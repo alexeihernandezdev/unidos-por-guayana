@@ -71,12 +71,12 @@ _Entidades centrales derivadas de la misión. Se documentan aquí las reglas no 
 
 - **Usuario** — `rol` ∈ `ADMIN` | `COLABORADOR` | `SOLICITANTE`. El rol controla los permisos: solo `ADMIN` puede crear/gestionar Ayudas. `estadoVerificacion` ∈ `PENDIENTE` | `VERIFICADO` | `RECHAZADO` (módulo de verificación de usuarios).
 - **Ayuda / Envío** — entidad central. Tiene `fecha` (de salida), `sectorDestino` y un `estado` ∈ `RECOLECTANDO` | `LISTO` | `EN_TRANSITO` | `ENTREGADO`. Sus **metas de recursos** se definen mediante `MetaRecurso`. Solo la crea el `ADMIN`; el paso a `LISTO` lo decide el `ADMIN` (normalmente cuando las metas se cumplen).
-- **Aporte** — lo registra un `COLABORADOR` y se asocia a una Ayuda y a un `Recurso`. Tiene `cantidad` (en la unidad del recurso) y un `estado` ∈ `COMPROMETIDO` | `RECIBIDO`. Solo suma a la meta cuando está `RECIBIDO`. Opcionalmente referencia el `PuntoAcopio` de entrega. No maneja dinero.
+- **Aporte** — lo registra un `COLABORADOR` y se asocia a una Ayuda y a un `Recurso`. Tiene `cantidad` (en la unidad del recurso) y un `estado` ∈ `COMPROMETIDO` | `RECIBIDO`. Solo suma a la meta cuando está `RECIBIDO`. Opcionalmente referencia el `PuntoAcopio` de entrega. El pago nunca ocurre dentro de la app: cuando el `Recurso` es de categoría `MONETARIO`, el `Aporte` solo **registra** el monto (en su moneda) y el `ADMIN` lo marca `RECIBIDO` al confirmarlo por un canal externo (transferencia, PayPal, Zelle…).
 - **Solicitud / Petición** — la crea un `SOLICITANTE`: pide ayuda para un `sector`, con `urgencia` y los recursos que necesita. Tiene `estado` (p. ej. `ABIERTA` | `ATENDIDA` | `CERRADA`). Alimenta la decisión del `ADMIN` sobre qué enviar.
 
 ### Catálogo y metas
 
-- **Recurso** (catálogo) — referencia estable de qué se puede aportar: `nombre` (agua, medicinas, alimentos, camión, voluntario…), `unidad` (litros, cajas, unidades, vehículos, personas) y `categoria` ∈ `SUMINISTRO` | `TRANSPORTE` | `PERSONAL`. Aportes y metas se miden siempre contra un `Recurso`.
+- **Recurso** (catálogo) — referencia estable de qué se puede aportar: `nombre` (agua, medicinas, alimentos, camión, voluntario, donación en USD…), `unidad` (litros, cajas, unidades, vehículos, personas, USD/Bs) y `categoria` ∈ `SUMINISTRO` | `TRANSPORTE` | `PERSONAL` | `MONETARIO`. Aportes y metas se miden siempre contra un `Recurso`. Los recursos `MONETARIO` representan ayuda económica que se recibe **por fuera** de la app (la app no procesa el pago; ver `mission.md`).
 - **MetaRecurso** — puente entre `Ayuda` y `Recurso`: `cantidadObjetivo` que el envío necesita de ese recurso. El progreso de una meta = suma de aportes `RECIBIDO` de ese recurso ÷ `cantidadObjetivo`. Una Ayuda tiene varias `MetaRecurso`.
 
 ### Logística y seguimiento
@@ -120,5 +120,5 @@ _Entidades centrales derivadas de la misión. Se documentan aquí las reglas no 
 - No añadir dependencias sin avisar.
 - Seguir siempre la arquitectura propuesta (Clean + Screaming); no meter lógica de negocio en `src/app/` ni en componentes de UI.
 - No subir archivos `.env*` al repo. El único que se puede subir es `.env.example`.
-- No procesar pagos ni donaciones monetarias (ver `mission.md` → "Qué NO es").
+- No procesar pagos dentro de la app: nada de pasarelas ni APIs de cobro, tarjetas o saldos. La ayuda monetaria se canaliza por fuera; la app solo muestra los medios externos y registra montos ya recibidos (ver `mission.md` → "Qué NO es").
 - Antes de tocar APIs de Next.js, leer la guía en `node_modules/next/dist/docs/`.

@@ -10,7 +10,7 @@ Aplicación enfocada a: organizar, brindar transparencia y recolectar ayuda del 
 2. **Login y registro** — Permite verificar qué tipo de usuario inicia sesión o se registra (administrador, colaborador o solicitante) y habilitar las acciones que le corresponden.
 3. **Ayudas / Envío** — Entidad central del proyecto. Es muy parecida a un envío que necesita cierta cantidad de recursos para poder salir: tiene una fecha y unas metas de recursos por cumplir. Solo el administrador puede crearla.
 4. **Seguimiento del envío** — Traza el estado de cada Ayuda a lo largo de su ciclo de vida (`recolectando → listo → en tránsito → entregado`), con evidencia de entrega, para dar visibilidad de origen a destino.
-5. **Aporte** — Permite al usuario colaborador cargar al sistema qué tipo de ayuda quiere aportar (suministros, transporte/camiones o personal) y asociarlo a una Ayuda/Envío para avanzar sus metas.
+5. **Aporte** — Permite al usuario colaborador cargar al sistema qué tipo de ayuda quiere aportar (suministros, transporte/camiones, personal o ayuda monetaria) y asociarlo a una Ayuda/Envío para avanzar sus metas. El dinero se dona por un canal externo (no dentro de la app); ver "Donaciones monetarias externas".
 6. **Solicitudes de ayuda** — Permite al usuario solicitante crear y listar peticiones de ayuda por sector (qué se necesita, urgencia y ubicación). Alimenta la decisión del administrador sobre qué enviar.
 7. **Panel de administración** — Tablero donde el administrador ve el estado de cada envío, cuánto falta para las metas y las solicitudes abiertas, y decide qué envío sale primero.
 8. **Tablero público de transparencia** — Vista abierta (sin necesidad de iniciar sesión) con qué se recolectó, el progreso de cada envío y a dónde fue cada ayuda.
@@ -21,6 +21,7 @@ Aplicación enfocada a: organizar, brindar transparencia y recolectar ayuda del 
 - **Catálogo de recursos** — Define los tipos y unidades de recurso (agua, medicinas, alimentos…) contra los que se miden las metas de un envío.
 - **Notificaciones** — Avisan a los colaboradores de un nuevo envío que necesita recursos o cuando se cumple una meta.
 - **Verificación de usuarios** — Valida a colaboradores y solicitantes (en especial quien aporta camiones o pide ayuda) para dar confianza.
+- **Donaciones monetarias externas** — Muestra los medios externos para donar dinero (cuenta bancaria, PayPal, Zelle, etc.). El pago siempre ocurre por fuera de la app; el administrador registra manualmente los montos ya recibidos para reflejarlos en la transparencia. La app no procesa el cobro.
 
 ## Para quién
 
@@ -42,5 +43,5 @@ _Las ideas rectoras que guían las decisiones de producto y técnicas._
 _Acota el alcance: lo que el proyecto deliberadamente no pretende ser. Evita malentendidos y feature creep._
 
 - **No reemplaza a los organismos oficiales** — Es apoyo logístico comunitario; no sustituye a Protección Civil, bomberos ni entes del Estado.
-- **No es una pasarela de pagos** — No procesa donaciones monetarias ni transacciones financieras; solo coordina recursos físicos y personas.
+- **No es una pasarela de pagos** — La app no procesa pagos ni transacciones financieras dentro del sistema: no integra APIs de cobro, tarjetas, ni saldos. La ayuda monetaria sí es bienvenida, pero se canaliza **por fuera** de la app (transferencia, PayPal, Zelle, etc.); la app solo muestra esos medios externos y registra —de forma manual y para transparencia— los montos ya recibidos.
 - **No es de alcance nacional/global** — Se enfoca en la ayuda que sale desde la región Guayana; no pretende ser una plataforma general para todo el país.
