@@ -32,6 +32,16 @@ export default async function PanelPage() {
 
       <div className="grid gap-4 border-t border-border pt-6 sm:grid-cols-2">
         <Link
+          href="/panel/ayudas"
+          className="focus-ring flex flex-col gap-1 rounded-lg border border-border p-5 transition-colors hover:bg-accent/10"
+        >
+          <span className="font-medium">Envíos de ayuda</span>
+          <span className="text-sm text-muted-foreground">
+            Crea envíos con sus metas por recurso, gestiona destino y fecha, y
+            hazlos avanzar de Recolectando a Entregado.
+          </span>
+        </Link>
+        <Link
           href="/panel/recursos"
           className="focus-ring flex flex-col gap-1 rounded-lg border border-border p-5 transition-colors hover:bg-accent/10"
         >
