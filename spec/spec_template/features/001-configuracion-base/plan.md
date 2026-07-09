@@ -47,7 +47,7 @@ prisma/           ← schema.prisma y migraciones
   - Imagen `postgres` con **tag fijado** (p. ej. `postgres:16`), no `latest`.
   - Variables `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` leídas del entorno (con
     valores por defecto para dev), documentadas en `.env.example`.
-  - Puerto `5432:5432` publicado.
+  - Puerto `5435:5432` publicado (5435 en el host para no chocar con otro Postgres en 5432).
   - Volumen nombrado (p. ej. `pgdata`) para persistir los datos entre reinicios.
   - `healthcheck` con `pg_isready` para saber cuándo la base acepta conexiones.
 
@@ -61,7 +61,7 @@ prisma/           ← schema.prisma y migraciones
         POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-guayana}
         POSTGRES_DB: ${POSTGRES_DB:-unidos_por_guayana}
       ports:
-        - "5432:5432"
+        - "5435:5432"
       volumes:
         - pgdata:/var/lib/postgresql/data
       healthcheck:
@@ -94,7 +94,7 @@ prisma/           ← schema.prisma y migraciones
 
 - `.env.example`: documentar `DATABASE_URL` y las credenciales del contenedor
   (`POSTGRES_USER`/`PASSWORD`/`DB`). En dev, `DATABASE_URL` apunta al Postgres de Docker
-  (p. ej. `postgresql://guayana:guayana@localhost:5432/unidos_por_guayana?schema=public`);
+  (p. ej. `postgresql://guayana:guayana@localhost:5435/unidos_por_guayana?schema=public`);
   en producción, a Supabase. **No** versionar `.env`.
 - Scripts: `"db:generate": "prisma generate"`, `"db:migrate": "prisma migrate dev"`.
 - **Verificación:** `npx prisma generate` corre sin error. La primera migración real se pospone
@@ -142,11 +142,11 @@ prisma/           ← schema.prisma y migraciones
 Correr, en este orden, y dejar todo en verde:
 
 1. `docker compose up -d` — la base queda `healthy`.
-2. `npm run lint`
-3. `npm run build`
-4. `npm run test`
+2. `pnpm lint`
+3. `pnpm build`
+4. `pnpm test`
 5. `npx prisma generate`
-6. `npm run dev` — verificar arranque sin errores en consola (conecta a la base de Docker).
+6. `pnpm dev` — verificar arranque sin errores en consola (conecta a la base de Docker).
 
 ## Al terminar
 

@@ -1,7 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import { getUsuarioActual } from "@/shared/auth";
+import { cerrarSesionAction } from "@/shared/auth/actions";
+import { Rol } from "@/modules/usuarios/domain/Rol";
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const usuario = await getUsuarioActual();
+
   return (
     <header className="sticky top-0 z-40 h-16 border-b border-border bg-background/85 backdrop-blur-md">
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6 md:px-8">
@@ -47,12 +52,47 @@ export function SiteHeader() {
           </Link>
         </nav>
 
-        <Link
-          href="/login"
-          className="focus-ring underline-sweep text-sm text-foreground/80 transition-colors duration-150 hover:text-accent"
-        >
-          Ya tengo cuenta
-        </Link>
+        {usuario ? (
+          <div className="flex items-center gap-5">
+            {usuario.rol === Rol.ADMIN ? (
+              <Link
+                href="/panel"
+                className="focus-ring underline-sweep hidden text-sm text-foreground/80 transition-colors duration-150 hover:text-accent sm:inline-flex"
+              >
+                Panel
+              </Link>
+            ) : null}
+            <span
+              className="hidden text-sm text-muted-foreground sm:inline"
+              title={usuario.email ?? undefined}
+            >
+              {usuario.nombre ?? usuario.email}
+            </span>
+            <form action={cerrarSesionAction}>
+              <button
+                type="submit"
+                className="focus-ring underline-sweep text-sm text-foreground/80 transition-colors duration-150 hover:text-accent"
+              >
+                Cerrar sesión
+              </button>
+            </form>
+          </div>
+        ) : (
+          <div className="flex items-center gap-5">
+            <Link
+              href="/login"
+              className="focus-ring underline-sweep text-sm text-foreground/80 transition-colors duration-150 hover:text-accent"
+            >
+              Ya tengo cuenta
+            </Link>
+            <Link
+              href="/registro"
+              className="focus-ring underline-sweep hidden text-sm text-foreground/80 transition-colors duration-150 hover:text-accent sm:inline-flex"
+            >
+              Crear cuenta
+            </Link>
+          </div>
+        )}
       </div>
     </header>
   );

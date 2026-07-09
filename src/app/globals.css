@@ -4,17 +4,17 @@
    Modo claro/oscuro con prefers-color-scheme (ver tech-stack.md → Estilo visual). */
 :root {
   --radius: 0.625rem;
-  /* Fondo tibio, muy ligeramente teñido hacia el ocre de marca. Evita el
-     blanco puro que ciega y da temperatura sin caer en la beige "cream" AI. */
-  --background: oklch(0.975 0.006 78);
+  /* Fondo muy claro con un leve tinte hacia el teal/petróleo de marca. Evita el
+     blanco puro que ciega y aporta temperatura fría alineada con la paleta. */
+  --background: oklch(0.98 0.006 200);
   --foreground: oklch(0.22 0.004 260);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.22 0.004 260);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.22 0.004 260);
-  --primary: oklch(0.72 0.14 75);
-  --primary-foreground: oklch(0.2 0.004 260);
-  --primary-ink: oklch(0.44 0.12 60);
+  --primary: oklch(0.47 0.108 194);
+  --primary-foreground: oklch(0.985 0 0);
+  --primary-ink: oklch(0.38 0.10 194);
   --secondary: oklch(0.95 0.003 260);
   --secondary-foreground: oklch(0.28 0.005 260);
   --muted: oklch(0.96 0.003 260);
@@ -22,9 +22,13 @@
   --accent: oklch(0.42 0.06 200);
   --accent-foreground: oklch(0.98 0.005 200);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.9 0.004 260);
-  --input: oklch(0.9 0.004 260);
-  --ring: oklch(0.42 0.06 200);
+  /* Color de marca (acento sobrio, teal/petróleo). Se usa con moderación en la
+     landing a partir de "Cómo funciona" (etiquetas, insignias, chips y CTA). */
+  --brand: oklch(0.47 0.108 194);
+  --brand-foreground: oklch(0.985 0 0);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -51,9 +55,9 @@
     --card-foreground: oklch(0.96 0.003 260);
     --popover: oklch(0.22 0.005 260);
     --popover-foreground: oklch(0.96 0.003 260);
-    --primary: oklch(0.78 0.14 75);
+    --primary: oklch(0.72 0.12 192);
     --primary-foreground: oklch(0.16 0.004 260);
-    --primary-ink: oklch(0.82 0.10 75);
+    --primary-ink: oklch(0.85 0.09 192);
     --secondary: oklch(0.28 0.005 260);
     --secondary-foreground: oklch(0.96 0.003 260);
     --muted: oklch(0.26 0.004 260);
@@ -61,6 +65,8 @@
     --accent: oklch(0.62 0.09 200);
     --accent-foreground: oklch(0.15 0.008 200);
     --destructive: oklch(0.704 0.191 22.216);
+    --brand: oklch(0.72 0.12 192);
+    --brand-foreground: oklch(0.205 0 0);
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.62 0.09 200);
@@ -100,6 +106,8 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -231,27 +239,59 @@
   }
   body {
     @apply bg-background text-foreground;
-    /* Gradiente ambient muy sutil: dos wash radiales cálidos y un tibio
-       lineal, para que la landing no sea un blanco plano. Se fija al
-       viewport de modo que el scroll no lo estire. */
+    position: relative;
+  }
+
+  /* Ambient gradient: se pinta en un pseudo-elemento fijo detrás del contenido
+     para poder animarlo con transform (GPU) sin repaint. Opacidades bajas para
+     que sea sutil; drift lento de 25s para que no compita con el contenido. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -8%;
+    z-index: -1;
+    pointer-events: none;
     background-image:
       radial-gradient(
-        ellipse 60% 40% at 0% 0%,
-        oklch(0.92 0.05 78 / 0.55),
-        transparent 60%
+        ellipse 60% 45% at 0% 0%,
+        oklch(0.88 0.08 194 / 0.22),
+        transparent 62%
       ),
       radial-gradient(
-        ellipse 50% 45% at 100% 15%,
-        oklch(0.9 0.04 200 / 0.35),
+        ellipse 55% 50% at 100% 15%,
+        oklch(0.82 0.1 200 / 0.18),
         transparent 65%
+      ),
+      radial-gradient(
+        ellipse 70% 45% at 50% 105%,
+        oklch(0.78 0.1 190 / 0.16),
+        transparent 68%
       ),
       linear-gradient(
         180deg,
-        oklch(0.97 0.008 78) 0%,
-        oklch(0.975 0.006 78) 45%,
-        oklch(0.97 0.01 60) 100%
+        oklch(0.985 0.006 200) 0%,
+        oklch(0.98 0.008 194) 50%,
+        oklch(0.97 0.012 190) 100%
       );
-    background-attachment: fixed;
-    background-repeat: no-repeat;
+    will-change: transform;
+    animation: ambient-drift 25s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes ambient-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-2%, 1.5%, 0) scale(1.04);
+  }
+  100% {
+    transform: translate3d(2%, -1%, 0) scale(1.02);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
   }
 }

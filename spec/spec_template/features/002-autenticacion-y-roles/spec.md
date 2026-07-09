@@ -76,9 +76,9 @@ reglas de permisos. Esta feature es la base de seguridad sobre la que se apoya t
       por `COLABORADOR` ni `SOLICITANTE` (demostrado con una ruta de ejemplo).
 - [ ] La **migración** crea las tablas y el **seed** deja un `ADMIN` inicial que puede iniciar
       sesión.
-- [ ] `npm run test` cubre: rechazo de `ADMIN` en registro, hash de contraseña y rechazo de
+- [ ] `pnpm test` cubre: rechazo de `ADMIN` en registro, hash de contraseña y rechazo de
       credenciales inválidas — en verde.
-- [ ] `npm run lint` / `npm run build` sin errores; `usuarios/domain` y `usuarios/application`
+- [ ] `pnpm lint` / `pnpm build` sin errores; `usuarios/domain` y `usuarios/application`
       permanecen **puras** (sin framework ni Auth.js/Prisma).
 
 ## Notas y riesgos

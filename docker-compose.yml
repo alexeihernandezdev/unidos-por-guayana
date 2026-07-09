@@ -7,7 +7,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-guayana}
       POSTGRES_DB: ${POSTGRES_DB:-unidos_por_guayana}
     ports:
-      - "5432:5432"
+      # host:contenedor — Postgres escucha en 5432 dentro del contenedor.
+      # Se publica en el 5435 del host para no chocar con otro Postgres en 5432.
+      - "5435:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

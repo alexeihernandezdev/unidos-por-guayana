@@ -1,0 +1,86 @@
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import {
+  registrarUsuario,
+  type RegistrarUsuarioInput,
+} from "@/modules/usuarios/application/registrarUsuario";
+import { validarCredenciales } from "@/modules/usuarios/application/validarCredenciales";
+import type { Rol } from "@/modules/usuarios/domain/Rol";
+import type { Usuario } from "@/modules/usuarios/domain/Usuario";
+import { BcryptPasswordHasher } from "@/modules/usuarios/infrastructure/BcryptPasswordHasher";
+import { PrismaUsuarioRepository } from "@/modules/usuarios/infrastructure/PrismaUsuarioRepository";
+
+// ── Composition root ────────────────────────────────────────────────────────
+// `src/lib` es infraestructura global (tech-stack.md): aquí se cablean las
+// implementaciones concretas con los casos de uso puros. Se instancian una sola
+// vez y se reutilizan.
+const usuarios = new PrismaUsuarioRepository();
+const hasher = new BcryptPasswordHasher();
+
+/**
+ * Registro con la infraestructura ya inyectada. Lo consume el server action de
+ * registro a través de la fachada `@/shared/auth` (la presentación no importa
+ * infraestructura directamente; ese límite lo hace cumplir ESLint).
+ */
+export function registrarNuevoUsuario(
+  input: RegistrarUsuarioInput,
+): Promise<Usuario> {
+  return registrarUsuario({ usuarios, hasher }, input);
+}
+
+// ── Auth.js v5 (NextAuth) ─────────────────────────────────────────────────────
+// Provider de credenciales (email + contraseña) con sesión JWT. El provider de
+// credenciales exige JWT y no persiste sesión vía adapter, por eso no se usa el
+// adapter de Prisma: la tabla `Usuario` es nuestra y la gestiona el caso de uso
+// de registro. El rol viaja embebido en el token (callbacks jwt/session).
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  session: { strategy: "jwt" },
+  trustHost: true,
+  pages: { signIn: "/login" },
+  providers: [
+    Credentials({
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Contraseña", type: "password" },
+      },
+      authorize: async (credentials) => {
+        const email =
+          typeof credentials?.email === "string" ? credentials.email : "";
+        const password =
+          typeof credentials?.password === "string" ? credentials.password : "";
+        if (!email || !password) return null;
+
+        const usuario = await validarCredenciales(
+          { usuarios, hasher },
+          email,
+          password,
+        );
+        if (!usuario) return null;
+
+        // Lo devuelto se serializa en el JWT (ver callbacks). No incluir el hash.
+        return {
+          id: usuario.id,
+          email: usuario.email,
+          name: usuario.nombre,
+          rol: usuario.rol,
+        };
+      },
+    }),
+  ],
+  callbacks: {
+    jwt: async ({ token, user }) => {
+      if (user) {
+        token.id = user.id;
+        token.rol = user.rol;
+      }
+      return token;
+    },
+    session: async ({ session, token }) => {
+      // El JWT no está tipado con `id`/`rol` (ver nota en next-auth.d.ts): se
+      // leen con guards de tipo, robustos ante cualquier gestor de paquetes.
+      if (typeof token.id === "string") session.user.id = token.id;
+      if (typeof token.rol === "string") session.user.rol = token.rol as Rol;
+      return session;
+    },
+  },
+});

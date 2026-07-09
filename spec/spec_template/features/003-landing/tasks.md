@@ -35,15 +35,23 @@
       compone las secciones; mantenerlo fino y sin lógica de negocio.
 - [ ] Verificar que `/` es pública (no cubierta por el middleware de la feature 002).
 
-## 5. Comportamiento según sesión
+## 5. Comportamiento según sesión (en cliente)
 
-- [ ] Leer el usuario actual con el helper de servidor de la feature 002.
-- [ ] Con sesión: mostrar acceso al área del usuario. Sin sesión: mostrar registro/login.
-- [ ] Fallback elegante si el helper aún no existe.
+- [ ] Componente **cliente** (p. ej. `AccesoUsuario`) que decide entre registro/login y "Mi cuenta"
+      usando `useSession()` de `next-auth/react` (con `SessionProvider` acotado) o `/api/auth/session`.
+- [ ] Estado por defecto (sin sesión / mientras hidrata): mostrar registro/login.
+- [ ] **No** leer la sesión en `page.tsx` (`auth()`/`cookies()`) — rompería el estático.
+- [ ] Fallback elegante si la feature 002 no estuviera: mostrar siempre registro/login.
 
-## 6. Metadatos
+## 6. SEO y metadatos
 
-- [ ] Exportar `metadata`/`generateMetadata` con título y descripción de la landing (Next 16).
+- [ ] `metadata` con `title`, `description`, `metadataBase` (`NEXT_PUBLIC_SITE_URL`) y canonical.
+- [ ] **Open Graph** y **Twitter Card** (título, descripción, imagen); imagen vía `opengraph-image`.
+- [ ] `app/robots.ts` (indexado + sitemap) y `app/sitemap.ts` (incluye `/`).
+- [ ] **JSON-LD** (`Organization`) embebido con `<script type="application/ld+json">`.
+- [ ] HTML **semántico**: un único `<h1>`, landmarks (`header`/`main`/`footer`), `alt` y enlaces
+      descriptivos.
+- [ ] Cambiar `layout.tsx` a **`lang="es"`** (hoy `en`). Documentar `NEXT_PUBLIC_SITE_URL` en `.env.example`.
 
 ## 7. Estilo, responsive y tema
 
@@ -53,13 +61,15 @@
 
 ## 8. Validación final
 
-- [ ] `npm run dev`: `/` muestra la landing sin pedir login.
+- [ ] `pnpm dev`: `/` muestra la landing sin pedir login.
 - [ ] CTAs correctas: "Quiero colaborar" → registro (`COLABORADOR`), "Necesito ayuda" → registro
       (`SOLICITANTE`), "Iniciar sesión" → `/login`.
-- [ ] Con sesión activa, la landing ofrece acceso al área del usuario.
+- [ ] Con sesión activa, la landing ofrece acceso al área del usuario (en cliente).
 - [ ] Responsive (móvil/escritorio) y modo claro/oscuro verificados.
-- [ ] Metadatos (título/descripción) presentes en el `<head>`.
-- [ ] `npm run lint` / `npm run build` sin errores.
+- [ ] `<head>` con metadatos, canonical, Open Graph/Twitter y `<script>` JSON-LD; `/robots.txt` y
+      `/sitemap.xml` responden; documento en `lang="es"`.
+- [ ] `pnpm build`: la ruta `/` figura como **`○` (Static)**, no `ƒ` (Dynamic).
+- [ ] `pnpm lint` / `pnpm build` sin errores.
 
 ## 9. Cierre
 

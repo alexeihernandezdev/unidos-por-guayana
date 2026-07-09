@@ -13,7 +13,7 @@
 
 - [ ] Crear `src/modules/`, `src/shared/`, `src/lib/` y `prisma/`.
 - [ ] Sembrar carpetas vacías con `.gitkeep` (o barril `index.ts`) para versionarlas.
-- [ ] Verificar que `npm run lint` no reporte problemas de naming de carpetas.
+- [ ] Verificar que `pnpm lint` no reporte problemas de naming de carpetas.
 
 ## 2. Vitest
 
@@ -24,12 +24,12 @@
 - [ ] Crear archivo de setup para `@testing-library/jest-dom`.
 - [ ] Añadir scripts `test` y `test:watch` en `package.json`.
 - [ ] Escribir un test de humo que importe con alias `@/…` y pase.
-- [ ] `npm run test` en verde.
+- [ ] `pnpm test` en verde.
 
 ## 3. Docker — PostgreSQL local
 
 - [ ] Crear `docker-compose.yml` con servicio `db` (imagen `postgres:16` con tag fijado).
-- [ ] Configurar credenciales por entorno (`POSTGRES_USER`/`PASSWORD`/`DB`), puerto `5432`,
+- [ ] Configurar credenciales por entorno (`POSTGRES_USER`/`PASSWORD`/`DB`), puerto `5435:5432`,
       volumen `pgdata` y `healthcheck` con `pg_isready`.
 - [ ] `docker compose up -d` levanta la base; `docker compose ps` la muestra `healthy`.
 - [ ] `docker compose down` la detiene sin perder los datos del volumen.
@@ -52,7 +52,7 @@
 - [ ] Crear el provider como client component (`providers.tsx`) con una instancia de
       `QueryClient`.
 - [ ] Montar el provider en `src/app/layout.tsx`.
-- [ ] Verificar arranque con `npm run dev` sin errores en consola.
+- [ ] Verificar arranque con `pnpm dev` sin errores en consola.
 
 ## 6. Shadcn
 
@@ -61,7 +61,7 @@
       tokens desde `globals.css`.
 - [ ] Confirmar que **no** se creó un `tailwind.config.js` clásico.
 - [ ] `npx shadcn@latest add button` y renderizarlo en una página de prueba.
-- [ ] Verificar naming (PascalCase para `*.tsx`) con `npm run lint`.
+- [ ] Verificar naming (PascalCase para `*.tsx`) con `pnpm lint`.
 
 ## 7. React Hook Form, Zustand, Luxon
 
@@ -72,11 +72,11 @@
 ## 8. Validación final
 
 - [ ] `docker compose up -d` y base `healthy`.
-- [ ] `npm run lint` sin errores.
-- [ ] `npm run build` sin errores.
-- [ ] `npm run test` en verde.
+- [ ] `pnpm lint` sin errores.
+- [ ] `pnpm build` sin errores.
+- [ ] `pnpm test` en verde.
 - [ ] `npx prisma generate` sin errores.
-- [ ] `npm run dev` arranca limpio con el `QueryClientProvider` activo y conecta a la base.
+- [ ] `pnpm dev` arranca limpio con el `QueryClientProvider` activo y conecta a la base.
 
 ## 9. Cierre
 
