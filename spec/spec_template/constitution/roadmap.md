@@ -8,7 +8,7 @@ _Features completadas, en orden de implementación._
 
 1. **000 · Andamiaje inicial** — Proyecto Next.js 16 (App Router) con TypeScript, Tailwind v4 y ESLint (commit inicial).
 2. **001 · Configuración base** — Instalados y configurados Prisma + PostgreSQL (Docker en dev, Supabase en prod), Vitest y las librerías elegidas (TanStack Query, Shadcn, React Hook Form, Zustand, Luxon); estructura de módulos de Clean + Screaming (`src/modules`, `src/shared`, `src/lib`, `prisma/`).
-3. **003 · Landing** — Página de bienvenida pública en `/` con hero, cómo funciona, principios y CTA final. CTAs enlazan a `/registro?rol=COLABORADOR` y `/registro?rol=SOLICITANTE` (la feature 002 los proveerá). Componentes en `src/modules/landing/ui` (server components); animaciones CSS-native.
+3. **003 · Landing** — Página de bienvenida pública en `/` con hero, cómo funciona, principios y CTA final. CTAs enlazan a `/registro?rol=COLABORADOR` y `/registro?rol=SOLICITANTE`. Componentes en `src/modules/landing/ui` (server components); animaciones CSS-native. Paleta ajustada a teal/petróleo (`--primary` = `--brand`), logo actualizado y fondo global con gradiente sutil animado (`ambient-drift`, respeta `prefers-reduced-motion`). `SiteHeader` integra la sesión: sin usuario muestra login/registro; con sesión, nombre + cerrar sesión (y "Panel" si `ADMIN`).
 
 ## Siguiente 🔜
 
