@@ -53,13 +53,13 @@
 
 ## 8. Validación final
 
-- [ ] `npm run dev`: `/` muestra la landing sin pedir login.
+- [ ] `pnpm dev`: `/` muestra la landing sin pedir login.
 - [ ] CTAs correctas: "Quiero colaborar" → registro (`COLABORADOR`), "Necesito ayuda" → registro
       (`SOLICITANTE`), "Iniciar sesión" → `/login`.
 - [ ] Con sesión activa, la landing ofrece acceso al área del usuario.
 - [ ] Responsive (móvil/escritorio) y modo claro/oscuro verificados.
 - [ ] Metadatos (título/descripción) presentes en el `<head>`.
-- [ ] `npm run lint` / `npm run build` sin errores.
+- [ ] `pnpm lint` / `pnpm build` sin errores.
 
 ## 9. Cierre
 

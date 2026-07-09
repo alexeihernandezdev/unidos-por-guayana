@@ -91,7 +91,7 @@ primera impresión de seriedad y transparencia sobre la que se apoya la captaci�
 - [ ] La página define **metadatos** (título y descripción) mediante la API de metadata de Next 16.
 - [ ] Las secciones se componen desde `src/modules/landing/ui`; `src/app/page.tsx` se mantiene fino
       y sin lógica de negocio.
-- [ ] `npm run lint` / `npm run build` sin errores; no se introduce lógica de dominio en `src/app`
+- [ ] `pnpm lint` / `pnpm build` sin errores; no se introduce lógica de dominio en `src/app`
       ni en la UI (se respetan los límites de la constitución).
 
 ## Notas y riesgos

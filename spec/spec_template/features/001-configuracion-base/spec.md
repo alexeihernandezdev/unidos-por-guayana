@@ -63,11 +63,11 @@ feature el punto único y explícito donde se incorporan las dependencias acorda
 
 ## Criterios de aceptación
 
-- [ ] `npm install` deja las dependencias listadas instaladas; `package.json` las refleja.
-- [ ] `npm run build` compila sin errores.
-- [ ] `npm run lint` pasa sin errores (respeta los límites de capas ya definidos en
+- [ ] `pnpm install` deja las dependencias listadas instaladas; `package.json` las refleja.
+- [ ] `pnpm build` compila sin errores.
+- [ ] `pnpm lint` pasa sin errores (respeta los límites de capas ya definidos en
       `eslint.config.mjs`).
-- [ ] `npm run test` ejecuta Vitest y al menos un test de humo pasa; el alias `@/…`
+- [ ] `pnpm test` ejecuta Vitest y al menos un test de humo pasa; el alias `@/…`
       resuelve dentro de los tests.
 - [ ] `docker compose up -d` levanta el contenedor de PostgreSQL y queda accesible en el
       puerto configurado; `docker compose down` lo detiene sin perder los datos del volumen.
@@ -75,7 +75,7 @@ feature el punto único y explícito donde se incorporan las dependencias acorda
 - [ ] `npx prisma generate` corre sin errores con el `schema.prisma` inicial.
 - [ ] Existen las carpetas `src/modules/`, `src/shared/`, `src/lib/` y `prisma/`.
 - [ ] El cliente de Prisma vive en `src/lib` como singleton reutilizable.
-- [ ] La app arranca (`npm run dev`) con el `QueryClientProvider` activo y sin errores en
+- [ ] La app arranca (`pnpm dev`) con el `QueryClientProvider` activo y sin errores en
       consola.
 - [ ] `shadcn` está inicializado (`components.json`) y un componente base (p. ej. `Button`)
       se puede añadir en `src/shared` y renderizar.

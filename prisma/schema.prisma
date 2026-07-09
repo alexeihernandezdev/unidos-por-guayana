@@ -11,3 +11,37 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// Rol del usuario. Controla los permisos en toda la plataforma (ver
+// constitution/tech-stack.md). `ADMIN` no es auto-registrable: se crea por seed
+// o lo promueve otro `ADMIN` (ver feature 002).
+enum Rol {
+  ADMIN
+  COLABORADOR
+  SOLICITANTE
+}
+
+// Estado de verificación del usuario. Nace en `PENDIENTE`; su gestión real
+// (aprobar/rechazar colaboradores y solicitantes) es la feature 013. Se modela
+// desde ya para no re-migrar más adelante.
+enum EstadoVerificacion {
+  PENDIENTE
+  VERIFICADO
+  RECHAZADO
+}
+
+// Persona registrada en la plataforma. La contraseña se guarda siempre hasheada
+// (nunca en claro). La autenticación es por credenciales (email + contraseña)
+// con Auth.js v5 y sesión JWT.
+model Usuario {
+  id                 String             @id @default(cuid())
+  email              String             @unique
+  passwordHash       String
+  nombre             String
+  rol                Rol
+  estadoVerificacion EstadoVerificacion @default(PENDIENTE)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@map("usuarios")
+}

@@ -102,9 +102,9 @@ registro/login → protección por rol → seed → tests**.
 
 1. `docker compose up -d` (base arriba).
 2. `npx prisma migrate dev` — migración aplicada.
-3. `npm run test` (casos de uso en verde).
-4. `npm run lint` / `npm run build` sin errores.
-5. `npm run dev` — registrar un colaborador, iniciar/cerrar sesión, y comprobar que la ruta
+3. `pnpm test` (casos de uso en verde).
+4. `pnpm lint` / `pnpm build` sin errores.
+5. `pnpm dev` — registrar un colaborador, iniciar/cerrar sesión, y comprobar que la ruta
    solo-`ADMIN` bloquea a un no-admin y deja pasar al `ADMIN` sembrado.
 
 ## Al terminar

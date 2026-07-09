@@ -13,7 +13,8 @@ Instaladas hoy (ver `package.json`):
 - **Librerías:** TanStack Query (provider en `src/app/providers.tsx`) / Shadcn (componentes en `src/shared/ui`, util `cn` en `src/shared/lib/utils.ts`) / React Hook Form / Luxon / Zustand.
 - **Base de datos:** PostgreSQL con Prisma 7 (driver adapter `@prisma/adapter-pg`); cliente singleton en `src/lib/prisma.ts` y esquema en `prisma/schema.prisma` (sin modelos de dominio todavía).
 - **Entorno local de BD:** Docker + Docker Compose — un contenedor de PostgreSQL para desarrollo, definido en `docker-compose.yml`. Evita instalar Postgres en la máquina y da un entorno reproducible; en producción la base vive en Supabase.
-- **Tests:** Vitest (`vitest.config.ts`, entorno `jsdom`, alias `@/…`; `npm run test`).
+- **Tests:** Vitest (`vitest.config.ts`, entorno `jsdom`, alias `@/…`; `pnpm test`).
+- **Gestor de paquetes:** **pnpm** (lockfile `pnpm-lock.yaml`). Instalar deps con `pnpm add [-D] <pkg>` y correr scripts con `pnpm <script>`. No usar `npm`/`yarn` (generan lockfiles divergentes y el node_modules estricto de pnpm difiere del plano de npm).
 
 Pendiente de configurar más adelante:
 
@@ -59,13 +60,14 @@ Estructura objetivo (a crear conforme avancen las features):
 
 ## Comandos
 
-- `npm run dev` — arranca el entorno local (`next dev`).
-- `npm run build` — compila para producción (`next build`).
-- `npm run start` — sirve la build de producción (`next start`).
-- `npm run lint` — revisa el estilo (`eslint`).
-- `npm run test` — ejecuta los tests con Vitest (`npm run test:watch` para el modo interactivo).
-- `npm run db:generate` — regenera el cliente de Prisma (`prisma generate`).
-- `npm run db:migrate` — aplica migraciones en desarrollo (`prisma migrate dev`).
+- `pnpm dev` — arranca el entorno local (`next dev`).
+- `pnpm build` — compila para producción (`next build`).
+- `pnpm start` — sirve la build de producción (`next start`).
+- `pnpm lint` — revisa el estilo (`eslint`).
+- `pnpm test` — ejecuta los tests con Vitest (`pnpm test:watch` para el modo interactivo).
+- `pnpm db:generate` — regenera el cliente de Prisma (`prisma generate`).
+- `pnpm db:migrate` — aplica migraciones en desarrollo (`prisma migrate dev`).
+- `pnpm db:seed` — siembra datos iniciales (p. ej. el ADMIN; ver feature 002).
 - `docker compose up -d` — levanta el contenedor de PostgreSQL para desarrollo local.
 - `docker compose down` — detiene y elimina los contenedores (los datos persisten en el volumen).
 
