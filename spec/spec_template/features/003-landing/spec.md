@@ -40,13 +40,23 @@ primera impresión de seriedad y transparencia sobre la que se apoya la captaci�
 - **CTAs hacia la feature 002:** "Quiero colaborar" y "Necesito ayuda" enlazan a `/registro`
   (indicando el rol sugerido) e "Iniciar sesión" a `/login`. Si un usuario ya tiene sesión, la
   landing puede ofrecer un acceso directo a su área en lugar de registro/login.
+- **Renderizado estático primero:** la landing se **prerenderiza como estática** (SSG) y se sirve
+  desde CDN. En `pnpm build` la ruta `/` debe salir como estática (`○`), **no** dinámica (`ƒ`). Para
+  lograrlo, `page.tsx` **no** llama a `auth()`/`cookies()`/`headers()` ni consulta la base: es
+  contenido fijo.
+- **Sesión sin romper el estático:** la personalización "según sesión" (mostrar "Mi cuenta" en vez de
+  registro/login) se resuelve en un **componente cliente** pequeño que hidrata tras la carga; el HTML
+  prerenderizado no cambia. Nunca se lee la sesión en el server component de la landing.
+- **SEO de primera clase:** metadatos completos (título, descripción, canonical), **Open Graph** y
+  **Twitter Card** con imagen, `robots` y `sitemap`, **datos estructurados JSON-LD** (Organization) y
+  HTML semántico. El idioma del documento debe ser `es` (hoy `layout.tsx` tiene `lang="en"`: corregir).
 
 ## Alcance
 
 **Incluye**
 
-- Página de bienvenida en la raíz `/` (`src/app/page.tsx`), **pública** y responsive
-  (móvil primero), con soporte de modo claro/oscuro usando los tokens de `globals.css`.
+- Página de bienvenida en la raíz `/` (`src/app/page.tsx`), **pública**, **estática** (SSG) y
+  responsive (móvil primero), con soporte de modo claro/oscuro usando los tokens de `globals.css`.
 - Secciones de contenido: **hero** (título, propósito en una frase y CTAs), **qué es el proyecto**,
   **cómo funciona / roles**, **principios** (transparencia y trazabilidad) y un **CTA de cierre**.
 - Un **encabezado** con navegación mínima (logo/nombre + acceso a `Iniciar sesión`/`Registro`) y un
@@ -55,12 +65,21 @@ primera impresión de seriedad y transparencia sobre la que se apoya la captaci�
   - "Quiero colaborar" → registro con rol sugerido `COLABORADOR`.
   - "Necesito ayuda" → registro con rol sugerido `SOLICITANTE`.
   - "Iniciar sesión" → `/login`.
-- Comportamiento **según sesión**: si hay sesión activa, mostrar un acceso a su área en lugar de
-  las CTAs de registro/login (usando el helper de sesión de la feature 002).
+- Comportamiento **según sesión** resuelto en **cliente** (componente `"use client"` que hidrata):
+  si hay sesión activa, mostrar un acceso a su área en lugar de las CTAs de registro/login. La
+  página en sí **no** lee la sesión en el servidor, para no perder el renderizado estático.
 - Componentes de la feature en `src/modules/landing/ui` (PascalCase), reutilizando primitivos de
   Shadcn (`Button`, etc.) desde `src/shared/ui`.
-- Metadatos básicos de la página (título y descripción para SEO/redes) vía la API de metadata de
-  Next 16.
+- **SEO completo** (Next 16 metadata API y file conventions):
+  - `metadata` con **título**, **descripción**, `metadataBase` y **canonical**.
+  - **Open Graph** y **Twitter Card** (título, descripción e imagen social; `opengraph-image`).
+  - `app/robots.ts` (permitir indexado, apuntar al sitemap) y `app/sitemap.ts` (incluye `/`).
+  - **Datos estructurados JSON-LD** (`Organization`/`NonprofitOrganization` con nombre, url, logo).
+  - **HTML semántico**: un solo `<h1>`, jerarquía de encabezados, landmarks (`header`/`main`/`footer`),
+    `alt` descriptivos y texto de enlace significativo.
+  - Documento en **`lang="es"`** (corregir `layout.tsx`, hoy `en`).
+- **Renderizado estático**: la ruta `/` se prerenderiza en `build` (aparece como `○` en la salida de
+  `next build`); sin llamadas a APIs de request (`cookies`/`headers`/`auth`) ni a la base.
 - Textos en **español**, en tono claro y accesible (principio de "Simplicidad de uso").
 
 **No incluye**
@@ -88,7 +107,16 @@ primera impresión de seriedad y transparencia sobre la que se apoya la captaci�
       CTAs de registro/login.
 - [ ] La página es **responsive** (usable en móvil) y respeta el **modo claro/oscuro** con los
       tokens de Tailwind existentes.
-- [ ] La página define **metadatos** (título y descripción) mediante la API de metadata de Next 16.
+- [ ] La ruta `/` se **prerenderiza como estática**: en la salida de `pnpm build` aparece como `○`
+      (Static), **no** como `ƒ` (Dynamic). `page.tsx` no usa `cookies`/`headers`/`auth`.
+- [ ] La página define **metadatos** (título, descripción, `metadataBase`, canonical) y etiquetas
+      **Open Graph** y **Twitter Card** con imagen social, mediante la API de metadata de Next 16.
+- [ ] Existen `app/robots.ts` y `app/sitemap.ts`; el sitemap incluye `/` y robots referencia al sitemap.
+- [ ] La página incluye **datos estructurados JSON-LD** (Organization) válidos.
+- [ ] HTML **semántico**: un único `<h1>`, landmarks (`header`/`main`/`footer`) y el documento en
+      **`lang="es"`**.
+- [ ] Con **sesión activa**, la personalización (acceso a "Mi cuenta") ocurre en **cliente** sin
+      convertir la ruta en dinámica.
 - [ ] Las secciones se componen desde `src/modules/landing/ui`; `src/app/page.tsx` se mantiene fino
       y sin lógica de negocio.
 - [ ] `pnpm lint` / `pnpm build` sin errores; no se introduce lógica de dominio en `src/app`
@@ -100,6 +128,16 @@ primera impresión de seriedad y transparencia sobre la que se apoya la captaci�
   cambian respecto a versiones previas — leer `node_modules/next/dist/docs/` antes de codificar
   (AGENTS.md). Las CTAs son enlaces (`Link`); mantener la página como **server component** salvo las
   partes interactivas.
+- **Estático vs. sesión (importante):** leer la sesión en el servidor (`auth()`/`cookies()`) en la
+  landing la volvería **dinámica** y perdería el prerenderizado. Por eso la personalización "según
+  sesión" va en un **componente cliente** (hidrata tras la carga); `page.tsx` queda estático. Ojo:
+  el `src/app/page.tsx` que dejó la feature 002 sí lee la sesión — esta feature lo **sustituye** por
+  la landing estática.
+- **`metadataBase` / URL del sitio:** para URLs absolutas de Open Graph, sitemap y canonical hace
+  falta la URL pública del sitio (p. ej. `NEXT_PUBLIC_SITE_URL`, documentada en `.env.example`).
+- **Imagen social (OG):** usar `opengraph-image` (estático en `public/` o generado). Optimizar peso.
+- **`lang` del documento:** `layout.tsx` está en `lang="en"`; cambiar a `es` (afecta a toda la app,
+  no solo a la landing) — es correcto para accesibilidad y SEO del contenido en español.
 - **Dependencia de la feature 002:** las rutas `/login` y `/registro` y el helper de sesión provienen
   de la 002. Si aún no están, dejar las CTAs enlazando a esas rutas (que existirán) y degradar con
   elegancia el bloque "según sesión".

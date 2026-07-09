@@ -47,18 +47,32 @@ comportamiento según sesión → metadatos → responsive/tema → validación*
 - Mantenerlo fino: sin lógica; solo orden de secciones y layout general.
 - Asegurar que la ruta es **pública** (el middleware de la feature 002 no debe cubrir `/`).
 
-## 5. Comportamiento según sesión
+## 5. Comportamiento según sesión (en cliente, para no romper el estático)
 
-- Leer el usuario actual con el helper de servidor de la feature 002 (`getUsuarioActual()` o
-  equivalente) desde el server component.
-- Si hay sesión: mostrar un acceso directo al área del usuario (o a su panel según rol) en lugar de
-  las CTAs de registro/login. Si no hay sesión: mostrar registro/login.
-- Degradar con elegancia si el helper aún no existe (fallback: mostrar siempre registro/login).
+- **No** leer la sesión en el server component de la landing: `auth()`/`cookies()` volverían la ruta
+  dinámica. La página se mantiene estática.
+- La personalización va en un **componente cliente** pequeño (p. ej. `AccesoUsuario` en
+  `landing/ui`) que decide entre "Iniciar sesión / Registro" y "Mi cuenta":
+  - Con Auth.js v5, usar `useSession()` de `next-auth/react` (requiere `SessionProvider`; montarlo
+    solo alrededor de esa parte o en el header, no forzar dinámica la página), **o** una llamada
+    ligera del cliente a `/api/auth/session`.
+  - Estado por defecto (sin sesión / mientras carga): mostrar registro/login. Al hidratar, si hay
+    sesión, cambiar a "Mi cuenta". Así el HTML prerenderizado no depende de la sesión.
+- Fallback elegante si la feature 002 no estuviera: mostrar siempre registro/login.
 
-## 6. Metadatos
+## 6. SEO y metadatos
 
-- Exportar `metadata` (o `generateMetadata`) desde `page.tsx`/`layout.tsx` con **título** y
-  **descripción** de la landing (SEO y previsualización en redes), según la API de Next 16.
+- **Metadata** (`export const metadata`) en `page.tsx` (y `layout.tsx` para lo global): `title`,
+  `description`, `metadataBase` (desde `NEXT_PUBLIC_SITE_URL`), `alternates.canonical`.
+- **Open Graph** y **Twitter Card** en `metadata.openGraph` / `metadata.twitter` (título, descripción,
+  imagen). Imagen social vía `opengraph-image` (archivo en `app/` o asset en `public/`).
+- **`app/robots.ts`** (permitir indexado, `sitemap`) y **`app/sitemap.ts`** (incluye `/`), usando las
+  file conventions de metadata de Next 16.
+- **JSON-LD** (`Organization`/`NonprofitOrganization`: `name`, `url`, `logo`) embebido con un
+  `<script type="application/ld+json">` en un componente server (no usar `next/head`).
+- **HTML semántico**: un solo `<h1>` en el hero, jerarquía correcta de encabezados, landmarks
+  (`<header>`/`<main>`/`<footer>`), `alt` en imágenes y texto de enlace descriptivo.
+- **Idioma**: cambiar `layout.tsx` a `lang="es"` (hoy `en`).
 
 ## 7. Estilo, responsive y tema
 
@@ -72,8 +86,10 @@ comportamiento según sesión → metadatos → responsive/tema → validación*
 
 - **Presentación pura, sin dominio:** la landing no toca la base ni añade casos de uso; cualquier
   dato en vivo llega con el tablero público (009). Esto la mantiene simple y desplegable ya.
-- **Server component por defecto:** el contenido es estático; solo se interactúa vía enlaces, así que
-  no se necesita `"use client"` en la página (mejor rendimiento y menos JS).
+- **Estático por defecto (SSG):** el contenido es fijo; la página es un server component **sin** APIs
+  de request, por lo que Next la **prerenderiza** (`○` en el build) y se sirve desde CDN. Solo las
+  piezas interactivas (personalización según sesión) son `"use client"` e hidratan aparte. Es la
+  decisión clave de la feature: máxima velocidad, cacheabilidad y SEO.
 - **Componentes en el módulo, `page.tsx` fino:** respeta Screaming Architecture (la carpeta grita
   "landing") y evita meter maquetación pesada en `src/app`.
 - **Enganche al tablero, no el tablero:** se deja el enlace/mención a transparencia sin implementarla,
@@ -86,8 +102,10 @@ comportamiento según sesión → metadatos → responsive/tema → validación*
    (`SOLICITANTE`), "Iniciar sesión" → `/login`.
 3. Con sesión activa, la landing ofrece acceso al área del usuario en lugar de registro/login.
 4. Verificar **responsive** (móvil/escritorio) y **modo claro/oscuro**.
-5. Revisar los **metadatos** (título/descripción) en el `<head>`.
-6. `pnpm lint` / `pnpm build` sin errores.
+5. Revisar el `<head>`: metadatos, canonical, **Open Graph**/**Twitter** y el `<script>` **JSON-LD**;
+   comprobar `/robots.txt` y `/sitemap.xml`, y que el documento sea `lang="es"`.
+6. `pnpm build`: confirmar que `/` figura como **`○` (Static)**, no `ƒ` (Dynamic).
+7. `pnpm lint` / `pnpm build` sin errores.
 
 ## Al terminar
 
