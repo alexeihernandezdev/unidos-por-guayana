@@ -12,10 +12,11 @@ Permitir al equipo gestor **crear los envíos de ayuda** y definir **cuánto se 
 
 Esta etapa introduce el **corazón de la plataforma**: la **Ayuda** (un envío concreto hacia un sector).
 
-- **El Administrador crea envíos** — indica el **destino**, la **fecha de salida** y **qué se necesita**: por ejemplo, 500 litros de agua, 200 cajas de alimentos y 1 camión. Cada necesidad es una **meta**, medida con los recursos del catálogo (feature anterior).
-- **Un ciclo de vida claro** — cada envío avanza, en un solo sentido, por cuatro etapas: **Recolectando → Listo → En tránsito → Entregado**. El Administrador lo hace avanzar (normalmente pasa a "Listo" cuando las metas se cumplen). No se puede retroceder ni saltarse pasos.
-- **Metas ajustables al principio** — mientras el envío está en "Recolectando", el Administrador puede añadir, cambiar o quitar metas. Una vez pasa a "Listo", las metas quedan fijas para poder medir el progreso con seriedad.
-- **Vista de gestión** — lista de todos los envíos con su estado, y un detalle con sus metas.
+- **El Administrador crea envíos** con un **título breve** que los identifica, un **destino**, una **fecha de salida** y **qué se necesita**: por ejemplo, 500 litros de agua, 200 cajas de alimentos y 1 camión. Cada necesidad es una **meta**, medida con los recursos del catálogo (feature anterior).
+- **Un ciclo de vida claro** — cada envío avanza, en un solo sentido, por cuatro etapas: **Recolectando, Listo, En tránsito y Entregado**. El Administrador lo hace avanzar (normalmente pasa a "Listo" cuando las metas se cumplen). No se puede retroceder ni saltarse pasos.
+- **Metas ajustables al principio** — mientras el envío está en "Recolectando", el Administrador puede añadir, cambiar o quitar metas, y también corregir destino o fecha. Una vez pasa a "Listo", todo queda fijo para poder medir el progreso con seriedad.
+- **Envíos aún en preparación se pueden descartar** — si un envío se creó por error o ya no tiene sentido, el Administrador puede eliminarlo mientras siga en "Recolectando". A partir de "Listo" ya no se elimina, porque forma parte del historial.
+- **Vista de gestión** — lista de todos los envíos con su estado (con filtro por etapa) y un detalle con sus metas y el objetivo de cada una.
 
 ## Por qué importa
 
@@ -26,7 +27,7 @@ Es la pieza **contra la que todo se mide**. Los colaboradores aportarán **a un 
 - Los **aportes** de los colaboradores y el **cálculo del progreso** real de cada meta llegan en la etapa siguiente. Aquí se definen los objetivos; todavía no se suma lo aportado.
 - El **historial de seguimiento** (registro de cada cambio de estado con nota y evidencia de entrega) es una etapa posterior.
 - El **panel del administrador** y el **tablero público** que muestran todo esto de forma visual vienen después.
-- No se pueden retroceder estados ni editar metas de un envío ya avanzado.
+- No se pueden retroceder estados, editar metas de un envío ya avanzado, ni eliminar envíos que ya salieron de "Recolectando".
 
 ## Resultado para el cliente
 
