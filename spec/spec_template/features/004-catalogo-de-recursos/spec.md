@@ -1,6 +1,6 @@
 # 004 · Catálogo de recursos
 
-> Estado: **Pendiente** · Depende de: `002 · Autenticación y roles` · Roadmap: `constitution/roadmap.md`
+> Estado: **Hecho ✅** · Depende de: `002 · Autenticación y roles` · Roadmap: `constitution/roadmap.md`
 
 ## Qué hace
 
@@ -72,22 +72,22 @@ la coherencia de la transparencia. Es requisito de las features 005–009.
 
 ## Criterios de aceptación
 
-- [ ] El `ADMIN` puede **crear** un recurso con `nombre`, `unidad` y `categoria` (y `descripcion`
+- [x] El `ADMIN` puede **crear** un recurso con `nombre`, `unidad` y `categoria` (y `descripcion`
       opcional); queda guardado y aparece en el listado.
-- [ ] El sistema **rechaza** un `nombre` duplicado (validado en servidor, insensible a mayúsculas y
+- [x] El sistema **rechaza** un `nombre` duplicado (validado en servidor, insensible a mayúsculas y
       espacios) con un mensaje claro.
-- [ ] Solo se aceptan categorías válidas (`SUMINISTRO` | `TRANSPORTE` | `PERSONAL` | `MONETARIO`).
-- [ ] El `ADMIN` puede **editar** un recurso existente (nombre, unidad, categoría, descripción).
-- [ ] El `ADMIN` puede **archivar** un recurso (queda `activo = false`) y **reactivarlo**; los
+- [x] Solo se aceptan categorías válidas (`SUMINISTRO` | `TRANSPORTE` | `PERSONAL` | `MONETARIO`).
+- [x] El `ADMIN` puede **editar** un recurso existente (nombre, unidad, categoría, descripción).
+- [x] El `ADMIN` puede **archivar** un recurso (queda `activo = false`) y **reactivarlo**; los
       archivados no se ofrecen por defecto pero se conservan.
-- [ ] El **listado** muestra los recursos del catálogo, con distinción visual de los archivados y
+- [x] El **listado** muestra los recursos del catálogo, con distinción visual de los archivados y
       posibilidad de filtrar por categoría / estado.
-- [ ] Un usuario **no-`ADMIN`** (o sin sesión) **no** puede acceder a la gestión del catálogo
+- [x] Un usuario **no-`ADMIN`** (o sin sesión) **no** puede acceder a la gestión del catálogo
       (protegido en servidor; redirige/bloquea).
-- [ ] La **migración** crea la tabla `recursos` y el enum sin errores.
-- [ ] `pnpm test` cubre: rechazo de duplicado, normalización de nombre, categoría inválida y
+- [x] La **migración** crea la tabla `recursos` y el enum sin errores.
+- [x] `pnpm test` cubre: rechazo de duplicado, normalización de nombre, categoría inválida y
       archivar/activar — en verde.
-- [ ] `pnpm lint` / `pnpm build` sin errores; `recursos/domain` y `recursos/application` permanecen
+- [x] `pnpm lint` / `pnpm build` sin errores; `recursos/domain` y `recursos/application` permanecen
       **puras** (sin framework ni Prisma).
 
 ## Notas y riesgos

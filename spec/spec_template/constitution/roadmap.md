@@ -10,12 +10,13 @@ _Features completadas, en orden de implementación._
 2. **001 · Configuración base** — Instalados y configurados Prisma + PostgreSQL (Docker en dev, Supabase en prod), Vitest y las librerías elegidas (TanStack Query, Shadcn, React Hook Form, Zustand, Luxon); estructura de módulos de Clean + Screaming (`src/modules`, `src/shared`, `src/lib`, `prisma/`).
 3. **002 · Autenticación y roles** — Login y registro con control de acceso por rol (`ADMIN` / `COLABORADOR` / `SOLICITANTE`).
 4. **003 · Landing** — Página de bienvenida pública en `/` (estática y con SEO): hero, cómo funciona, principios y CTA final; CTAs a `/registro?rol=COLABORADOR` y `/registro?rol=SOLICITANTE`. Componentes en `src/modules/landing/ui`.
+5. **004 · Catálogo de recursos** — Gestión de `Recurso` (nombre, unidad, categoría) solo para `ADMIN`: alta, edición y archivar/activar en `/panel/recursos`. Módulo `src/modules/recursos` (Clean + Screaming); base sobre la que se miden metas y aportes.
 
 ## Siguiente 🔜
 
 _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
 
-5. **004 · Catálogo de recursos** — Gestión de `Recurso` (nombre, unidad, categoría); base sobre la que se miden metas y aportes.
+6. **005 · Ayudas / Envío** — El `ADMIN` crea envíos con sus `MetaRecurso` (fecha, sector destino, metas por recurso).
 
 ## Backlog / ideas 💡
 
@@ -23,7 +24,6 @@ _Ordenado según dependencias. Cada uno se convierte en `features/NNN-…/` ante
 
 **Base y flujo central**
 
-6. **005 · Ayudas / Envío** — El `ADMIN` crea envíos con sus `MetaRecurso` (fecha, sector destino, metas por recurso).
 7. **006 · Aportes** — El `COLABORADOR` aporta a una Ayuda contra un recurso; el aporte suma a la meta cuando se marca `RECIBIDO`.
 8. **007 · Solicitudes de ayuda** — El `SOLICITANTE` crea y lista peticiones por sector, con urgencia y recursos necesarios.
 

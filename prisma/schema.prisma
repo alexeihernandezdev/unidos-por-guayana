@@ -45,3 +45,32 @@ model Usuario {
 
   @@map("usuarios")
 }
+
+// Categoría de un recurso del catálogo (ver feature 004 y constitution/tech-stack.md).
+// `SUMINISTRO` (agua, alimentos, medicinas…), `TRANSPORTE` (camión, combustible…),
+// `PERSONAL` (voluntarios…) y `MONETARIO` (donación en USD/Bs, recibida por fuera
+// de la app). Sus valores coinciden con el enum de dominio para mapear sin casts.
+enum CategoriaRecurso {
+  SUMINISTRO
+  TRANSPORTE
+  PERSONAL
+  MONETARIO
+}
+
+// Recurso del catálogo: la referencia estable contra la que se miden metas y
+// aportes. `nombre` es único (se guarda tal cual con trim; la unicidad insensible
+// a mayúsculas se valida en la aplicación). `unidad` es texto libre (litros, cajas,
+// personas, USD…). No se borran: se archivan (`activo = false`) para no dejar metas
+// ni aportes huérfanos (features 005/006).
+model Recurso {
+  id          String           @id @default(cuid())
+  nombre      String           @unique
+  unidad      String
+  categoria   CategoriaRecurso
+  descripcion String?
+  activo      Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@map("recursos")
+}
