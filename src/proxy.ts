@@ -20,7 +20,8 @@ export default auth((req) => {
     pathname.startsWith("/panel") ||
     pathname === "/mis-aportes" ||
     pathname.startsWith("/solicitudes") ||
-    /^\/ayudas\/[^/]+\/aportar$/.test(pathname);
+    pathname === "/ayudas" ||
+    /^\/ayudas\/[^/]+/.test(pathname);
 
   if (requiereSesion && !req.auth) {
     const urlLogin = new URL("/login", req.nextUrl.origin);

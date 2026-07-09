@@ -27,9 +27,10 @@ export function navItemsPorRol(rol: Rol | null): NavItem[] {
         { label: "Solicitudes", href: "/panel/solicitudes" },
       ];
     case Rol.COLABORADOR:
-      // TODO: cuando exista un listado público de Ayudas (feature 009) añadir
-      // aquí { label: "Envíos", href: "/ayudas" }.
-      return [{ label: "Mis aportes", href: "/mis-aportes", exact: true }];
+      return [
+        { label: "Envíos", href: "/ayudas", exact: true },
+        { label: "Mis aportes", href: "/mis-aportes", exact: true },
+      ];
     case Rol.SOLICITANTE:
       return [
         { label: "Mis solicitudes", href: "/solicitudes", exact: true },
