@@ -67,7 +67,7 @@ La plataforma se compone de estos módulos:
 Para evitar malentendidos, la plataforma **deliberadamente**:
 
 - **No reemplaza a los organismos oficiales** — Es apoyo logístico comunitario; no sustituye a Protección Civil, bomberos ni entes del Estado.
-- **No maneja dinero** — No procesa donaciones monetarias ni pagos; solo coordina recursos físicos y personas.
+- **No procesa pagos dentro de la app** — La ayuda monetaria es bienvenida, pero se canaliza por medios externos (transferencia, PayPal, Zelle…); la aplicación no cobra ni gestiona transacciones: solo muestra esos medios y registra, para transparencia, los montos ya recibidos.
 - **No es de alcance nacional** — Se enfoca en la ayuda que sale desde la región Guayana.
 
 ## 7. Plan de entrega por fases

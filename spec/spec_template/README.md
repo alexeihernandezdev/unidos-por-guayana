@@ -44,9 +44,10 @@ Son las reglas estables que gobiernan el proyecto. Mientras que las features van
 1. Tomar la siguiente feature del `roadmap.md` y crear `features/NNN-nombre-feature/` con su número (`001`, `002`, …).
 2. Escribir `spec.md`: qué hace, por qué y criterios de aceptación medibles.
 3. Escribir `plan.md`: enfoque técnico y decisiones, respetando `constitution/tech-stack.md`.
-4. Desglosar en `tasks.md` y marcar el progreso.
-5. Implementar y validar (`build` / `tests` / `lint`, según la constitución).
-6. Actualizar `constitution/roadmap.md` (mover la feature a "Hecho").
+4. **Generar la documentación de cliente en `DOC/features/NNN-nombre-feature.md`** (ver "Relación con la carpeta `DOC/`"): un resumen en lenguaje llano de qué aporta la feature y por qué, derivado de la `spec.md`.
+5. Desglosar en `tasks.md` y marcar el progreso.
+6. Implementar y validar (`build` / `tests` / `lint`, según la constitución).
+7. Actualizar `constitution/roadmap.md` (mover la feature a "Hecho") y revisar que el `DOC/` de la feature siga fiel a lo entregado.
 
 > **La constitución manda:** si una feature choca con `mission.md` o `tech-stack.md`, se replantea la feature, no la constitución.
 
@@ -54,3 +55,8 @@ Son las reglas estables que gobiernan el proyecto. Mientras que las features van
 
 - **`spec/`** es documentación **técnica y de producto**, para quien implementa.
 - **`DOC/`** (en la raíz del repo) es el **resumen para el cliente**: explica en lenguaje llano qué se va a construir y por qué, para justificar el proyecto y alinear expectativas.
+
+**Regla:** cada vez que se genera una feature en `spec/features/NNN-…/`, se genera también su documentación de cliente en `DOC/features/NNN-nombre-feature.md`. Así `DOC/` refleja siempre lo que se está construyendo, no solo el resumen general.
+
+- `DOC/resumen-general.md` — visión global del proyecto (no cambia con cada feature).
+- `DOC/features/NNN-nombre-feature.md` — un documento por feature, en lenguaje llano: qué aporta al cliente, por qué importa y qué queda fuera. Es la traducción no técnica de la `spec.md`; no repite el `plan.md` ni las `tasks.md`.

@@ -10,12 +10,13 @@ Instaladas hoy (ver `package.json`):
 - **Framework:** Next.js 16 (App Router, carpeta `src/app/`) con React 19 y React Compiler activado (`reactCompiler: true` en `next.config.ts`).
 - **Estilos:** Tailwind CSS v4 (`@import "tailwindcss"` en `globals.css`).
 - **Lint:** ESLint 9 (flat config) con `eslint-config-next` (core-web-vitals + typescript).
+- **Librerías:** TanStack Query (provider en `src/app/providers.tsx`) / Shadcn (componentes en `src/shared/ui`, util `cn` en `src/shared/lib/utils.ts`) / React Hook Form / Luxon / Zustand.
+- **Base de datos:** PostgreSQL con Prisma 7 (driver adapter `@prisma/adapter-pg`); cliente singleton en `src/lib/prisma.ts` y esquema en `prisma/schema.prisma` (sin modelos de dominio todavía).
+- **Entorno local de BD:** Docker + Docker Compose — un contenedor de PostgreSQL para desarrollo, definido en `docker-compose.yml`. Evita instalar Postgres en la máquina y da un entorno reproducible; en producción la base vive en Supabase.
+- **Tests:** Vitest (`vitest.config.ts`, entorno `jsdom`, alias `@/…`; `npm run test`).
 
-Elegidas pero **aún pendientes de instalar/configurar**:
+Pendiente de configurar más adelante:
 
-- **Librerias:** TanStack Query / Shadcn / React Hook Form / Luxon / Zustand
-- **Base de datos:** PostgreSQL con Prisma.
-- **Tests:** Vitest.
 - **Despliegue:** Vercel (app) / Supabase (base de datos).
 
 > ⚠️ Esta versión de Next.js tiene cambios importantes respecto a lo habitual. Antes de escribir código, consulta la guía correspondiente en `node_modules/next/dist/docs/` y respeta los avisos de deprecación (ver `AGENTS.md`).
@@ -41,6 +42,7 @@ Existe hoy:
 - `src/app/globals.css` — estilos globales y tokens de Tailwind v4.
 - `next.config.ts`, `tsconfig.json`, `eslint.config.mjs` — configuración del proyecto.
 - `public/` — activos estáticos.
+- `docker-compose.yml` — contenedor de PostgreSQL para desarrollo local (a crear en la feature de configuración base).
 
 Estructura objetivo (a crear conforme avancen las features):
 
@@ -61,7 +63,11 @@ Estructura objetivo (a crear conforme avancen las features):
 - `npm run build` — compila para producción (`next build`).
 - `npm run start` — sirve la build de producción (`next start`).
 - `npm run lint` — revisa el estilo (`eslint`).
-- _Test: pendiente — se añadirá `npm run test` (Vitest) al configurarlo._
+- `npm run test` — ejecuta los tests con Vitest (`npm run test:watch` para el modo interactivo).
+- `npm run db:generate` — regenera el cliente de Prisma (`prisma generate`).
+- `npm run db:migrate` — aplica migraciones en desarrollo (`prisma migrate dev`).
+- `docker compose up -d` — levanta el contenedor de PostgreSQL para desarrollo local.
+- `docker compose down` — detiene y elimina los contenedores (los datos persisten en el volumen).
 
 ## Modelo de datos / dominio
 
@@ -107,7 +113,7 @@ _Entidades centrales derivadas de la misión. Se documentan aquí las reglas no 
 | Archivos CSS/módulos | kebab-case                | `user-card.module.css`         |
 | Rutas API            | kebab-case                | `/api/user-profile`            |
 
-> El casing de archivos y carpetas lo **hace cumplir ESLint** con `eslint-plugin-check-file`: componentes `*.tsx` en PascalCase, hooks `use*.ts` en camelCase y carpetas de módulo en kebab-case. Convención: los barriles se llaman `index.ts`. El casing de `*.module.css` no se valida automáticamente (ESLint 9 no parsea CSS sin `@eslint/css`); mantenerlo en kebab-case a mano.
+> El casing de archivos y carpetas lo **hace cumplir ESLint** con `eslint-plugin-check-file`: los componentes propios de un módulo (`src/modules/*/ui/*.tsx`) van en PascalCase, los hooks `use*.ts` en camelCase y las carpetas de módulo en kebab-case. **Excepción:** los primitivos de Shadcn viven en `src/shared/ui` y siguen la convención de la librería (kebab-case: `button.tsx`, `dropdown-menu.tsx`), por lo que esa carpeta se valida como kebab-case. Convención: los barriles se llaman `index.ts`. El casing de `*.module.css` no se valida automáticamente (ESLint 9 no parsea CSS sin `@eslint/css`); mantenerlo en kebab-case a mano.
 
 ## Estilo visual
 
