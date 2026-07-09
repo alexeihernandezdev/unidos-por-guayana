@@ -2,6 +2,8 @@
 
 _Documento de cliente. Explica en lenguaje llano qué aporta esta feature y por qué. El detalle técnico vive en `spec/features/003-landing/`._
 
+**Estado:** ✅ Completada — la landing pública está publicada en `/`, con paleta teal/petróleo, logo actualizado y fondo con gradiente sutil animado.
+
 ---
 
 ## En una frase
