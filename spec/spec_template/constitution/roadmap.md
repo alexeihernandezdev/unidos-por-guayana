@@ -12,20 +12,17 @@ _Features completadas, en orden de implementación._
 4. **003 · Landing** — Página de bienvenida pública en `/` (estática y con SEO): hero, cómo funciona, principios y CTA final; CTAs a `/registro?rol=COLABORADOR` y `/registro?rol=SOLICITANTE`. Componentes en `src/modules/landing/ui`.
 5. **004 · Catálogo de recursos** — Gestión de `Recurso` (nombre, unidad, categoría) solo para `ADMIN`: alta, edición y archivar/activar en `/panel/recursos`. Módulo `src/modules/recursos` (Clean + Screaming); base sobre la que se miden metas y aportes.
 6. **005 · Ayudas / Envío** — El `ADMIN` crea envíos con sus `MetaRecurso` (título, fecha, sector destino, metas por recurso) en `/panel/ayudas`: alta, listado con filtro por estado, detalle, edición de cabecera/metas solo en `RECOLECTANDO` y avance de estado por la secuencia `RECOLECTANDO → LISTO → EN_TRANSITO → ENTREGADO`. Módulo `src/modules/ayudas` (Clean + Screaming) con la máquina de estados como dominio puro.
+7. **006 · Aportes** — El `COLABORADOR` aporta a una Ayuda en `RECOLECTANDO` contra un recurso de sus metas (rutas `/ayudas/[id]/aportar` y `/mis-aportes`). El `ADMIN` marca `COMPROMETIDO → RECIBIDO` (o revierte) desde el detalle de Ayuda; solo los `RECIBIDO` suman al progreso, y `ProgresoMetas` reemplaza el placeholder "sin aportes aún" con recibido/prometido/porcentaje. Módulo `src/modules/aportes` (Clean + Screaming) con `progresoDeMeta` puro y `updateMany` idempotente para transiciones.
 
 ## Siguiente 🔜
 
 _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
 
-7. **006 · Aportes** — El `COLABORADOR` aporta a una Ayuda contra un recurso; el aporte suma a la meta cuando se marca `RECIBIDO`.
+8. **007 · Solicitudes de ayuda** — El `SOLICITANTE` crea y lista peticiones por sector, con urgencia y recursos necesarios.
 
 ## Backlog / ideas 💡
 
 _Ordenado según dependencias. Cada uno se convierte en `features/NNN-…/` antes de tocar código._
-
-**Base y flujo central**
-
-8. **007 · Solicitudes de ayuda** — El `SOLICITANTE` crea y lista peticiones por sector, con urgencia y recursos necesarios.
 
 **Superficies de gestión y transparencia**
 

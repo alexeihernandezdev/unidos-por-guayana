@@ -16,7 +16,8 @@ export default auth((req) => {
 });
 
 export const config = {
-  // Solo protege /panel (ejemplo). Añade aquí más prefijos según crezcan las
-  // features. Auth (/api/auth), estáticos e imágenes quedan fuera por defecto.
-  matcher: ["/panel/:path*"],
+  // Protege el panel (ADMIN) y las rutas autenticadas de aportes del colaborador
+  // (feature 006). El control por rol lo aplica cada página con `requireRol()`.
+  // Auth (/api/auth), estáticos e imágenes quedan fuera por defecto.
+  matcher: ["/panel/:path*", "/mis-aportes", "/ayudas/:id/aportar"],
 };
