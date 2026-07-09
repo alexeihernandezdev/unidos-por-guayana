@@ -45,6 +45,8 @@ model Usuario {
 
   // Aportes que este usuario ha registrado como colaborador (feature 006).
   aportes Aporte[]
+  // Relación inversa: solicitudes de ayuda creadas por el solicitante (feature 007).
+  solicitudes Solicitud[]
 
   @@map("usuarios")
 }
@@ -81,6 +83,8 @@ model Recurso {
 
   // Aportes registrados contra este recurso (feature 006).
   aportes Aporte[]
+  // Relación inversa: recursos necesarios en solicitudes de ayuda (feature 007).
+  recursoSolicitudes RecursoSolicitud[]
 
   @@map("recursos")
 }
@@ -167,4 +171,65 @@ model Aporte {
   @@index([ayudaId])
   @@index([ayudaId, recursoId, estado])
   @@map("aportes")
+}
+// Urgencia de una solicitud de ayuda (feature 007). Tres niveles para priorizar sin
+// paralizar al solicitante con una escala numérica.
+enum UrgenciaSolicitud {
+  BAJA
+  MEDIA
+  ALTA
+}
+
+// Ciclo de vida de una solicitud de ayuda (feature 007). Avanza desde `ABIERTA` hacia
+// `ATENDIDA` o `CERRADA`; ambos son terminales y no se reabren.
+enum EstadoSolicitud {
+  ABIERTA
+  ATENDIDA
+  CERRADA
+}
+
+// Quién cerró la solicitud (feature 007). Distingue cancelación del solicitante de
+// cierre administrativo por el ADMIN.
+enum CerradaPor {
+  SOLICITANTE
+  ADMIN
+}
+
+// Solicitud de ayuda: petición formal de un SOLICITANTE para un sector concreto,
+// indicando urgencia, descripción y recursos necesarios del catálogo. Nace en `ABIERTA`.
+// El ADMIN la marca `ATENDIDA` o `CERRADA`; el solicitante puede cancelarla mientras
+// esté abierta.
+model Solicitud {
+  id            String            @id @default(cuid())
+  sector        String
+  urgencia      UrgenciaSolicitud
+  descripcion   String
+  estado        EstadoSolicitud   @default(ABIERTA)
+  cerradaPor    CerradaPor?
+  solicitanteId String
+  solicitante   Usuario           @relation(fields: [solicitanteId], references: [id])
+  recursos      RecursoSolicitud[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([estado])
+  @@index([sector])
+  @@map("solicitudes")
+}
+
+// RecursoSolicitud: puente entre `Solicitud` y `Recurso`. `cantidadEstimada` es
+// opcional (el solicitante puede no saber cuánto necesita). Se guarda como `Decimal`
+// por precisión y se convierte a `number` en el límite de infraestructura.
+model RecursoSolicitud {
+  id                String    @id @default(cuid())
+  solicitudId       String
+  solicitud         Solicitud @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+  recursoId         String
+  recurso           Recurso   @relation(fields: [recursoId], references: [id])
+  cantidadEstimada  Decimal?  @db.Decimal(12, 2)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([solicitudId, recursoId])
+  @@map("recursos_solicitud")
 }

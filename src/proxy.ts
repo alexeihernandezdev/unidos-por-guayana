@@ -19,5 +19,5 @@ export const config = {
   // Protege el panel (ADMIN) y las rutas autenticadas de aportes del colaborador
   // (feature 006). El control por rol lo aplica cada página con `requireRol()`.
   // Auth (/api/auth), estáticos e imágenes quedan fuera por defecto.
-  matcher: ["/panel/:path*", "/mis-aportes", "/ayudas/:id/aportar"],
+  matcher: ["/panel/:path*", "/mis-aportes", "/ayudas/:id/aportar", "/solicitudes/:path*"],
 };

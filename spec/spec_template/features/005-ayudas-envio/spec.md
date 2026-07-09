@@ -106,7 +106,8 @@ y sus metas no hay contra qué medir aportes ni qué mostrar. Es el requisito di
 ## Notas y riesgos
 
 - **Dependencias:** no debería hacer falta ninguna nueva (Prisma, zod, RHF, Auth.js ya están). Para
-  fechas usar **Luxon** (ya instalado) en el formateo de la UI. Si se valorara algo más, **avisar**.
+  fechas usar **Luxon** (ya instalado) en el formateo de la UI, con locale `es-VE` y formato español
+  `DD/MM/AAAA` (ver `constitution/tech-stack.md` → Convenciones). Si se valorara algo más, **avisar**.
 - **Next 16:** route handlers, server actions y server components cambian — leer
   `node_modules/next/dist/docs/` antes de codificar (AGENTS.md). La gestión vive bajo `requireRol`
   y `proxy.ts` de la feature 002 (área `/panel`).
@@ -120,5 +121,5 @@ y sus metas no hay contra qué medir aportes ni qué mostrar. Es el requisito di
   (p. ej. `siguienteEstado(estado)` y `puedeTransicionar(desde, hacia)`), testeable sin base.
 - **Progreso diferido:** dejar el detalle preparado para mostrar progreso cuando 006 aporte los
   datos; no adelantar el cálculo aquí.
-- **Zona horaria de `fecha`:** guardar en UTC; interpretar/mostrar con Luxon. Definir si `fecha` es
-  solo día o fecha-hora (recomendado: fecha de salida a nivel de día).
+- **Zona horaria de `fecha`:** guardar en UTC; interpretar/mostrar con Luxon en locale `es-VE`
+  (`DD/MM/AAAA`). Definir si `fecha` es solo día o fecha-hora (recomendado: fecha de salida a nivel de día).
