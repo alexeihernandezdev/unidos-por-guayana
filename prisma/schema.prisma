@@ -72,5 +72,58 @@ model Recurso {
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
 
+  // Relación inversa: metas de envío que apuntan a este recurso (feature 005).
+  // Como los recursos se archivan (no se borran), no habrá metas huérfanas.
+  metas MetaRecurso[]
+
   @@map("recursos")
+}
+
+// Ciclo de vida de una Ayuda (ver feature 005 y constitution/tech-stack.md). Avanza
+// en un solo sentido: RECOLECTANDO → LISTO → EN_TRANSITO → ENTREGADO. La máquina de
+// estados (transiciones válidas) vive como regla pura en el dominio. Sus valores
+// coinciden con el enum de dominio para mapear sin casts.
+enum EstadoAyuda {
+  RECOLECTANDO
+  LISTO
+  EN_TRANSITO
+  ENTREGADO
+}
+
+// Ayuda / Envío: la entidad central de la plataforma. Un envío concreto de ayuda
+// humanitaria hacia un sector, con una fecha de salida y un ciclo de vida. Define
+// qué necesita y cuánto mediante sus `metas` (MetaRecurso). Solo la gestiona el
+// `ADMIN`. Nace en `RECOLECTANDO`; la cabecera y las metas solo se editan mientras
+// siga en ese estado (después quedan congeladas para medir el progreso).
+model Ayuda {
+  id           String        @id @default(cuid())
+  titulo       String
+  sectorDestino String
+  fecha        DateTime
+  estado       EstadoAyuda   @default(RECOLECTANDO)
+  descripcion  String?
+  metas        MetaRecurso[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@map("ayudas")
+}
+
+// MetaRecurso: puente entre `Ayuda` y `Recurso`. `cantidadObjetivo` es cuánto
+// necesita el envío de ese recurso, en la unidad del recurso. Se guarda como
+// `Decimal` por precisión y se convierte a `number` en el límite de infraestructura
+// (el dominio trabaja con números puros). Única por (ayuda, recurso): un recurso no
+// se repite en dos metas de la misma Ayuda. Se borra en cascada con su Ayuda.
+model MetaRecurso {
+  id               String   @id @default(cuid())
+  ayudaId          String
+  ayuda            Ayuda    @relation(fields: [ayudaId], references: [id], onDelete: Cascade)
+  recursoId        String
+  recurso          Recurso  @relation(fields: [recursoId], references: [id])
+  cantidadObjetivo Decimal  @db.Decimal(12, 2)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([ayudaId, recursoId])
+  @@map("metas_recurso")
 }
