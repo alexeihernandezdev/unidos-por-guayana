@@ -35,21 +35,25 @@ La pieza central es el **Envío de ayuda**: un despacho con una fecha, un destin
 
 La plataforma se compone de estos módulos:
 
-**Cara al público y acceso**
+### Cara al público y acceso
+
 - **Página de bienvenida** que presenta el proyecto e invita a colaborar o solicitar ayuda.
 - **Registro e inicio de sesión** que identifica a cada tipo de usuario y habilita lo que le corresponde.
 
-**Corazón del sistema**
+### Corazón del sistema
+
 - **Envíos de ayuda** con sus metas de recursos, fecha y sector destino.
 - **Aportes** de los colaboradores, que suman a las metas de cada envío.
 - **Solicitudes de ayuda** que canalizan lo que cada sector necesita.
 
-**Gestión y confianza**
+### Gestión y confianza
+
 - **Panel de administración** para ver el estado de cada envío, el progreso de las metas y decidir prioridades.
 - **Tablero público de transparencia**: cualquiera, sin registrarse, puede ver qué se recolectó, cuánto falta y a dónde fue cada ayuda.
 - **Seguimiento del envío** de principio a fin (recolectando → listo → en tránsito → entregado), con evidencia de entrega.
 
-**Apoyo logístico**
+### Apoyo logístico
+
 - **Puntos de acopio** donde entregar los suministros.
 - **Catálogo de recursos** para medir las metas de forma clara.
 - **Notificaciones** para avisar de nuevos envíos o metas cumplidas.
