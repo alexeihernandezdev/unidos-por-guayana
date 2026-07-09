@@ -158,8 +158,11 @@ const eslintConfig = defineConfig([
       "check-file/filename-naming-convention": [
         "warn",
         {
-          // Componentes React: PascalCase (UserCard.tsx).
-          "src/{modules/*/ui,shared}/**/*.tsx": "PASCAL_CASE",
+          // Componentes propios de un módulo: PascalCase (UserCard.tsx).
+          "src/modules/*/ui/**/*.tsx": "PASCAL_CASE",
+          // Primitivos de Shadcn (viven en src/shared/ui): kebab-case, que es su
+          // convención de la librería (button.tsx, dropdown-menu.tsx…).
+          "src/shared/ui/**/*.tsx": "KEBAB_CASE",
           // Hooks: camelCase, por convención con prefijo "use" (useAuthUser.ts).
           "src/**/use*.{ts,tsx}": "CAMEL_CASE",
         },
@@ -180,6 +183,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Cliente de Prisma generado (no es código nuestro; se regenera).
+    "src/generated/**",
   ]),
 ]);
 
