@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="Unidos por Guayana">
+  <rect width="180" height="180" rx="36" fill="#d4a24a"/>
+  <text x="90" y="118" text-anchor="middle"
+        font-family="'EB Garamond', Georgia, 'Times New Roman', serif"
+        font-weight="600" font-size="86" letter-spacing="-1.5" fill="#ffffff">UPG</text>
+  <rect x="46" y="138" width="88" height="8" rx="4" fill="#3d6068"/>
+</svg>
