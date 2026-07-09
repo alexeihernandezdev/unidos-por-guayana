@@ -6,7 +6,6 @@ import {
   HowItWorksSection,
   NumbersSection,
   SiteFooter,
-  SiteHeader,
   TrustSection,
 } from "@/modules/landing/ui";
 
@@ -19,7 +18,6 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <>
-      <SiteHeader />
       <main className="flex-1">
         <HeroSection />
         <ActiveShipmentsSection />

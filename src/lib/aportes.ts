@@ -7,6 +7,7 @@ import type { Actor } from "@/modules/aportes/application/deps";
 import {
   listarAportesDeColaborador,
   listarAportesPorAyuda,
+  listarAportesRecientes,
 } from "@/modules/aportes/application/listarAportes";
 import { marcarRecibido } from "@/modules/aportes/application/marcarRecibido";
 import { progresoDeAyuda } from "@/modules/aportes/application/progresoDeAyuda";
@@ -56,6 +57,12 @@ export function listarAportesDeColaboradorServicio(
   colaboradorId: string,
 ): Promise<Aporte[]> {
   return listarAportesDeColaborador(deps, colaboradorId);
+}
+
+export function listarAportesRecientesServicio(
+  limit: number,
+): Promise<Aporte[]> {
+  return listarAportesRecientes(deps, limit);
 }
 
 export function progresoDeAyudaServicio(

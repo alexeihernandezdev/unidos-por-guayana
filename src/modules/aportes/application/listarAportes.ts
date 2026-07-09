@@ -16,3 +16,11 @@ export async function listarAportesDeColaborador(
 ): Promise<Aporte[]> {
   return aportes.listarDeColaborador(colaboradorId);
 }
+
+/** Feed del dashboard del ADMIN: últimos N aportes creados en la plataforma. */
+export async function listarAportesRecientes(
+  { aportes }: Pick<AporteDeps, "aportes">,
+  limit: number,
+): Promise<Aporte[]> {
+  return aportes.listarRecientes(limit);
+}

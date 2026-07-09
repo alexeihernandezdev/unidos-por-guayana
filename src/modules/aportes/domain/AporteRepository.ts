@@ -34,4 +34,9 @@ export interface AporteRepository {
   eliminar(id: string): Promise<void>;
   /** Agregación por meta de una Ayuda (recibido/prometido por recurso). */
   progresoPorAyuda(ayudaId: string): Promise<AgregadoPorMeta[]>;
+  /**
+   * Últimos aportes de la plataforma, en orden descendente por `createdAt`.
+   * Alimenta el feed del dashboard del ADMIN (feature 008).
+   */
+  listarRecientes(limit: number): Promise<Aporte[]>;
 }

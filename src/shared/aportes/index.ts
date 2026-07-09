@@ -8,5 +8,6 @@ export {
   revertirRecibidoServicio,
   listarAportesPorAyudaServicio,
   listarAportesDeColaboradorServicio,
+  listarAportesRecientesServicio,
   progresoDeAyudaServicio,
 } from "@/lib/aportes";

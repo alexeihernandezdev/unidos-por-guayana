@@ -128,6 +128,15 @@ export class PrismaAporteRepository implements AporteRepository {
     await prisma.aporte.delete({ where: { id } });
   }
 
+  async listarRecientes(limit: number): Promise<Aporte[]> {
+    const filas = await prisma.aporte.findMany({
+      orderBy: { createdAt: "desc" },
+      take: Math.max(0, limit),
+      include: INCLUDE_DETALLE,
+    });
+    return filas.map(mapear);
+  }
+
   /**
    * Agrega recibido/prometido por recurso para una Ayuda usando `groupBy`. El
    * índice `(ayudaId, recursoId, estado)` mantiene barata la consulta.

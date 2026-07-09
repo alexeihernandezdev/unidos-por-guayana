@@ -77,6 +77,13 @@ export class InMemoryAporteRepository implements AporteRepository {
     this.porId.delete(id);
   }
 
+  async listarRecientes(limit: number): Promise<Aporte[]> {
+    return [...this.porId.values()]
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, Math.max(0, limit))
+      .map((a) => this.clonar(a));
+  }
+
   async progresoPorAyuda(ayudaId: string): Promise<AgregadoPorMeta[]> {
     const acumulado = new Map<string, AgregadoPorMeta>();
     for (const aporte of this.porId.values()) {

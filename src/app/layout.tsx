@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { EB_Garamond, Geist, Geist_Mono } from "next/font/google";
+import { SiteHeader } from "@/modules/landing/ui/SiteHeader";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -30,19 +32,29 @@ export const metadata: Metadata = {
     "Plataforma para coordinar ayudas, aportes y solicitudes hacia Guayana.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // El navbar global (SiteHeader) NO se muestra dentro del panel del
+  // administrador: /panel/* usa su propio shell con sidebar (ver
+  // `src/modules/admin/ui/AdminShell.tsx`). La ruta actual llega vía el header
+  // `x-pathname` que setea `src/proxy.ts` en cada request.
+  const pathname = (await headers()).get("x-pathname") ?? "";
+  const esRutaAdmin = pathname.startsWith("/panel");
+
   return (
     <html
       lang="es"
       style={{ colorScheme: "light" }}
       className={`${geistSans.variable} ${geistMono.variable} ${ebGaramond.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        <Providers>
+          {!esRutaAdmin && <SiteHeader />}
+          {children}
+        </Providers>
       </body>
     </html>
   );
