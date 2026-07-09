@@ -8,21 +8,20 @@ _Features completadas, en orden de implementación._
 
 1. **000 · Andamiaje inicial** — Proyecto Next.js 16 (App Router) con TypeScript, Tailwind v4 y ESLint (commit inicial).
 2. **001 · Configuración base** — Instalados y configurados Prisma + PostgreSQL (Docker en dev, Supabase en prod), Vitest y las librerías elegidas (TanStack Query, Shadcn, React Hook Form, Zustand, Luxon); estructura de módulos de Clean + Screaming (`src/modules`, `src/shared`, `src/lib`, `prisma/`).
+3. **002 · Autenticación y roles** — Login y registro con control de acceso por rol (`ADMIN` / `COLABORADOR` / `SOLICITANTE`).
+4. **003 · Landing** — Página de bienvenida (estática y con SEO) que presenta el proyecto e invita a colaborar o solicitar ayuda.
 
 ## Siguiente 🔜
 
 _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
 
-3. **002 · Autenticación y roles** — Login y registro con control de acceso por rol (`ADMIN` / `COLABORADOR` / `SOLICITANTE`).
+5. **004 · Catálogo de recursos** — Gestión de `Recurso` (nombre, unidad, categoría); base sobre la que se miden metas y aportes.
 
 ## Backlog / ideas 💡
 
 _Ordenado según dependencias. Cada uno se convierte en `features/NNN-…/` antes de tocar código._
 
 **Base y flujo central**
-
-4. **003 · Landing** — Página de bienvenida que presenta el proyecto e invita a colaborar o solicitar ayuda.
-5. **004 · Catálogo de recursos** — Gestión de `Recurso` (nombre, unidad, categoría); base sobre la que se miden metas y aportes.
 6. **005 · Ayudas / Envío** — El `ADMIN` crea envíos con sus `MetaRecurso` (fecha, sector destino, metas por recurso).
 7. **006 · Aportes** — El `COLABORADOR` aporta a una Ayuda contra un recurso; el aporte suma a la meta cuando se marca `RECIBIDO`.
 8. **007 · Solicitudes de ayuda** — El `SOLICITANTE` crea y lista peticiones por sector, con urgencia y recursos necesarios.
