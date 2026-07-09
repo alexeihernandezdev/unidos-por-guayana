@@ -1,6 +1,6 @@
 # 007 · Solicitudes de ayuda
 
-> Estado: **Pendiente** · Depende de: `002 · Autenticación y roles`, `004 · Catálogo de recursos` · Roadmap: `constitution/roadmap.md`
+> Estado: **Hecho ✅** · Depende de: `002 · Autenticación y roles`, `004 · Catálogo de recursos` · Roadmap: `constitution/roadmap.md`
 
 ## Qué hace
 
@@ -112,22 +112,22 @@ real. Es requisito de 008 (panel del admin, que las lista y prioriza).
 
 ## Criterios de aceptación
 
-- [ ] Un `SOLICITANTE` autenticado puede **crear** una solicitud con `sector`, `urgencia`,
+- [x] Un `SOLICITANTE` autenticado puede **crear** una solicitud con `sector`, `urgencia`,
       `descripcion` y ≥ 1 recurso del catálogo (activo). Nace en `ABIERTA`.
-- [ ] El sistema **rechaza**: recurso archivado, recurso repetido, `cantidadEstimada ≤ 0` si viene,
+- [x] El sistema **rechaza**: recurso archivado, recurso repetido, `cantidadEstimada ≤ 0` si viene,
       campos vacíos, urgencia inválida. Validado en servidor.
-- [ ] El **dueño** puede **editar** su solicitud (cabecera y recursos) mientras esté `ABIERTA`; tras
+- [x] El **dueño** puede **editar** su solicitud (cabecera y recursos) mientras esté `ABIERTA`; tras
       `ATENDIDA` o `CERRADA` queda bloqueada.
-- [ ] El **dueño** puede **cancelar** su solicitud (`ABIERTA → CERRADA` con
+- [x] El **dueño** puede **cancelar** su solicitud (`ABIERTA → CERRADA` con
       `cerradaPor = SOLICITANTE`).
-- [ ] El `ADMIN` puede **marcar atendida** o **cerrar** una solicitud `ABIERTA`
+- [x] El `ADMIN` puede **marcar atendida** o **cerrar** una solicitud `ABIERTA`
       (`cerradaPor = ADMIN` al cerrar). Los estados `ATENDIDA` y `CERRADA` son terminales.
-- [ ] El `ADMIN` ve un **listado** con filtros por `sector`, `urgencia` y `estado`.
-- [ ] Un `COLABORADOR` **no** puede crear solicitudes ni gestionar el estado.
-- [ ] La **migración** crea `solicitudes`, `recursos_solicitud` y los enums sin errores.
-- [ ] `pnpm test` cubre: transiciones válidas/inválidas, validaciones de creación, edición y
+- [x] El `ADMIN` ve un **listado** con filtros por `sector`, `urgencia` y `estado`.
+- [x] Un `COLABORADOR` **no** puede crear solicitudes ni gestionar el estado.
+- [x] La **migración** crea `solicitudes`, `recursos_solicitud` y los enums sin errores.
+- [x] `pnpm test` cubre: transiciones válidas/inválidas, validaciones de creación, edición y
       cancelación por dueño y bloqueo fuera de `ABIERTA` — en verde.
-- [ ] `pnpm lint` / `pnpm build` sin errores; `solicitudes/domain` y `solicitudes/application`
+- [x] `pnpm lint` / `pnpm build` sin errores; `solicitudes/domain` y `solicitudes/application`
       **puras** (sin framework ni Prisma).
 
 ## Notas y riesgos
