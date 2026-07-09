@@ -98,7 +98,7 @@ _Entidades centrales derivadas de la misión. Se documentan aquí las reglas no 
 ## Convenciones
 
 - **Idioma del contenido:** español (UI, textos y dominio). Código en inglés donde sea idiomático.
-- **Formato de fechas:** español, día/mes/año. En textos y documentación escribir `DD/MM/AAAA` (p. ej. `24/06/2026`), nunca el orden anglosajón `MM/DD/AAAA` ni ISO (`AAAA-MM-DD`) en contenido visible. En la UI, formatear con **Luxon** usando el locale `es-VE` (`DateTime.setLocale("es-VE")`); guardar siempre en UTC en la BD y solo formatear a español al mostrar. Los formatos ISO se reservan para almacenamiento e intercambio de datos, no para el usuario.
+- **Formato de fechas:** español, día/mes/año. Nunca el orden anglosajón `MM/DD/AAAA` ni ISO (`AAAA-MM-DD`) en contenido visible al usuario. Dos formas válidas: numérica `DD/MM/AAAA` (p. ej. `24/06/2026`) para valores y datos tabulares, y larga en prosa (p. ej. `24 de junio de 2026`) cuando el texto corrido lo pida. En la UI, formatear con **Luxon** usando el locale `es-VE` (`DateTime.setLocale("es-VE")`, formato `dd/MM/yyyy`); guardar siempre en UTC en la BD y solo formatear a español al mostrar. Los formatos ISO se reservan para almacenamiento, intercambio de datos y el `value` de inputs nativos (`type="date"`), no como texto visible.
 - **Arquitectura:** el dominio no depende de la infraestructura ni del framework; las dependencias apuntan hacia adentro (infraestructura → aplicación → dominio).
 - **TypeScript estricto:** sin `any` implícitos; validar entradas en los límites (formularios, handlers, API).
 - **Tests:** junto al archivo (`foo.ts` + `foo.test.ts`) una vez configurado Vitest.
