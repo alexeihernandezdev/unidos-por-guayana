@@ -1,0 +1,8 @@
+export { SiteHeader } from "./SiteHeader";
+export { HeroSection } from "./HeroSection";
+export { ActiveShipmentsSection } from "./ActiveShipmentsSection";
+export { HowItWorksSection } from "./HowItWorksSection";
+export { NumbersSection } from "./NumbersSection";
+export { TrustSection } from "./TrustSection";
+export { FinalCtaSection } from "./FinalCtaSection";
+export { SiteFooter } from "./SiteFooter";

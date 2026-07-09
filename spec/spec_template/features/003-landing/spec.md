@@ -1,6 +1,6 @@
 # 003 · Landing
 
-> Estado: **Pendiente** · Depende de: `002 · Autenticación y roles` · Roadmap: `constitution/roadmap.md`
+> Estado: **Hecho ✅** · Depende de (soft): `002 · Autenticación y roles` (rutas `/login`, `/registro`) · Roadmap: `constitution/roadmap.md`
 
 ## Qué hace
 

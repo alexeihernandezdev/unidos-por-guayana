@@ -17,7 +17,7 @@ Es la primera pantalla que ve cualquier persona al entrar, **sin necesidad de re
 - **Invita a actuar** — botones claros:
   - **"Quiero colaborar"** → lleva a registrarse como colaborador.
   - **"Necesito ayuda"** → lleva a registrarse como solicitante.
-  - **"Iniciar sesión"** → para quien ya tiene cuenta.
+  - **"Ya tengo cuenta"** (en el encabezado) → para quien ya se registró.
 - **Genera confianza** — comunica los compromisos de **transparencia** y **trazabilidad**, y deja preparado el enlace al futuro tablero público donde se verá todo lo recolectado.
 
 Si la persona ya inició sesión, la página le ofrece un acceso directo a su área en lugar de volver a invitarla a registrarse.

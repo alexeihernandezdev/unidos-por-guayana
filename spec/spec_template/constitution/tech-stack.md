@@ -117,9 +117,73 @@ _Entidades centrales derivadas de la misión. Se documentan aquí las reglas no 
 
 ## Estilo visual
 
-- **Sistema de color / tokens:** Tailwind v4 con tokens en `globals.css` (`--background`, `--foreground`, expuestos vía `@theme inline`). Soporte de modo claro/oscuro con `prefers-color-scheme`.
-- **Tipografías:** Geist Sans y Geist Mono (`--font-geist-sans` / `--font-geist-mono`).
-- **Layout:** responsive con utilidades de Tailwind; diseño usable en móvil y con conexión limitada (ver principio de "Simplicidad de uso" en `mission.md`).
+### Tokens y fundamentos
+
+- **Sistema de color / tokens:** Tailwind v4 con tokens en `globals.css` expuestos vía `@theme inline`. **Modo claro por defecto**, no se activa dark mode automáticamente por `prefers-color-scheme` del OS: los tokens dark están definidos pero gated bajo `:root[data-theme="dark"]` / `.dark` para un toggle explícito futuro. `<html>` fija `style={{ colorScheme: "light" }}` para que los controles nativos (scrollbars, form widgets) también respeten el modo claro. La paleta está **anclada al lugar** (no es monocromo neutral):
+  - **`--primary`** ocre cálido (`oklch(0.72 0.14 75)`), color del sol y de la tierra rica en hierro de Guayana. Se usa como **fondo** en CTAs primarios y en trazos de identidad (p. ej. la línea bajo el nombre en el `SiteHeader`). Nunca como texto sobre fondo claro.
+  - **`--primary-ink`** (`oklch(0.44 0.12 60)` light, `oklch(0.82 0.10 75)` dark) es la variante oscura del ocre pensada para **texto** que necesita contraste WCAG AA sobre `--background`. Usar en marcadores numéricos ("01/02/03"), fechas destacadas y otros microtextos con carga de identidad.
+  - **`--accent`** teal profundo (`oklch(0.42 0.06 200)` light, `oklch(0.62 0.09 200)` dark), color del Orinoco. Es la **capa de soporte**: rings de foco (`--ring` apunta al accent), separadores decorativos (p. ej. los `·` en la fecha del hero), color de hover para links de navegación.
+  - **`--background` / `--foreground`** son off-white cálido tintado hacia la hue de marca (75) y near-black cálido (hue 60). No son pure white/black.
+  - **Disciplina de uso:** cada acento aparece en 2-3 momentos, no como sprinkle. Ocre = identidad ("marca"). Teal = interacción/soporte. Todo lo demás en neutrales.
+- **Tipografías:** tres familias como techo, cargadas vía `next/font/google` en `src/app/layout.tsx`:
+  - **`EB Garamond`** — serif de display para headings y momentos editoriales (variable `--font-serif`, alias Tailwind `font-serif`). Elegida por gravitas civil y por su encaje con la tradición tipográfica en español; evita clichés de AI slop (Fraunces / Instrument Serif están vetadas).
+  - **`Geist Sans`** — cuerpo de texto y UI (variable `--font-geist-sans`, alias `font-sans`).
+  - **`Geist Mono`** — solo para labels numéricos, códigos, contadores (variable `--font-geist-mono`, alias `font-mono`). Cuando se muestren números tabulares aplicar clase `numeric-tnum` (`font-feature-settings: 'tnum', 'lnum'`); para números en cuerpo editorial usar `numeric-oldstyle`.
+- **Refinamientos disponibles** en `globals.css`:
+  - `.focus-ring` — anillo de foco consistente basado en `--ring` con offset y radius derivados.
+  - `.underline-sweep` — subrayado que barre desde la izquierda al hover/focus. Gated por `@media (hover: hover) and (pointer: fine)`. Sustituye al crossfade de opacidad en links de navegación.
+- **Paleta:** dos acentos comprometidos (ocre + teal) sobre neutrales cálidos. Ver la subsección "Sistema de color / tokens" más arriba para el uso disciplinado de cada token. No añadir nuevos colores de acento sin decisión explícita del equipo; el énfasis puntual se resuelve con peso tipográfico y jerarquía, no inventando colores.
+- **Radio:** `--radius: 0.625rem` (10px) es la fuente única. Usar `rounded-md/lg/xl` en función de la escala derivada (`--radius-*` en `@theme inline`). No mezclar radios ad-hoc (`rounded-[24px]`, etc.).
+- **Easing:** una sola curva compartida, `--ease-out-emil: cubic-bezier(0.23, 1, 0.32, 1)`, definida en `globals.css`. Cualquier animación de UI la usa; no proliferar variantes.
+
+### Tipografía
+
+- **Escala con ratio ≥ 1.25.** Jerarquía por peso (`font-semibold` / `font-bold` en headings) y por escala, no por color.
+- **Body en `text-foreground` o `text-foreground/80`.** `text-muted-foreground` solo para labels pequeños, notas o metadatos, nunca para el cuerpo principal (WCAG AA).
+- **Ancho de línea:** `max-w-[65ch]` en párrafos. Headings con `[text-wrap:balance]`, cuerpos con `[text-wrap:pretty]`.
+- **Sin ALL-CAPS en cuerpos.** Reservado a etiquetas cortas (≤4 palabras). Los "eyebrows" uppercase-tracked (etiquetas pequeñas sobre cada heading) están **prohibidos como scaffolding**; usar máximo uno por cada 3 secciones, con criterio.
+- **Cap tipográfico:** hero máximo `text-6xl` (60px) en desktop; `md:text-5xl`/`md:text-4xl` para headings de sección. No superar `clamp(..., 6rem)` en ningún display.
+
+### Espaciado y layout
+
+- **Escala rítmica en Tailwind:** usar pasos `2, 4, 6, 8, 12, 16, 20, 24, 32, 40`. No inventar valores intermedios (`py-14`, `mt-7`) a ojo.
+- **Contenedor principal:** `max-w-6xl mx-auto`. Gutters `px-6 md:px-8`. Prosa dentro de sección: `max-w-3xl` o `max-w-[65ch]`.
+- **Ritmo vertical entre secciones:** `py-16` móvil, `py-24` desktop por defecto. Hero cap `pt-24` en desktop (HERO TOP PADDING CAP). Secciones de clímax pueden subir a `py-32`.
+- **Móvil primero.** Cada layout multi-columna declara su colapso explícito a una columna en `< md`. `min-h-[100dvh]` en vez de `h-screen`.
+- **Sin cards por defecto.** Usar hairlines (`border-t border-border`), stacks con `space-y-*` o divisores. La card se reserva a cuando la elevación comunica jerarquía real.
+
+### Restricciones duras de diseño
+
+- **Prohibido em-dash (`—`) y en-dash (`–`) en todo texto visible al usuario.** Headlines, subheads, botones, metadata, alt, footer. Ni siquiera "con moderación". Usar coma, dos puntos, punto y coma, punto o paréntesis.
+- **Prohibido eyebrow uppercase-tracked** ("SOBRE", "PROCESO", "PRINCIPIOS") sobre cada sección. Cliché de AI slop.
+- **Prohibida numeración de secciones tipo `01 / 02 / 03`** como scaffolding decorativo. Solo cuando la sección **es** una secuencia real (p. ej. "Tres formas de participar" en la landing) y el orden aporta información.
+- **Prohibido `transition: all`.** Especificar propiedades (`transition-transform`, `transition-colors`, etc.).
+- **Prohibido `scale(0)` en animaciones de entrada.** Nada aparece de la nada; empezar en `scale(0.95)` + `opacity: 0`.
+- **Prohibido `ease-in` en animaciones de UI.** Siempre `ease-out` (o custom `--ease-out-emil`).
+- **Prohibido animar `top`/`left`/`width`/`height`.** Solo `transform` y `opacity` para llegar a GPU.
+- **Prohibido `<span>` con textos placeholder tipo logos de marcas inventadas o "Jane Doe" avatars.** Si se necesita placeholder de marca, generar un mark real o dejar hueco.
+- **Prohibido gradient-text** (`background-clip: text`), side-stripe borders decorativos, glassmorphism como default.
+
+### Motion
+
+- **Frecuencia de uso define si se anima.** Acciones repetidas (nav, teclado) no se animan. Momentos raros (entrada de hero, feedback puntual) pueden llevar animación sutil.
+- **Duración cap:** UI ≤ 300ms. Botón press 100-160ms. Marketing/explanatory puede alargarse.
+- **`prefers-reduced-motion` es obligatorio** para cualquier animación con transform. Envolver en `@media (prefers-reduced-motion: no-preference)` o degradar a fade / instantáneo.
+- **Hover states gated por dispositivo:** `@media (hover: hover) and (pointer: fine)`.
+- **Botones interactivos:** feedback `:active` con `scale(0.97)` y transición explícita.
+- **Popovers** (cuando existan) usan `transform-origin` del trigger, no `center`. Modales sí quedan `center`.
+
+### Iconografía e imágenes
+
+- **Iconos:** `lucide-react` es la librería única del proyecto (instalada en la feature 003). Todos los iconos con `strokeWidth={1.5}` para consistencia. Nada de SVG a mano ni de mezclar con otras familias.
+- **Imágenes:** `next/image` cuando la fuente sea local o esté configurada en `next.config.ts`. Placeholders remotos (Picsum) llevan `unoptimized` y comentario `TODO` claro con la ruta de reemplazo.
+- **Sin ilustraciones "sketchy" hechas a mano** (paths crudos, `feTurbulence`, doodles). Si no hay activo real, dejar hueco marcado con `TODO`.
+
+### Accesibilidad
+
+- **Contraste WCAG AA** en todo texto (`≥ 4.5:1` cuerpo, `≥ 3:1` display ≥ 18px). Verificar cuando se usen tokens `--muted-foreground` sobre superficies tintadas.
+- **Botones con `aria-*` cuando corresponda** y foco visible por defecto (los primitivos Shadcn ya lo traen).
+- **Alt en imágenes.** Vacío `alt=""` para decorativas, descriptivo para las que aportan contenido.
 
 ## Límites duros
 
