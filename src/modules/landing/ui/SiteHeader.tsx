@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getUsuarioActual } from "@/shared/auth";
 import { cerrarSesionAction } from "@/shared/auth/actions";
 import { Rol } from "@/modules/usuarios/domain/Rol";
+import { Button } from "@/shared/ui/button";
 
 export async function SiteHeader() {
   const usuario = await getUsuarioActual();
@@ -78,19 +79,13 @@ export async function SiteHeader() {
             </form>
           </div>
         ) : (
-          <div className="flex items-center gap-5">
-            <Link
-              href="/login"
-              className="focus-ring underline-sweep text-sm text-foreground/80 transition-colors duration-150 hover:text-accent"
-            >
-              Ya tengo cuenta
-            </Link>
-            <Link
-              href="/registro"
-              className="focus-ring underline-sweep hidden text-sm text-foreground/80 transition-colors duration-150 hover:text-accent sm:inline-flex"
-            >
-              Crear cuenta
-            </Link>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Button asChild variant="ghost" size="sm" className="focus-ring">
+              <Link href="/login">Iniciar sesión</Link>
+            </Button>
+            <Button asChild size="sm" className="focus-ring">
+              <Link href="/registro">Crear cuenta</Link>
+            </Button>
           </div>
         )}
       </div>

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Package } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 
 export function HeroSection() {
