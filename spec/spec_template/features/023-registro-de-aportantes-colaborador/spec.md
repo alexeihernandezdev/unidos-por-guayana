@@ -1,6 +1,6 @@
 # 023 · Registro de aportantes visible al colaborador
 
-> Estado: **Pendiente** · Enmienda: `006 · Aportes` · Depende de: `006`, `002` · Roadmap: `constitution/roadmap.md`
+> Estado: **Hecho** · Enmienda: `006 · Aportes` · Depende de: `006`, `002` · Roadmap: `constitution/roadmap.md`
 
 ## Qué hace
 
@@ -86,19 +86,19 @@ confianza ("esto es real, hay gente moviéndose") y anima a sumarse. El cliente 
 
 ## Criterios de aceptación
 
-- [ ] En el detalle de una actividad (`/ayudas/[id]`), un usuario **autenticado** ve la sección "Quiénes
+- [x] En el detalle de una actividad (`/ayudas/[id]`), un usuario **autenticado** ve la sección "Quiénes
       han aportado" con, por cada aporte: **nombre** del aportante, **recurso**, **cantidad** y **estado**.
-- [ ] El registro **no** muestra cédula, teléfono, correo ni ubicación de ningún aportante (verificado en
+- [x] El registro **no** muestra cédula, teléfono, correo ni ubicación de ningún aportante (verificado en
       el DTO/`select`, no solo en la UI).
-- [ ] Un usuario **sin sesión** **no** ve nombres de personas en esa sección (ve agregados o un CTA a
+- [x] Un usuario **sin sesión** **no** ve nombres de personas en esa sección (ve agregados o un CTA a
       iniciar sesión); la **transparencia pública** sigue sin nombres.
-- [ ] Los aportes se listan del **más reciente al más antiguo**, con fecha en `es-VE` (`DD/MM/AAAA`).
-- [ ] Si la actividad no tiene aportes, se muestra un **vacío claro** ("Todavía no hay aportes...").
-- [ ] La vista es **solo lectura**: no permite marcar recibido, revertir ni editar (esas acciones siguen
+- [x] Los aportes se listan del **más reciente al más antiguo**, con fecha en `es-VE` (`DD/MM/AAAA`).
+- [x] Si la actividad no tiene aportes, se muestra un **vacío claro** ("Todavía no hay aportes...").
+- [x] La vista es **solo lectura**: no permite marcar recibido, revertir ni editar (esas acciones siguen
       en el panel del `ADMIN`).
-- [ ] `pnpm test` cubre: la lectura por actividad devuelve `nombre` sin datos de contacto y ordena por
+- [x] `pnpm test` cubre: la lectura por actividad devuelve `nombre` sin datos de contacto y ordena por
       fecha desc, en verde.
-- [ ] `pnpm lint` / `pnpm build` sin errores; `aportes/domain` y `aportes/application` permanecen **puras**.
+- [x] `pnpm lint` / `pnpm build` sin errores; `aportes/domain` y `aportes/application` permanecen **puras**.
 
 ## Notas y riesgos
 

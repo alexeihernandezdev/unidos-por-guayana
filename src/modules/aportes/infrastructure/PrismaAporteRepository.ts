@@ -4,6 +4,7 @@ import type { EstadoAporte } from "@/modules/aportes/domain/EstadoAporte";
 import { EstadoAporte as Estados } from "@/modules/aportes/domain/EstadoAporte";
 import type {
   AgregadoPorMeta,
+  AportanteDeAyuda,
   AporteRepository,
   FiltroAportes,
   RecolectadoPorRecursoId,
@@ -104,6 +105,35 @@ export class PrismaAporteRepository implements AporteRepository {
       include: INCLUDE_DETALLE,
     });
     return filas.map(mapear);
+  }
+
+  /**
+   * Registro de reconocimiento (feature 023): `select` explícito solo con
+   * `colaborador.nombre` (sin cédula/teléfono/correo) + recurso + cantidad +
+   * estado + fecha, ordenado del más reciente al más antiguo.
+   */
+  async listarAportantesDeAyuda(ayudaId: string): Promise<AportanteDeAyuda[]> {
+    const filas = await prisma.aporte.findMany({
+      where: { ayudaId },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        cantidad: true,
+        estado: true,
+        createdAt: true,
+        colaborador: { select: { nombre: true } },
+        recurso: { select: { nombre: true, unidad: true } },
+      },
+    });
+    return filas.map((fila) => ({
+      id: fila.id,
+      aportanteNombre: fila.colaborador.nombre,
+      recursoNombre: fila.recurso.nombre,
+      recursoUnidad: fila.recurso.unidad,
+      cantidad: fila.cantidad.toNumber(),
+      estado: fila.estado,
+      fecha: fila.createdAt,
+    }));
   }
 
   /**

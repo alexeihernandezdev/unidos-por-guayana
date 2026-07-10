@@ -9,11 +9,15 @@ import {
   listarAportesPorAyuda,
   listarAportesRecientes,
 } from "@/modules/aportes/application/listarAportes";
+import { listarAportantesDeAyuda } from "@/modules/aportes/application/listarAportantesDeAyuda";
 import { marcarRecibido } from "@/modules/aportes/application/marcarRecibido";
 import { progresoDeAyuda } from "@/modules/aportes/application/progresoDeAyuda";
 import { revertirRecibido } from "@/modules/aportes/application/revertirRecibido";
 import type { Aporte, ProgresoMetaDetalle } from "@/modules/aportes/domain/Aporte";
-import type { FiltroAportes } from "@/modules/aportes/domain/AporteRepository";
+import type {
+  AportanteDeAyuda,
+  FiltroAportes,
+} from "@/modules/aportes/domain/AporteRepository";
 import { PrismaAporteRepository } from "@/modules/aportes/infrastructure/PrismaAporteRepository";
 import { PrismaAyudaRepository } from "@/modules/ayudas/infrastructure/PrismaAyudaRepository";
 import { PrismaRecursoRepository } from "@/modules/recursos/infrastructure/PrismaRecursoRepository";
@@ -63,6 +67,12 @@ export function listarAportesRecientesServicio(
   limit: number,
 ): Promise<Aporte[]> {
   return listarAportesRecientes(deps, limit);
+}
+
+export function listarAportantesDeAyudaServicio(
+  ayudaId: string,
+): Promise<AportanteDeAyuda[]> {
+  return listarAportantesDeAyuda(deps, ayudaId);
 }
 
 export function progresoDeAyudaServicio(

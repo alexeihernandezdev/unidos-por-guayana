@@ -18,6 +18,7 @@ Esta etapa da vida a los envíos: por primera vez el progreso de las metas empie
 - **El colaborador puede cancelar mientras esté comprometido** — si cambió de idea o se equivocó. Una vez recibido, ya no.
 - **El Administrador puede corregir** — si marcó "recibido" por error, puede revertir a "comprometido". Es una corrección puntual, no un flujo habitual.
 - **Cada colaborador ve sus aportes** — una vista "Mis aportes" con el estado de cada uno.
+- **Registro de aportantes en la actividad (023)** — en el detalle `/ayudas/[id]`, quien tiene sesión ve quiénes han aportado (solo el nombre, sin datos de contacto). La transparencia pública sigue anónima.
 
 ## Por qué importa
 
