@@ -21,20 +21,30 @@ _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
 
 9. **008 · Panel de administración** — Tablero del `ADMIN`: estado de envíos, progreso de metas, solicitudes abiertas y decisión de qué sale primero.
 
+## Cambios propuestos por el cliente (revisión de alcance) 🔁
+
+_Cambios solicitados por el cliente que **rompen parte del encaje actual**: tocan features ya "Hecho" (002, 004, 005) y la constitución ya se actualizó (`mission.md`, `tech-stack.md`) para reflejarlos. Cada uno se aborda como feature nueva y, al implementarse, enmienda la feature de origen. Ordenados por dependencia; van antes que el backlog de apoyo porque cambian el modelo base._
+
+10. **015 · Rol SUPERADMIN y registro público de administradores** — Nuevo rol `SUPERADMIN` (sembrado por `db:seed`, raíz de confianza). El registro de `ADMIN` pasa a ser **público**: la cuenta se crea en `estadoVerificacion = PENDIENTE` y no puede operar hasta que un `SUPERADMIN` la aprueba (`VERIFICADO`) o la rechaza. Incluye la bandeja de aprobación del superadmin. _Enmienda 002._
+11. **016 · Perfil de administrador y centro de acopio** — `PerfilAdmin` con datos ampliados (`nombreCuenta`, `estado`, `parroquia`, `telefono`, `correo`, `documento` con `tipoDocumento` ∈ `JURIDICO` | `NATURAL`); el `ADMIN` funciona como centro de acopio y puede tener uno o varios `PuntoAcopio`. _Depende de 015; conecta con 011._
+12. **017 · Datos de contacto obligatorios (colaborador y solicitante)** — `cedula` y `telefono` obligatorios en el registro de `COLABORADOR` y `SOLICITANTE`. _Enmienda 002._
+13. **018 · Tipos de actividad en Ayuda (envío / jornada / evento social)** — La entidad Ayuda gana `tipo` ∈ `ENVIO` | `JORNADA` | `EVENTO_SOCIAL`; la acción de crear se **renombra y presenta según el tipo**, compartiendo metas, aportes y seguimiento. _Enmienda 005._
+14. **019 · Propuesta de recursos por el solicitante** — El `SOLICITANTE` puede proponer recursos al catálogo (`estadoAprobacion = PROPUESTO`, con `propuestoPor`); el `ADMIN` aprueba o rechaza. Solo los `APROBADO` se usan en metas y aportes. _Enmienda 004._
+
 ## Backlog / ideas 💡
 
 _Ordenado según dependencias. Cada uno se convierte en `features/NNN-…/` antes de tocar código._
 
 **Superficies de gestión y transparencia**
 
-10. **009 · Tablero público de transparencia** — Vista abierta (sin login) con lo recolectado, progreso por envío y destino de cada ayuda.
-11. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
+15. **009 · Tablero público de transparencia** — Vista abierta (sin login) con lo recolectado, progreso por envío y destino de cada ayuda.
+16. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
 
 **Módulos de apoyo**
 
-12. **011 · Puntos de acopio** — Centros físicos de entrega (dirección, horarios, qué reciben).
-13. **012 · Notificaciones** — Avisos a colaboradores sobre envíos que necesitan recursos o metas cumplidas.
-14. **013 · Verificación de usuarios** — Validación de colaboradores y solicitantes (`estadoVerificacion`) para dar confianza.
-15. **014 · Donaciones monetarias externas** — Mostrar medios externos para donar dinero (cuenta bancaria, PayPal, Zelle…) y permitir al `ADMIN` registrar manualmente montos recibidos por fuera (recursos `MONETARIO`) para reflejarlos en la transparencia. La app no procesa el pago.
+17. **011 · Puntos de acopio** — Centros físicos de entrega (dirección, horarios, qué reciben), **cada uno perteneciente a un `ADMIN`** (ver 016).
+18. **012 · Notificaciones** — Avisos a colaboradores sobre envíos que necesitan recursos o metas cumplidas.
+19. **013 · Verificación de usuarios** — Validación de `COLABORADOR` y `SOLICITANTE` (`estadoVerificacion`) por parte del `ADMIN`. La verificación de cuentas `ADMIN` la cubre 015 (superadmin).
+20. **014 · Donaciones monetarias externas** — Mostrar medios externos para donar dinero (cuenta bancaria, PayPal, Zelle…) y permitir al `ADMIN` registrar manualmente montos recibidos por fuera (recursos `MONETARIO`) para reflejarlos en la transparencia. La app no procesa el pago.
 
 > Cada feature nueva se crea como `features/NNN-nombre-feature/` con `spec.md`, `plan.md` y `tasks.md` antes de tocar código.

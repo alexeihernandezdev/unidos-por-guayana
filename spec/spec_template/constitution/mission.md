@@ -7,27 +7,28 @@ Este proyecto llamado "Unidos por Guayana" es una forma de ayudar en el problema
 Aplicación enfocada a: organizar, brindar transparencia y recolectar ayuda del tipo suministros, personal dispuesto a colaborar, camiones para realizar los envíos, entre otro tipo de ayuda necesaria.
 
 1. **Página de bienvenida (landing)** — Presenta el proyecto, qué busca y cuál es el objetivo; invita a colaborar o solicitar ayuda.
-2. **Login y registro** — Permite verificar qué tipo de usuario inicia sesión o se registra (administrador, colaborador o solicitante) y habilitar las acciones que le corresponden.
-3. **Ayudas / Envío** — Entidad central del proyecto. Es muy parecida a un envío que necesita cierta cantidad de recursos para poder salir: tiene una fecha y unas metas de recursos por cumplir. Solo el administrador puede crearla.
+2. **Login y registro** — Permite verificar qué tipo de usuario inicia sesión o se registra (superadministrador, administrador, colaborador o solicitante) y habilitar las acciones que le corresponden. **Cualquiera puede registrarse como administrador**, pero la cuenta queda pendiente hasta que un **superadministrador** la verifica y aprueba. El colaborador y el solicitante deben completar sus datos de contacto (cédula y teléfono) para operar.
+3. **Ayudas / Actividad** — Entidad central del proyecto. Es muy parecida a un envío que necesita cierta cantidad de recursos para poder salir: tiene una fecha y unas metas de recursos por cumplir. Una misma entidad sirve para distintos **tipos de actividad** (`ENVIO`, `JORNADA`, `EVENTO_SOCIAL`); el tipo cambia cómo se presenta y se nombra la acción al crearla, pero comparte metas, aportes y seguimiento. Solo el administrador puede crearla.
 4. **Seguimiento del envío** — Traza el estado de cada Ayuda a lo largo de su ciclo de vida (`recolectando → listo → en tránsito → entregado`), con evidencia de entrega, para dar visibilidad de origen a destino.
 5. **Aporte** — Permite al usuario colaborador cargar al sistema qué tipo de ayuda quiere aportar (suministros, transporte/camiones, personal o ayuda monetaria) y asociarlo a una Ayuda/Envío para avanzar sus metas. El dinero se dona por un canal externo (no dentro de la app); ver "Donaciones monetarias externas".
-6. **Solicitudes de ayuda** — Permite al usuario solicitante crear y listar peticiones de ayuda por sector (qué se necesita, urgencia y ubicación). Alimenta la decisión del administrador sobre qué enviar.
+6. **Solicitudes de ayuda** — Permite al usuario solicitante crear y listar peticiones de ayuda por sector (qué se necesita, urgencia y ubicación). Alimenta la decisión del administrador sobre qué enviar. El solicitante también puede **proponer recursos nuevos al catálogo** cuando lo que necesita no existe aún; la propuesta la revisa el administrador.
 7. **Panel de administración** — Tablero donde el administrador ve el estado de cada envío, cuánto falta para las metas y las solicitudes abiertas, y decide qué envío sale primero.
 8. **Tablero público de transparencia** — Vista abierta (sin necesidad de iniciar sesión) con qué se recolectó, el progreso de cada envío y a dónde fue cada ayuda.
 
 **Módulos de apoyo** _(a ordenar en el roadmap):_
 
-- **Puntos de acopio** — Centros físicos donde el colaborador entrega suministros: dirección, horarios y qué reciben.
-- **Catálogo de recursos** — Define los tipos y unidades de recurso (agua, medicinas, alimentos…) contra los que se miden las metas de un envío.
+- **Puntos de acopio** — Centros físicos de entrega (dirección, horarios y qué reciben). **Cada punto de acopio pertenece a un administrador**: el administrador funciona como centro de acopio y puede tener uno o varios puntos.
+- **Catálogo de recursos** — Define los tipos y unidades de recurso (agua, medicinas, alimentos…) contra los que se miden las metas de un envío. El administrador lo gestiona; el solicitante puede proponer recursos nuevos que el administrador aprueba o rechaza.
 - **Notificaciones** — Avisan a los colaboradores de un nuevo envío que necesita recursos o cuando se cumple una meta.
-- **Verificación de usuarios** — Valida a colaboradores y solicitantes (en especial quien aporta camiones o pide ayuda) para dar confianza.
+- **Verificación de usuarios** — Da confianza validando dos flujos: el **superadministrador** verifica y aprueba las cuentas de administrador (que se registran de forma pública), y el administrador valida a colaboradores y solicitantes (en especial quien aporta camiones o pide ayuda).
 - **Donaciones monetarias externas** — Muestra los medios externos para donar dinero (cuenta bancaria, PayPal, Zelle, etc.). El pago siempre ocurre por fuera de la app; el administrador registra manualmente los montos ya recibidos para reflejarlos en la transparencia. La app no procesa el cobro.
 
 ## Para quién
 
-- **Administrador** — Persona encargada de gestionar las ayudas y decidir cuándo sale el próximo envío y con qué recursos.
-- **Colaboradores** — Personas dispuestas a aportar cualquier tipo de ayuda, ya sea sumándose como voluntarios, entregando suministros o poniendo transporte/camiones a disposición.
-- **Usuario Solicitante** — Quien requiere o hace una petición de ayuda específica para algún sector, especificando qué se necesita.
+- **Superadministrador** — Autoridad máxima del sistema. No gestiona ayudas del día a día: su rol es **verificar y aprobar (o rechazar) las cuentas de administrador** que se registran públicamente, para dar confianza a la red de centros de acopio.
+- **Administrador** — Persona u organización que gestiona las ayudas y decide cuándo sale el próximo envío y con qué recursos. **Cualquiera puede registrarse como administrador**, pero opera solo tras ser aprobado por un superadministrador. Cada administrador funciona además como **centro de acopio** y aporta datos ampliados: estado del país al que pertenece, parroquia, nombre de la cuenta, teléfono, correo y documento de identidad (jurídico o natural).
+- **Colaboradores** — Personas dispuestas a aportar cualquier tipo de ayuda, ya sea sumándose como voluntarios, entregando suministros o poniendo transporte/camiones a disposición. Deben registrar cédula y teléfono.
+- **Usuario Solicitante** — Quien requiere o hace una petición de ayuda específica para algún sector, especificando qué se necesita; también puede proponer recursos al catálogo. Debe registrar cédula y teléfono.
 
 ## Principios
 
