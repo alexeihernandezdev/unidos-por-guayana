@@ -6,6 +6,7 @@ import type { EstadoAporte } from "@/modules/aportes/domain/EstadoAporte";
 import { EstadoAporte as Estados } from "@/modules/aportes/domain/EstadoAporte";
 import type {
   AgregadoPorMeta,
+  AportanteDeAyuda,
   AporteRepository,
   FiltroAportes,
   RecolectadoPorRecursoId,
@@ -55,6 +56,28 @@ export class InMemoryAporteRepository implements AporteRepository {
     return [...this.porId.values()]
       .filter((a) => a.colaboradorId === colaboradorId)
       .map((a) => this.clonar(a));
+  }
+
+  /**
+   * Solo para tests: inserta un aporte ya formado (con recurso/colaborador).
+   */
+  seed(aporte: Aporte): void {
+    this.porId.set(aporte.id, this.clonar(aporte));
+  }
+
+  async listarAportantesDeAyuda(ayudaId: string): Promise<AportanteDeAyuda[]> {
+    return [...this.porId.values()]
+      .filter((a) => a.ayudaId === ayudaId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .map((a) => ({
+        id: a.id,
+        aportanteNombre: a.colaborador?.nombre ?? "(aportante)",
+        recursoNombre: a.recurso?.nombre ?? "(recurso)",
+        recursoUnidad: a.recurso?.unidad ?? "",
+        cantidad: a.cantidad,
+        estado: a.estado,
+        fecha: a.createdAt,
+      }));
   }
 
   async cambiarEstado(
