@@ -1,21 +1,30 @@
 # 017 · Datos de contacto obligatorios (colaborador y solicitante)
 
-> Estado: **Pendiente** · Depende de: `002 · Autenticación y roles` · Enmienda: `002` · Roadmap: `constitution/roadmap.md`
+> Estado: **Pendiente** · Depende de: `002 · Autenticación y roles` · Enmienda: `002`, `016` · Roadmap: `constitution/roadmap.md`
 
 ## Qué hace
 
-Hace **obligatorios** los datos de contacto `cedula` y `telefono` en el registro de los usuarios
+Hace **obligatorios** los datos de contacto y ubicación en el registro de los usuarios
 `COLABORADOR` y `SOLICITANTE`. Hoy el registro (feature 002) solo pide correo, contraseña, nombre
-y rol; esta feature añade dos campos que la plataforma necesita para poder contactar y luego
+y rol; esta feature añade los datos que la plataforma necesita para contactar, ubicar y luego
 verificar a quien aporta ayuda o pide ayuda:
 
 - **Cédula obligatoria** — documento de identidad venezolano con su prefijo (`V`, `E` o `J`) y su
   número. Se valida el formato en el formulario y en el servidor.
 - **Teléfono obligatorio** — número de contacto venezolano, validado en formato y longitud.
+- **Flag `telefonoEsWhatsApp`** — el usuario indica si su teléfono es contactable por WhatsApp.
+  Aplica también a `ADMIN` (se añade a `PerfilAdmin` de la feature 016) para simetría de contacto.
+- **Ubicación obligatoria (`estado` + `parroquia`)** — el `COLABORADOR` y el `SOLICITANTE` indican
+  dónde están, con el mismo modelo (texto libre) que usa `PerfilAdmin` en 016. Habilita filtrado
+  geográfico en 008/009 y decisiones logísticas del `ADMIN`.
 - **Enmienda al registro (002)** — el formulario y el caso de uso `registrarUsuario` pasan a exigir
-  ambos campos para `COLABORADOR` y `SOLICITANTE`. El `ADMIN` y el `SUPERADMIN` quedan fuera.
-- **Usuarios existentes sin estos datos** — se define una estrategia de "completar perfil
-  obligatorio al primer inicio de sesión" para las cuentas ya creadas antes de esta feature.
+  los cinco campos (`cedula`, `telefono`, `telefonoEsWhatsApp`, `estado`, `parroquia`) para
+  `COLABORADOR` y `SOLICITANTE`. El `SUPERADMIN` queda fuera; el `ADMIN` conserva su flujo de 016 y
+  solo suma el flag WhatsApp.
+- **Usuarios existentes sin estos datos** — estrategia de "completar perfil obligatorio al primer
+  inicio de sesión" para las cuentas ya creadas antes de esta feature.
+- **Edición desde `/mi-perfil`** — el `COLABORADOR` y el `SOLICITANTE` pueden actualizar sus datos
+  de contacto y ubicación en cualquier momento (no solo la primera vez).
 
 ## Por qué
 
@@ -29,9 +38,25 @@ feature es el prerrequisito de datos para esa confianza.
 
 ## Decisiones tomadas
 
-- **Alcance por rol:** la obligatoriedad aplica **solo** a `COLABORADOR` y `SOLICITANTE`. El
-  `ADMIN` tiene sus datos ampliados en la feature 016 (`PerfilAdmin`) y el `SUPERADMIN` se siembra
-  (no se registra por la app); ninguno de los dos pasa por esta validación.
+- **Alcance por rol:** la obligatoriedad de `cedula`, `telefono`, `estado` y `parroquia` aplica
+  **solo** a `COLABORADOR` y `SOLICITANTE`. El `ADMIN` ya cubre estos datos en `PerfilAdmin` (016);
+  aquí solo suma `telefonoEsWhatsApp` a ese perfil. El `SUPERADMIN` se siembra (no se registra por
+  la app) y no pasa por esta validación.
+- **Ubicación como texto libre:** `estado` y `parroquia` se guardan como `string` no acotado, igual
+  que `PerfilAdmin` (016), para no arrastrar mantenimiento de un catálogo de estados/parroquias VE
+  antes de tenerlo definido. La validación es solo "no vacío". Si en el futuro se añade un catálogo,
+  se migra desde el mismo campo sin re-modelar.
+- **Datos en `Usuario`, no en tabla aparte:** los 5 campos del colaborador/solicitante viven
+  directamente en `usuarios` (no se crea un `PerfilColaborador`/`PerfilSolicitante`) porque son
+  pocos y no tienen relación 1:N. Contrasta con `PerfilAdmin` (016), que sí es tabla aparte por su
+  relación con `PuntoAcopio`.
+- **Flag WhatsApp en ambos lados:** `telefonoEsWhatsApp: boolean` se añade a `Usuario` (para
+  colaborador/solicitante) y a `PerfilAdmin` (enmienda 016). En BD nace con default `false`, en el
+  formulario se muestra como casilla marcable. Enmienda 016 por simetría de contacto.
+- **Edición vía `/mi-perfil`, no solo "completar":** el flujo `/completar-perfil` sigue existiendo
+  como puerta obligatoria para cuentas incompletas, pero se separa una pantalla persistente
+  `/mi-perfil` (COLABORADOR/SOLICITANTE) que permite editar los datos en cualquier momento. Ambas
+  usan el mismo caso de uso `actualizarDatosContacto`.
 - **Validación en el límite:** el formulario usa **React Hook Form** y la validación de **formato**
   vive en el **dominio** (funciones puras `validarCedula` / `validarTelefono`), reutilizadas tanto
   por el formulario (resolver) como por el servidor. La regla de dominio no depende del framework.
@@ -53,32 +78,47 @@ feature es el prerrequisito de datos para esa confianza.
 
 **Incluye**
 
-- Ampliar el modelo `Usuario` en Prisma con `cedula` (única, opcional en BD) y `telefono`
-  (opcional en BD); **migración** que añade ambas columnas sin romper los datos existentes.
+- Ampliar el modelo `Usuario` en Prisma con `cedula String? @unique`, `telefono String?`,
+  `telefonoEsWhatsApp Boolean @default(false)`, `estado String?` y `parroquia String?`; **migración
+  aditiva** que no rompe los datos existentes.
+- Ampliar `PerfilAdmin` (enmienda 016) con `telefonoEsWhatsApp Boolean @default(false)`, en la
+  misma migración.
 - Reglas de dominio puras en `src/modules/usuarios/domain`:
   - `validarCedula(entrada)` — formato de cédula venezolana (prefijo + número).
   - `validarTelefono(entrada)` — formato de teléfono venezolano.
-  - Funciones de **normalización** (`normalizarCedula`, `normalizarTelefono`) que producen el valor
-    a guardar.
-- Enmendar el caso de uso `registrarUsuario` para **exigir y validar** `cedula` y `telefono`
-  cuando el rol es `COLABORADOR` o `SOLICITANTE` (validado en servidor, no solo en el formulario),
-  incluida la comprobación de **cédula no duplicada**.
-- Enmendar el **formulario de registro** (`src/modules/usuarios/ui`) para pedir los dos campos con
-  React Hook Form, con mensajes de error en español.
-- Flujo de **completar perfil** para usuarios existentes: pantalla `/completar-perfil`, caso de uso
-  `completarDatosContacto`, y un **guard** que redirige allí a los `COLABORADOR` / `SOLICITANTE`
-  sin `cedula` o `telefono` antes de dejarles usar rutas protegidas.
-- Tests (Vitest) de las reglas de dominio (cédulas y teléfonos válidos e inválidos) y del caso de
-  uso (registro exige y normaliza los datos; rechaza cédula duplicada).
+  - `validarUbicacion(entrada)` — `estado` y `parroquia` no vacíos tras trim.
+  - Funciones de **normalización** (`normalizarCedula`, `normalizarTelefono`, `normalizarUbicacion`)
+    que producen el valor a guardar (trim + colapso de espacios en ubicación).
+- Enmendar el caso de uso `registrarUsuario` para **exigir y validar** los cinco campos
+  (`cedula`, `telefono`, `telefonoEsWhatsApp`, `estado`, `parroquia`) cuando el rol es
+  `COLABORADOR` o `SOLICITANTE` (validado en servidor, no solo en el formulario), incluida la
+  comprobación de **cédula no duplicada**. Para `ADMIN`, sumar `telefonoEsWhatsApp` en el flujo de
+  registro público (feature 016).
+- Enmendar el **formulario de registro** (`src/modules/usuarios/ui`) para pedir los campos con
+  React Hook Form; mensajes de error en español. La ramificación por rol de 016 se conserva.
+- Nuevo caso de uso `actualizarDatosContacto(usuarioId, input)` que sustituye a
+  `completarDatosContacto`: valida, normaliza, comprueba unicidad de cédula (excluyéndose a sí
+  mismo) y actualiza los cinco campos del `Usuario`. Sirve tanto para el flujo "completar" como
+  para "editar".
+- Flujo de **completar perfil** para usuarios existentes: pantalla `/completar-perfil` y un
+  **guard** que redirige allí a los `COLABORADOR` / `SOLICITANTE` sin datos completos antes de
+  dejarles usar rutas protegidas.
+- Pantalla **`/mi-perfil`** (COLABORADOR/SOLICITANTE): formulario de edición que carga los datos
+  actuales del usuario en sesión y permite actualizarlos; usa el mismo caso de uso
+  `actualizarDatosContacto`. Enlazada desde el menú de usuario.
+- Tests (Vitest) de las reglas de dominio y del caso de uso (registro/edición exigen y normalizan;
+  rechazan cédula duplicada; el `ADMIN` guarda el flag WhatsApp; los cinco campos aplican solo a
+  los dos roles objetivo).
 
 **No incluye**
 
 - **Verificación de usuarios** (que el `ADMIN` valide al colaborador/solicitante): es la feature
   `013`. Aquí solo se **capturan y validan de formato** los datos, no se aprueban.
-- Datos ampliados del `ADMIN` (`PerfilAdmin`, centro de acopio): es la feature `016`.
+- Catálogo cerrado de estados/parroquias venezolanas: por ahora texto libre (igual que 016).
+- Datos ampliados del `ADMIN` más allá del flag WhatsApp añadido a `PerfilAdmin`.
 - Validación contra un registro externo (CNE/SAIME) o verificación de que la cédula sea real: solo
   se valida el **formato**, no la existencia del documento.
-- Recuperación/edición general del perfil más allá de completar los dos campos obligatorios.
+- Cambio de email o de contraseña desde `/mi-perfil`: fuera de alcance.
 
 ## Reglas de validación (dominio)
 
@@ -117,32 +157,59 @@ feature es el prerrequisito de datos para esa confianza.
   - Longitud inválida: `"El teléfono debe tener 11 dígitos (por ejemplo 0412 1234567)."`
   - Código de operadora inválido: `"El código de operadora no es válido en Venezuela."`
 
+### WhatsApp
+
+- **Tipo:** booleano; en el formulario, casilla marcable ("Este número recibe WhatsApp").
+- **Default:** `false`. No hay validación adicional; solo se muestra el flag al `ADMIN` para saber
+  el canal de contacto.
+
+### Ubicación (`estado` + `parroquia`)
+
+- **Formato de entrada:** texto libre (igual que `PerfilAdmin` de 016).
+- **Normalización:** trim + colapsar espacios múltiples.
+- **Reglas:** tras normalizar, ambos deben tener **al menos 1 carácter**.
+- **Mensajes:**
+  - `estado` vacío: `"Indica el estado."`
+  - `parroquia` vacía: `"Indica la parroquia."`
+
 ## Criterios de aceptación
 
-- [ ] Al **registrarse** como `COLABORADOR` o `SOLICITANTE`, el formulario **exige** cédula y
-      teléfono; sin ellos no deja continuar y muestra los mensajes en español definidos arriba.
-- [ ] El servidor **rechaza** un registro de `COLABORADOR` / `SOLICITANTE` sin cédula o sin
-      teléfono, o con formato inválido, aunque el formulario se saltara (validado en `registrarUsuario`).
-- [ ] La cédula y el teléfono se guardan **normalizados** (cédula `V12345678`, teléfono
-      `04121234567`), no en el formato crudo tecleado.
+- [ ] Al **registrarse** como `COLABORADOR` o `SOLICITANTE`, el formulario **exige** cédula,
+      teléfono, estado y parroquia; sin ellos no deja continuar y muestra los mensajes en español
+      definidos arriba.
+- [ ] El formulario de registro expone el checkbox `telefonoEsWhatsApp` para los tres roles con
+      teléfono (`COLABORADOR`, `SOLICITANTE`, `ADMIN`); default marcado según decisión de UI, se
+      guarda tal cual.
+- [ ] El servidor **rechaza** un registro de `COLABORADOR` / `SOLICITANTE` con cualquiera de los
+      cinco campos faltante o con formato inválido, aunque el formulario se saltara (validado en
+      `registrarUsuario`).
+- [ ] Cédula y teléfono se guardan **normalizados** (`V12345678`, `04121234567`); estado y
+      parroquia se guardan sin espacios sobrantes.
 - [ ] El registro **rechaza una cédula duplicada** con `"Ya existe una cuenta con esta cédula."`.
-- [ ] La validación de **formato** vive en el dominio (`validarCedula` / `validarTelefono`) y la
-      usan tanto el formulario como el servidor (una sola fuente de verdad).
-- [ ] Un usuario `COLABORADOR` / `SOLICITANTE` **creado antes** de esta feature (sin cédula ni
-      teléfono) es **redirigido a `/completar-perfil`** al iniciar sesión y no puede usar rutas
+- [ ] La validación de **formato** vive en el dominio (`validarCedula` / `validarTelefono` /
+      `validarUbicacion`) y la usan tanto el formulario como el servidor (una sola fuente de
+      verdad).
+- [ ] Un usuario `COLABORADOR` / `SOLICITANTE` **creado antes** de esta feature (sin datos
+      completos) es **redirigido a `/completar-perfil`** al iniciar sesión y no puede usar rutas
       protegidas hasta completarlos.
-- [ ] El registro de `ADMIN` (feature 016) y el `SUPERADMIN` **no** pasan por esta validación.
-- [ ] La **migración** añade `cedula` y `telefono` sin romper los datos existentes.
-- [ ] `pnpm test` cubre reglas de dominio (cédulas/teléfonos válidos e inválidos, normalización) y
-      el caso de uso (exige datos, normaliza, rechaza duplicado) — en verde.
+- [ ] Un `COLABORADOR` o `SOLICITANTE` autenticado puede **entrar en `/mi-perfil`**, ver sus datos
+      actuales precargados y **guardar cambios**; los cambios pasan por `actualizarDatosContacto`
+      (validación completa; rechaza cédula que ya use otro usuario, permite conservar la propia).
+- [ ] El registro público de `ADMIN` (feature 016) **añade** el checkbox `telefonoEsWhatsApp` y lo
+      guarda en `PerfilAdmin`. El `SUPERADMIN` no pasa por ninguna de estas validaciones.
+- [ ] La **migración** añade `cedula`, `telefono`, `telefonoEsWhatsApp`, `estado` y `parroquia` a
+      `usuarios` y `telefonoEsWhatsApp` a `perfiles_admin` sin romper los datos existentes.
+- [ ] `pnpm test` cubre reglas de dominio, `registrarUsuario` y `actualizarDatosContacto` — en
+      verde.
 - [ ] `pnpm lint` / `pnpm build` sin errores; `usuarios/domain` y `usuarios/application` siguen
       **puras** (sin framework, Prisma ni Auth.js).
 
 ## Notas y riesgos
 
-- **Enmienda a 002:** esta feature modifica el modelo `Usuario`, el caso de uso `registrarUsuario`
-  y el formulario de registro ya entregados en 002. Al cerrarla, revisar que el `DOC/` de 002 no
-  quede desactualizado (o anotar la enmienda).
+- **Enmienda a 002 y 016:** esta feature modifica el modelo `Usuario`, el caso de uso
+  `registrarUsuario` y el formulario de registro entregados en 002; y añade `telefonoEsWhatsApp` a
+  `PerfilAdmin` de 016 (con su UI de registro/edición de perfil admin). Al cerrarla, revisar que
+  los `DOC/` de 002 y 016 no queden desactualizados.
 - **Backfill vs. completar perfil:** se elige "completar perfil al primer login" en vez de backfill
   con datos inventados, porque no se pueden fabricar cédulas ni teléfonos reales. La columna nace
   **opcional en la base** (migración segura) pero **obligatoria en el flujo** para los dos roles; si
