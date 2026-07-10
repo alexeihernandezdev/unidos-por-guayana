@@ -71,7 +71,7 @@ export function AporteForm({ action, opciones, volverHref }: Props) {
   if (opciones.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        Este envío no tiene metas disponibles para aportar.
+        Esta actividad no tiene metas disponibles para aportar.
       </p>
     );
   }

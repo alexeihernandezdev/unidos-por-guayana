@@ -17,15 +17,15 @@ export default async function AyudasPublicasPage() {
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 p-6 md:p-8">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Envíos abiertos</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Actividades abiertas</h1>
         <p className="text-sm text-muted-foreground">
-          Envíos que están recolectando ahora mismo. Elige uno para aportar.
+          Actividades que están recolectando ahora mismo. Elige una para aportar.
         </p>
       </div>
 
       {ayudas.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          Ahora mismo no hay envíos recolectando. Vuelve más tarde.
+          Ahora mismo no hay actividades recolectando. Vuelve más tarde.
         </p>
       ) : (
         <ul className="flex flex-col gap-3">

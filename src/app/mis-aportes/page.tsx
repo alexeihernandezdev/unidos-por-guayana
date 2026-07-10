@@ -45,7 +45,7 @@ export default async function MisAportesPage() {
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-border text-left text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                <th className={celda}>Envío</th>
+                <th className={celda}>Actividad</th>
                 <th className={celda}>Recurso</th>
                 <th className={celda}>Cantidad</th>
                 <th className={celda}>Estado</th>

@@ -23,7 +23,7 @@ export function PanelResumen({ resumen }: Props) {
           Sala de despacho
         </h1>
         <p className="max-w-[65ch] text-sm text-foreground/70">
-          Estado agregado de envíos, solicitudes y aportes. Priorizado por lo que
+          Estado agregado de actividades, solicitudes y aportes. Priorizado por lo que
           probablemente necesita tu atención en los próximos minutos.
         </p>
       </header>
@@ -73,14 +73,14 @@ export function PanelResumen({ resumen }: Props) {
       <section className="rounded-lg border border-border p-4 text-xs text-muted-foreground">
         <p className="font-medium text-foreground/80">Metas por debajo del 100 %</p>
         <p className="mt-1">
-          {progresoAgregadoRecolectando.metasBajo} metas en envíos en
+          {progresoAgregadoRecolectando.metasBajo} metas en actividades en
           recolección necesitan más aportes confirmados.
         </p>
         <Link
           href="/panel/ayudas?estado=RECOLECTANDO"
           className="focus-ring mt-2 inline-flex items-center gap-1 text-accent hover:underline"
         >
-          Ver envíos en recolección
+          Ver actividades en recolección
           <ArrowRightIcon strokeWidth={1.5} className="size-3" />
         </Link>
       </section>

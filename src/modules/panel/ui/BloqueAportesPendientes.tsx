@@ -27,7 +27,7 @@ export function BloqueAportesPendientes({ conteo }: Props) {
         href="/panel/ayudas?estado=RECOLECTANDO"
         className="focus-ring group inline-flex items-center gap-1 text-sm text-accent"
       >
-        Revisar en envíos activos
+        Revisar en actividades activas
         <ArrowRightIcon
           strokeWidth={1.5}
           className="size-3.5 transition-transform duration-150 group-hover:translate-x-0.5"

@@ -4,7 +4,6 @@ import {
   esTipoActividad,
 } from "@/modules/ayudas/domain/TipoActividad";
 import { AyudaForm } from "@/modules/ayudas/ui/AyudaForm";
-import { nombreSingular } from "@/modules/ayudas/ui/tipos";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarRecursosServicio } from "@/shared/recursos";
 import { requireRol } from "@/shared/auth";
@@ -25,13 +24,11 @@ export default async function NuevaAyudaPage({ searchParams }: Props) {
   // Solo recursos APROBADO + activos son seleccionables (features 004, 019).
   const recursos = await listarRecursosServicio({ soloSeleccionables: true });
 
-  const singular = nombreSingular(tipoInicial);
-
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 p-6 md:p-8">
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold tracking-tight">
-          {`Crear ${singular}`}
+          Crear actividad
         </h1>
         <p className="text-sm text-muted-foreground">
           Elige el tipo de actividad, define el destino, la fecha y las metas de
@@ -48,7 +45,7 @@ export default async function NuevaAyudaPage({ searchParams }: Props) {
         }))}
         conMetas
         valoresIniciales={{ tipo: tipoInicial }}
-        textoEnviar={`Crear ${singular}`}
+        textoEnviar="Crear actividad"
         textoEnviando="Creando…"
       />
 

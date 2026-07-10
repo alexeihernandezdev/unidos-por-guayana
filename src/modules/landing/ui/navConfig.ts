@@ -26,13 +26,13 @@ export function navItemsPorRol(rol: Rol | null): NavItem[] {
     case Rol.ADMIN:
       return [
         { label: "Panel", href: "/panel", exact: true },
-        { label: "Envíos", href: "/panel/ayudas" },
+        { label: "Actividades", href: "/panel/ayudas" },
         { label: "Recursos", href: "/panel/recursos" },
         { label: "Solicitudes", href: "/panel/solicitudes" },
       ];
     case Rol.COLABORADOR:
       return [
-        { label: "Envíos", href: "/ayudas", exact: true },
+        { label: "Actividades", href: "/ayudas", exact: true },
         { label: "Mis aportes", href: "/mis-aportes", exact: true },
       ];
     case Rol.SOLICITANTE:

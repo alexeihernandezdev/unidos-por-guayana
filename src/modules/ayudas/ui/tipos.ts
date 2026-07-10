@@ -1,9 +1,9 @@
 import { TipoActividad } from "@/modules/ayudas/domain/TipoActividad";
 
 // Presentación por tipo de actividad (feature 018). Único punto de verdad para
-// los copys visibles: nombre singular usado en títulos y botones de la acción de
-// crear ("Crear envío" / "Crear jornada" / "Crear evento social") y etiqueta
-// visible en badges/columnas del listado y del detalle. Sin em-dash / en-dash
+// los copys visibles: `singular` (nombre del tipo en minúscula) y `etiqueta`
+// visible en badges/columnas del listado y del detalle. La acción de crear usa
+// un copy genérico ("Crear actividad"). Sin em-dash / en-dash
 // (ver constitution/tech-stack.md).
 
 export type PresentacionTipo = {

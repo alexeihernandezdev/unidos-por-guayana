@@ -14,7 +14,7 @@ const columns = [
     heading: "El proyecto",
     links: [
       { label: "Cómo funciona", href: "#como-funciona" },
-      { label: "Envíos en curso", href: "#envios" },
+      { label: "Actividades en curso", href: "#envios" },
       { label: "Transparencia", href: "#transparencia" },
     ],
   },

@@ -37,7 +37,7 @@ const FechaSchema = z
   .regex(/^\d{4}-\d{2}-\d{2}$/, "Indica una fecha de salida válida.");
 
 const CabeceraSchema = z.object({
-  titulo: z.string().trim().min(1, "Indica un título para el envío.").max(160),
+  titulo: z.string().trim().min(1, "Indica un título para la actividad.").max(160),
   sectorDestino: z
     .string()
     .trim()
@@ -87,7 +87,7 @@ function traducirError(error: unknown): Resultado | null {
     return { ok: false, error: error.message };
   }
   if (error instanceof AyudaNoEncontradaError) {
-    return { ok: false, error: "El envío ya no existe." };
+    return { ok: false, error: "La actividad ya no existe." };
   }
   return null;
 }

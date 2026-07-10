@@ -18,7 +18,7 @@ export function AvanzarEstadoBoton({ ayudaId, estado, avanzarAction }: Props) {
   if (!siguiente) {
     return (
       <p className="text-sm text-muted-foreground">
-        Este envío ya fue entregado. No hay más pasos.
+        Esta actividad ya fue entregada. No hay más pasos.
       </p>
     );
   }

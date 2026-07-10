@@ -39,7 +39,7 @@ export default async function CuentaAdminPage() {
         <p className="text-sm text-muted-foreground">
           {rechazada
             ? "Un superadministrador ha revisado tu solicitud y no la ha aprobado. Si crees que es un error, ponte en contacto con la organización."
-            : "Registramos tu cuenta como administrador. Un superadministrador debe aprobarla antes de que puedas crear envíos, recursos o gestionar aportes. Vuelve a intentarlo más tarde."}
+            : "Registramos tu cuenta como administrador. Un superadministrador debe aprobarla antes de que puedas crear actividades, recursos o gestionar aportes. Vuelve a intentarlo más tarde."}
         </p>
       </div>
 

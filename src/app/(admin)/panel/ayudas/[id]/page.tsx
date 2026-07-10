@@ -98,9 +98,9 @@ export default async function AyudaDetallePage({ params }: Props) {
       </section>
 
       <section className="flex flex-col gap-3 border-t border-border pt-6">
-        <h2 className="text-lg font-semibold">Estado del envío</h2>
+        <h2 className="text-lg font-semibold">Estado de la actividad</h2>
         <p className="text-sm text-muted-foreground">
-          El envío avanza en un solo sentido: Recolectando, Listo, En tránsito,
+          La actividad avanza en un solo sentido: Recolectando, Listo, En tránsito,
           Entregado.
         </p>
         <AvanzarEstadoBoton
@@ -114,7 +114,7 @@ export default async function AyudaDetallePage({ params }: Props) {
         href="/panel/ayudas"
         className="text-sm text-primary underline-offset-4 hover:underline"
       >
-        Volver a los envíos
+        Volver a las actividades
       </Link>
     </main>
   );

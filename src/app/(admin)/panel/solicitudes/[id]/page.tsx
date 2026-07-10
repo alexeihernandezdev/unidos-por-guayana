@@ -95,7 +95,7 @@ export default async function SolicitudAdminDetallePage({ params }: Props) {
       <section className="flex flex-col gap-3 border-t border-border pt-6">
         <h2 className="text-lg font-semibold">Gestión</h2>
         <p className="text-sm text-muted-foreground">
-          Marca la solicitud como atendida cuando esté cubierta por un envío, o
+          Marca la solicitud como atendida cuando esté cubierta por una actividad, o
           ciérrala si ya no aplica.
         </p>
         <SolicitudAcciones

@@ -61,7 +61,7 @@ export default async function AportarPage({ params }: Props) {
 
       {!aceptaAportes ? (
         <p className="text-sm text-muted-foreground">
-          Este envío ya no acepta aportes (estado actual: {ayuda.estado}).
+          Esta actividad ya no acepta aportes (estado actual: {ayuda.estado}).
         </p>
       ) : (
         <AporteForm

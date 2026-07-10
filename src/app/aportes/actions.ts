@@ -56,7 +56,7 @@ function traducirError(error: unknown): Resultado | null {
     return { ok: false, error: "El aporte ya no existe." };
   }
   if (error instanceof AyudaNoEncontradaError) {
-    return { ok: false, error: "El envío ya no existe." };
+    return { ok: false, error: "La actividad ya no existe." };
   }
   return null;
 }

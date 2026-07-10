@@ -71,7 +71,7 @@ export default async function AyudaDetallePublicoPage({ params }: Props) {
         <ProgresoMetas progreso={progreso} />
         {!aceptaAportes && (
           <p className="text-sm text-muted-foreground">
-            Este envío ya no acepta aportes (estado actual: {ayuda.estado}).
+            Esta actividad ya no acepta aportes (estado actual: {ayuda.estado}).
           </p>
         )}
       </section>
@@ -80,7 +80,7 @@ export default async function AyudaDetallePublicoPage({ params }: Props) {
         href="/ayudas"
         className="text-sm text-primary underline-offset-4 hover:underline"
       >
-        Volver a los envíos abiertos
+        Volver a las actividades abiertas
       </Link>
     </main>
   );

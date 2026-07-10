@@ -28,7 +28,7 @@ export const ADMIN_NAV: AdminNavSection[] = [
     label: "Operación",
     items: [
       { label: "Panel", href: "/panel", icon: "panel", exact: true },
-      { label: "Envíos", href: "/panel/ayudas", icon: "envios" },
+      { label: "Actividades", href: "/panel/ayudas", icon: "envios" },
       { label: "Solicitudes", href: "/panel/solicitudes", icon: "solicitudes" },
     ],
   },

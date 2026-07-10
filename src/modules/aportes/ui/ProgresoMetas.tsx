@@ -21,7 +21,7 @@ export function ProgresoMetas({ progreso }: Props) {
   if (progreso.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        Este envío no tiene metas definidas.
+        Esta actividad no tiene metas definidas.
       </p>
     );
   }

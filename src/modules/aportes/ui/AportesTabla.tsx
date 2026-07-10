@@ -27,7 +27,7 @@ export function AportesTabla({
   if (aportes.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        Aún no hay aportes para este envío.
+        Aún no hay aportes para esta actividad.
       </p>
     );
   }

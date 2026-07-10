@@ -69,13 +69,13 @@ export function ActiveShipmentsSection() {
           <div className="max-w-xl">
             <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
               <span className="hairline w-8" aria-hidden />
-              <span>Panel · envíos</span>
+              <span>Panel · actividades</span>
             </div>
             <h2 className="mt-3 text-3xl font-semibold text-foreground [text-wrap:balance] md:text-4xl md:tracking-tight">
-              Envíos en curso
+              Actividades en curso
             </h2>
             <p className="mt-4 max-w-[58ch] text-base text-foreground/85 [text-wrap:pretty]">
-              Cada envío tiene un destino, unas metas y un progreso público. Así
+              Cada actividad tiene un destino, unas metas y un progreso público. Así
               se verá el tablero cuando esté en vivo. Los ejemplos de abajo
               muestran la forma final.
             </p>

@@ -71,7 +71,7 @@ export function MetasEditor({
     <div className="flex flex-col gap-4">
       {metas.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          Este envío aún no tiene metas.
+          Esta actividad aún no tiene metas.
         </p>
       ) : (
         <ul className="flex flex-col gap-3">

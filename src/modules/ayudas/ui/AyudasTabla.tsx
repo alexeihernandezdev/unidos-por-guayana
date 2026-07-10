@@ -18,7 +18,7 @@ export function AyudasTabla({ ayudas, eliminarAction }: Props) {
   if (ayudas.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        No hay envíos que coincidan con el filtro.
+        No hay actividades que coincidan con el filtro.
       </p>
     );
   }

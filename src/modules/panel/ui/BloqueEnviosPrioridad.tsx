@@ -17,7 +17,7 @@ export function BloqueEnviosPrioridad({ envios }: Props) {
           id="titulo-prioridad"
           className="font-serif text-lg leading-none tracking-tight"
         >
-          Qué envío sale primero
+          Qué actividad sale primero
         </h2>
         <span className="font-mono text-xs text-muted-foreground">
           por % de metas completado
@@ -25,7 +25,7 @@ export function BloqueEnviosPrioridad({ envios }: Props) {
       </div>
       {envios.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border/70 px-4 py-6 text-center text-xs text-muted-foreground">
-          No hay envíos en Recolectando.
+          No hay actividades en Recolectando.
         </div>
       ) : (
         <ul className="flex flex-col divide-y divide-border rounded-lg border border-border">

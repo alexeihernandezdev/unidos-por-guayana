@@ -9,7 +9,7 @@ import {
   TipoActividad,
 } from "@/modules/ayudas/domain/TipoActividad";
 import { Button } from "@/shared/ui/button";
-import { etiquetaTipo, nombreSingular } from "./tipos";
+import { etiquetaTipo } from "./tipos";
 
 // Opción de recurso para el selector de metas (recursos activos del catálogo).
 export type RecursoOpcion = {
@@ -75,7 +75,6 @@ export function AyudaForm({
     register,
     control,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<AyudaFormValores>({
     defaultValues: {
@@ -93,12 +92,8 @@ export function AyudaForm({
   });
 
   const { fields, append, remove } = useFieldArray({ control, name: "metas" });
-  // El botón de alta se renombra según el tipo elegido en el desplegable
-  // ("Crear envío" / "Crear jornada" / "Crear evento social", feature 018).
-  const tipoSeleccionado = watch("tipo");
-  const textoEnviarDinamico = conMetas
-    ? `Crear ${nombreSingular(tipoSeleccionado)}`
-    : textoEnviar;
+  // En el alta el botón es genérico ("Crear actividad"), sin importar el tipo.
+  const textoEnviarDinamico = conMetas ? "Crear actividad" : textoEnviar;
   const textoEnviandoDinamico = conMetas ? "Creando…" : textoEnviando;
 
   const sinRecursos = conMetas && recursos.length === 0;
@@ -110,7 +105,7 @@ export function AyudaForm({
       if (resultado.ok) {
         router.push("/panel/ayudas");
       } else {
-        setErrorServidor(resultado.error ?? "No se pudo guardar el envío.");
+        setErrorServidor(resultado.error ?? "No se pudo guardar la actividad.");
       }
     });
   });
@@ -147,7 +142,7 @@ export function AyudaForm({
           placeholder="Envío a Upata, agua y alimentos"
           aria-invalid={Boolean(errors.titulo)}
           {...register("titulo", {
-            required: "Indica un título para el envío.",
+            required: "Indica un título para la actividad.",
             setValueAs: (v: string) => v.trim(),
           })}
         />
@@ -209,9 +204,9 @@ export function AyudaForm({
 
       {conMetas && (
         <fieldset className="flex flex-col gap-3 border-t border-border pt-4">
-          <legend className="text-sm font-medium">Metas de recursos</legend>
+          <legend className="text-sm font-medium">Crear recurso</legend>
           <p className="text-sm text-muted-foreground">
-            Qué necesita el envío y cuánto, con los recursos activos del catálogo.
+            Qué necesita la actividad y cuánto, con los recursos activos del catálogo.
           </p>
 
           {sinRecursos ? (
@@ -299,7 +294,7 @@ export function AyudaForm({
                     })
                   }
                 >
-                  Añadir meta
+                  Añadir recurso
                 </Button>
               </div>
             </>

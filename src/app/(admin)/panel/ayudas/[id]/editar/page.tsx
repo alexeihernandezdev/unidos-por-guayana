@@ -56,9 +56,9 @@ export default async function EditarAyudaPage({ params }: Props) {
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 p-6 md:p-8">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Editar envío</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Editar actividad</h1>
         <p className="text-sm text-muted-foreground">
-          Ajusta la cabecera y las metas mientras el envío está en Recolectando.
+          Ajusta la cabecera y las metas mientras la actividad está en Recolectando.
         </p>
       </div>
 
