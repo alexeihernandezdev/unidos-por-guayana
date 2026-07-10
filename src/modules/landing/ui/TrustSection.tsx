@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 type Principle = {
   title: string;
@@ -84,9 +85,13 @@ export function TrustSection() {
               </p>
               <div className="mt-8">
                 <div className="hairline" aria-hidden />
-                <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                  Tablero público · próximamente
-                </p>
+                <Link
+                  href="/transparencia"
+                  className="focus-ring mt-4 inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.14em] text-accent transition-colors hover:text-accent/80"
+                >
+                  Ver tablero público
+                  <span aria-hidden>→</span>
+                </Link>
               </div>
             </div>
           </article>

@@ -1,3 +1,4 @@
+import { porcentajeGlobalAyuda } from "@/modules/aportes/application/porcentajeGlobalAyuda";
 import { progresoDeAyuda } from "@/modules/aportes/application/progresoDeAyuda";
 import type { AporteDeps } from "@/modules/aportes/application/deps";
 import type { Ayuda } from "@/modules/ayudas/domain/Ayuda";
@@ -10,17 +11,6 @@ export type EnvioPrioridad = {
 };
 
 type Deps = Pick<AyudaDeps, "ayudas"> & Pick<AporteDeps, "aportes" | "ayudas">;
-
-function porcentajePromedioMetas(
-  progreso: Awaited<ReturnType<typeof progresoDeAyuda>>,
-): number {
-  if (progreso.length === 0) return 0;
-  const suma = progreso.reduce(
-    (acc, p) => acc + Math.min(100, p.porcentaje),
-    0,
-  );
-  return suma / progreso.length;
-}
 
 /**
  * Envíos en RECOLECTANDO ordenados por % de metas completado (desc) y, en empate,
@@ -36,7 +26,7 @@ export async function listarPrioridadRecolectando(
   const conPorcentaje = await Promise.all(
     recolectando.map(async (ayuda) => ({
       ayuda,
-      porcentaje: porcentajePromedioMetas(
+      porcentaje: porcentajeGlobalAyuda(
         await progresoDeAyuda(deps, ayuda.id),
       ),
     })),

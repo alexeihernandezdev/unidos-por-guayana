@@ -33,4 +33,4 @@ Es la pieza que convierte la transparencia de una promesa a algo **comprobable**
 
 ## Resultado para el cliente
 
-Al terminar, el proyecto tiene una **cara pública que rinde cuentas**: cualquier persona entra a la pantalla de transparencia, sin registrarse, y comprueba en segundos qué se ha recolectado, cómo avanza cada envío y a dónde llegó cada ayuda. Es la prueba visible de que lo donado se usa bien, y una herramienta para atraer más apoyo con confianza.
+**Entregado.** La pantalla pública está en `/transparencia` (y el detalle en `/transparencia/[id]`). Cualquier persona entra sin registrarse y ve totales de impacto, lo recolectado por recurso (incluidos montos monetarios por moneda, con nota de canal externo), la lista de actividades con progreso y destino, y el detalle de metas por recurso. No se muestran nombres ni contactos de aportantes o solicitantes. La landing y el pie de página enlazan al tablero.

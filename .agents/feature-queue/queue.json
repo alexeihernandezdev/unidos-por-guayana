@@ -103,14 +103,14 @@
       "id": "009",
       "slug": "009-tablero-publico-de-transparencia",
       "title": "Tablero público de transparencia",
-      "status": "pending",
+      "status": "done",
       "specDir": "spec/spec_template/features/009-tablero-publico-de-transparencia",
       "docFile": "DOC/features/009-tablero-publico-de-transparencia.md",
-      "branch": null,
+      "branch": "cursor/tablero-transparencia-009-3b92",
       "pr": null,
       "agentBcId": null,
-      "startedAt": null,
-      "completedAt": null
+      "startedAt": "2026-07-10T15:32:00Z",
+      "completedAt": "2026-07-10T15:42:00Z"
     },
     "010-seguimiento-del-envio": {
       "id": "010",
