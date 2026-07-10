@@ -8,4 +8,8 @@ export {
   editarRecursoServicio,
   archivarRecursoServicio,
   activarRecursoServicio,
+  proponerRecursoServicio,
+  listarPropuestasServicio,
+  aprobarPropuestaServicio,
+  rechazarPropuestaServicio,
 } from "@/lib/recursos";

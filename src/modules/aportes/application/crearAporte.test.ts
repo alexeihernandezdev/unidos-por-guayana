@@ -38,6 +38,7 @@ async function armarContexto() {
       titulo: "Envío 1",
       sectorDestino: "Upata",
       fecha: new Date(),
+      tipo: "ENVIO",
       metas: [{ recursoId: agua.id, cantidadObjetivo: 100 }],
     },
   );

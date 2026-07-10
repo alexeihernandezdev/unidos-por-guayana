@@ -6,6 +6,10 @@ import {
   normalizarDescripcion,
   normalizarTexto,
 } from "@/modules/ayudas/domain/reglas";
+import {
+  type TipoActividad,
+  esTipoActividad,
+} from "@/modules/ayudas/domain/TipoActividad";
 import { type AyudaDeps, validarMeta } from "./deps";
 import { DatosAyudaInvalidosError } from "./errors";
 
@@ -13,6 +17,7 @@ export type CrearAyudaInput = {
   titulo: string;
   sectorDestino: string;
   fecha: Date;
+  tipo: TipoActividad;
   descripcion?: string | null;
   metas: { recursoId: string; cantidadObjetivo: number }[];
 };
@@ -41,6 +46,9 @@ export async function crearAyuda(
       "El sector de destino no puede estar vacío.",
     );
   }
+  if (!esTipoActividad(input.tipo)) {
+    throw new DatosAyudaInvalidosError("El tipo de actividad no es válido.");
+  }
   if (input.metas.length === 0) {
     throw new DatosAyudaInvalidosError("Añade al menos una meta de recurso.");
   }
@@ -58,6 +66,7 @@ export async function crearAyuda(
     titulo,
     sectorDestino,
     fecha: input.fecha,
+    tipo: input.tipo,
     descripcion: normalizarDescripcion(input.descripcion),
     metas: input.metas.map((m) => ({
       recursoId: m.recursoId,

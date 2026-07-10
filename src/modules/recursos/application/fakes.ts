@@ -1,3 +1,4 @@
+import { EstadoAprobacionRecurso } from "@/modules/recursos/domain/EstadoAprobacionRecurso";
 import type {
   CambiosRecurso,
   NuevoRecurso,
@@ -21,10 +22,16 @@ export class InMemoryRecursoRepository implements RecursoRepository {
     const ahora = new Date();
     const recurso: Recurso = {
       id: `recurso-${++this.secuencia}`,
+      nombre: datos.nombre,
+      unidad: datos.unidad,
+      categoria: datos.categoria,
+      descripcion: datos.descripcion,
       activo: true,
+      estadoAprobacion:
+        datos.estadoAprobacion ?? EstadoAprobacionRecurso.APROBADO,
+      propuestoPorId: datos.propuestoPorId ?? null,
       createdAt: ahora,
       updatedAt: ahora,
-      ...datos,
     };
     this.porId.set(recurso.id, recurso);
     return recurso;
@@ -37,6 +44,17 @@ export class InMemoryRecursoRepository implements RecursoRepository {
     }
     if (filtro?.soloActivos) {
       recursos = recursos.filter((r) => r.activo);
+    }
+    if (filtro?.estadoAprobacion) {
+      recursos = recursos.filter(
+        (r) => r.estadoAprobacion === filtro.estadoAprobacion,
+      );
+    }
+    if (filtro?.soloSeleccionables) {
+      recursos = recursos.filter(
+        (r) =>
+          r.estadoAprobacion === EstadoAprobacionRecurso.APROBADO && r.activo,
+      );
     }
     return recursos;
   }

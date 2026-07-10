@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SolicitudForm } from "@/modules/solicitudes/ui/SolicitudForm";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarRecursosServicio } from "@/shared/recursos";
@@ -7,7 +8,9 @@ import { crearSolicitudAction } from "../actions";
 export default async function NuevaSolicitudPage() {
   await requireRol(Rol.SOLICITANTE);
 
-  const recursos = (await listarRecursosServicio({ soloActivos: true })).map(
+  const recursos = (
+    await listarRecursosServicio({ soloSeleccionables: true })
+  ).map(
     (r) => ({
       id: r.id,
       nombre: r.nombre,
@@ -25,6 +28,17 @@ export default async function NuevaSolicitudPage() {
           Indica tu sector, la urgencia y qué recursos necesitas.
         </p>
       </div>
+
+      <p className="text-sm text-muted-foreground">
+        ¿No ves el recurso que necesitas?{" "}
+        <Link
+          href="/solicitudes/proponer-recurso"
+          className="text-primary underline-offset-4 hover:underline"
+        >
+          Propón uno nuevo al catálogo
+        </Link>
+        .
+      </p>
 
       <SolicitudForm
         action={crearSolicitudAction}

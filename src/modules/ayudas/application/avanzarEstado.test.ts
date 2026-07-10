@@ -21,6 +21,7 @@ async function crearAyudaBase() {
     titulo: "Envío",
     sectorDestino: "Upata",
     fecha: new Date(),
+    tipo: "ENVIO",
     metas: [{ recursoId: agua.id, cantidadObjetivo: 10 }],
   });
   return { deps, ayuda };

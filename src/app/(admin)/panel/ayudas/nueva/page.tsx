@@ -1,22 +1,41 @@
 import Link from "next/link";
+import {
+  TipoActividad,
+  esTipoActividad,
+} from "@/modules/ayudas/domain/TipoActividad";
 import { AyudaForm } from "@/modules/ayudas/ui/AyudaForm";
+import { nombreSingular } from "@/modules/ayudas/ui/tipos";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarRecursosServicio } from "@/shared/recursos";
 import { requireRol } from "@/shared/auth";
 import { crearAyudaAction } from "../actions";
 
-export default async function NuevaAyudaPage() {
+type Props = {
+  searchParams: Promise<{ tipo?: string }>;
+};
+
+export default async function NuevaAyudaPage({ searchParams }: Props) {
   await requireRol(Rol.ADMIN);
 
+  const { tipo } = await searchParams;
+  const tipoInicial =
+    tipo && esTipoActividad(tipo) ? tipo : TipoActividad.ENVIO;
+
   // Solo se pueden elegir recursos activos del catálogo para las metas (feature 004).
-  const recursos = await listarRecursosServicio({ soloActivos: true });
+  // Solo recursos APROBADO + activos son seleccionables (features 004, 019).
+  const recursos = await listarRecursosServicio({ soloSeleccionables: true });
+
+  const singular = nombreSingular(tipoInicial);
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 p-6 md:p-8">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Nuevo envío</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          {`Crear ${singular}`}
+        </h1>
         <p className="text-sm text-muted-foreground">
-          Define el destino, la fecha de salida y las metas de recursos.
+          Elige el tipo de actividad, define el destino, la fecha y las metas de
+          recursos.
         </p>
       </div>
 
@@ -28,7 +47,8 @@ export default async function NuevaAyudaPage() {
           unidad: r.unidad,
         }))}
         conMetas
-        textoEnviar="Crear envío"
+        valoresIniciales={{ tipo: tipoInicial }}
+        textoEnviar={`Crear ${singular}`}
         textoEnviando="Creando…"
       />
 
@@ -36,7 +56,7 @@ export default async function NuevaAyudaPage() {
         href="/panel/ayudas"
         className="text-sm text-primary underline-offset-4 hover:underline"
       >
-        Volver a los envíos
+        Volver a las actividades
       </Link>
     </main>
   );

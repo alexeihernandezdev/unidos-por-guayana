@@ -1,4 +1,5 @@
 import type { EstadoAyuda } from "./EstadoAyuda";
+import type { TipoActividad } from "./TipoActividad";
 
 // Entidades de dominio de la Ayuda / Envío (feature 005). Puras: `cantidadObjetivo`
 // es un `number` (la infraestructura convierte el `Decimal` de Prisma en el límite),
@@ -29,6 +30,7 @@ export type Ayuda = {
   sectorDestino: string;
   fecha: Date;
   estado: EstadoAyuda;
+  tipo: TipoActividad;
   descripcion: string | null;
   metas: MetaRecurso[];
   createdAt: Date;
@@ -42,11 +44,13 @@ export type NuevaMeta = {
 };
 
 // Datos para dar de alta una Ayuda con sus metas iniciales. `estado` no se pide:
-// nace en `RECOLECTANDO` por defecto (ver schema).
+// nace en `RECOLECTANDO` por defecto (ver schema). `tipo` sí se pide: lo elige
+// el ADMIN al iniciar el alta (feature 018) y es inmutable después.
 export type NuevaAyuda = {
   titulo: string;
   sectorDestino: string;
   fecha: Date;
+  tipo: TipoActividad;
   descripcion: string | null;
   metas: NuevaMeta[];
 };

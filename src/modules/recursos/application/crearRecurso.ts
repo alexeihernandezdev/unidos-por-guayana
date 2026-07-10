@@ -57,6 +57,8 @@ export async function crearRecurso(
     unidad,
     categoria: input.categoria,
     descripcion: normalizarDescripcion(input.descripcion),
+    estadoAprobacion: "APROBADO",
+    propuestoPorId: null,
   });
 }
 

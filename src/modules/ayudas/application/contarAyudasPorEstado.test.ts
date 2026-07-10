@@ -23,12 +23,14 @@ describe("contarAyudasPorEstado", () => {
       titulo: "A",
       sectorDestino: "Upata",
       fecha: new Date("2026-08-01"),
+      tipo: "ENVIO",
       metas: [{ recursoId: agua.id, cantidadObjetivo: 10 }],
     });
     const b = await crearAyuda(deps, {
       titulo: "B",
       sectorDestino: "Tumeremo",
       fecha: new Date("2026-08-02"),
+      tipo: "ENVIO",
       metas: [{ recursoId: agua.id, cantidadObjetivo: 5 }],
     });
     await avanzarEstado(deps, b.id);

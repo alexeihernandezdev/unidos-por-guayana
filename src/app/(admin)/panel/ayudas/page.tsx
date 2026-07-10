@@ -3,9 +3,14 @@ import {
   ESTADOS_AYUDA,
   esEstadoAyuda,
 } from "@/modules/ayudas/domain/EstadoAyuda";
+import {
+  TIPOS_ACTIVIDAD,
+  esTipoActividad,
+} from "@/modules/ayudas/domain/TipoActividad";
 import type { FiltroAyudas } from "@/modules/ayudas/domain/AyudaRepository";
 import { AyudasTabla } from "@/modules/ayudas/ui/AyudasTabla";
 import { ESTADO_LABEL } from "@/modules/ayudas/ui/estados";
+import { etiquetaTipo } from "@/modules/ayudas/ui/tipos";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarAyudasServicio } from "@/shared/ayudas";
 import { requireRol } from "@/shared/auth";
@@ -13,7 +18,7 @@ import { Button } from "@/shared/ui/button";
 import { eliminarAyudaAction } from "./actions";
 
 type Props = {
-  searchParams: Promise<{ estado?: string }>;
+  searchParams: Promise<{ estado?: string; tipo?: string }>;
 };
 
 const campo =
@@ -22,10 +27,11 @@ const campo =
 export default async function AyudasPage({ searchParams }: Props) {
   await requireRol(Rol.ADMIN);
 
-  const { estado } = await searchParams;
+  const { estado, tipo } = await searchParams;
 
   const filtro: FiltroAyudas = {};
   if (estado && esEstadoAyuda(estado)) filtro.estado = estado;
+  if (tipo && esTipoActividad(tipo)) filtro.tipo = tipo;
 
   const ayudas = await listarAyudasServicio(filtro);
 
@@ -34,14 +40,14 @@ export default async function AyudasPage({ searchParams }: Props) {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-semibold tracking-tight">
-            Envíos de ayuda
+            Actividades de ayuda
           </h1>
           <p className="text-sm text-muted-foreground">
-            Planifica y sigue cada envío: destino, fecha, metas y estado.
+            Planifica y sigue cada actividad: envíos, jornadas y eventos sociales.
           </p>
         </div>
         <Button asChild>
-          <Link href="/panel/ayudas/nueva">Nuevo envío</Link>
+          <Link href="/panel/ayudas/nueva">Nueva actividad</Link>
         </Button>
       </div>
 
@@ -49,6 +55,25 @@ export default async function AyudasPage({ searchParams }: Props) {
         method="get"
         className="flex flex-wrap items-end gap-3 border-t border-border pt-4"
       >
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="tipo" className="text-sm font-medium">
+            Tipo
+          </label>
+          <select
+            id="tipo"
+            name="tipo"
+            defaultValue={filtro.tipo ?? ""}
+            className={campo}
+          >
+            <option value="">Todos</option>
+            {TIPOS_ACTIVIDAD.map((t) => (
+              <option key={t} value={t}>
+                {etiquetaTipo(t)}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="flex flex-col gap-1.5">
           <label htmlFor="estado" className="text-sm font-medium">
             Estado

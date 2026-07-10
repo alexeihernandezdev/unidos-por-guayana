@@ -21,3 +21,19 @@ export class DatosRecursoInvalidosError extends Error {
     this.name = "DatosRecursoInvalidosError";
   }
 }
+
+// Feature 019 · errores del ciclo de revisión de propuestas.
+
+export class PropuestaNoEncontradaError extends Error {
+  constructor(id: string) {
+    super(`No existe una propuesta de recurso con el id "${id}".`);
+    this.name = "PropuestaNoEncontradaError";
+  }
+}
+
+export class TransicionAprobacionInvalidaError extends Error {
+  constructor(mensaje: string) {
+    super(mensaje);
+    this.name = "TransicionAprobacionInvalidaError";
+  }
+}

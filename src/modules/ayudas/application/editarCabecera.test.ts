@@ -21,6 +21,7 @@ async function crearAyudaBase() {
     titulo: "Envío",
     sectorDestino: "Upata",
     fecha: new Date("2026-08-01T00:00:00.000Z"),
+    tipo: "ENVIO",
     metas: [{ recursoId: agua.id, cantidadObjetivo: 10 }],
   });
   return { deps, ayuda };
@@ -51,6 +52,17 @@ describe("editarCabecera", () => {
     await expect(
       editarCabecera(deps, ayuda.id, { titulo: "   " }),
     ).rejects.toBeInstanceOf(DatosAyudaInvalidosError);
+  });
+
+  it("no cambia el tipo de actividad al editar la cabecera", async () => {
+    const { deps, ayuda } = ctx;
+
+    const actualizada = await editarCabecera(deps, ayuda.id, {
+      titulo: "Otro título",
+      // el input de editarCabecera no admite tipo — es inmutable por construcción.
+    });
+
+    expect(actualizada.tipo).toBe(ayuda.tipo);
   });
 
   it("bloquea la edición una vez la ayuda pasa a LISTO", async () => {

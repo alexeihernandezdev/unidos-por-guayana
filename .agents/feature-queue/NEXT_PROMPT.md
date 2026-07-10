@@ -1,7 +1,7 @@
 # Prompt — próximo Cloud Agent
 
 > **Feature en cola:** `015-superadmin-y-registro-de-administradores`  
-> **Generado:** tras completar `008-panel-de-administracion`  
+> **Generado:** tras completar `018-tipos-de-actividad-en-ayuda` y `019-propuesta-de-recursos-por-solicitante` (ambas implementadas fuera del orden habitual de la cola, en la misma sesión, por decisión explícita del usuario).  
 > **Instrucción:** crea un **nuevo** Cloud Agent, pega este prompt completo y archiva el agente anterior.
 
 ---

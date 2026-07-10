@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { EstadoAprobacionRecurso } from "@/modules/recursos/domain/EstadoAprobacionRecurso";
 import type {
   CambiosRecurso,
   NuevoRecurso,
@@ -14,15 +15,35 @@ import type {
 // es asignable a la entidad de dominio sin conversiones.
 export class PrismaRecursoRepository implements RecursoRepository {
   async crear(datos: NuevoRecurso): Promise<Recurso> {
-    return prisma.recurso.create({ data: datos });
+    return prisma.recurso.create({
+      data: {
+        nombre: datos.nombre,
+        unidad: datos.unidad,
+        categoria: datos.categoria,
+        descripcion: datos.descripcion,
+        // Si el caso de uso no especifica el estado (p. ej. tests o
+        // rutas legacy), Prisma aplica el default `APROBADO` del schema.
+        ...(datos.estadoAprobacion
+          ? { estadoAprobacion: datos.estadoAprobacion }
+          : {}),
+        propuestoPorId: datos.propuestoPorId ?? null,
+      },
+    });
   }
 
   async listar(filtro?: FiltroRecursos): Promise<Recurso[]> {
+    const where: Record<string, unknown> = {};
+    if (filtro?.categoria) where.categoria = filtro.categoria;
+    if (filtro?.soloActivos) where.activo = true;
+    if (filtro?.estadoAprobacion) {
+      where.estadoAprobacion = filtro.estadoAprobacion;
+    }
+    if (filtro?.soloSeleccionables) {
+      where.estadoAprobacion = EstadoAprobacionRecurso.APROBADO;
+      where.activo = true;
+    }
     return prisma.recurso.findMany({
-      where: {
-        ...(filtro?.categoria ? { categoria: filtro.categoria } : {}),
-        ...(filtro?.soloActivos ? { activo: true } : {}),
-      },
+      where,
       orderBy: { nombre: "asc" },
     });
   }

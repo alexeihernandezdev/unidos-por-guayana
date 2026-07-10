@@ -74,27 +74,29 @@
       "id": "018",
       "slug": "018-tipos-de-actividad-en-ayuda",
       "title": "Tipos de actividad en Ayuda",
-      "status": "pending",
+      "status": "done",
       "specDir": "spec/spec_template/features/018-tipos-de-actividad-en-ayuda",
       "docFile": "DOC/features/018-tipos-de-actividad-en-ayuda.md",
-      "branch": null,
+      "branch": "cursor/tipos-actividad-y-propuesta-recursos-018-019-3b92",
       "pr": null,
       "agentBcId": null,
-      "startedAt": null,
-      "completedAt": null
+      "startedAt": "2026-07-10T09:30:00Z",
+      "completedAt": "2026-07-10T09:55:00Z",
+      "notes": "Implementada junto a 019 en la misma sesión por decisión explícita del usuario (skip de la convención un-agente-por-feature)."
     },
     "019-propuesta-de-recursos-por-solicitante": {
       "id": "019",
       "slug": "019-propuesta-de-recursos-por-solicitante",
       "title": "Propuesta de recursos por el solicitante",
-      "status": "pending",
+      "status": "done",
       "specDir": "spec/spec_template/features/019-propuesta-de-recursos-por-solicitante",
       "docFile": "DOC/features/019-propuesta-de-recursos-por-solicitante.md",
-      "branch": null,
+      "branch": "cursor/tipos-actividad-y-propuesta-recursos-018-019-3b92",
       "pr": null,
       "agentBcId": null,
-      "startedAt": null,
-      "completedAt": null
+      "startedAt": "2026-07-10T09:30:00Z",
+      "completedAt": "2026-07-10T09:55:00Z",
+      "notes": "Implementada junto a 018 en la misma sesión por decisión explícita del usuario (skip de la convención un-agente-por-feature)."
     },
     "009-tablero-publico-de-transparencia": {
       "id": "009",

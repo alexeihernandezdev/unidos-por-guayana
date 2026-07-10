@@ -10,7 +10,16 @@ import {
   editarRecurso,
   type EditarRecursoInput,
 } from "@/modules/recursos/application/editarRecurso";
+import { listarPropuestas } from "@/modules/recursos/application/listarPropuestas";
 import { listarRecursos } from "@/modules/recursos/application/listarRecursos";
+import {
+  proponerRecurso,
+  type ProponerRecursoInput,
+} from "@/modules/recursos/application/proponerRecurso";
+import {
+  aprobarPropuesta,
+  rechazarPropuesta,
+} from "@/modules/recursos/application/revisarPropuesta";
 import type { Recurso } from "@/modules/recursos/domain/Recurso";
 import type { FiltroRecursos } from "@/modules/recursos/domain/RecursoRepository";
 import { PrismaRecursoRepository } from "@/modules/recursos/infrastructure/PrismaRecursoRepository";
@@ -52,4 +61,23 @@ export function archivarRecursoServicio(id: string): Promise<Recurso> {
 
 export function activarRecursoServicio(id: string): Promise<Recurso> {
   return activarRecurso({ recursos }, id);
+}
+
+export function proponerRecursoServicio(
+  input: ProponerRecursoInput,
+  solicitanteId: string,
+): Promise<Recurso> {
+  return proponerRecurso({ recursos }, input, solicitanteId);
+}
+
+export function listarPropuestasServicio(): Promise<Recurso[]> {
+  return listarPropuestas({ recursos });
+}
+
+export function aprobarPropuestaServicio(id: string): Promise<Recurso> {
+  return aprobarPropuesta({ recursos }, id);
+}
+
+export function rechazarPropuestaServicio(id: string): Promise<Recurso> {
+  return rechazarPropuesta({ recursos }, id);
 }

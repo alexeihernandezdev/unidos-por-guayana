@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { InMemoryRecursoRepository } from "@/modules/recursos/application/fakes";
 import { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import { EstadoAyuda } from "@/modules/ayudas/domain/EstadoAyuda";
+import { TipoActividad } from "@/modules/ayudas/domain/TipoActividad";
 import { crearAyuda } from "./crearAyuda";
 import type { AyudaDeps } from "./deps";
 import { DatosAyudaInvalidosError, RecursoInvalidoError } from "./errors";
@@ -47,6 +48,7 @@ describe("crearAyuda", () => {
       titulo: "Envío a Upata",
       sectorDestino: "Upata",
       fecha: new Date("2026-08-01T00:00:00.000Z"),
+      tipo: "ENVIO",
       metas: [
         { recursoId: agua.id, cantidadObjetivo: 500 },
         { recursoId: alimentos.id, cantidadObjetivo: 200 },
@@ -67,6 +69,7 @@ describe("crearAyuda", () => {
       sectorDestino: "  Upata ",
       fecha: new Date(),
       descripcion: "   ",
+      tipo: "ENVIO",
       metas: [{ recursoId: agua.id, cantidadObjetivo: 10 }],
     });
 
@@ -83,6 +86,7 @@ describe("crearAyuda", () => {
         titulo: "   ",
         sectorDestino: "Upata",
         fecha: new Date(),
+        tipo: "ENVIO",
         metas: [{ recursoId: agua.id, cantidadObjetivo: 10 }],
       }),
     ).rejects.toBeInstanceOf(DatosAyudaInvalidosError);
@@ -96,6 +100,7 @@ describe("crearAyuda", () => {
         titulo: "Envío",
         sectorDestino: "  ",
         fecha: new Date(),
+        tipo: "ENVIO",
         metas: [{ recursoId: agua.id, cantidadObjetivo: 10 }],
       }),
     ).rejects.toBeInstanceOf(DatosAyudaInvalidosError);
@@ -109,6 +114,7 @@ describe("crearAyuda", () => {
         titulo: "Envío",
         sectorDestino: "Upata",
         fecha: new Date(),
+        tipo: "ENVIO",
         metas: [],
       }),
     ).rejects.toBeInstanceOf(DatosAyudaInvalidosError);
@@ -122,6 +128,7 @@ describe("crearAyuda", () => {
         titulo: "Envío",
         sectorDestino: "Upata",
         fecha: new Date(),
+        tipo: "ENVIO",
         metas: [
           { recursoId: agua.id, cantidadObjetivo: 10 },
           { recursoId: agua.id, cantidadObjetivo: 20 },
@@ -138,6 +145,7 @@ describe("crearAyuda", () => {
         titulo: "Envío",
         sectorDestino: "Upata",
         fecha: new Date(),
+        tipo: "ENVIO",
         metas: [{ recursoId: agua.id, cantidadObjetivo: 0 }],
       }),
     ).rejects.toBeInstanceOf(DatosAyudaInvalidosError);
@@ -151,6 +159,7 @@ describe("crearAyuda", () => {
         titulo: "Envío",
         sectorDestino: "Upata",
         fecha: new Date(),
+        tipo: "ENVIO",
         metas: [{ recursoId: "no-existe", cantidadObjetivo: 10 }],
       }),
     ).rejects.toBeInstanceOf(RecursoInvalidoError);
@@ -164,8 +173,45 @@ describe("crearAyuda", () => {
         titulo: "Envío",
         sectorDestino: "Upata",
         fecha: new Date(),
+        tipo: "ENVIO",
         metas: [{ recursoId: archivado.id, cantidadObjetivo: 1 }],
       }),
     ).rejects.toBeInstanceOf(RecursoInvalidoError);
+  });
+
+  it("acepta cualquier tipo de actividad (envío, jornada, evento social)", async () => {
+    const { deps, agua } = ctx;
+
+    const jornada = await crearAyuda(deps, {
+      titulo: "Jornada de salud",
+      sectorDestino: "Upata",
+      fecha: new Date("2026-09-01"),
+      tipo: TipoActividad.JORNADA,
+      metas: [{ recursoId: agua.id, cantidadObjetivo: 5 }],
+    });
+    const evento = await crearAyuda(deps, {
+      titulo: "Feria comunitaria",
+      sectorDestino: "San Félix",
+      fecha: new Date("2026-09-02"),
+      tipo: TipoActividad.EVENTO_SOCIAL,
+      metas: [{ recursoId: agua.id, cantidadObjetivo: 5 }],
+    });
+
+    expect(jornada.tipo).toBe(TipoActividad.JORNADA);
+    expect(evento.tipo).toBe(TipoActividad.EVENTO_SOCIAL);
+  });
+
+  it("rechaza un tipo de actividad inválido", async () => {
+    const { deps, agua } = ctx;
+
+    await expect(
+      crearAyuda(deps, {
+        titulo: "Envío",
+        sectorDestino: "Upata",
+        fecha: new Date(),
+        tipo: "FIESTA" as TipoActividad,
+        metas: [{ recursoId: agua.id, cantidadObjetivo: 10 }],
+      }),
+    ).rejects.toBeInstanceOf(DatosAyudaInvalidosError);
   });
 });

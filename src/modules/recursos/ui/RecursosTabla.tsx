@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Recurso } from "@/modules/recursos/domain/Recurso";
 import { Button } from "@/shared/ui/button";
 import { CATEGORIA_LABEL } from "./categorias";
+import { EstadoAprobacionBadge } from "./EstadoAprobacionBadge";
 
 type Props = {
   recursos: Recurso[];
@@ -34,6 +35,7 @@ export function RecursosTabla({
             <th className={celda}>Nombre</th>
             <th className={celda}>Unidad</th>
             <th className={celda}>Categoría</th>
+            <th className={celda}>Aprobación</th>
             <th className={celda}>Estado</th>
             <th className={`${celda} text-right`}>Acciones</th>
           </tr>
@@ -54,6 +56,9 @@ export function RecursosTabla({
               </td>
               <td className={celda}>{recurso.unidad}</td>
               <td className={celda}>{CATEGORIA_LABEL[recurso.categoria]}</td>
+              <td className={celda}>
+                <EstadoAprobacionBadge estado={recurso.estadoAprobacion} />
+              </td>
               <td className={celda}>
                 {recurso.activo ? (
                   <span className="text-primary-ink">Activo</span>

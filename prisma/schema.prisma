@@ -47,6 +47,8 @@ model Usuario {
   aportes Aporte[]
   // Relación inversa: solicitudes de ayuda creadas por el solicitante (feature 007).
   solicitudes Solicitud[]
+  // Relación inversa: recursos que este usuario ha propuesto al catálogo (feature 019).
+  recursosPropuestos Recurso[] @relation("RecursosPropuestos")
 
   @@map("usuarios")
 }
@@ -62,20 +64,34 @@ enum CategoriaRecurso {
   MONETARIO
 }
 
+// Estado de aprobación del recurso (feature 019). Un `ADMIN` crea recursos ya
+// `APROBADO`; un `SOLICITANTE` puede proponer nuevos recursos que nacen
+// `PROPUESTO` a la espera de revisión. Solo los `APROBADO` (y `activo`) son
+// seleccionables en metas y aportes. `RECHAZADO` es terminal y se conserva
+// para auditoría. Backfill: los recursos existentes quedan `APROBADO`.
+enum EstadoAprobacionRecurso {
+  APROBADO
+  PROPUESTO
+  RECHAZADO
+}
+
 // Recurso del catálogo: la referencia estable contra la que se miden metas y
 // aportes. `nombre` es único (se guarda tal cual con trim; la unicidad insensible
 // a mayúsculas se valida en la aplicación). `unidad` es texto libre (litros, cajas,
 // personas, USD…). No se borran: se archivan (`activo = false`) para no dejar metas
 // ni aportes huérfanos (features 005/006).
 model Recurso {
-  id          String           @id @default(cuid())
-  nombre      String           @unique
-  unidad      String
-  categoria   CategoriaRecurso
-  descripcion String?
-  activo      Boolean          @default(true)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id               String                  @id @default(cuid())
+  nombre           String                  @unique
+  unidad           String
+  categoria        CategoriaRecurso
+  descripcion      String?
+  activo           Boolean                 @default(true)
+  estadoAprobacion EstadoAprobacionRecurso @default(APROBADO)
+  propuestoPorId   String?
+  propuestoPor     Usuario?                @relation("RecursosPropuestos", fields: [propuestoPorId], references: [id])
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
 
   // Relación inversa: metas de envío que apuntan a este recurso (feature 005).
   // Como los recursos se archivan (no se borran), no habrá metas huérfanas.
@@ -86,7 +102,18 @@ model Recurso {
   // Relación inversa: recursos necesarios en solicitudes de ayuda (feature 007).
   recursoSolicitudes RecursoSolicitud[]
 
+  @@index([estadoAprobacion])
   @@map("recursos")
+}
+
+// Tipo de actividad de una Ayuda (feature 018). La entidad Ayuda es la misma para
+// las tres clases (envío / jornada / evento social): comparten ciclo de vida,
+// metas, aportes y seguimiento. Solo cambia el vocabulario visible en la UI.
+// Backfill: las Ayudas existentes se consideran `ENVIO`.
+enum TipoActividad {
+  ENVIO
+  JORNADA
+  EVENTO_SOCIAL
 }
 
 // Ciclo de vida de una Ayuda (ver feature 005 y constitution/tech-stack.md). Avanza
@@ -106,17 +133,19 @@ enum EstadoAyuda {
 // `ADMIN`. Nace en `RECOLECTANDO`; la cabecera y las metas solo se editan mientras
 // siga en ese estado (después quedan congeladas para medir el progreso).
 model Ayuda {
-  id           String        @id @default(cuid())
-  titulo       String
+  id            String        @id @default(cuid())
+  titulo        String
   sectorDestino String
-  fecha        DateTime
-  estado       EstadoAyuda   @default(RECOLECTANDO)
-  descripcion  String?
-  metas        MetaRecurso[]
-  aportes      Aporte[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  fecha         DateTime
+  estado        EstadoAyuda   @default(RECOLECTANDO)
+  tipo          TipoActividad @default(ENVIO)
+  descripcion   String?
+  metas         MetaRecurso[]
+  aportes       Aporte[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
+  @@index([tipo])
   @@map("ayudas")
 }
 

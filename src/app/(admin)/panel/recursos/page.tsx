@@ -41,9 +41,14 @@ export default async function RecursosPage({ searchParams }: Props) {
             Lista maestra de lo que se puede aportar o necesitar.
           </p>
         </div>
-        <Button asChild>
-          <Link href="/panel/recursos/nuevo">Nuevo recurso</Link>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button asChild variant="outline">
+            <Link href="/panel/recursos/propuestas">Ver propuestas</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/panel/recursos/nuevo">Nuevo recurso</Link>
+          </Button>
+        </div>
       </div>
 
       <form

@@ -31,7 +31,9 @@ export default async function EditarSolicitudPage({ params }: Props) {
   const { id } = await params;
   const solicitud = await cargarSolicitud(id, usuario.id);
 
-  const recursos = (await listarRecursosServicio({ soloActivos: true })).map(
+  const recursos = (
+    await listarRecursosServicio({ soloSeleccionables: true })
+  ).map(
     (r) => ({
       id: r.id,
       nombre: r.nombre,

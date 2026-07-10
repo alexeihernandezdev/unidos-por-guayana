@@ -5,6 +5,8 @@ import type { Ayuda } from "@/modules/ayudas/domain/Ayuda";
 import { esEditable } from "@/modules/ayudas/domain/maquinaEstados";
 import { AvanzarEstadoBoton } from "@/modules/ayudas/ui/AvanzarEstadoBoton";
 import { EstadoBadge } from "@/modules/ayudas/ui/EstadoBadge";
+import { TipoBadge } from "@/modules/ayudas/ui/TipoBadge";
+import { etiquetaTipo } from "@/modules/ayudas/ui/tipos";
 import { formatearFecha } from "@/modules/ayudas/ui/fechas";
 import { AportesTabla } from "@/modules/aportes/ui/AportesTabla";
 import { ProgresoMetas } from "@/modules/aportes/ui/ProgresoMetas";
@@ -55,12 +57,14 @@ export default async function AyudaDetallePage({ params }: Props) {
             <h1 className="text-2xl font-semibold tracking-tight">
               {ayuda.titulo}
             </h1>
+            <TipoBadge tipo={ayuda.tipo} />
             <EstadoBadge estado={ayuda.estado} />
           </div>
           <p className="text-sm text-muted-foreground">
-            Destino: <span className="text-foreground">{ayuda.sectorDestino}</span>
+            {etiquetaTipo(ayuda.tipo)} · Destino:{" "}
+            <span className="text-foreground">{ayuda.sectorDestino}</span>
             {" · "}
-            Salida:{" "}
+            Fecha:{" "}
             <span className="numeric-tnum text-foreground">
               {formatearFecha(ayuda.fecha)}
             </span>

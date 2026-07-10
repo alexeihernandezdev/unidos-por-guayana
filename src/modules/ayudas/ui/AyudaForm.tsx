@@ -4,7 +4,12 @@ import { useState, useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
+import {
+  TIPOS_ACTIVIDAD,
+  TipoActividad,
+} from "@/modules/ayudas/domain/TipoActividad";
 import { Button } from "@/shared/ui/button";
+import { etiquetaTipo, nombreSingular } from "./tipos";
 
 // Opción de recurso para el selector de metas (recursos activos del catálogo).
 export type RecursoOpcion = {
@@ -23,6 +28,9 @@ export type AyudaFormValores = {
   sectorDestino: string;
   // Fecha de salida a nivel de día (yyyy-mm-dd). El servidor la interpreta en UTC.
   fecha: string;
+  // Tipo de actividad. Solo se pide en el alta (feature 018): en edición de
+  // cabecera es inmutable y el form omite el campo.
+  tipo: TipoActividad;
   descripcion: string;
   metas: MetaValor[];
 };
@@ -67,12 +75,14 @@ export function AyudaForm({
     register,
     control,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<AyudaFormValores>({
     defaultValues: {
       titulo: valoresIniciales?.titulo ?? "",
       sectorDestino: valoresIniciales?.sectorDestino ?? "",
       fecha: valoresIniciales?.fecha ?? hoyISO(),
+      tipo: valoresIniciales?.tipo ?? TipoActividad.ENVIO,
       descripcion: valoresIniciales?.descripcion ?? "",
       metas:
         valoresIniciales?.metas ??
@@ -83,6 +93,13 @@ export function AyudaForm({
   });
 
   const { fields, append, remove } = useFieldArray({ control, name: "metas" });
+  // El botón de alta se renombra según el tipo elegido en el desplegable
+  // ("Crear envío" / "Crear jornada" / "Crear evento social", feature 018).
+  const tipoSeleccionado = watch("tipo");
+  const textoEnviarDinamico = conMetas
+    ? `Crear ${nombreSingular(tipoSeleccionado)}`
+    : textoEnviar;
+  const textoEnviandoDinamico = conMetas ? "Creando…" : textoEnviando;
 
   const sinRecursos = conMetas && recursos.length === 0;
 
@@ -100,6 +117,26 @@ export function AyudaForm({
 
   return (
     <form onSubmit={onSubmit} className="flex w-full max-w-2xl flex-col gap-4">
+      {conMetas && (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="tipo" className="text-sm font-medium">
+            Tipo de actividad
+          </label>
+          <select
+            id="tipo"
+            className={campo}
+            aria-invalid={Boolean(errors.tipo)}
+            {...register("tipo", { required: "Elige el tipo de actividad." })}
+          >
+            {TIPOS_ACTIVIDAD.map((t) => (
+              <option key={t} value={t}>
+                {etiquetaTipo(t)}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       <div className="flex flex-col gap-1.5">
         <label htmlFor="titulo" className="text-sm font-medium">
           Título
@@ -277,7 +314,7 @@ export function AyudaForm({
       )}
 
       <Button type="submit" disabled={pendiente || sinRecursos}>
-        {pendiente ? textoEnviando : textoEnviar}
+        {pendiente ? textoEnviandoDinamico : textoEnviarDinamico}
       </Button>
     </form>
   );

@@ -41,7 +41,9 @@ export default async function EditarAyudaPage({ params }: Props) {
     redirect(`/panel/ayudas/${id}`);
   }
 
-  const recursos = (await listarRecursosServicio({ soloActivos: true })).map(
+  const recursos = (
+    await listarRecursosServicio({ soloSeleccionables: true })
+  ).map(
     (r) => ({ id: r.id, nombre: r.nombre, unidad: r.unidad }),
   );
 
@@ -69,6 +71,7 @@ export default async function EditarAyudaPage({ params }: Props) {
             titulo: ayuda.titulo,
             sectorDestino: ayuda.sectorDestino,
             fecha: fechaParaInput(ayuda.fecha),
+            tipo: ayuda.tipo,
             descripcion: ayuda.descripcion ?? "",
           }}
           textoEnviar="Guardar cambios"

@@ -9,6 +9,7 @@ import {
   RecursoInvalidoError,
   TransicionInvalidaError,
 } from "@/modules/ayudas/application/errors";
+import { TIPOS_ACTIVIDAD } from "@/modules/ayudas/domain/TipoActividad";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import {
   avanzarEstadoServicio,
@@ -47,7 +48,12 @@ const CabeceraSchema = z.object({
   descripcion: z.string().trim().max(1000).optional().or(z.literal("")),
 });
 
+const TipoSchema = z.enum(TIPOS_ACTIVIDAD as unknown as [string, ...string[]], {
+  message: "Elige el tipo de actividad.",
+});
+
 const CrearAyudaSchema = CabeceraSchema.extend({
+  tipo: TipoSchema,
   metas: z.array(MetaSchema).min(1, "Añade al menos una meta de recurso."),
 });
 
@@ -55,6 +61,7 @@ export type AyudaInput = {
   titulo: string;
   sectorDestino: string;
   fecha: string;
+  tipo: string;
   descripcion: string;
   metas: { recursoId: string; cantidadObjetivo: number }[];
 };
@@ -102,6 +109,7 @@ export async function crearAyudaAction(input: AyudaInput): Promise<Resultado> {
       titulo: parsed.data.titulo,
       sectorDestino: parsed.data.sectorDestino,
       fecha: parseFecha(parsed.data.fecha),
+      tipo: parsed.data.tipo as (typeof TIPOS_ACTIVIDAD)[number],
       descripcion: parsed.data.descripcion ?? null,
       metas: parsed.data.metas,
     });

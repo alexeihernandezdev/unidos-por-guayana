@@ -7,6 +7,7 @@ import type {
   NuevaMeta,
 } from "@/modules/ayudas/domain/Ayuda";
 import type { EstadoAyuda } from "@/modules/ayudas/domain/EstadoAyuda";
+import type { TipoActividad } from "@/modules/ayudas/domain/TipoActividad";
 import type {
   AyudaRepository,
   FiltroAyudas,
@@ -37,6 +38,7 @@ type FilaAyuda = {
   sectorDestino: string;
   fecha: Date;
   estado: EstadoAyuda;
+  tipo: TipoActividad;
   descripcion: string | null;
   metas: FilaMeta[];
   createdAt: Date;
@@ -67,6 +69,7 @@ function mapearAyuda(fila: FilaAyuda): Ayuda {
     sectorDestino: fila.sectorDestino,
     fecha: fila.fecha,
     estado: fila.estado,
+    tipo: fila.tipo,
     descripcion: fila.descripcion,
     metas: fila.metas.map(mapearMeta),
     createdAt: fila.createdAt,
@@ -84,6 +87,7 @@ export class PrismaAyudaRepository implements AyudaRepository {
         titulo: datos.titulo,
         sectorDestino: datos.sectorDestino,
         fecha: datos.fecha,
+        tipo: datos.tipo,
         descripcion: datos.descripcion,
         metas: {
           create: datos.metas.map((m) => ({
@@ -99,7 +103,10 @@ export class PrismaAyudaRepository implements AyudaRepository {
 
   async listar(filtro?: FiltroAyudas): Promise<Ayuda[]> {
     const filas = await prisma.ayuda.findMany({
-      where: filtro?.estado ? { estado: filtro.estado } : {},
+      where: {
+        ...(filtro?.estado ? { estado: filtro.estado } : {}),
+        ...(filtro?.tipo ? { tipo: filtro.tipo } : {}),
+      },
       orderBy: { fecha: "desc" },
       include: INCLUDE_METAS,
     });

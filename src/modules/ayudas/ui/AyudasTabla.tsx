@@ -3,6 +3,7 @@ import type { Ayuda } from "@/modules/ayudas/domain/Ayuda";
 import { esEditable, esEliminable } from "@/modules/ayudas/domain/maquinaEstados";
 import { Button } from "@/shared/ui/button";
 import { EstadoBadge } from "./EstadoBadge";
+import { TipoBadge } from "./TipoBadge";
 import { formatearFecha } from "./fechas";
 
 type Props = {
@@ -27,7 +28,8 @@ export function AyudasTabla({ ayudas, eliminarAction }: Props) {
       <table className="w-full border-collapse">
         <thead>
           <tr className="border-b border-border text-left text-xs font-medium tracking-wide text-muted-foreground uppercase">
-            <th className={celda}>Envío</th>
+            <th className={celda}>Actividad</th>
+            <th className={celda}>Tipo</th>
             <th className={celda}>Destino</th>
             <th className={celda}>Fecha</th>
             <th className={celda}>Metas</th>
@@ -48,6 +50,9 @@ export function AyudasTabla({ ayudas, eliminarAction }: Props) {
                 >
                   {ayuda.titulo}
                 </Link>
+              </td>
+              <td className={celda}>
+                <TipoBadge tipo={ayuda.tipo} />
               </td>
               <td className={celda}>{ayuda.sectorDestino}</td>
               <td className={`${celda} numeric-tnum`}>

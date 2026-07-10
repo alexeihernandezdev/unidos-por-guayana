@@ -28,6 +28,7 @@ describe("contarAportesPendientes", () => {
       titulo: "Envío",
       sectorDestino: "Upata",
       fecha: new Date(),
+      tipo: "ENVIO",
       metas: [{ recursoId: agua.id, cantidadObjetivo: 100 }],
     });
     const a1 = await crearAporte(deps, {

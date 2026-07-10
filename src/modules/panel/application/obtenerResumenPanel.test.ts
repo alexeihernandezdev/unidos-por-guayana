@@ -36,6 +36,7 @@ describe("obtenerResumenPanel", () => {
       titulo: "Envío principal",
       sectorDestino: "Upata",
       fecha: new Date("2026-10-01"),
+      tipo: "ENVIO",
       metas: [{ recursoId: aguaId, cantidadObjetivo: 100 }],
     });
     await crearAporte(deps, {

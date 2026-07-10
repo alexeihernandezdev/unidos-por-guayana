@@ -38,6 +38,7 @@ export class InMemoryAyudaRepository implements AyudaRepository {
       sectorDestino: datos.sectorDestino,
       fecha: datos.fecha,
       estado: Estados.RECOLECTANDO,
+      tipo: datos.tipo,
       descripcion: datos.descripcion,
       metas: datos.metas.map((m) => this.nuevaMeta(m)),
       createdAt: ahora,
@@ -51,6 +52,9 @@ export class InMemoryAyudaRepository implements AyudaRepository {
     let ayudas = [...this.porId.values()];
     if (filtro?.estado) {
       ayudas = ayudas.filter((a) => a.estado === filtro.estado);
+    }
+    if (filtro?.tipo) {
+      ayudas = ayudas.filter((a) => a.tipo === filtro.tipo);
     }
     return ayudas.map((a) => this.clonar(a));
   }

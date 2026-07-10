@@ -33,12 +33,14 @@ describe("listarPrioridadRecolectando", () => {
       titulo: "Tarde",
       sectorDestino: "A",
       fecha: new Date("2026-09-10"),
+      tipo: "ENVIO",
       metas: [{ recursoId: aguaId, cantidadObjetivo: 100 }],
     });
     const temprano = await crearAyuda(deps, {
       titulo: "Temprano",
       sectorDestino: "B",
       fecha: new Date("2026-09-01"),
+      tipo: "ENVIO",
       metas: [{ recursoId: aguaId, cantidadObjetivo: 100 }],
     });
     const aporteTarde = await crearAporte(deps, {

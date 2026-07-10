@@ -10,6 +10,11 @@ import {
   SolicitudNoEncontradaError,
 } from "@/modules/solicitudes/application/errors";
 import {
+  DatosRecursoInvalidosError,
+  NombreDuplicadoError,
+} from "@/modules/recursos/application/errors";
+import { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
+import {
   URGENCIAS_SOLICITUD,
   UrgenciaSolicitud,
 } from "@/modules/solicitudes/domain/UrgenciaSolicitud";
@@ -19,6 +24,7 @@ import {
   crearSolicitudServicio,
   editarSolicitudServicio,
 } from "@/shared/solicitudes";
+import { proponerRecursoServicio } from "@/shared/recursos";
 import { requireRol } from "@/shared/auth";
 
 const RUTA_LISTADO = "/solicitudes";
@@ -139,6 +145,57 @@ export async function editarSolicitudAction(
   } catch (error) {
     const traducido = traducirError(error);
     if (traducido) return traducido;
+    throw error;
+  }
+}
+
+// Feature 019 · propuesta de recurso por el solicitante.
+const ProponerRecursoSchema = z.object({
+  nombre: z.string().trim().min(1, "Indica el nombre del recurso.").max(120),
+  unidad: z.string().trim().min(1, "Indica la unidad de medida.").max(60),
+  categoria: z.enum(CategoriaRecurso, { message: "Categoría no válida." }),
+  descripcion: z.string().trim().max(500).optional().or(z.literal("")),
+});
+
+export type ProponerRecursoInput = {
+  nombre: string;
+  unidad: string;
+  categoria: CategoriaRecurso;
+  descripcion: string;
+};
+
+export async function proponerRecursoAction(
+  input: ProponerRecursoInput,
+): Promise<Resultado> {
+  const usuario = await requireRol(Rol.SOLICITANTE);
+
+  const parsed = ProponerRecursoSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Datos no válidos.",
+    };
+  }
+
+  try {
+    await proponerRecursoServicio(
+      {
+        nombre: parsed.data.nombre,
+        unidad: parsed.data.unidad,
+        categoria: parsed.data.categoria,
+        descripcion: parsed.data.descripcion ?? null,
+      },
+      usuario.id,
+    );
+    revalidatePath("/solicitudes/nueva");
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof NombreDuplicadoError) {
+      return { ok: false, error: "Ya existe un recurso con ese nombre." };
+    }
+    if (error instanceof DatosRecursoInvalidosError) {
+      return { ok: false, error: error.message };
+    }
     throw error;
   }
 }
