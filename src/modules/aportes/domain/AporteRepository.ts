@@ -4,6 +4,7 @@ import type { EstadoAporte } from "./EstadoAporte";
 // Filtros de listado.
 export type FiltroAportes = {
   estado?: EstadoAporte;
+  ayudaId?: string;
 };
 
 // Agregado por meta (recibido / prometido) que la infraestructura sabe calcular
@@ -34,6 +35,8 @@ export interface AporteRepository {
   eliminar(id: string): Promise<void>;
   /** Agregación por meta de una Ayuda (recibido/prometido por recurso). */
   progresoPorAyuda(ayudaId: string): Promise<AgregadoPorMeta[]>;
+  /** Cuenta aportes que coinciden con el filtro. */
+  contar(filtro?: FiltroAportes): Promise<number>;
   /**
    * Últimos aportes de la plataforma, en orden descendente por `createdAt`.
    * Alimenta el feed del dashboard del ADMIN (feature 008).

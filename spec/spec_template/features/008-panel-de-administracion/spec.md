@@ -1,6 +1,6 @@
 # 008 · Panel de administración
 
-> Estado: **Pendiente** · Depende de: `002 · Autenticación y roles`, `004 · Catálogo de recursos`, `005 · Ayudas / Envío`, `006 · Aportes`, `007 · Solicitudes de ayuda` · Roadmap: `constitution/roadmap.md`
+> Estado: **Hecho** · Depende de: `002 · Autenticación y roles`, `004 · Catálogo de recursos`, `005 · Ayudas / Envío`, `006 · Aportes`, `007 · Solicitudes de ayuda` · Roadmap: `constitution/roadmap.md`
 
 ## Qué hace
 
@@ -94,18 +94,18 @@ la urgencia" y prerrequisito visual de 009 (tablero público) — parte de las l
 
 ## Criterios de aceptación
 
-- [ ] Un `ADMIN` autenticado ve en `/(admin)/panel` las tarjetas de métricas descritas
+- [x] Un `ADMIN` autenticado ve en `/(admin)/panel` las tarjetas de métricas descritas
       (envíos por estado, solicitudes por urgencia, aportes pendientes, sectores top).
-- [ ] El bloque **"Qué envío sale primero"** lista los envíos en `RECOLECTANDO` ordenados por
+- [x] El bloque **"Qué envío sale primero"** lista los envíos en `RECOLECTANDO` ordenados por
       porcentaje de completitud de sus metas (descendente), con enlace al detalle.
-- [ ] Cada tarjeta / bloque tiene un **enlace claro** al listado del módulo correspondiente con el
+- [x] Cada tarjeta / bloque tiene un **enlace claro** al listado del módulo correspondiente con el
       filtro aplicado (p. ej. "Solicitudes `ALTA` abiertas").
-- [ ] El panel **no ejecuta mutaciones**: todos los botones son links a los módulos dueños.
-- [ ] Un usuario **no-`ADMIN`** (o sin sesión) **no** accede a `/(admin)/panel` (protegido en
+- [x] El panel **no ejecuta mutaciones**: todos los botones son links a los módulos dueños.
+- [x] Un usuario **no-`ADMIN`** (o sin sesión) **no** accede a `/(admin)/panel` (protegido en
       servidor, redirige/bloquea vía `requireRol` / `proxy.ts`).
-- [ ] `pnpm test` cubre: `obtenerResumenPanel` compone correctamente los conteos y el orden de
+- [x] `pnpm test` cubre: `obtenerResumenPanel` compone correctamente los conteos y el orden de
       envíos por porcentaje, con dobles en memoria — en verde.
-- [ ] `pnpm lint` / `pnpm build` sin errores; `panel/application` **puro** (sin framework ni
+- [x] `pnpm lint` / `pnpm build` sin errores; `panel/application` **puro** (sin framework ni
       Prisma).
 
 ## Notas y riesgos

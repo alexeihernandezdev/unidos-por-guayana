@@ -162,4 +162,13 @@ export class PrismaAporteRepository implements AporteRepository {
     }
     return [...porRecurso.values()];
   }
+
+  async contar(filtro?: FiltroAportes): Promise<number> {
+    return prisma.aporte.count({
+      where: {
+        ...(filtro?.estado ? { estado: filtro.estado } : {}),
+        ...(filtro?.ayudaId ? { ayudaId: filtro.ayudaId } : {}),
+      },
+    });
+  }
 }

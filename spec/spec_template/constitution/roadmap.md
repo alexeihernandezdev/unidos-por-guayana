@@ -14,18 +14,18 @@ _Features completadas, en orden de implementación._
 6. **005 · Ayudas / Envío** — El `ADMIN` crea envíos con sus `MetaRecurso` (título, fecha, sector destino, metas por recurso) en `/panel/ayudas`: alta, listado con filtro por estado, detalle, edición de cabecera/metas solo en `RECOLECTANDO` y avance de estado por la secuencia `RECOLECTANDO → LISTO → EN_TRANSITO → ENTREGADO`. Módulo `src/modules/ayudas` (Clean + Screaming) con la máquina de estados como dominio puro.
 7. **006 · Aportes** — El `COLABORADOR` aporta a una Ayuda en `RECOLECTANDO` contra un recurso de sus metas (rutas `/ayudas/[id]/aportar` y `/mis-aportes`). El `ADMIN` marca `COMPROMETIDO → RECIBIDO` (o revierte) desde el detalle de Ayuda; solo los `RECIBIDO` suman al progreso, y `ProgresoMetas` reemplaza el placeholder "sin aportes aún" con recibido/prometido/porcentaje. Módulo `src/modules/aportes` (Clean + Screaming) con `progresoDeMeta` puro y `updateMany` idempotente para transiciones.
 8. **007 · Solicitudes de ayuda** — El `SOLICITANTE` crea y gestiona peticiones por sector, urgencia y recursos necesarios en `/solicitudes`; el `ADMIN` las lista con filtros y marca atendida o cierra en `/panel/solicitudes`. Módulo `src/modules/solicitudes` (Clean + Screaming) con máquina de estados pura.
+9. **008 · Panel de administración** — Tablero read-only del `ADMIN` en `/panel`: métricas agregadas (envíos por estado, solicitudes por urgencia, aportes pendientes, sectores top), bloque «Qué envío sale primero» ordenado por % de metas, y atajos a crear ayuda/recurso/solicitudes. Módulo `src/modules/panel` (solo `application` + `ui`); lecturas agregadas en 005/006/007.
 
 ## Siguiente 🔜
 
 _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
 
-9. **008 · Panel de administración** — Tablero del `ADMIN`: estado de envíos, progreso de metas, solicitudes abiertas y decisión de qué sale primero.
+10. **015 · Rol SUPERADMIN y registro público de administradores** — Nuevo rol `SUPERADMIN` (sembrado por `db:seed`, raíz de confianza). El registro de `ADMIN` pasa a ser **público**: la cuenta se crea en `estadoVerificacion = PENDIENTE` y no puede operar hasta que un `SUPERADMIN` la aprueba (`VERIFICADO`) o la rechaza. Incluye la bandeja de aprobación del superadmin. _Enmienda 002._
 
 ## Cambios propuestos por el cliente (revisión de alcance) 🔁
 
 _Cambios solicitados por el cliente que **rompen parte del encaje actual**: tocan features ya "Hecho" (002, 004, 005) y la constitución ya se actualizó (`mission.md`, `tech-stack.md`) para reflejarlos. Cada uno se aborda como feature nueva y, al implementarse, enmienda la feature de origen. Ordenados por dependencia; van antes que el backlog de apoyo porque cambian el modelo base._
 
-10. **015 · Rol SUPERADMIN y registro público de administradores** — Nuevo rol `SUPERADMIN` (sembrado por `db:seed`, raíz de confianza). El registro de `ADMIN` pasa a ser **público**: la cuenta se crea en `estadoVerificacion = PENDIENTE` y no puede operar hasta que un `SUPERADMIN` la aprueba (`VERIFICADO`) o la rechaza. Incluye la bandeja de aprobación del superadmin. _Enmienda 002._
 11. **016 · Perfil de administrador y centro de acopio** — `PerfilAdmin` con datos ampliados (`nombreCuenta`, `estado`, `parroquia`, `telefono`, `correo`, `documento` con `tipoDocumento` ∈ `JURIDICO` | `NATURAL`); el `ADMIN` funciona como centro de acopio y puede tener uno o varios `PuntoAcopio`. _Depende de 015; conecta con 011._
 12. **017 · Datos de contacto obligatorios (colaborador y solicitante)** — `cedula` y `telefono` obligatorios en el registro de `COLABORADOR` y `SOLICITANTE`. _Enmienda 002._
 13. **018 · Tipos de actividad en Ayuda (envío / jornada / evento social)** — La entidad Ayuda gana `tipo` ∈ `ENVIO` | `JORNADA` | `EVENTO_SOCIAL`; la acción de crear se **renombra y presenta según el tipo**, compartiendo metas, aportes y seguimiento. _Enmienda 005._
