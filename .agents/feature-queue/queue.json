@@ -28,6 +28,8 @@
       "docFile": "DOC/features/020-catalogo-estados-municipios-venezuela.md",
       "branch": "cursor/catalogo-estados-municipios-020-fa4a",
       "pr": "https://github.com/alexeihernandezdev/unidos-por-guayana/pull/11",
+      "agentBcId": null,
+      "startedAt": "2026-07-10T16:25:00Z",
       "completedAt": "2026-07-10T16:35:00Z"
     },
     "008-panel-de-administracion": {
