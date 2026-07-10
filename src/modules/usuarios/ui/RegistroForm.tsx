@@ -3,20 +3,25 @@
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import type { DatosContacto } from "@/modules/usuarios/domain/datosContacto";
 import {
   TipoDocumento,
   type DatosPerfilAdmin,
 } from "@/modules/usuarios/domain/PerfilAdmin";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { Button } from "@/shared/ui/button";
+import { DatosContactoFields } from "./DatosContactoFields";
 
 // Payload que el formulario envía al server action. Cuando el rol es ADMIN,
-// incluye el perfil de centro de acopio (feature 016).
+// incluye el perfil de centro de acopio (feature 016) con `telefonoEsWhatsApp`.
+// Cuando el rol es COLABORADOR/SOLICITANTE, incluye los datos de contacto y
+// ubicación (feature 017).
 export type RegistroInput = {
   nombre: string;
   email: string;
   password: string;
   rol: Rol;
+  datosContacto?: DatosContacto;
   perfil?: DatosPerfilAdmin;
 };
 
@@ -25,14 +30,19 @@ type Campos = {
   email: string;
   password: string;
   rol: typeof Rol.ADMIN | typeof Rol.COLABORADOR | typeof Rol.SOLICITANTE;
-  // Perfil de administrador (solo se envían y validan si rol === ADMIN).
-  nombreCuenta: string;
+  // Contacto y ubicación (COLABORADOR/SOLICITANTE, feature 017).
+  cedula: string;
+  telefono: string;
+  telefonoEsWhatsApp: boolean;
   estado: string;
   parroquia: string;
-  telefono: string;
+  // Perfil de administrador (solo se envían y validan si rol === ADMIN).
+  nombreCuenta: string;
   correo: string;
   tipoDocumento: TipoDocumento;
   numeroDocumento: string;
+  // WhatsApp flag del PerfilAdmin (feature 017 amplía 016).
+  perfilTelefonoEsWhatsApp: boolean;
 };
 
 type Props = {
@@ -55,12 +65,18 @@ export function RegistroForm({ action }: Props) {
     handleSubmit,
     formState: { errors },
   } = useForm<Campos>({
-    defaultValues: { rol: Rol.COLABORADOR, tipoDocumento: TipoDocumento.JURIDICO },
+    defaultValues: {
+      rol: Rol.COLABORADOR,
+      tipoDocumento: TipoDocumento.JURIDICO,
+      telefonoEsWhatsApp: true,
+      perfilTelefonoEsWhatsApp: true,
+    },
   });
 
   // Se sigue el rol con estado local (en vez de `watch`, que desactiva la
-  // memoización del React Compiler) para mostrar los campos de perfil del admin.
-  const [esAdmin, setEsAdmin] = useState(false);
+  // memoización del React Compiler) para mostrar los campos condicionales.
+  const [rolActual, setRolActual] = useState<Rol>(Rol.COLABORADOR);
+  const esAdmin = rolActual === Rol.ADMIN;
   const rolField = register("rol");
 
   const onSubmit = handleSubmit((datos) => {
@@ -70,12 +86,28 @@ export function RegistroForm({ action }: Props) {
       email: datos.email,
       password: datos.password,
       rol: datos.rol,
+      datosContacto: esAdmin
+        ? {
+            cedula: "",
+            telefono: "",
+            telefonoEsWhatsApp: datos.perfilTelefonoEsWhatsApp,
+            estado: "",
+            parroquia: "",
+          }
+        : {
+            cedula: datos.cedula,
+            telefono: datos.telefono,
+            telefonoEsWhatsApp: datos.telefonoEsWhatsApp,
+            estado: datos.estado,
+            parroquia: datos.parroquia,
+          },
       perfil: esAdmin
         ? {
             nombreCuenta: datos.nombreCuenta,
             estado: datos.estado,
             parroquia: datos.parroquia,
             telefono: datos.telefono,
+            telefonoEsWhatsApp: datos.perfilTelefonoEsWhatsApp,
             correo: datos.correo,
             tipoDocumento: datos.tipoDocumento,
             numeroDocumento: datos.numeroDocumento,
@@ -165,7 +197,7 @@ export function RegistroForm({ action }: Props) {
           {...rolField}
           onChange={(event) => {
             rolField.onChange(event);
-            setEsAdmin(event.target.value === Rol.ADMIN);
+            setRolActual(event.target.value as Rol);
           }}
         >
           <option value={Rol.COLABORADOR}>Colaborador (quiero aportar)</option>
@@ -181,6 +213,10 @@ export function RegistroForm({ action }: Props) {
           </p>
         )}
       </div>
+
+      {!esAdmin && (
+        <DatosContactoFields<Campos> register={register} errors={errors} />
+      )}
 
       {esAdmin && (
         <fieldset className="flex flex-col gap-4 rounded-lg border border-border p-4">
@@ -286,6 +322,14 @@ export function RegistroForm({ action }: Props) {
               )}
             </div>
           </div>
+
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              {...register("perfilTelefonoEsWhatsApp")}
+            />
+            Este número recibe WhatsApp
+          </label>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">

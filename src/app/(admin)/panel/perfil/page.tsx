@@ -21,6 +21,7 @@ export default async function PerfilAdminPage() {
         estado: perfil.estado,
         parroquia: perfil.parroquia,
         telefono: perfil.telefono,
+        telefonoEsWhatsApp: perfil.telefonoEsWhatsApp,
         correo: perfil.correo,
         tipoDocumento: perfil.tipoDocumento,
         numeroDocumento: perfil.numeroDocumento,

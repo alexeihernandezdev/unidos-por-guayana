@@ -1,6 +1,10 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import {
+  actualizarDatosContacto as actualizarDatosContactoCaso,
+  type ActualizarDatosContactoInput,
+} from "@/modules/usuarios/application/actualizarDatosContacto";
+import {
   aprobarAdmin,
   listarAdminsPendientes,
   rechazarAdmin,
@@ -108,6 +112,18 @@ export function rechazarAdminGestion(
  */
 export function buscarUsuarioPorId(id: string): Promise<Usuario | null> {
   return usuarios.buscarPorId(id);
+}
+
+/**
+ * Guarda los datos de contacto/ubicación de un COLABORADOR/SOLICITANTE. Lo
+ * consumen `/completar-perfil` (primer login) y `/mi-perfil` (edición) a
+ * través de la fachada `@/shared/auth` (feature 017).
+ */
+export function actualizarDatosContactoUsuario(
+  usuarioId: string,
+  input: ActualizarDatosContactoInput,
+): Promise<Usuario> {
+  return actualizarDatosContactoCaso({ usuarios }, usuarioId, input);
 }
 
 // ── Auth.js v5 (NextAuth) ─────────────────────────────────────────────────────

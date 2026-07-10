@@ -11,6 +11,13 @@ async function crearDepsConUsuario() {
     email: "ana@example.com",
     password: "contraseña-segura",
     rol: Rol.COLABORADOR,
+    datosContacto: {
+      cedula: "V12345678",
+      telefono: "04121234567",
+      telefonoEsWhatsApp: true,
+      estado: "La Guaira",
+      parroquia: "Catia La Mar",
+    },
   });
   return deps;
 }

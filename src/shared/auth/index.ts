@@ -13,11 +13,13 @@ export {
   rechazarAdminGestion,
   obtenerPerfilAdminGestion,
   actualizarPerfilAdminGestion,
+  actualizarDatosContactoUsuario,
   buscarUsuarioPorId,
 } from "@/lib/auth";
 export {
   getUsuarioActual,
   requireAdminVerificado,
+  requireDatosContactoCompletos,
   requireRol,
   requireSesion,
   type UsuarioSesion,

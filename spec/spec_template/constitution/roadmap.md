@@ -19,12 +19,13 @@ _Features completadas, en orden de implementación._
 11. **016 · Perfil de administrador y centro de acopio** — `PerfilAdmin` (uno a uno con `Usuario` ADMIN): `nombreCuenta`, `estado`, `parroquia`, `telefono`, `correo`, `documento` con `tipoDocumento` ∈ `JURIDICO` | `NATURAL`. Se captura en el registro público de admin (015), se muestra al `SUPERADMIN` en la bandeja de aprobación, y el admin lo edita en `/panel/perfil`. Declara el lado `adminId` de la relación con `PuntoAcopio` (0..N) y la herencia de ubicación por defecto. _Depende de 015; deja lista la base para 011._
 12. **018 · Tipos de actividad en Ayuda (envío / jornada / evento social)** — La entidad Ayuda gana `tipo` ∈ `ENVIO` | `JORNADA` | `EVENTO_SOCIAL`. El ADMIN lo elige al crear y la pantalla renombra título y botón ("Crear envío" / "Crear jornada" / "Crear evento social"); el listado muestra el tipo con filtro combinable con el de estado; ciclo de vida, metas, aportes y seguimiento no cambian. Backfill: las Ayudas existentes quedan como `ENVIO`. _Enmienda 005._
 13. **019 · Propuesta de recursos por el solicitante** — El `Recurso` gana `estadoAprobacion` ∈ `APROBADO` | `PROPUESTO` | `RECHAZADO` y `propuestoPor`. El `SOLICITANTE` puede proponer recursos desde `/solicitudes/proponer-recurso`; el `ADMIN` los revisa en `/panel/recursos/propuestas` y los aprueba o rechaza. Solo los `APROBADO` + activos son seleccionables en metas (005) y aportes (006). Backfill: los recursos previos quedan `APROBADO`. _Enmienda 004._
+14. **017 · Datos de contacto obligatorios (colaborador y solicitante)** — `cedula`, `telefono`, `telefonoEsWhatsApp`, `estado` y `parroquia` obligatorios en el registro de `COLABORADOR` y `SOLICITANTE`. Guard de servidor redirige a `/completar-perfil` cuando faltan; edición desde `/mi-perfil`. Añade `telefonoEsWhatsApp` a `PerfilAdmin` (enmienda 016). _Enmienda 002 y 016._
 
 ## Siguiente 🔜
 
 _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
 
-14. **017 · Datos de contacto obligatorios (colaborador y solicitante)** — `cedula` y `telefono` obligatorios en el registro de `COLABORADOR` y `SOLICITANTE`. _Enmienda 002._
+15. **009 · Tablero público de transparencia** — Vista abierta (sin login) con lo recolectado, progreso por envío y destino de cada ayuda.
 
 ## Cambios propuestos por el cliente (revisión de alcance) 🔁
 
@@ -38,7 +39,6 @@ _Ordenado según dependencias. Cada uno se convierte en `features/NNN-…/` ante
 
 **Superficies de gestión y transparencia**
 
-15. **009 · Tablero público de transparencia** — Vista abierta (sin login) con lo recolectado, progreso por envío y destino de cada ayuda.
 16. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
 
 **Módulos de apoyo**

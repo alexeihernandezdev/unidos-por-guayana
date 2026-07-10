@@ -34,11 +34,13 @@ export function navItemsPorRol(rol: Rol | null): NavItem[] {
       return [
         { label: "Actividades", href: "/ayudas", exact: true },
         { label: "Mis aportes", href: "/mis-aportes", exact: true },
+        { label: "Mi perfil", href: "/mi-perfil", exact: true },
       ];
     case Rol.SOLICITANTE:
       return [
         { label: "Mis solicitudes", href: "/solicitudes", exact: true },
         { label: "Nueva solicitud", href: "/solicitudes/nueva", exact: true },
+        { label: "Mi perfil", href: "/mi-perfil", exact: true },
       ];
   }
 }

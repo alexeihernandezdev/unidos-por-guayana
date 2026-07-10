@@ -13,7 +13,9 @@ export function esTipoDocumentoValido(valor: string): valor is TipoDocumento {
   return valor === TipoDocumento.JURIDICO || valor === TipoDocumento.NATURAL;
 }
 
-// Entidad de dominio: extensión uno a uno de `Usuario` (rol `ADMIN`).
+// Entidad de dominio: extensión uno a uno de `Usuario` (rol `ADMIN`). El campo
+// `telefonoEsWhatsApp` se añadió en la feature 017 para saber por qué canal
+// puede contactarle un colaborador o el propio SUPERADMIN.
 export type PerfilAdmin = {
   id: string;
   usuarioId: string;
@@ -21,6 +23,7 @@ export type PerfilAdmin = {
   estado: string;
   parroquia: string;
   telefono: string;
+  telefonoEsWhatsApp: boolean;
   correo: string;
   tipoDocumento: TipoDocumento;
   numeroDocumento: string;
@@ -34,6 +37,7 @@ export type DatosPerfilAdmin = {
   estado: string;
   parroquia: string;
   telefono: string;
+  telefonoEsWhatsApp: boolean;
   correo: string;
   tipoDocumento: TipoDocumento;
   numeroDocumento: string;
