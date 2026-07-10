@@ -221,6 +221,27 @@
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
 
+/* Clip orgánico tipo "petalo" para fotos protagonistas del hero. Se define en
+   userSpaceOnUse para que la forma escale con la imagen y no se distorsione en
+   proporciones extremas. Referencia visual: Gainlove ONG. */
+.clip-organic {
+  clip-path: path("M 0 60 C 0 20, 20 0, 60 0 L 340 0 C 380 0, 400 30, 395 80 L 380 480 C 375 530, 350 560, 300 555 L 60 545 C 20 540, 0 510, 5 460 Z");
+  -webkit-clip-path: path("M 0 60 C 0 20, 20 0, 60 0 L 340 0 C 380 0, 400 30, 395 80 L 380 480 C 375 530, 350 560, 300 555 L 60 545 C 20 540, 0 510, 5 460 Z");
+}
+
+/* Watermark de dot-grid: aproximación abstracta a un mapa del mundo/región.
+   Se usa como capa decorativa fija de fondo en secciones territoriales. No es
+   un mapa literal (evita cliché) pero da la sensación de territorio y escala. */
+.dot-map {
+  background-image: radial-gradient(oklch(0.22 0.004 260 / 0.12) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+  background-position: 0 0;
+}
+.dot-map-dense {
+  background-image: radial-gradient(oklch(0.22 0.004 260 / 0.16) 1px, transparent 1.2px);
+  background-size: 14px 14px;
+}
+
 /* Hairline reutilizable: separadores 1px que respetan el token de border. */
 .hairline {
   height: 1px;

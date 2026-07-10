@@ -33,16 +33,23 @@ export function TrustSection() {
   return (
     <section
       id="transparencia"
-      className="relative border-t border-border bg-muted"
+      className="relative overflow-hidden border-t border-border bg-muted"
     >
-      <div className="mx-auto max-w-6xl px-6 py-16 md:px-8 md:py-20">
+      {/* Watermark dot-map denso: da textura de territorio al bloque de confianza. */}
+      <div
+        aria-hidden
+        className="dot-map-dense pointer-events-none absolute inset-0 opacity-50"
+      />
+      <div className="relative mx-auto max-w-6xl px-6 py-20 md:px-8 md:py-28">
         <div className="grid gap-8 md:grid-cols-[1.4fr_1fr] md:items-end md:gap-12">
           <div>
             <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
               <span className="hairline w-8" aria-hidden />
               <span>Transparencia</span>
             </div>
-            <h2 className="mt-3 text-3xl font-semibold text-foreground [text-wrap:balance] md:text-4xl md:tracking-tight">
+            <h2 className="mt-3 font-serif text-4xl font-medium text-foreground [text-wrap:balance] md:text-[3rem]"
+              style={{ letterSpacing: "-0.02em", lineHeight: 1.05 }}
+            >
               Por qué puedes confiar.
             </h2>
           </div>
@@ -67,7 +74,9 @@ export function TrustSection() {
               />
             </div>
             <div className="flex flex-1 flex-col p-8 md:p-10">
-              <h3 className="text-2xl font-semibold text-foreground [text-wrap:balance] md:text-3xl md:tracking-tight">
+              <h3 className="font-serif text-3xl font-medium text-foreground [text-wrap:balance] md:text-[2.25rem]"
+                style={{ letterSpacing: "-0.015em", lineHeight: 1.1 }}
+              >
                 {featured.title}
               </h3>
               <p className="mt-5 max-w-[54ch] text-base text-foreground/85 [text-wrap:pretty]">
