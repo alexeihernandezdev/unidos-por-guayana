@@ -107,7 +107,7 @@
       "specDir": "spec/spec_template/features/009-tablero-publico-de-transparencia",
       "docFile": "DOC/features/009-tablero-publico-de-transparencia.md",
       "branch": "cursor/tablero-transparencia-009-3b92",
-      "pr": null,
+      "pr": "https://github.com/alexeihernandezdev/unidos-por-guayana/pull/8",
       "agentBcId": null,
       "startedAt": "2026-07-10T15:32:00Z",
       "completedAt": "2026-07-10T15:42:00Z"
