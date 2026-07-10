@@ -6,6 +6,7 @@ import type {
   AgregadoPorMeta,
   AporteRepository,
   FiltroAportes,
+  RecolectadoPorRecursoId,
 } from "@/modules/aportes/domain/AporteRepository";
 
 // Incluye recurso y colaborador para las vistas (tabla admin, "mis aportes").
@@ -161,6 +162,20 @@ export class PrismaAporteRepository implements AporteRepository {
       porRecurso.set(g.recursoId, actual);
     }
     return [...porRecurso.values()];
+  }
+
+  async recolectadoGlobalPorRecurso(): Promise<RecolectadoPorRecursoId[]> {
+    const grupos = await prisma.aporte.groupBy({
+      by: ["recursoId"],
+      where: { estado: Estados.RECIBIDO },
+      _sum: { cantidad: true },
+    });
+    return grupos
+      .map((g) => ({
+        recursoId: g.recursoId,
+        cantidadRecibida: g._sum.cantidad?.toNumber() ?? 0,
+      }))
+      .filter((fila) => fila.cantidadRecibida > 0);
   }
 
   async contar(filtro?: FiltroAportes): Promise<number> {

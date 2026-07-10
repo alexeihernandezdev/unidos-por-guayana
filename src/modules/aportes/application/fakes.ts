@@ -8,6 +8,7 @@ import type {
   AgregadoPorMeta,
   AporteRepository,
   FiltroAportes,
+  RecolectadoPorRecursoId,
 } from "@/modules/aportes/domain/AporteRepository";
 
 // Doble en memoria para los tests de casos de uso. No toca la base ni Prisma.
@@ -99,6 +100,23 @@ export class InMemoryAporteRepository implements AporteRepository {
       acumulado.set(aporte.recursoId, actual);
     }
     return [...acumulado.values()];
+  }
+
+  async recolectadoGlobalPorRecurso(): Promise<RecolectadoPorRecursoId[]> {
+    const acumulado = new Map<string, number>();
+    for (const aporte of this.porId.values()) {
+      if (aporte.estado !== Estados.RECIBIDO) continue;
+      acumulado.set(
+        aporte.recursoId,
+        (acumulado.get(aporte.recursoId) ?? 0) + aporte.cantidad,
+      );
+    }
+    return [...acumulado.entries()]
+      .filter(([, cantidad]) => cantidad > 0)
+      .map(([recursoId, cantidadRecibida]) => ({
+        recursoId,
+        cantidadRecibida,
+      }));
   }
 
   async contar(filtro?: FiltroAportes): Promise<number> {

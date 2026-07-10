@@ -15,6 +15,12 @@ export type AgregadoPorMeta = {
   prometido: number;
 };
 
+/** Suma global de aportes RECIBIDO por recurso (tablero público, feature 009). */
+export type RecolectadoPorRecursoId = {
+  recursoId: string;
+  cantidadRecibida: number;
+};
+
 // Contrato de persistencia de aportes. La implementación concreta (Prisma) vive
 // en la capa de infraestructura; el dominio solo define la interfaz.
 export interface AporteRepository {
@@ -35,6 +41,8 @@ export interface AporteRepository {
   eliminar(id: string): Promise<void>;
   /** Agregación por meta de una Ayuda (recibido/prometido por recurso). */
   progresoPorAyuda(ayudaId: string): Promise<AgregadoPorMeta[]>;
+  /** Suma de cantidades RECIBIDO agrupada por recurso en toda la plataforma. */
+  recolectadoGlobalPorRecurso(): Promise<RecolectadoPorRecursoId[]>;
   /** Cuenta aportes que coinciden con el filtro. */
   contar(filtro?: FiltroAportes): Promise<number>;
   /**

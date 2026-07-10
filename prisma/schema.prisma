@@ -251,6 +251,8 @@ model Ayuda {
   updatedAt     DateTime      @updatedAt
 
   @@index([tipo])
+  @@index([estado])
+  @@index([fecha])
   @@map("ayudas")
 }
 
