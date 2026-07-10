@@ -1,19 +1,26 @@
 import { getUsuarioActual } from "@/shared/auth";
 import { cerrarSesionAction } from "@/shared/auth/actions";
-import { BackButton } from "@/modules/shell/ui/BackButton";
 import { LogOutIcon } from "lucide-react";
-import { Sidebar } from "./Sidebar";
-import { MobileSidebar } from "./MobileSidebar";
+import { resolverPanelInicio } from "@/modules/shell/application/resolverPanelInicio";
+import { buscarUsuarioPorId } from "@/shared/auth";
+import { Rol } from "@/modules/usuarios/domain/Rol";
+import { AppSidebar } from "./AppSidebar";
+import { BackButton } from "./BackButton";
+import { MobileAppSidebar } from "./MobileAppSidebar";
+import { inicioPanelPorRol, navSectionsPorRol } from "./navConfig";
 
-// Shell del panel de administrador. Server component: renderiza el sidebar
-// (server + client interactivo dentro), el topbar móvil con Sheet, y una
-// zona `main` que hospeda el contenido. Sidebar y main comparten background
-// (spec: "sidebars: mismo background que canvas, borde suficiente separación").
-export async function AdminShell({ children }: { children: React.ReactNode }) {
+// Shell del panel de funcionalidades para COLABORADOR, SOLICITANTE y SUPERADMIN
+// (y pantallas de onboarding como completar-perfil / cuenta-admin pendiente).
+export async function AppShell({ children }: { children: React.ReactNode }) {
   const usuario = await getUsuarioActual();
+  const inicioHref = usuario
+    ? usuario.rol === Rol.ADMIN
+      ? "/cuenta-admin"
+      : inicioPanelPorRol(usuario.rol)
+    : "/";
 
-  // Cluster de sesión: se renderiza en el server y se inyecta al Sheet móvil
-  // como slot, evitando duplicar lógica de sesión en el cliente.
+  const sections = usuario ? navSectionsPorRol(usuario.rol) : [];
+
   const clusterSesion = (
     <>
       {usuario && (
@@ -43,11 +50,14 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-[100dvh] flex-col md:flex-row">
-      <Sidebar />
+      <AppSidebar inicioHref={inicioHref} />
 
-      {/* Topbar móvil: solo visible < md. Ancla el hamburguesa + wordmark. */}
       <div className="flex h-14 items-center justify-between border-b border-border bg-background px-4 md:hidden">
-        <MobileSidebar slotSesion={clusterSesion} />
+        <MobileAppSidebar
+          inicioHref={inicioHref}
+          sections={sections}
+          slotSesion={clusterSesion}
+        />
         <span className="relative pb-[2px] font-serif text-sm leading-none tracking-tight">
           <span className="italic text-foreground/60">Unidos por</span>{" "}
           <span className="font-semibold">la Guaira</span>
@@ -61,10 +71,17 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
 
       <main className="flex min-w-0 flex-1 flex-col bg-background">
         <div className="border-b border-border px-4 py-2 md:px-6">
-          <BackButton fallbackHref="/panel" />
+          <BackButton fallbackHref={inicioHref} />
         </div>
         {children}
       </main>
     </div>
   );
+}
+
+/** Resuelve el destino tras login con datos frescos de base para ADMIN. */
+export async function destinoPostLogin(usuarioId: string): Promise<string> {
+  const fresco = await buscarUsuarioPorId(usuarioId);
+  if (!fresco) return "/";
+  return resolverPanelInicio(fresco);
 }

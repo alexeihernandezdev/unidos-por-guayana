@@ -3,6 +3,7 @@ import { tieneDatosContactoCompletos } from "@/modules/usuarios/domain/datosCont
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { DatosContactoForm } from "@/modules/usuarios/ui/DatosContactoForm";
 import { buscarUsuarioPorId, requireSesion } from "@/shared/auth";
+import { destinoPostLogin } from "@/shared/shell";
 import { guardarDatosContactoAction } from "./actions";
 
 // Pantalla obligatoria de "completar perfil" para cuentas COLABORADOR /
@@ -17,8 +18,10 @@ export default async function CompletarPerfilPage() {
 
   const fresco = await buscarUsuarioPorId(sesion.id);
   if (fresco && tieneDatosContactoCompletos(fresco)) {
-    redirect("/mi-perfil");
+    redirect(await destinoPostLogin(sesion.id));
   }
+
+  const destinoOk = await destinoPostLogin(sesion.id);
 
   return (
     <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 p-6 md:p-8">
@@ -43,7 +46,7 @@ export default async function CompletarPerfilPage() {
           parroquia: fresco?.parroquia ?? "",
         }}
         action={guardarDatosContactoAction}
-        destinoOk="/"
+        destinoOk={destinoOk}
       />
     </main>
   );

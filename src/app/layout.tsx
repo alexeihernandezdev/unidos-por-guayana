@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { EB_Garamond, Geist, Geist_Mono } from "next/font/google";
 import { SiteHeader } from "@/modules/landing/ui/SiteHeader";
+import { AppShell, esRutaConSidebar, esRutaShellUsuario } from "@/shared/shell";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -37,12 +38,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // El navbar global (SiteHeader) NO se muestra dentro del panel del
-  // administrador: /panel/* usa su propio shell con sidebar (ver
-  // `src/modules/admin/ui/AdminShell.tsx`). La ruta actual llega vía el header
-  // `x-pathname` que setea `src/proxy.ts` en cada request.
+  // El navbar global (SiteHeader) NO se muestra en rutas con sidebar: /panel/*
+  // usa `AdminShell`; el resto de paneles por rol usan `AppShell`. La ruta
+  // actual llega vía el header `x-pathname` que setea `src/proxy.ts`.
   const pathname = (await headers()).get("x-pathname") ?? "";
-  const esRutaAdmin = pathname.startsWith("/panel");
+  const enPanel = esRutaConSidebar(pathname);
+  const enPanelUsuario = esRutaShellUsuario(pathname);
 
   return (
     <html
@@ -52,8 +53,8 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <Providers>
-          {!esRutaAdmin && <SiteHeader />}
-          {children}
+          {!enPanel && <SiteHeader />}
+          {enPanelUsuario ? <AppShell>{children}</AppShell> : children}
         </Providers>
       </body>
     </html>

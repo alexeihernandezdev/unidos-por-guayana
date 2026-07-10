@@ -114,6 +114,14 @@ export function buscarUsuarioPorId(id: string): Promise<Usuario | null> {
   return usuarios.buscarPorId(id);
 }
 
+/** Valida credenciales para el login (sin crear sesión). */
+export function validarCredencialesLogin(
+  email: string,
+  password: string,
+): Promise<Usuario | null> {
+  return validarCredenciales({ usuarios, hasher }, email, password);
+}
+
 /**
  * Guarda los datos de contacto/ubicación de un COLABORADOR/SOLICITANTE. Lo
  * consumen `/completar-perfil` (primer login) y `/mi-perfil` (edición) a

@@ -15,6 +15,7 @@ export {
   actualizarPerfilAdminGestion,
   actualizarDatosContactoUsuario,
   buscarUsuarioPorId,
+  validarCredencialesLogin,
 } from "@/lib/auth";
 export {
   getUsuarioActual,

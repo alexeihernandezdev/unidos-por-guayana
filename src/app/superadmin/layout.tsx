@@ -11,5 +11,5 @@ export default async function SuperadminLayout({
 }) {
   await requireRol(Rol.SUPERADMIN);
 
-  return <div className="mx-auto w-full max-w-3xl flex-1 px-6 py-10">{children}</div>;
+  return <div className="mx-auto w-full max-w-3xl flex-1 p-6 md:p-8">{children}</div>;
 }
