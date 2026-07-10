@@ -10,6 +10,8 @@
     "017-datos-de-contacto-obligatorios",
     "018-tipos-de-actividad-en-ayuda",
     "019-propuesta-de-recursos-por-solicitante",
+    "020-catalogo-estados-municipios",
+    "021-home-y-shell-por-rol",
     "009-tablero-publico-de-transparencia",
     "010-seguimiento-del-envio",
     "011-puntos-de-acopio",
@@ -98,6 +100,34 @@
       "startedAt": "2026-07-10T09:30:00Z",
       "completedAt": "2026-07-10T09:55:00Z",
       "notes": "Implementada junto a 018 en la misma sesión por decisión explícita del usuario (skip de la convención un-agente-por-feature)."
+    },
+    "020-catalogo-estados-municipios": {
+      "id": "020",
+      "slug": "020-catalogo-estados-municipios",
+      "title": "Catálogo de estados y municipios de Venezuela",
+      "status": "pending",
+      "specDir": "spec/spec_template/features/020-catalogo-estados-municipios",
+      "docFile": "DOC/features/020-catalogo-estados-municipios.md",
+      "branch": null,
+      "pr": null,
+      "agentBcId": null,
+      "startedAt": null,
+      "completedAt": null,
+      "notes": "Enmienda 016/017: reemplaza texto libre estado/parroquia por FKs al catálogo sembrado en BD."
+    },
+    "021-home-y-shell-por-rol": {
+      "id": "021",
+      "slug": "021-home-y-shell-por-rol",
+      "title": "Home y shell de navegación por rol",
+      "status": "pending",
+      "specDir": "spec/spec_template/features/021-home-y-shell-por-rol",
+      "docFile": "DOC/features/021-home-y-shell-por-rol.md",
+      "branch": null,
+      "pr": null,
+      "agentBcId": null,
+      "startedAt": null,
+      "completedAt": null,
+      "notes": "Enmienda 002/003/008: post-login → home por rol; AppShell con sidebar para todos; botón Volver al sitio."
     },
     "009-tablero-publico-de-transparencia": {
       "id": "009",

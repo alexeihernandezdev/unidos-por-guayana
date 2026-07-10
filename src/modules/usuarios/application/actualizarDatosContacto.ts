@@ -5,6 +5,8 @@ import {
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import type { Usuario } from "@/modules/usuarios/domain/Usuario";
 import type { UsuarioRepository } from "@/modules/usuarios/domain/UsuarioRepository";
+import { validarUbicacionCatalogo } from "@/modules/ubicaciones/domain/reglas";
+import type { UbicacionRepository } from "@/modules/ubicaciones/domain/UbicacionRepository";
 import {
   CedulaYaRegistradaError,
   DatosContactoInvalidosError,
@@ -13,23 +15,16 @@ import {
 
 export type ActualizarDatosContactoDeps = {
   usuarios: UsuarioRepository;
+  ubicaciones: Pick<UbicacionRepository, "obtenerMunicipio">;
 };
 
 export type ActualizarDatosContactoInput = DatosContacto;
 
 /**
- * Valida y persiste los cinco campos de contacto/ubicación de un usuario. Se
- * usa tanto en el primer inicio de sesión (guard → `/completar-perfil`) como
- * en la edición desde `/mi-perfil` (feature 017).
- *
- * Reglas:
- * - Solo `COLABORADOR` y `SOLICITANTE` guardan estos datos en `Usuario`; para
- *   `ADMIN` los datos viven en `PerfilAdmin` (016) y este caso de uso no aplica.
- * - Unicidad de cédula: rechaza si otra cuenta ya la tiene, permitiendo que el
- *   propio usuario "guarde sin cambiar" (cédula igual a la suya actual).
+ * Valida y persiste contacto + ubicación por catálogo (017 + 020).
  */
 export async function actualizarDatosContacto(
-  { usuarios }: ActualizarDatosContactoDeps,
+  { usuarios, ubicaciones }: ActualizarDatosContactoDeps,
   usuarioId: string,
   input: ActualizarDatosContactoInput,
 ): Promise<Usuario> {
@@ -48,10 +43,25 @@ export async function actualizarDatosContacto(
     throw new DatosContactoInvalidosError(validacion.error);
   }
 
+  const ubicacion = await validarUbicacionCatalogo(
+    {
+      estadoId: validacion.valor.estadoId,
+      municipioId: validacion.valor.municipioId,
+    },
+    { ubicaciones },
+  );
+  if (!ubicacion.ok) {
+    throw new DatosContactoInvalidosError(ubicacion.error);
+  }
+
   const existente = await usuarios.buscarPorCedula(validacion.valor.cedula);
   if (existente && existente.id !== usuarioId) {
     throw new CedulaYaRegistradaError();
   }
 
-  return usuarios.actualizarDatosContacto(usuarioId, validacion.valor);
+  return usuarios.actualizarDatosContacto(usuarioId, {
+    ...validacion.valor,
+    estadoId: ubicacion.valor.estadoId,
+    municipioId: ubicacion.valor.municipioId,
+  });
 }

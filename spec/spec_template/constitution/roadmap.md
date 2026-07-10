@@ -25,13 +25,14 @@ _Features completadas, en orden de implementación._
 
 _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
 
-15. **009 · Tablero público de transparencia** — Vista abierta (sin login) con lo recolectado, progreso por envío y destino de cada ayuda.
+15. **020 · Catálogo de estados y municipios de Venezuela** — Tablas `Estado` / `Municipio` sembradas en BD; selects en cascada en registro y perfiles. Sustituye el texto libre `estado`/`parroquia` de 016 y 017 por FKs. _Enmienda 016 y 017._
 
 ## Cambios propuestos por el cliente (revisión de alcance) 🔁
 
-_Cambios solicitados por el cliente que **rompen parte del encaje actual**: tocan features ya "Hecho" (002, 004, 005) y la constitución ya se actualizó (`mission.md`, `tech-stack.md`) para reflejarlos. Cada uno se aborda como feature nueva y, al implementarse, enmienda la feature de origen._
+_Cambios solicitados por el cliente que **rompen parte del encaje actual**: tocan features ya "Hecho" y la constitución se actualiza (`mission.md`, `tech-stack.md`) para reflejarlos. Cada uno se aborda como feature nueva y, al implementarse, enmienda la feature de origen._
 
-_Ninguno pendiente._
+1. **020 · Catálogo de estados y municipios de Venezuela** — Ubicación seleccionable desde catálogo oficial en BD (en curso / siguiente).
+2. **021 · Home y shell de navegación por rol** — Tras el login, cada usuario va a su panel de funcionalidades (no se queda en la landing). Todas las rutas de trabajo usan **sidebar** (generaliza el shell del admin) y un botón **«Volver al sitio»** a `/`. Homes ligeros para colaborador/solicitante en `/inicio`. _Enmienda 002 (redirect), 003 (SiteHeader solo en público) y 008 (shell compartido)._ Spec: `features/021-home-y-shell-por-rol/`.
 
 ## Backlog / ideas 💡
 
@@ -39,13 +40,15 @@ _Ordenado según dependencias. Cada uno se convierte en `features/NNN-…/` ante
 
 **Superficies de gestión y transparencia**
 
-16. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
+16. **021 · Home y shell de navegación por rol** — Ver «Cambios propuestos»; conviene abordarla pronto tras 020 (o en paralelo si no choca) porque hoy el login deja a todos en la landing.
+17. **009 · Tablero público de transparencia** — Vista abierta (sin login) con lo recolectado, progreso por envío y destino de cada ayuda.
+18. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
 
 **Módulos de apoyo**
 
-17. **011 · Puntos de acopio** — Centros físicos de entrega (dirección, horarios, qué reciben), **cada uno perteneciente a un `ADMIN`** (ver 016).
-18. **012 · Notificaciones** — Avisos a colaboradores sobre envíos que necesitan recursos o metas cumplidas.
-19. **013 · Verificación de usuarios** — Validación de `COLABORADOR` y `SOLICITANTE` (`estadoVerificacion`) por parte del `ADMIN`. La verificación de cuentas `ADMIN` la cubre 015 (superadmin).
-20. **014 · Donaciones monetarias externas** — Mostrar medios externos para donar dinero (cuenta bancaria, PayPal, Zelle…) y permitir al `ADMIN` registrar manualmente montos recibidos por fuera (recursos `MONETARIO`) para reflejarlos en la transparencia. La app no procesa el pago.
+19. **011 · Puntos de acopio** — Centros físicos de entrega (dirección, horarios, qué reciben), **cada uno perteneciente a un `ADMIN`** (ver 016). Ubicación por `estadoId`/`municipioId` (catálogo 020).
+20. **012 · Notificaciones** — Avisos a colaboradores sobre envíos que necesitan recursos o metas cumplidas.
+21. **013 · Verificación de usuarios** — Validación de `COLABORADOR` y `SOLICITANTE` (`estadoVerificacion`) por parte del `ADMIN`. La verificación de cuentas `ADMIN` la cubre 015 (superadmin).
+22. **014 · Donaciones monetarias externas** — Mostrar medios externos para donar dinero (cuenta bancaria, PayPal, Zelle…) y permitir al `ADMIN` registrar manualmente montos recibidos por fuera (recursos `MONETARIO`) para reflejarlos en la transparencia. La app no procesa el pago.
 
 > Cada feature nueva se crea como `features/NNN-nombre-feature/` con `spec.md`, `plan.md` y `tasks.md` antes de tocar código.

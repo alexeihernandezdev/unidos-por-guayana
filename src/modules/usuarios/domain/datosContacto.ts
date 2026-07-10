@@ -170,41 +170,37 @@ export function normalizarTelefono(entrada: string): string | null {
   return resultado.ok ? resultado.valor : null;
 }
 
-// ── Ubicación ─────────────────────────────────────────────────────────────────
+// ── Ubicación (catálogo 020) ──────────────────────────────────────────────────
 
 export type Ubicacion = {
-  estado: string;
-  parroquia: string;
+  estadoId: string;
+  municipioId: string;
 };
 
 /**
- * Valida `estado` y `parroquia`: no vacíos tras trim. Se guardan como texto
- * libre (igual que `PerfilAdmin` de la feature 016) para no arrastrar el
- * mantenimiento de un catálogo cerrado antes de tenerlo definido.
+ * Valida que `estadoId` y `municipioId` no estén vacíos. La pertenencia
+ * municipio↔estado la comprueba `validarUbicacionCatalogo` (módulo ubicaciones)
+ * en el caso de uso, con acceso al repositorio.
  */
 export function validarUbicacion(
   entrada: Ubicacion,
 ): ResultadoValidacion<Ubicacion> {
-  const estado = colapsarEspacios(entrada.estado);
-  const parroquia = colapsarEspacios(entrada.parroquia);
+  const estadoId = entrada.estadoId.trim();
+  const municipioId = entrada.municipioId.trim();
 
-  if (estado.length === 0) {
-    return { ok: false, error: "Indica el estado." };
+  if (estadoId.length === 0) {
+    return { ok: false, error: "Selecciona el estado." };
   }
-  if (parroquia.length === 0) {
-    return { ok: false, error: "Indica la parroquia." };
+  if (municipioId.length === 0) {
+    return { ok: false, error: "Selecciona el municipio." };
   }
 
-  return { ok: true, valor: { estado, parroquia } };
+  return { ok: true, valor: { estadoId, municipioId } };
 }
 
 export function normalizarUbicacion(entrada: Ubicacion): Ubicacion | null {
   const resultado = validarUbicacion(entrada);
   return resultado.ok ? resultado.valor : null;
-}
-
-function colapsarEspacios(valor: string): string {
-  return valor.trim().replace(/\s+/g, " ");
 }
 
 // ── Datos de contacto completos ───────────────────────────────────────────────
@@ -213,14 +209,13 @@ export type DatosContacto = {
   cedula: string;
   telefono: string;
   telefonoEsWhatsApp: boolean;
-  estado: string;
-  parroquia: string;
+  estadoId: string;
+  municipioId: string;
 };
 
 /**
- * Valida y normaliza los cinco campos obligatorios. Devuelve el primer error
- * encontrado, en el orden en que se ven en el formulario, para dar feedback
- * consistente entre cliente y servidor.
+ * Valida y normaliza cédula, teléfono y IDs de ubicación (no vacíos). La
+ * pertenencia al catálogo se valida en el caso de uso con el repositorio.
  */
 export function validarDatosContacto(
   entrada: DatosContacto,
@@ -232,8 +227,8 @@ export function validarDatosContacto(
   if (!telefono.ok) return telefono;
 
   const ubicacion = validarUbicacion({
-    estado: entrada.estado,
-    parroquia: entrada.parroquia,
+    estadoId: entrada.estadoId,
+    municipioId: entrada.municipioId,
   });
   if (!ubicacion.ok) return ubicacion;
 
@@ -243,8 +238,8 @@ export function validarDatosContacto(
       cedula: cedula.valor,
       telefono: telefono.valor,
       telefonoEsWhatsApp: Boolean(entrada.telefonoEsWhatsApp),
-      estado: ubicacion.valor.estado,
-      parroquia: ubicacion.valor.parroquia,
+      estadoId: ubicacion.valor.estadoId,
+      municipioId: ubicacion.valor.municipioId,
     },
   };
 }
@@ -252,18 +247,18 @@ export function validarDatosContacto(
 /**
  * Devuelve `true` si un usuario `COLABORADOR`/`SOLICITANTE` tiene todos los
  * datos obligatorios completos. Lo consume el guard de servidor para redirigir
- * a `/completar-perfil` mientras falte cualquiera de los cuatro campos.
+ * a `/completar-perfil` mientras falte cualquiera de los campos.
  */
 export function tieneDatosContactoCompletos(datos: {
   cedula: string | null;
   telefono: string | null;
-  estado: string | null;
-  parroquia: string | null;
+  estadoId: string | null;
+  municipioId: string | null;
 }): boolean {
   return (
     Boolean(datos.cedula) &&
     Boolean(datos.telefono) &&
-    Boolean(datos.estado) &&
-    Boolean(datos.parroquia)
+    Boolean(datos.estadoId) &&
+    Boolean(datos.municipioId)
   );
 }

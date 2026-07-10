@@ -24,8 +24,8 @@ export class InMemoryUsuarioRepository implements UsuarioRepository {
       cedula: datos.cedula ?? null,
       telefono: datos.telefono ?? null,
       telefonoEsWhatsApp: datos.telefonoEsWhatsApp ?? false,
-      estado: datos.estado ?? null,
-      parroquia: datos.parroquia ?? null,
+      estadoId: datos.estadoId ?? null,
+      municipioId: datos.municipioId ?? null,
       createdAt: ahora,
       updatedAt: ahora,
       email: datos.email,
@@ -93,8 +93,8 @@ export class InMemoryUsuarioRepository implements UsuarioRepository {
       cedula: datos.cedula,
       telefono: datos.telefono,
       telefonoEsWhatsApp: datos.telefonoEsWhatsApp,
-      estado: datos.estado,
-      parroquia: datos.parroquia,
+      estadoId: datos.estadoId,
+      municipioId: datos.municipioId,
       updatedAt: new Date(),
     };
     this.porId.set(id, actualizado);

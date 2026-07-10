@@ -44,15 +44,17 @@ model Usuario {
   nombre             String
   rol                Rol
   estadoVerificacion EstadoVerificacion @default(PENDIENTE)
-  // Datos de contacto y ubicación (feature 017). Obligatorios en el flujo para
-  // COLABORADOR/SOLICITANTE; opcionales en base para no romper cuentas creadas
-  // antes de la feature (el guard las redirige a `/completar-perfil`). El ADMIN
-  // guarda sus datos en `PerfilAdmin` (016); aquí solo comparte el flag WhatsApp.
+  // Datos de contacto y ubicación (feature 017, enmendada por 020). Obligatorios
+  // en el flujo para COLABORADOR/SOLICITANTE; opcionales en base para no romper
+  // cuentas creadas antes (el guard las redirige a `/completar-perfil`). El ADMIN
+  // guarda su ubicación en `PerfilAdmin` (016); aquí solo comparte el flag WhatsApp.
   cedula             String?            @unique
   telefono           String?
   telefonoEsWhatsApp Boolean            @default(false)
-  estado             String?
-  parroquia          String?
+  estadoId           String?
+  municipioId        String?
+  estado             Estado?            @relation(fields: [estadoId], references: [id], onDelete: Restrict)
+  municipio          Municipio?         @relation(fields: [municipioId], references: [id], onDelete: Restrict)
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 
@@ -69,6 +71,8 @@ model Usuario {
   // el modelo completo lo crea la feature 011).
   puntosAcopio PuntoAcopio[]
 
+  @@index([estadoId])
+  @@index([municipioId])
   @@map("usuarios")
 }
 
@@ -90,8 +94,12 @@ model PerfilAdmin {
   usuarioId          String        @unique
   usuario            Usuario       @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   nombreCuenta       String
-  estado             String
-  parroquia          String
+  // Ubicación por catálogo (feature 020 enmienda 016). Nullable en BD para filas
+  // legacy sin match de backfill; el flujo exige ambos al crear/editar.
+  estadoId           String?
+  municipioId        String?
+  estado             Estado?       @relation(fields: [estadoId], references: [id], onDelete: Restrict)
+  municipio          Municipio?    @relation(fields: [municipioId], references: [id], onDelete: Restrict)
   telefono           String
   // Flag WhatsApp del teléfono del centro de acopio (feature 017 amplía 016).
   telefonoEsWhatsApp Boolean       @default(false)
@@ -101,13 +109,43 @@ model PerfilAdmin {
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
 
+  @@index([estadoId])
+  @@index([municipioId])
   @@map("perfiles_admin")
+}
+
+// Catálogo de divisiones político-territoriales de Venezuela (feature 020).
+// Solo lectura en runtime: se siembra con `pnpm db:seed`. 24 entidades (23
+// estados + Distrito Capital); sin Dependencias Federales ni Guayana Esequiba.
+model Estado {
+  id            String        @id @default(cuid())
+  codigo        String        @unique
+  nombre        String        @unique
+  municipios    Municipio[]
+  usuarios      Usuario[]
+  perfilesAdmin PerfilAdmin[]
+
+  @@map("estados")
+}
+
+model Municipio {
+  id            String        @id @default(cuid())
+  codigo        String?
+  nombre        String
+  estadoId      String
+  estado        Estado        @relation(fields: [estadoId], references: [id], onDelete: Restrict)
+  usuarios      Usuario[]
+  perfilesAdmin PerfilAdmin[]
+
+  @@unique([estadoId, nombre])
+  @@index([estadoId])
+  @@map("municipios")
 }
 
 // PuntoAcopio: centro físico de entrega perteneciente a un `ADMIN`. La feature 016
 // solo declara el lado admin de la relación (`adminId`) para no re-migrar; el
 // modelo completo (nombre, dirección, horarios, qué recibe) lo añade la feature
-// 011. Un `PuntoAcopio` nuevo hereda por defecto `estado`/`parroquia` del
+// 011. Un `PuntoAcopio` nuevo hereda por defecto `estadoId`/`municipioId` del
 // `PerfilAdmin` de su admin (regla de dominio que consumirá la 011).
 model PuntoAcopio {
   id        String   @id @default(cuid())

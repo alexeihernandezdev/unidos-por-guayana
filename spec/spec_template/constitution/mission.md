@@ -26,7 +26,7 @@ Aplicación enfocada a: organizar, brindar transparencia y recolectar ayuda del 
 ## Para quién
 
 - **Superadministrador** — Autoridad máxima del sistema. No gestiona ayudas del día a día: su rol es **verificar y aprobar (o rechazar) las cuentas de administrador** que se registran públicamente, para dar confianza a la red de centros de acopio.
-- **Administrador** — Persona u organización que gestiona las ayudas y decide cuándo sale el próximo envío y con qué recursos. **Cualquiera puede registrarse como administrador**, pero opera solo tras ser aprobado por un superadministrador. Cada administrador funciona además como **centro de acopio** y aporta datos ampliados: estado del país al que pertenece, parroquia, nombre de la cuenta, teléfono, correo y documento de identidad (jurídico o natural).
+- **Administrador** — Persona u organización que gestiona las ayudas y decide cuándo sale el próximo envío y con qué recursos. **Cualquiera puede registrarse como administrador**, pero opera solo tras ser aprobado por un superadministrador. Cada administrador funciona además como **centro de acopio** y aporta datos ampliados: estado y municipio (de un catálogo de Venezuela), nombre de la cuenta, teléfono, correo y documento de identidad (jurídico o natural).
 - **Colaboradores** — Personas dispuestas a aportar cualquier tipo de ayuda, ya sea sumándose como voluntarios, entregando suministros o poniendo transporte/camiones a disposición. Deben registrar cédula y teléfono.
 - **Usuario Solicitante** — Quien requiere o hace una petición de ayuda específica para algún sector, especificando qué se necesita; también puede proponer recursos al catálogo. Debe registrar cédula y teléfono.
 

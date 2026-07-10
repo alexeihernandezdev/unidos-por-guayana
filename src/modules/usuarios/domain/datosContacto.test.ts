@@ -116,31 +116,31 @@ describe("validarTelefono", () => {
 
 describe("validarUbicacion", () => {
   it("rechaza estado vacío", () => {
-    const r = validarUbicacion({ estado: "   ", parroquia: "Catia" });
+    const r = validarUbicacion({ estadoId: "   ", municipioId: "mun-vargas" });
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.error).toBe("Indica el estado.");
+    if (!r.ok) expect(r.error).toBe("Selecciona el estado.");
   });
 
-  it("rechaza parroquia vacía", () => {
-    const r = validarUbicacion({ estado: "La Guaira", parroquia: "" });
+  it("rechaza municipio vacío", () => {
+    const r = validarUbicacion({ estadoId: "est-lg", municipioId: "" });
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.error).toBe("Indica la parroquia.");
+    if (!r.ok) expect(r.error).toBe("Selecciona el municipio.");
   });
 
-  it("normaliza espacios múltiples", () => {
+  it("recorta espacios en los IDs", () => {
     const r = validarUbicacion({
-      estado: "  La   Guaira  ",
-      parroquia: "  Catia  La  Mar ",
+      estadoId: "  est-lg  ",
+      municipioId: "  mun-vargas ",
     });
     expect(r).toEqual({
       ok: true,
-      valor: { estado: "La Guaira", parroquia: "Catia La Mar" },
+      valor: { estadoId: "est-lg", municipioId: "mun-vargas" },
     });
   });
 
   it("normalizarUbicacion devuelve null si es inválida", () => {
     expect(
-      normalizarUbicacion({ estado: "", parroquia: "Catia" }),
+      normalizarUbicacion({ estadoId: "", municipioId: "mun-vargas" }),
     ).toBeNull();
   });
 });
@@ -151,8 +151,8 @@ describe("validarDatosContacto", () => {
       cedula: "",
       telefono: "04121234567",
       telefonoEsWhatsApp: true,
-      estado: "La Guaira",
-      parroquia: "Catia La Mar",
+      estadoId: "est-lg",
+      municipioId: "mun-vargas",
     });
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toBe("La cédula es obligatoria.");
@@ -163,8 +163,8 @@ describe("validarDatosContacto", () => {
       cedula: "v-12.345.678",
       telefono: "+58 412 1234567",
       telefonoEsWhatsApp: true,
-      estado: "  La Guaira  ",
-      parroquia: "Catia La Mar",
+      estadoId: "  est-lg  ",
+      municipioId: "mun-vargas",
     });
     expect(r).toEqual({
       ok: true,
@@ -172,8 +172,8 @@ describe("validarDatosContacto", () => {
         cedula: "V12345678",
         telefono: "04121234567",
         telefonoEsWhatsApp: true,
-        estado: "La Guaira",
-        parroquia: "Catia La Mar",
+        estadoId: "est-lg",
+        municipioId: "mun-vargas",
       },
     });
   });
@@ -185,8 +185,8 @@ describe("tieneDatosContactoCompletos", () => {
       tieneDatosContactoCompletos({
         cedula: "V12345678",
         telefono: "04121234567",
-        estado: "La Guaira",
-        parroquia: "Catia La Mar",
+        estadoId: "est-lg",
+        municipioId: "mun-vargas",
       }),
     ).toBe(true);
   });
@@ -195,13 +195,13 @@ describe("tieneDatosContactoCompletos", () => {
     const base = {
       cedula: "V12345678",
       telefono: "04121234567",
-      estado: "La Guaira",
-      parroquia: "Catia",
+      estadoId: "est-lg",
+      municipioId: "mun-vargas",
     };
     expect(tieneDatosContactoCompletos({ ...base, cedula: null })).toBe(false);
     expect(tieneDatosContactoCompletos({ ...base, telefono: null })).toBe(false);
-    expect(tieneDatosContactoCompletos({ ...base, estado: null })).toBe(false);
-    expect(tieneDatosContactoCompletos({ ...base, parroquia: null })).toBe(
+    expect(tieneDatosContactoCompletos({ ...base, estadoId: null })).toBe(false);
+    expect(tieneDatosContactoCompletos({ ...base, municipioId: null })).toBe(
       false,
     );
   });

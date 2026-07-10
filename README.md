@@ -48,7 +48,7 @@ Se configuran en `.env` (nunca se sube al repo; la plantilla es `.env.example`).
 | `POSTGRES_USER` / `PASSWORD` / `DB`        | Credenciales del contenedor de PostgreSQL (`docker-compose.yml`).    |
 | `DATABASE_URL`                             | Cadena de conexión de Prisma (dev: `localhost:5435`).                |
 | `AUTH_SECRET`                              | Secreto para firmar los JWT de sesión (`openssl rand -base64 32`).   |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `NOMBRE`| Credenciales del ADMIN inicial que crea `pnpm db:seed`.              |
+| `SUPERADMIN_EMAIL` / `PASSWORD` / `NOMBRE` | Credenciales del SUPERADMIN que crea `pnpm db:seed`.                 |
 
 > El puerto de la base se publica en el **5435** del host (mapea al 5432 del contenedor) para no
 > chocar con otro PostgreSQL que use el 5432. Cámbialo en `docker-compose.yml` y `.env` si lo
@@ -59,13 +59,14 @@ Se configuran en `.env` (nunca se sube al repo; la plantilla es `.env.example`).
 | Comando            | Qué hace                                                            |
 | ------------------ | ------------------------------------------------------------------ |
 | `pnpm dev`         | Arranca el entorno local (`next dev`) en el puerto 3000.           |
-| `pnpm build`       | Compila para producción (`next build`).                            |
-| `pnpm start`       | Sirve la build de producción (`next start`).                       |
-| `pnpm lint`        | Revisa el estilo y los límites de capas (`eslint`).               |
-| `pnpm test`        | Ejecuta los tests con Vitest (`pnpm test:watch` para el modo watch).|
-| `pnpm db:migrate`  | Aplica migraciones en desarrollo (`prisma migrate dev`).           |
-| `pnpm db:generate` | Regenera el cliente de Prisma (`prisma generate`).                 |
-| `pnpm db:seed`     | Siembra datos iniciales (ADMIN).                                    |
+| `pnpm build`            | Genera Prisma, migra, seed y compila (`next build`). Usado en Vercel. |
+| `pnpm start`            | Sirve la build de producción (`next start`).                       |
+| `pnpm lint`             | Revisa el estilo y los límites de capas (`eslint`).               |
+| `pnpm test`             | Ejecuta los tests con Vitest (`pnpm test:watch` para el modo watch).|
+| `pnpm db:migrate`       | Aplica migraciones en desarrollo (`prisma migrate dev`).           |
+| `pnpm db:migrate:deploy`| Aplica migraciones pendientes en prod (`prisma migrate deploy`).   |
+| `pnpm db:generate`      | Regenera el cliente de Prisma (`prisma generate`).                 |
+| `pnpm db:seed`          | Siembra datos iniciales (SUPERADMIN; idempotente).                 |
 
 Base de datos:
 
@@ -104,5 +105,14 @@ Los límites entre capas los **hace cumplir ESLint** (ver `eslint.config.mjs` y
 
 ## Despliegue
 
-App en **Vercel** y base de datos en **Supabase**. Configura las mismas variables de entorno en
-el proveedor (con la `DATABASE_URL` de Supabase y un `AUTH_SECRET` propio de producción).
+App en **Vercel** y base de datos en **Supabase**. En cada deploy, `pnpm build` ejecuta:
+
+1. `prisma generate` — cliente Prisma
+2. `prisma migrate deploy` — migraciones pendientes
+3. `pnpm db:seed` — SUPERADMIN (idempotente; omite usuarios de prueba si no hay vars)
+4. `next build`
+
+Configura en Vercel al menos: `DATABASE_URL` (Supabase), `AUTH_SECRET`,
+`SUPERADMIN_EMAIL`, `SUPERADMIN_PASSWORD` (y opcionalmente `SUPERADMIN_NOMBRE`,
+`NEXT_PUBLIC_SITE_URL`). No definas `COLABORADOR_*` / `SOLICITANTE_*` en producción
+salvo que quieras usuarios de prueba.

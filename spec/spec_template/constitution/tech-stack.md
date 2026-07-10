@@ -47,7 +47,7 @@ Existe hoy:
 
 Estructura objetivo (a crear conforme avancen las features):
 
-- `src/modules/<dominio>/` — una carpeta por dominio (`ayudas`, `aportes`, `usuarios`, `solicitudes`, `recursos`, `acopio`, `notificaciones`). Screaming Architecture.
+- `src/modules/<dominio>/` — una carpeta por dominio (`ayudas`, `aportes`, `usuarios`, `solicitudes`, `recursos`, `ubicaciones`, `acopio`, `notificaciones`). Screaming Architecture.
   - `domain/` — entidades, reglas de negocio e interfaces de repositorio (sin dependencias del framework).
   - `application/` — casos de uso que orquestan el dominio.
   - `infrastructure/` — implementaciones concretas (repositorios Prisma, servicios externos).
@@ -81,19 +81,21 @@ _Entidades centrales derivadas de la misión. Se documentan aquí las reglas no 
   - Para `ADMIN` la cuenta se crea por **registro público** en `PENDIENTE` y no puede operar hasta que un `SUPERADMIN` la pasa a `VERIFICADO` (o `RECHAZADO`).
   - Para `COLABORADOR` y `SOLICITANTE` el registro exige `cedula` y `telefono` obligatorios; su verificación la gestiona el `ADMIN` (módulo de verificación de usuarios).
   - El `SUPERADMIN` no se registra por la app: se siembra (`db:seed`) y es la raíz de confianza.
-- **PerfilAdmin** — datos ampliados de una cuenta `ADMIN`, que funciona además como **centro de acopio**: `nombreCuenta`, `estado` (del país), `parroquia`, `telefono`, `correo` y `documento` (`tipoDocumento` ∈ `JURIDICO` | `NATURAL` + número). Se completa en el registro público y el `SUPERADMIN` lo revisa al aprobar. Un `ADMIN` puede tener uno o varios `PuntoAcopio` asociados.
+- **PerfilAdmin** — datos ampliados de una cuenta `ADMIN`, que funciona además como **centro de acopio**: `nombreCuenta`, ubicación (`estadoId` + `municipioId` del catálogo de Venezuela), `telefono`, `correo` y `documento` (`tipoDocumento` ∈ `JURIDICO` | `NATURAL` + número). Se completa en el registro público y el `SUPERADMIN` lo revisa al aprobar. Un `ADMIN` puede tener uno o varios `PuntoAcopio` asociados.
+- **Usuario (COLABORADOR / SOLICITANTE)** — además de `cedula` y `telefono`, ubican con `estadoId` + `municipioId` (mismo catálogo).
 - **Ayuda / Actividad** — entidad central. Tiene `tipo` ∈ `ENVIO` | `JORNADA` | `EVENTO_SOCIAL` (determina cómo se nombra y presenta al crearla; comparte el mismo modelo), `fecha`, `sectorDestino` y un `estado` ∈ `RECOLECTANDO` | `LISTO` | `EN_TRANSITO` | `ENTREGADO`. Sus **metas de recursos** se definen mediante `MetaRecurso`. Solo la crea el `ADMIN`; el paso a `LISTO` lo decide el `ADMIN` (normalmente cuando las metas se cumplen).
 - **Aporte** — lo registra un `COLABORADOR` y se asocia a una Ayuda y a un `Recurso`. Tiene `cantidad` (en la unidad del recurso) y un `estado` ∈ `COMPROMETIDO` | `RECIBIDO`. Solo suma a la meta cuando está `RECIBIDO`. Opcionalmente referencia el `PuntoAcopio` de entrega. El pago nunca ocurre dentro de la app: cuando el `Recurso` es de categoría `MONETARIO`, el `Aporte` solo **registra** el monto (en su moneda) y el `ADMIN` lo marca `RECIBIDO` al confirmarlo por un canal externo (transferencia, PayPal, Zelle…).
 - **Solicitud / Petición** — la crea un `SOLICITANTE`: pide ayuda para un `sector`, con `urgencia` y los recursos que necesita. Tiene `estado` (p. ej. `ABIERTA` | `ATENDIDA` | `CERRADA`). Alimenta la decisión del `ADMIN` sobre qué enviar.
 
 ### Catálogo y metas
 
+- **Estado / Municipio** (catálogo geográfico VE) — divisiones político-territoriales de Venezuela sembradas en BD (`db:seed`). `Municipio` pertenece a un `Estado`. Son de solo lectura en runtime (no hay CRUD de admin). `Usuario` (colaborador/solicitante) y `PerfilAdmin` referencian `estadoId` + `municipioId`; el municipio debe pertenecer al estado elegido. Sustituye el texto libre `estado`/`parroquia` de las features 016/017 (feature 020).
 - **Recurso** (catálogo) — referencia estable de qué se puede aportar: `nombre` (agua, medicinas, alimentos, camión, voluntario, donación en USD…), `unidad` (litros, cajas, unidades, vehículos, personas, USD/Bs) y `categoria` ∈ `SUMINISTRO` | `TRANSPORTE` | `PERSONAL` | `MONETARIO`. Aportes y metas se miden siempre contra un `Recurso`. Los recursos `MONETARIO` representan ayuda económica que se recibe **por fuera** de la app (la app no procesa el pago; ver `mission.md`). Un `Recurso` tiene `estadoAprobacion` ∈ `APROBADO` | `PROPUESTO` | `RECHAZADO`: el `ADMIN` crea recursos ya `APROBADO`; el `SOLICITANTE` puede **proponer** recursos (`PROPUESTO`, con `propuestoPor`) que el `ADMIN` aprueba o rechaza. Solo los `APROBADO` son seleccionables en metas y aportes.
 - **MetaRecurso** — puente entre `Ayuda` y `Recurso`: `cantidadObjetivo` que el envío necesita de ese recurso. El progreso de una meta = suma de aportes `RECIBIDO` de ese recurso ÷ `cantidadObjetivo`. Una Ayuda tiene varias `MetaRecurso`.
 
 ### Logística y seguimiento
 
-- **PuntoAcopio** — centro físico de entrega: `nombre`, `direccion`, `horarios` y qué recursos recibe. **Pertenece a un `ADMIN`** (`adminId`): un administrador puede gestionar uno o varios puntos. Sus datos de ubicación (estado, parroquia) heredan por defecto los del `PerfilAdmin`.
+- **PuntoAcopio** — centro físico de entrega: `nombre`, `direccion`, `horarios` y qué recursos recibe. **Pertenece a un `ADMIN`** (`adminId`): un administrador puede gestionar uno o varios puntos. Sus datos de ubicación (`estadoId`, `municipioId`) heredan por defecto los del `PerfilAdmin`.
 - **SeguimientoEvento** — historial de trazabilidad de una `Ayuda`: cada cambio de `estado` con `fecha`, `nota` y `evidencia` opcional (foto/URL). Da la traza de origen a destino.
 - **Notificacion** — dirigida a un `Usuario`: `tipo`, `mensaje`, `referencia` (p. ej. la Ayuda relacionada) y `leida`.
 
