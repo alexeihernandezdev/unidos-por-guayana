@@ -6,22 +6,59 @@ import type {
 } from "@/modules/usuarios/domain/PerfilAdmin";
 import type { PerfilAdminRepository } from "@/modules/usuarios/domain/PerfilAdminRepository";
 
-// Implementación del repositorio de perfiles sobre Prisma (feature 016). Los
-// enums de dominio y de Prisma comparten valores, así que la fila es asignable a
-// la entidad de dominio sin conversiones.
+function mapearPerfil(
+  row: Awaited<ReturnType<typeof prisma.perfilAdmin.findUnique>> & {
+    estadoUbicacion?: { nombre: string } | null;
+    municipio?: { nombre: string } | null;
+  },
+): PerfilAdmin {
+  if (!row) {
+    throw new Error("Perfil no encontrado.");
+  }
+  return {
+    id: row.id,
+    usuarioId: row.usuarioId,
+    nombreCuenta: row.nombreCuenta,
+    estadoId: row.estadoId,
+    municipioId: row.municipioId,
+    telefono: row.telefono,
+    telefonoEsWhatsApp: row.telefonoEsWhatsApp,
+    correo: row.correo,
+    tipoDocumento: row.tipoDocumento,
+    numeroDocumento: row.numeroDocumento,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    estadoNombre: row.estadoUbicacion?.nombre,
+    municipioNombre: row.municipio?.nombre,
+  };
+}
+
 export class PrismaPerfilAdminRepository implements PerfilAdminRepository {
   async crear(datos: NuevoPerfilAdmin): Promise<PerfilAdmin> {
-    return prisma.perfilAdmin.create({ data: datos });
+    const row = await prisma.perfilAdmin.create({
+      data: datos,
+      include: { estadoUbicacion: true, municipio: true },
+    });
+    return mapearPerfil(row);
   }
 
   async buscarPorUsuarioId(usuarioId: string): Promise<PerfilAdmin | null> {
-    return prisma.perfilAdmin.findUnique({ where: { usuarioId } });
+    const row = await prisma.perfilAdmin.findUnique({
+      where: { usuarioId },
+      include: { estadoUbicacion: true, municipio: true },
+    });
+    return row ? mapearPerfil(row) : null;
   }
 
   async actualizar(
     usuarioId: string,
     cambios: CambiosPerfilAdmin,
   ): Promise<PerfilAdmin> {
-    return prisma.perfilAdmin.update({ where: { usuarioId }, data: cambios });
+    const row = await prisma.perfilAdmin.update({
+      where: { usuarioId },
+      data: cambios,
+      include: { estadoUbicacion: true, municipio: true },
+    });
+    return mapearPerfil(row);
   }
 }

@@ -95,8 +95,11 @@ export function BandejaAdmins({ pendientes, aprobarAction, rechazarAction }: Pro
           {perfil ? (
             <dl className="grid grid-cols-2 gap-3 border-t border-border pt-3 sm:grid-cols-3">
               <Dato etiqueta="Responsable" valor={admin.nombre} />
-              <Dato etiqueta="Estado" valor={perfil.estado} />
-              <Dato etiqueta="Parroquia" valor={perfil.parroquia} />
+              <Dato etiqueta="Estado" valor={perfil.estadoNombre ?? perfil.estadoId} />
+              <Dato
+                etiqueta="Municipio"
+                valor={perfil.municipioNombre ?? perfil.municipioId}
+              />
               <Dato etiqueta="Teléfono" valor={perfil.telefono} />
               <Dato etiqueta="Correo" valor={perfil.correo} />
               <Dato

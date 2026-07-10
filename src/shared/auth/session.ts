@@ -77,7 +77,7 @@ export async function requireAdminVerificado(): Promise<UsuarioSesion> {
 
 /**
  * Exige que un `COLABORADOR` / `SOLICITANTE` tenga los cuatro campos
- * obligatorios (`cedula`, `telefono`, `estado`, `parroquia`); si le falta
+ * obligatorios (`cedula`, `telefono`, `estadoId`, `municipioId`); si le falta
  * cualquiera, redirige a `/completar-perfil`. Otros roles no pasan por este
  * gate (el ADMIN se atiende con `requireAdminVerificado`; el SUPERADMIN queda
  * fuera). Es idempotente: si el perfil ya está completo, devuelve la sesión.

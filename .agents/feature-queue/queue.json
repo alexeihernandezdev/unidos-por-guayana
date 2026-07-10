@@ -11,6 +11,7 @@
     "018-tipos-de-actividad-en-ayuda",
     "019-propuesta-de-recursos-por-solicitante",
     "009-tablero-publico-de-transparencia",
+    "020-catalogo-estados-municipios-venezuela",
     "010-seguimiento-del-envio",
     "011-puntos-de-acopio",
     "012-notificaciones",
@@ -18,6 +19,19 @@
     "014-donaciones-monetarias-externas"
   ],
   "features": {
+    "020-catalogo-estados-municipios-venezuela": {
+      "id": "020",
+      "slug": "020-catalogo-estados-municipios-venezuela",
+      "title": "Catálogo de estados y municipios de Venezuela",
+      "status": "done",
+      "specDir": "spec/spec_template/features/020-catalogo-estados-municipios-venezuela",
+      "docFile": "DOC/features/020-catalogo-estados-municipios-venezuela.md",
+      "branch": "cursor/catalogo-estados-municipios-020-fa4a",
+      "pr": null,
+      "agentBcId": null,
+      "startedAt": "2026-07-10T16:25:00Z",
+      "completedAt": "2026-07-10T16:35:00Z"
+    },
     "008-panel-de-administracion": {
       "id": "008",
       "slug": "008-panel-de-administracion",

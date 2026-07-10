@@ -2,24 +2,25 @@ import type { Metadata } from "next";
 import type { DatosPerfilAdmin } from "@/modules/usuarios/domain/PerfilAdmin";
 import { PerfilAdminForm } from "@/modules/usuarios/ui/PerfilAdminForm";
 import { obtenerPerfilAdminGestion, requireAdminVerificado } from "@/shared/auth";
+import { obtenerCatalogoUbicacionServicio } from "@/shared/ubicacion";
 import { actualizarPerfilAction } from "./actions";
 
 export const metadata: Metadata = {
   title: "Mi perfil de centro de acopio | Unidos por la Guaira",
 };
 
-// Perfil del centro de acopio del ADMIN (feature 016): ver y editar los datos
-// ampliados de la cuenta. Requiere un ADMIN verificado (guard de segmento del
-// route group (admin); se reafirma aquí para obtener el id de sesión).
 export default async function PerfilAdminPage() {
   const sesion = await requireAdminVerificado();
-  const perfil = await obtenerPerfilAdminGestion(sesion.id);
+  const [perfil, catalogo] = await Promise.all([
+    obtenerPerfilAdminGestion(sesion.id),
+    obtenerCatalogoUbicacionServicio(),
+  ]);
 
   const datos: DatosPerfilAdmin | null = perfil
     ? {
         nombreCuenta: perfil.nombreCuenta,
-        estado: perfil.estado,
-        parroquia: perfil.parroquia,
+        estadoId: perfil.estadoId,
+        municipioId: perfil.municipioId,
         telefono: perfil.telefono,
         telefonoEsWhatsApp: perfil.telefonoEsWhatsApp,
         correo: perfil.correo,
@@ -41,7 +42,11 @@ export default async function PerfilAdminPage() {
       </header>
 
       {datos ? (
-        <PerfilAdminForm perfil={datos} action={actualizarPerfilAction} />
+        <PerfilAdminForm
+          perfil={datos}
+          catalogo={catalogo}
+          action={actualizarPerfilAction}
+        />
       ) : (
         <p className="rounded-lg border border-dashed border-border p-8 text-sm text-muted-foreground">
           Tu cuenta aún no tiene un perfil de centro de acopio. Contacta con la

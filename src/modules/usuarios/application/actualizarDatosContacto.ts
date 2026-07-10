@@ -5,6 +5,8 @@ import {
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import type { Usuario } from "@/modules/usuarios/domain/Usuario";
 import type { UsuarioRepository } from "@/modules/usuarios/domain/UsuarioRepository";
+import { validarUbicacionCatalogo } from "@/modules/ubicacion/application/validarUbicacionCatalogo";
+import type { UbicacionRepository } from "@/modules/ubicacion/domain/UbicacionRepository";
 import {
   CedulaYaRegistradaError,
   DatosContactoInvalidosError,
@@ -13,23 +15,13 @@ import {
 
 export type ActualizarDatosContactoDeps = {
   usuarios: UsuarioRepository;
+  ubicacion: UbicacionRepository;
 };
 
 export type ActualizarDatosContactoInput = DatosContacto;
 
-/**
- * Valida y persiste los cinco campos de contacto/ubicación de un usuario. Se
- * usa tanto en el primer inicio de sesión (guard → `/completar-perfil`) como
- * en la edición desde `/mi-perfil` (feature 017).
- *
- * Reglas:
- * - Solo `COLABORADOR` y `SOLICITANTE` guardan estos datos en `Usuario`; para
- *   `ADMIN` los datos viven en `PerfilAdmin` (016) y este caso de uso no aplica.
- * - Unicidad de cédula: rechaza si otra cuenta ya la tiene, permitiendo que el
- *   propio usuario "guarde sin cambiar" (cédula igual a la suya actual).
- */
 export async function actualizarDatosContacto(
-  { usuarios }: ActualizarDatosContactoDeps,
+  { usuarios, ubicacion }: ActualizarDatosContactoDeps,
   usuarioId: string,
   input: ActualizarDatosContactoInput,
 ): Promise<Usuario> {
@@ -46,6 +38,18 @@ export async function actualizarDatosContacto(
   const validacion = validarDatosContacto(input);
   if (!validacion.ok) {
     throw new DatosContactoInvalidosError(validacion.error);
+  }
+
+  try {
+    await validarUbicacionCatalogo({ ubicacion }, {
+      estadoId: validacion.valor.estadoId,
+      municipioId: validacion.valor.municipioId,
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new DatosContactoInvalidosError(error.message);
+    }
+    throw error;
   }
 
   const existente = await usuarios.buscarPorCedula(validacion.valor.cedula);

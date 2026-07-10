@@ -5,18 +5,17 @@ import {
   type PerfilAdmin,
 } from "@/modules/usuarios/domain/PerfilAdmin";
 import type { PerfilAdminRepository } from "@/modules/usuarios/domain/PerfilAdminRepository";
+import { validarUbicacionCatalogo } from "@/modules/ubicacion/application/validarUbicacionCatalogo";
+import type { UbicacionRepository } from "@/modules/ubicacion/domain/UbicacionRepository";
 import {
   PerfilAdminDuplicadoError,
   PerfilAdminInvalidoError,
   PerfilAdminNoEncontradoError,
 } from "./errors";
 
-// Casos de uso del perfil de administrador / centro de acopio (feature 016).
-// Puros: solo dependen del dominio (repositorio como contrato y reglas de
-// validación). Normalizan (trim) y aplican las reglas antes de persistir.
-
 export type PerfilAdminDeps = {
   perfiles: PerfilAdminRepository;
+  ubicacion: UbicacionRepository;
 };
 
 export type CrearPerfilAdminInput = DatosPerfilAdmin & { usuarioId: string };
@@ -24,8 +23,8 @@ export type CrearPerfilAdminInput = DatosPerfilAdmin & { usuarioId: string };
 function normalizar(datos: DatosPerfilAdmin): DatosPerfilAdmin {
   return {
     nombreCuenta: datos.nombreCuenta.trim(),
-    estado: datos.estado.trim(),
-    parroquia: datos.parroquia.trim(),
+    estadoId: datos.estadoId.trim(),
+    municipioId: datos.municipioId.trim(),
     telefono: datos.telefono.trim(),
     telefonoEsWhatsApp: Boolean(datos.telefonoEsWhatsApp),
     correo: datos.correo.trim().toLowerCase(),
@@ -41,17 +40,31 @@ function exigirValido(datos: DatosPerfilAdmin): void {
   }
 }
 
-/**
- * Crea el perfil de un `ADMIN`: valida los datos, evita un segundo perfil para la
- * misma cuenta y persiste. Lo invoca el registro público de admin (feature 015).
- */
+async function validarUbicacionPerfil(
+  ubicacion: UbicacionRepository,
+  datos: DatosPerfilAdmin,
+): Promise<void> {
+  try {
+    await validarUbicacionCatalogo({ ubicacion }, {
+      estadoId: datos.estadoId,
+      municipioId: datos.municipioId,
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new PerfilAdminInvalidoError(error.message);
+    }
+    throw error;
+  }
+}
+
 export async function crearPerfilAdmin(
-  { perfiles }: PerfilAdminDeps,
+  { perfiles, ubicacion }: PerfilAdminDeps,
   input: CrearPerfilAdminInput,
 ): Promise<PerfilAdmin> {
   const { usuarioId, ...datos } = input;
   const normalizados = normalizar(datos);
   exigirValido(normalizados);
+  await validarUbicacionPerfil(ubicacion, normalizados);
 
   const existente = await perfiles.buscarPorUsuarioId(usuarioId);
   if (existente) {
@@ -61,12 +74,8 @@ export async function crearPerfilAdmin(
   return perfiles.crear({ usuarioId, ...normalizados });
 }
 
-/**
- * Actualiza el perfil de un `ADMIN` aprobado: aplica los cambios sobre el perfil
- * existente y valida el resultado completo antes de persistir.
- */
 export async function actualizarPerfilAdmin(
-  { perfiles }: PerfilAdminDeps,
+  { perfiles, ubicacion }: PerfilAdminDeps,
   usuarioId: string,
   cambios: CambiosPerfilAdmin,
 ): Promise<PerfilAdmin> {
@@ -77,8 +86,8 @@ export async function actualizarPerfilAdmin(
 
   const combinados: DatosPerfilAdmin = normalizar({
     nombreCuenta: cambios.nombreCuenta ?? actual.nombreCuenta,
-    estado: cambios.estado ?? actual.estado,
-    parroquia: cambios.parroquia ?? actual.parroquia,
+    estadoId: cambios.estadoId ?? actual.estadoId,
+    municipioId: cambios.municipioId ?? actual.municipioId,
     telefono: cambios.telefono ?? actual.telefono,
     telefonoEsWhatsApp: cambios.telefonoEsWhatsApp ?? actual.telefonoEsWhatsApp,
     correo: cambios.correo ?? actual.correo,
@@ -86,11 +95,11 @@ export async function actualizarPerfilAdmin(
     numeroDocumento: cambios.numeroDocumento ?? actual.numeroDocumento,
   });
   exigirValido(combinados);
+  await validarUbicacionPerfil(ubicacion, combinados);
 
   return perfiles.actualizar(usuarioId, combinados);
 }
 
-/** Devuelve el perfil de una cuenta, o `null` si no tiene. */
 export function obtenerPerfilAdmin(
   { perfiles }: PerfilAdminDeps,
   usuarioId: string,

@@ -3,19 +3,20 @@ import { tieneDatosContactoCompletos } from "@/modules/usuarios/domain/datosCont
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { DatosContactoForm } from "@/modules/usuarios/ui/DatosContactoForm";
 import { buscarUsuarioPorId, requireSesion } from "@/shared/auth";
+import { obtenerCatalogoUbicacionServicio } from "@/shared/ubicacion";
 import { guardarDatosContactoAction } from "./actions";
 
-// Pantalla obligatoria de "completar perfil" para cuentas COLABORADOR /
-// SOLICITANTE creadas antes de la feature 017 (sin datos de contacto). El guard
-// de `requireRol` redirige aquí a quien le falten campos; una vez completo,
-// redirigimos fuera para que el usuario continúe con lo que estaba haciendo.
 export default async function CompletarPerfilPage() {
   const sesion = await requireSesion();
   if (sesion.rol !== Rol.COLABORADOR && sesion.rol !== Rol.SOLICITANTE) {
     redirect("/");
   }
 
-  const fresco = await buscarUsuarioPorId(sesion.id);
+  const [fresco, catalogo] = await Promise.all([
+    buscarUsuarioPorId(sesion.id),
+    obtenerCatalogoUbicacionServicio(),
+  ]);
+
   if (fresco && tieneDatosContactoCompletos(fresco)) {
     redirect("/mi-perfil");
   }
@@ -35,12 +36,13 @@ export default async function CompletarPerfilPage() {
 
       <DatosContactoForm
         modo="completar"
+        catalogo={catalogo}
         valoresIniciales={{
           cedula: fresco?.cedula ?? "",
           telefono: fresco?.telefono ?? "",
           telefonoEsWhatsApp: fresco?.telefonoEsWhatsApp ?? true,
-          estado: fresco?.estado ?? "",
-          parroquia: fresco?.parroquia ?? "",
+          estadoId: fresco?.estadoId ?? "",
+          municipioId: fresco?.municipioId ?? "",
         }}
         action={guardarDatosContactoAction}
         destinoOk="/"

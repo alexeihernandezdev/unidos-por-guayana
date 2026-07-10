@@ -9,6 +9,8 @@ import {
   type DatosPerfilAdmin,
 } from "@/modules/usuarios/domain/PerfilAdmin";
 import { Rol } from "@/modules/usuarios/domain/Rol";
+import type { CatalogoUbicacionFormulario } from "@/modules/ubicacion/domain/Ubicacion";
+import { UbicacionSelectFields } from "@/modules/ubicacion/ui/UbicacionSelectFields";
 import { Button } from "@/shared/ui/button";
 import { DatosContactoFields } from "./DatosContactoFields";
 
@@ -34,8 +36,8 @@ type Campos = {
   cedula: string;
   telefono: string;
   telefonoEsWhatsApp: boolean;
-  estado: string;
-  parroquia: string;
+  estadoId: string;
+  municipioId: string;
   // Perfil de administrador (solo se envían y validan si rol === ADMIN).
   nombreCuenta: string;
   correo: string;
@@ -46,8 +48,7 @@ type Campos = {
 };
 
 type Props = {
-  // El server action se recibe como prop desde la página (server component), así
-  // el formulario no importa la capa `app` y se mantiene reutilizable.
+  catalogo: CatalogoUbicacionFormulario;
   action: (
     input: RegistroInput,
   ) => Promise<{ ok: boolean; error?: string; rol?: Rol }>;
@@ -56,13 +57,15 @@ type Props = {
 const campo =
   "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive";
 
-export function RegistroForm({ action }: Props) {
+export function RegistroForm({ catalogo, action }: Props) {
   const router = useRouter();
   const [pendiente, startTransition] = useTransition();
   const [errorServidor, setErrorServidor] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<Campos>({
     defaultValues: {
@@ -91,21 +94,21 @@ export function RegistroForm({ action }: Props) {
             cedula: "",
             telefono: "",
             telefonoEsWhatsApp: datos.perfilTelefonoEsWhatsApp,
-            estado: "",
-            parroquia: "",
+            estadoId: "",
+            municipioId: "",
           }
         : {
             cedula: datos.cedula,
             telefono: datos.telefono,
             telefonoEsWhatsApp: datos.telefonoEsWhatsApp,
-            estado: datos.estado,
-            parroquia: datos.parroquia,
+            estadoId: datos.estadoId,
+            municipioId: datos.municipioId,
           },
       perfil: esAdmin
         ? {
             nombreCuenta: datos.nombreCuenta,
-            estado: datos.estado,
-            parroquia: datos.parroquia,
+            estadoId: datos.estadoId,
+            municipioId: datos.municipioId,
             telefono: datos.telefono,
             telefonoEsWhatsApp: datos.perfilTelefonoEsWhatsApp,
             correo: datos.correo,
@@ -215,7 +218,13 @@ export function RegistroForm({ action }: Props) {
       </div>
 
       {!esAdmin && (
-        <DatosContactoFields<Campos> register={register} errors={errors} />
+        <DatosContactoFields<Campos>
+          catalogo={catalogo}
+          register={register}
+          watch={watch}
+          setValue={setValue}
+          errors={errors}
+        />
       )}
 
       {esAdmin && (
@@ -243,44 +252,14 @@ export function RegistroForm({ action }: Props) {
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="estado" className="text-sm font-medium">
-                Estado
-              </label>
-              <input
-                id="estado"
-                className={campo}
-                aria-invalid={Boolean(errors.estado)}
-                {...register("estado", {
-                  required: esAdmin && "Indica el estado.",
-                })}
-              />
-              {errors.estado && (
-                <p className="text-sm text-destructive">
-                  {errors.estado.message}
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="parroquia" className="text-sm font-medium">
-                Parroquia
-              </label>
-              <input
-                id="parroquia"
-                className={campo}
-                aria-invalid={Boolean(errors.parroquia)}
-                {...register("parroquia", {
-                  required: esAdmin && "Indica la parroquia.",
-                })}
-              />
-              {errors.parroquia && (
-                <p className="text-sm text-destructive">
-                  {errors.parroquia.message}
-                </p>
-              )}
-            </div>
-          </div>
+          <UbicacionSelectFields<Campos>
+            catalogo={catalogo}
+            register={register}
+            watch={watch}
+            setValue={setValue}
+            errors={errors}
+            idPrefix="admin"
+          />
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">

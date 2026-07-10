@@ -21,12 +21,13 @@ _Features completadas, en orden de implementación._
 13. **019 · Propuesta de recursos por el solicitante** — El `Recurso` gana `estadoAprobacion` ∈ `APROBADO` | `PROPUESTO` | `RECHAZADO` y `propuestoPor`. El `SOLICITANTE` puede proponer recursos desde `/solicitudes/proponer-recurso`; el `ADMIN` los revisa en `/panel/recursos/propuestas` y los aprueba o rechaza. Solo los `APROBADO` + activos son seleccionables en metas (005) y aportes (006). Backfill: los recursos previos quedan `APROBADO`. _Enmienda 004._
 14. **017 · Datos de contacto obligatorios (colaborador y solicitante)** — `cedula`, `telefono`, `telefonoEsWhatsApp`, `estado` y `parroquia` obligatorios en el registro de `COLABORADOR` y `SOLICITANTE`. Guard de servidor redirige a `/completar-perfil` cuando faltan; edición desde `/mi-perfil`. Añade `telefonoEsWhatsApp` a `PerfilAdmin` (enmienda 016). _Enmienda 002 y 016._
 15. **009 · Tablero público de transparencia** — Vista abierta en `/transparencia` (sin login) con totales de impacto, recolectado por recurso, lista de actividades (envío/jornada/evento) con progreso y destino, y detalle público por actividad. Sin datos personales; reutiliza agregaciones de 005/006/008. Módulo `src/modules/transparencia` (solo `application` + `ui`).
+16. **020 · Catálogo de estados y municipios de Venezuela** — Catálogo en BD (24 estados, 335 municipios) con selects en cascada en registro, perfiles y centros de acopio; reemplaza texto libre estado/parroquia por FK `estadoId`/`municipioId`. Módulo `src/modules/ubicacion`. _Enmienda 016 y 017._
 
 ## Siguiente 🔜
 
 _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
 
-16. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
+17. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
 
 ## Cambios propuestos por el cliente (revisión de alcance) 🔁
 

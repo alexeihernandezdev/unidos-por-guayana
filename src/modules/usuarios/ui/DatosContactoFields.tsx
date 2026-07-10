@@ -5,39 +5,40 @@ import type {
   FieldValues,
   Path,
   UseFormRegister,
+  UseFormSetValue,
+  UseFormWatch,
 } from "react-hook-form";
+import type { CatalogoUbicacionFormulario } from "@/modules/ubicacion/domain/Ubicacion";
+import { UbicacionSelectFields } from "@/modules/ubicacion/ui/UbicacionSelectFields";
 import {
   validarCedula,
   validarTelefono,
-  validarUbicacion,
 } from "@/modules/usuarios/domain/datosContacto";
-
-// Campos de contacto y ubicación exigidos a COLABORADOR/SOLICITANTE
-// (feature 017). Componente reutilizado por `RegistroForm`,
-// `/completar-perfil` y `/mi-perfil`; la validación de formato la delega en
-// el dominio para mantener una sola fuente de verdad entre cliente y servidor.
 
 const campo =
   "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive";
 
-// Los formularios que usan este componente deben declarar estos nombres en su
-// tipo `T`. `Path<T>` deja que React Hook Form haga la comprobación en tiempo
-// de compilación (el campo existe y es del tipo esperado).
 export type CamposDatosContacto = {
   cedula: string;
   telefono: string;
   telefonoEsWhatsApp: boolean;
-  estado: string;
-  parroquia: string;
+  estadoId: string;
+  municipioId: string;
 };
 
 type Props<T extends FieldValues & CamposDatosContacto> = {
+  catalogo: CatalogoUbicacionFormulario;
   register: UseFormRegister<T>;
+  watch: UseFormWatch<T>;
+  setValue: UseFormSetValue<T>;
   errors: FieldErrors<T>;
 };
 
 export function DatosContactoFields<T extends FieldValues & CamposDatosContacto>({
+  catalogo,
   register,
+  watch,
+  setValue,
   errors,
 }: Props<T>) {
   const errorFor = (nombre: keyof CamposDatosContacto): string | undefined => {
@@ -105,54 +106,13 @@ export function DatosContactoFields<T extends FieldValues & CamposDatosContacto>
         Este número recibe WhatsApp
       </label>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="estado" className="text-sm font-medium">
-            Estado
-          </label>
-          <input
-            id="estado"
-            className={campo}
-            placeholder="La Guaira"
-            aria-invalid={Boolean(errorFor("estado"))}
-            {...register("estado" as Path<T>, {
-              validate: (valor: unknown) => {
-                const r = validarUbicacion({
-                  estado: String(valor ?? ""),
-                  parroquia: "placeholder",
-                });
-                return r.ok ? true : r.error;
-              },
-            })}
-          />
-          {errorFor("estado") && (
-            <p className="text-sm text-destructive">{errorFor("estado")}</p>
-          )}
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="parroquia" className="text-sm font-medium">
-            Parroquia
-          </label>
-          <input
-            id="parroquia"
-            className={campo}
-            placeholder="Catia La Mar"
-            aria-invalid={Boolean(errorFor("parroquia"))}
-            {...register("parroquia" as Path<T>, {
-              validate: (valor: unknown) => {
-                const r = validarUbicacion({
-                  estado: "placeholder",
-                  parroquia: String(valor ?? ""),
-                });
-                return r.ok ? true : r.error;
-              },
-            })}
-          />
-          {errorFor("parroquia") && (
-            <p className="text-sm text-destructive">{errorFor("parroquia")}</p>
-          )}
-        </div>
-      </div>
+      <UbicacionSelectFields
+        catalogo={catalogo}
+        register={register}
+        watch={watch}
+        setValue={setValue}
+        errors={errors}
+      />
     </fieldset>
   );
 }

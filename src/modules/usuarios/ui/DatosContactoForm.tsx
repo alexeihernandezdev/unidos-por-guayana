@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import type { CatalogoUbicacionFormulario } from "@/modules/ubicacion/domain/Ubicacion";
 import type { DatosContacto } from "@/modules/usuarios/domain/datosContacto";
 import { Button } from "@/shared/ui/button";
 import { DatosContactoFields, type CamposDatosContacto } from "./DatosContactoFields";
@@ -11,17 +12,15 @@ type Modo = "completar" | "editar";
 
 type Props = {
   modo: Modo;
+  catalogo: CatalogoUbicacionFormulario;
   valoresIniciales?: Partial<DatosContacto>;
   action: (input: DatosContacto) => Promise<{ ok: boolean; error?: string }>;
-  // Ruta a la que redirige tras un guardado correcto. En "completar" suele ser
-  // `/` o la ruta que el guard interrumpió; en "editar" vuelve a `/mi-perfil`.
   destinoOk: string;
 };
 
-// Formulario compartido por `/completar-perfil` (primer login) y `/mi-perfil`
-// (edición). La diferencia es solo el copy y los valores iniciales.
 export function DatosContactoForm({
   modo,
+  catalogo,
   valoresIniciales,
   action,
   destinoOk,
@@ -33,14 +32,16 @@ export function DatosContactoForm({
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<CamposDatosContacto>({
     defaultValues: {
       cedula: valoresIniciales?.cedula ?? "",
       telefono: valoresIniciales?.telefono ?? "",
       telefonoEsWhatsApp: valoresIniciales?.telefonoEsWhatsApp ?? true,
-      estado: valoresIniciales?.estado ?? "",
-      parroquia: valoresIniciales?.parroquia ?? "",
+      estadoId: valoresIniciales?.estadoId ?? "",
+      municipioId: valoresIniciales?.municipioId ?? "",
     },
   });
 
@@ -62,7 +63,10 @@ export function DatosContactoForm({
   return (
     <form onSubmit={onSubmit} className="flex w-full max-w-lg flex-col gap-4">
       <DatosContactoFields<CamposDatosContacto>
+        catalogo={catalogo}
         register={register}
+        watch={watch}
+        setValue={setValue}
         errors={errors}
       />
 

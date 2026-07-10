@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
+import type { CatalogoUbicacionFormulario } from "@/modules/ubicacion/domain/Ubicacion";
+import { UbicacionSelectFields } from "@/modules/ubicacion/ui/UbicacionSelectFields";
 import {
   TipoDocumento,
   type DatosPerfilAdmin,
@@ -9,17 +11,15 @@ import {
 import { Button } from "@/shared/ui/button";
 
 type Props = {
-  // Valores actuales del perfil, para prellenar el formulario.
   perfil: DatosPerfilAdmin;
-  // Server action de actualización, recibido como prop desde la página.
+  catalogo: CatalogoUbicacionFormulario;
   action: (input: DatosPerfilAdmin) => Promise<{ ok: boolean; error?: string }>;
 };
 
 const campo =
   "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive";
 
-/** Vista y edición del perfil de centro de acopio del ADMIN (feature 016). */
-export function PerfilAdminForm({ perfil, action }: Props) {
+export function PerfilAdminForm({ perfil, catalogo, action }: Props) {
   const [pendiente, startTransition] = useTransition();
   const [mensaje, setMensaje] = useState<
     { tipo: "ok" | "error"; texto: string } | null
@@ -27,6 +27,8 @@ export function PerfilAdminForm({ perfil, action }: Props) {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<DatosPerfilAdmin>({ defaultValues: perfil });
 
@@ -62,36 +64,13 @@ export function PerfilAdminForm({ perfil, action }: Props) {
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="estado" className="text-sm font-medium">
-            Estado
-          </label>
-          <input
-            id="estado"
-            className={campo}
-            aria-invalid={Boolean(errors.estado)}
-            {...register("estado", { required: "Indica el estado." })}
-          />
-          {errors.estado && (
-            <p className="text-sm text-destructive">{errors.estado.message}</p>
-          )}
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="parroquia" className="text-sm font-medium">
-            Parroquia
-          </label>
-          <input
-            id="parroquia"
-            className={campo}
-            aria-invalid={Boolean(errors.parroquia)}
-            {...register("parroquia", { required: "Indica la parroquia." })}
-          />
-          {errors.parroquia && (
-            <p className="text-sm text-destructive">{errors.parroquia.message}</p>
-          )}
-        </div>
-      </div>
+      <UbicacionSelectFields<DatosPerfilAdmin>
+        catalogo={catalogo}
+        register={register}
+        watch={watch}
+        setValue={setValue}
+        errors={errors}
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
@@ -109,10 +88,7 @@ export function PerfilAdminForm({ perfil, action }: Props) {
             <p className="text-sm text-destructive">{errors.telefono.message}</p>
           )}
           <label className="mt-1 flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              {...register("telefonoEsWhatsApp")}
-            />
+            <input type="checkbox" {...register("telefonoEsWhatsApp")} />
             Este número recibe WhatsApp
           </label>
         </div>

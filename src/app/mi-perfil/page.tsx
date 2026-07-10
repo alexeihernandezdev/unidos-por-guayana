@@ -1,16 +1,15 @@
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { DatosContactoForm } from "@/modules/usuarios/ui/DatosContactoForm";
 import { buscarUsuarioPorId, requireRol } from "@/shared/auth";
+import { obtenerCatalogoUbicacionServicio } from "@/shared/ubicacion";
 import { guardarDatosContactoAction } from "../completar-perfil/actions";
 
-// Perfil editable del COLABORADOR/SOLICITANTE (feature 017). Muestra los cinco
-// campos precargados con los datos actuales; permite actualizarlos en
-// cualquier momento con el mismo caso de uso que `/completar-perfil`. El guard
-// `requireRol` ya se encarga de: rol autorizado, y perfil completo (si no lo
-// está, redirige antes a `/completar-perfil`).
 export default async function MiPerfilPage() {
   const sesion = await requireRol(Rol.COLABORADOR, Rol.SOLICITANTE);
-  const usuario = await buscarUsuarioPorId(sesion.id);
+  const [usuario, catalogo] = await Promise.all([
+    buscarUsuarioPorId(sesion.id),
+    obtenerCatalogoUbicacionServicio(),
+  ]);
 
   return (
     <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 p-6 md:p-8">
@@ -24,12 +23,13 @@ export default async function MiPerfilPage() {
 
       <DatosContactoForm
         modo="editar"
+        catalogo={catalogo}
         valoresIniciales={{
           cedula: usuario?.cedula ?? "",
           telefono: usuario?.telefono ?? "",
           telefonoEsWhatsApp: usuario?.telefonoEsWhatsApp ?? true,
-          estado: usuario?.estado ?? "",
-          parroquia: usuario?.parroquia ?? "",
+          estadoId: usuario?.estadoId ?? "",
+          municipioId: usuario?.municipioId ?? "",
         }}
         action={guardarDatosContactoAction}
         destinoOk="/mi-perfil"

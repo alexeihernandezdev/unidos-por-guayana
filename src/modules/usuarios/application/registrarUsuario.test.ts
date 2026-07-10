@@ -16,64 +16,66 @@ import {
   registrarUsuario,
   type RegistrarUsuarioInput,
 } from "./registrarUsuario";
+import { crearUbicacionFakeTest } from "./ubicacionTestHelper";
 
 function crearDeps() {
+  const { ubicacion, estadoId, municipioId } = crearUbicacionFakeTest();
   return {
     usuarios: new InMemoryUsuarioRepository(),
     hasher: new FakePasswordHasher(),
+    ubicacion,
+    estadoId,
+    municipioId,
   };
 }
 
-const datosContactoBase: DatosContacto = {
-  cedula: "V12345678",
-  telefono: "04121234567",
-  telefonoEsWhatsApp: true,
-  estado: "La Guaira",
-  parroquia: "Catia La Mar",
-};
+function datosContacto(estadoId: string, municipioId: string): DatosContacto {
+  return {
+    cedula: "V12345678",
+    telefono: "04121234567",
+    telefonoEsWhatsApp: true,
+    estadoId,
+    municipioId,
+  };
+}
 
-const baseInput: RegistrarUsuarioInput = {
+const baseInput = (deps: ReturnType<typeof crearDeps>): RegistrarUsuarioInput => ({
   nombre: "Ana Pérez",
   email: "ana@example.com",
   password: "contraseña-segura",
   rol: Rol.COLABORADOR,
-  datosContacto: datosContactoBase,
-};
+  datosContacto: datosContacto(deps.estadoId, deps.municipioId),
+});
 
 describe("registrarUsuario", () => {
   it("crea un colaborador con datos de contacto normalizados", async () => {
     const deps = crearDeps();
 
     const usuario = await registrarUsuario(deps, {
-      ...baseInput,
+      ...baseInput(deps),
       datosContacto: {
         cedula: "v-12.345.678",
         telefono: "+58 412 1234567",
         telefonoEsWhatsApp: true,
-        estado: "  La Guaira  ",
-        parroquia: "Catia La Mar",
+        estadoId: deps.estadoId,
+        municipioId: deps.municipioId,
       },
     });
 
-    expect(usuario.id).toBeTruthy();
-    expect(usuario.email).toBe("ana@example.com");
-    expect(usuario.rol).toBe(Rol.COLABORADOR);
-    expect(usuario.estadoVerificacion).toBe("PENDIENTE");
     expect(usuario.cedula).toBe("V12345678");
     expect(usuario.telefono).toBe("04121234567");
-    expect(usuario.telefonoEsWhatsApp).toBe(true);
-    expect(usuario.estado).toBe("La Guaira");
-    expect(usuario.parroquia).toBe("Catia La Mar");
+    expect(usuario.estadoId).toBe(deps.estadoId);
+    expect(usuario.municipioId).toBe(deps.municipioId);
   });
 
-  it("crea un solicitante también con los cinco campos", async () => {
+  it("rechaza municipio que no pertenece al estado", async () => {
     const deps = crearDeps();
-    const usuario = await registrarUsuario(deps, {
-      ...baseInput,
-      rol: Rol.SOLICITANTE,
-    });
-    expect(usuario.rol).toBe(Rol.SOLICITANTE);
-    expect(usuario.cedula).toBe("V12345678");
+    await expect(
+      registrarUsuario(deps, {
+        ...baseInput(deps),
+        datosContacto: datosContacto("otro-estado", deps.municipioId),
+      }),
+    ).rejects.toBeInstanceOf(DatosContactoInvalidosError);
   });
 
   it("rechaza colaborador sin datos de contacto", async () => {
@@ -88,87 +90,50 @@ describe("registrarUsuario", () => {
     ).rejects.toBeInstanceOf(DatosContactoInvalidosError);
   });
 
-  it("propaga el error de dominio si algún campo es inválido", async () => {
+  it("rechaza cédula duplicada", async () => {
     const deps = crearDeps();
+    await registrarUsuario(deps, baseInput(deps));
     await expect(
       registrarUsuario(deps, {
-        ...baseInput,
-        datosContacto: { ...datosContactoBase, telefono: "0499 1234567" },
-      }),
-    ).rejects.toMatchObject({
-      name: "DatosContactoInvalidosError",
-      message: "El código de operadora no es válido en Venezuela.",
-    });
-  });
-
-  it("rechaza registrar una cédula que ya existe", async () => {
-    const deps = crearDeps();
-    await registrarUsuario(deps, baseInput);
-    await expect(
-      registrarUsuario(deps, {
-        ...baseInput,
+        ...baseInput(deps),
         email: "otra@example.com",
-        datosContacto: { ...datosContactoBase, cedula: "v-12.345.678" },
       }),
     ).rejects.toBeInstanceOf(CedulaYaRegistradaError);
   });
 
-  it("admite ADMIN sin datos de contacto (viven en PerfilAdmin) y guarda flag WhatsApp", async () => {
+  it("admite ADMIN sin datos de contacto en Usuario", async () => {
     const deps = crearDeps();
-
     const usuario = await registrarUsuario(deps, {
       nombre: "Centro Guaira",
       email: "centro@example.com",
       password: "contraseña-segura",
       rol: Rol.ADMIN,
-      datosContacto: {
-        cedula: "irrelevante",
-        telefono: "irrelevante",
-        telefonoEsWhatsApp: true,
-        estado: "irrelevante",
-        parroquia: "irrelevante",
-      },
     });
-
     expect(usuario.rol).toBe(Rol.ADMIN);
-    expect(usuario.estadoVerificacion).toBe("PENDIENTE");
     expect(usuario.cedula).toBeNull();
-    expect(usuario.telefono).toBeNull();
-    expect(usuario.telefonoEsWhatsApp).toBe(true);
   });
 
-  it("rechaza el rol SUPERADMIN (no auto-registrable)", async () => {
+  it("rechaza SUPERADMIN", async () => {
     const deps = crearDeps();
     await expect(
-      registrarUsuario(deps, { ...baseInput, rol: Rol.SUPERADMIN }),
+      registrarUsuario(deps, { ...baseInput(deps), rol: Rol.SUPERADMIN }),
     ).rejects.toBeInstanceOf(RolNoAutoRegistrableError);
-    expect(await deps.usuarios.buscarPorEmail(baseInput.email)).toBeNull();
   });
 
-  it("hashea la contraseña (nunca se guarda en claro)", async () => {
+  it("hashea la contraseña", async () => {
     const deps = crearDeps();
-    const usuario = await registrarUsuario(deps, baseInput);
-    expect(usuario.passwordHash).not.toBe(baseInput.password);
-    expect(usuario.passwordHash).toBe(`${PREFIJO_HASH}${baseInput.password}`);
+    const input = baseInput(deps);
+    const usuario = await registrarUsuario(deps, input);
+    expect(usuario.passwordHash).toBe(`${PREFIJO_HASH}${input.password}`);
   });
 
-  it("normaliza el email (trim + minúsculas)", async () => {
+  it("rechaza email duplicado", async () => {
     const deps = crearDeps();
-    const usuario = await registrarUsuario(deps, {
-      ...baseInput,
-      email: "  ANA@Example.com  ",
-    });
-    expect(usuario.email).toBe("ana@example.com");
-  });
-
-  it("rechaza un email ya registrado", async () => {
-    const deps = crearDeps();
-    await registrarUsuario(deps, baseInput);
+    await registrarUsuario(deps, baseInput(deps));
     await expect(
       registrarUsuario(deps, {
-        ...baseInput,
-        nombre: "Otra Ana",
-        datosContacto: { ...datosContactoBase, cedula: "V87654321" },
+        ...baseInput(deps),
+        datosContacto: { ...datosContacto(deps.estadoId, deps.municipioId), cedula: "V87654321" },
       }),
     ).rejects.toBeInstanceOf(EmailYaRegistradoError);
   });

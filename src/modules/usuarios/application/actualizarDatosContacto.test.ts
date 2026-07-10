@@ -4,20 +4,21 @@ import { Rol } from "@/modules/usuarios/domain/Rol";
 import { actualizarDatosContacto } from "./actualizarDatosContacto";
 import {
   CedulaYaRegistradaError,
-  DatosContactoInvalidosError,
   UsuarioNoEncontradoError,
 } from "./errors";
 import { FakePasswordHasher, InMemoryUsuarioRepository } from "./fakes";
 import { registrarUsuario } from "./registrarUsuario";
+import { crearUbicacionFakeTest } from "./ubicacionTestHelper";
 
 async function crearColaborador(
-  usuarios: InMemoryUsuarioRepository,
-  hasher: FakePasswordHasher,
   overrides: Partial<DatosContacto> = {},
   email = "col@example.com",
 ) {
-  return registrarUsuario(
-    { usuarios, hasher },
+  const usuarios = new InMemoryUsuarioRepository();
+  const hasher = new FakePasswordHasher();
+  const { ubicacion, estadoId, municipioId } = crearUbicacionFakeTest();
+  const usuario = await registrarUsuario(
+    { usuarios, hasher, ubicacion },
     {
       nombre: "Col",
       email,
@@ -27,86 +28,94 @@ async function crearColaborador(
         cedula: "V12345678",
         telefono: "04121234567",
         telefonoEsWhatsApp: true,
-        estado: "La Guaira",
-        parroquia: "Catia La Mar",
+        estadoId,
+        municipioId,
         ...overrides,
       },
     },
   );
+  return { usuarios, ubicacion, usuario, estadoId, municipioId };
 }
 
 describe("actualizarDatosContacto", () => {
   it("normaliza y persiste los cinco campos", async () => {
-    const usuarios = new InMemoryUsuarioRepository();
-    const hasher = new FakePasswordHasher();
-    const usuario = await crearColaborador(usuarios, hasher);
+    const { usuarios, ubicacion, usuario, estadoId, municipioId } =
+      await crearColaborador();
 
-    const actualizado = await actualizarDatosContacto({ usuarios }, usuario.id, {
-      cedula: "e-9.876.543",
-      telefono: "+58 414 7654321",
-      telefonoEsWhatsApp: false,
-      estado: "  Miranda  ",
-      parroquia: "El   Hatillo",
-    });
+    const actualizado = await actualizarDatosContacto(
+      { usuarios, ubicacion },
+      usuario.id,
+      {
+        cedula: "e-9.876.543",
+        telefono: "+58 414 7654321",
+        telefonoEsWhatsApp: false,
+        estadoId,
+        municipioId,
+      },
+    );
 
     expect(actualizado.cedula).toBe("E9876543");
     expect(actualizado.telefono).toBe("04147654321");
-    expect(actualizado.telefonoEsWhatsApp).toBe(false);
-    expect(actualizado.estado).toBe("Miranda");
-    expect(actualizado.parroquia).toBe("El Hatillo");
-  });
-
-  it("permite guardar sin cambiar la propia cédula", async () => {
-    const usuarios = new InMemoryUsuarioRepository();
-    const hasher = new FakePasswordHasher();
-    const usuario = await crearColaborador(usuarios, hasher);
-
-    const actualizado = await actualizarDatosContacto({ usuarios }, usuario.id, {
-      cedula: "V12345678",
-      telefono: "04121234567",
-      telefonoEsWhatsApp: true,
-      estado: "La Guaira",
-      parroquia: "Maiquetía",
-    });
-
-    expect(actualizado.parroquia).toBe("Maiquetía");
-    expect(actualizado.cedula).toBe("V12345678");
+    expect(actualizado.estadoId).toBe(estadoId);
+    expect(actualizado.municipioId).toBe(municipioId);
   });
 
   it("rechaza si otra cuenta ya tiene esa cédula", async () => {
     const usuarios = new InMemoryUsuarioRepository();
     const hasher = new FakePasswordHasher();
-    const uno = await crearColaborador(usuarios, hasher);
-    await crearColaborador(
-      usuarios,
-      hasher,
-      { cedula: "V87654321" },
-      "dos@example.com",
-    );
+    const { ubicacion, estadoId, municipioId } = crearUbicacionFakeTest();
+    const deps = { usuarios, hasher, ubicacion };
 
-    await expect(
-      actualizarDatosContacto({ usuarios }, uno.id, {
+    const uno = await registrarUsuario(deps, {
+      nombre: "Col",
+      email: "col@example.com",
+      password: "contraseña-segura",
+      rol: Rol.COLABORADOR,
+      datosContacto: {
+        cedula: "V12345678",
+        telefono: "04121234567",
+        telefonoEsWhatsApp: true,
+        estadoId,
+        municipioId,
+      },
+    });
+
+    await registrarUsuario(deps, {
+      nombre: "Col 2",
+      email: "dos@example.com",
+      password: "contraseña-segura",
+      rol: Rol.COLABORADOR,
+      datosContacto: {
         cedula: "V87654321",
         telefono: "04121234567",
         telefonoEsWhatsApp: true,
-        estado: "La Guaira",
-        parroquia: "Catia",
+        estadoId,
+        municipioId,
+      },
+    });
+
+    await expect(
+      actualizarDatosContacto({ usuarios, ubicacion }, uno.id, {
+        cedula: "V87654321",
+        telefono: "04121234567",
+        telefonoEsWhatsApp: true,
+        estadoId,
+        municipioId,
       }),
     ).rejects.toBeInstanceOf(CedulaYaRegistradaError);
   });
 
-  it("rechaza formato inválido con mensaje del dominio", async () => {
-    const usuarios = new InMemoryUsuarioRepository();
-    const hasher = new FakePasswordHasher();
-    const usuario = await crearColaborador(usuarios, hasher);
+  it("rechaza estadoId vacío", async () => {
+    const { usuarios, ubicacion, usuario, municipioId } =
+      await crearColaborador();
 
     await expect(
-      actualizarDatosContacto({ usuarios }, usuario.id, {
+      actualizarDatosContacto({ usuarios, ubicacion }, usuario.id, {
         cedula: "V12345678",
         telefono: "04121234567",
         telefonoEsWhatsApp: true,
-        estado: "",
-        parroquia: "Catia",
+        estadoId: "",
+        municipioId,
       }),
     ).rejects.toMatchObject({
       name: "DatosContactoInvalidosError",
@@ -115,39 +124,16 @@ describe("actualizarDatosContacto", () => {
   });
 
   it("rechaza si el usuario no existe", async () => {
-    const usuarios = new InMemoryUsuarioRepository();
+    const { usuarios, ubicacion, estadoId, municipioId } =
+      await crearColaborador();
     await expect(
-      actualizarDatosContacto({ usuarios }, "no-existe", {
+      actualizarDatosContacto({ usuarios, ubicacion }, "no-existe", {
         cedula: "V12345678",
         telefono: "04121234567",
         telefonoEsWhatsApp: true,
-        estado: "La Guaira",
-        parroquia: "Catia",
+        estadoId,
+        municipioId,
       }),
     ).rejects.toBeInstanceOf(UsuarioNoEncontradoError);
-  });
-
-  it("rechaza si el usuario es ADMIN (sus datos viven en PerfilAdmin)", async () => {
-    const usuarios = new InMemoryUsuarioRepository();
-    const hasher = new FakePasswordHasher();
-    const admin = await registrarUsuario(
-      { usuarios, hasher },
-      {
-        nombre: "Centro",
-        email: "centro@example.com",
-        password: "contraseña-segura",
-        rol: Rol.ADMIN,
-      },
-    );
-
-    await expect(
-      actualizarDatosContacto({ usuarios }, admin.id, {
-        cedula: "V12345678",
-        telefono: "04121234567",
-        telefonoEsWhatsApp: true,
-        estado: "La Guaira",
-        parroquia: "Catia",
-      }),
-    ).rejects.toBeInstanceOf(DatosContactoInvalidosError);
   });
 });

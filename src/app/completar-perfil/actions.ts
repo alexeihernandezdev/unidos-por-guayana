@@ -18,8 +18,8 @@ const DatosContactoSchema = z.object({
   cedula: z.string().trim().min(1, "La cédula es obligatoria.").max(20),
   telefono: z.string().trim().min(1, "El teléfono es obligatorio.").max(20),
   telefonoEsWhatsApp: z.boolean(),
-  estado: z.string().trim().min(1, "Indica el estado.").max(80),
-  parroquia: z.string().trim().min(1, "Indica la parroquia.").max(80),
+  estadoId: z.string().trim().min(1, "Indica el estado."),
+  municipioId: z.string().trim().min(1, "Indica el municipio."),
 });
 
 type Resultado = { ok: true } | { ok: false; error: string };

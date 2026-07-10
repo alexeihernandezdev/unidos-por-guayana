@@ -16,8 +16,8 @@ export type Usuario = {
   cedula: string | null;
   telefono: string | null;
   telefonoEsWhatsApp: boolean;
-  estado: string | null;
-  parroquia: string | null;
+  estadoId: string | null;
+  municipioId: string | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -34,6 +34,6 @@ export type NuevoUsuario = {
   cedula?: string | null;
   telefono?: string | null;
   telefonoEsWhatsApp?: boolean;
-  estado?: string | null;
-  parroquia?: string | null;
+  estadoId?: string | null;
+  municipioId?: string | null;
 };

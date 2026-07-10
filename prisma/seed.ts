@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "../src/generated/prisma/client";
+import { sembrarCatalogoUbicacion } from "./seed-ubicacion";
 
 // Siembra el SUPERADMIN inicial (obligatorio, raíz de confianza — feature 015) y,
 // si estamos en desarrollo, dos usuarios de prueba (COLABORADOR y SOLICITANTE)
@@ -64,6 +65,11 @@ async function main() {
   const prisma = new PrismaClient({ adapter });
 
   try {
+    const catalogo = await sembrarCatalogoUbicacion(prisma);
+    console.log(
+      `✔ Catálogo ubicación: ${catalogo.estados} estados, ${catalogo.municipios} municipios`,
+    );
+
     // SUPERADMIN: obligatorio. Raíz de confianza (feature 015): no se auto-registra
     // ni se promueve desde la app; es la única autoridad que aprueba cuentas ADMIN.
     await sembrarUsuario(prisma, {

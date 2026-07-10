@@ -3,13 +3,11 @@ import {
   validarDatosContacto,
   type DatosContacto,
 } from "@/modules/usuarios/domain/datosContacto";
-import {
-  esRolAutoRegistrable,
-  Rol,
-  type Rol as RolType,
-} from "@/modules/usuarios/domain/Rol";
+import { esRolAutoRegistrable, Rol, type Rol as RolType } from "@/modules/usuarios/domain/Rol";
 import type { Usuario } from "@/modules/usuarios/domain/Usuario";
 import type { UsuarioRepository } from "@/modules/usuarios/domain/UsuarioRepository";
+import { validarUbicacionCatalogo } from "@/modules/ubicacion/application/validarUbicacionCatalogo";
+import type { UbicacionRepository } from "@/modules/ubicacion/domain/UbicacionRepository";
 import {
   CedulaYaRegistradaError,
   DatosContactoInvalidosError,
@@ -20,12 +18,9 @@ import {
 export type RegistrarUsuarioDeps = {
   usuarios: UsuarioRepository;
   hasher: PasswordHasher;
+  ubicacion: UbicacionRepository;
 };
 
-// Entrada del caso de uso. Los datos de contacto son opcionales aquí: se
-// exigen dinámicamente para `COLABORADOR` y `SOLICITANTE` (feature 017) y para
-// el `ADMIN` solo se acepta el flag `telefonoEsWhatsApp` (que también se
-// guarda en su `PerfilAdmin`).
 export type RegistrarUsuarioInput = {
   nombre: string;
   email: string;
@@ -34,24 +29,8 @@ export type RegistrarUsuarioInput = {
   datosContacto?: DatosContacto;
 };
 
-/**
- * Da de alta un usuario:
- * 1. Rechaza roles no auto-registrables (el `SUPERADMIN`) — regla de dominio.
- * 2. Verifica que el email no exista ya.
- * 3. Si el rol es COLABORADOR/SOLICITANTE, valida y normaliza los datos de
- *    contacto/ubicación y rechaza cédula duplicada (feature 017).
- * 4. Hashea la contraseña y crea el usuario con todos sus datos.
- *
- * Desde la feature 015 el `ADMIN` es de registro público: se crea como cualquier
- * otro rol y nace en `estadoVerificacion = PENDIENTE` (valor por defecto del
- * repositorio); no opera hasta que un `SUPERADMIN` lo aprueba.
- *
- * Caso de uso puro: solo depende del dominio (repositorio y hasher como
- * contratos). La validación del formato de entrada ocurre en el límite
- * (presentación); aquí se aplican las reglas de negocio.
- */
 export async function registrarUsuario(
-  { usuarios, hasher }: RegistrarUsuarioDeps,
+  { usuarios, hasher, ubicacion }: RegistrarUsuarioDeps,
   input: RegistrarUsuarioInput,
 ): Promise<Usuario> {
   if (!esRolAutoRegistrable(input.rol)) {
@@ -67,7 +46,6 @@ export async function registrarUsuario(
 
   const passwordHash = await hasher.hash(input.password);
 
-  // Rol COLABORADOR/SOLICITANTE: exige los cinco campos de contacto.
   if (input.rol === Rol.COLABORADOR || input.rol === Rol.SOLICITANTE) {
     if (!input.datosContacto) {
       throw new DatosContactoInvalidosError("La cédula es obligatoria.");
@@ -76,6 +54,19 @@ export async function registrarUsuario(
     if (!validacion.ok) {
       throw new DatosContactoInvalidosError(validacion.error);
     }
+
+    try {
+      await validarUbicacionCatalogo({ ubicacion }, {
+        estadoId: validacion.valor.estadoId,
+        municipioId: validacion.valor.municipioId,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new DatosContactoInvalidosError(error.message);
+      }
+      throw error;
+    }
+
     const cedulaExistente = await usuarios.buscarPorCedula(validacion.valor.cedula);
     if (cedulaExistente) {
       throw new CedulaYaRegistradaError();
@@ -88,14 +79,11 @@ export async function registrarUsuario(
       cedula: validacion.valor.cedula,
       telefono: validacion.valor.telefono,
       telefonoEsWhatsApp: validacion.valor.telefonoEsWhatsApp,
-      estado: validacion.valor.estado,
-      parroquia: validacion.valor.parroquia,
+      estadoId: validacion.valor.estadoId,
+      municipioId: validacion.valor.municipioId,
     });
   }
 
-  // Rol ADMIN: no exige datos de contacto en `Usuario` (viven en `PerfilAdmin`,
-  // feature 016). Solo respeta el flag WhatsApp si viene, para reflejar el
-  // canal preferente del centro de acopio también en su cuenta base.
   return usuarios.crear({
     email,
     nombre: input.nombre.trim(),

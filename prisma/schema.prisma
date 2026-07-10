@@ -51,8 +51,11 @@ model Usuario {
   cedula             String?            @unique
   telefono           String?
   telefonoEsWhatsApp Boolean            @default(false)
-  estado             String?
-  parroquia          String?
+  // Ubicación venezuela (feature 020): FK al catálogo oficial de estados/municipios.
+  estadoId           String?
+  estadoUbicacion    EstadoVenezuela?   @relation(fields: [estadoId], references: [id])
+  municipioId        String?
+  municipio          MunicipioVenezuela? @relation(fields: [municipioId], references: [id])
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 
@@ -90,8 +93,10 @@ model PerfilAdmin {
   usuarioId          String        @unique
   usuario            Usuario       @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   nombreCuenta       String
-  estado             String
-  parroquia          String
+  estadoId           String
+  estadoUbicacion    EstadoVenezuela   @relation(fields: [estadoId], references: [id])
+  municipioId        String
+  municipio          MunicipioVenezuela @relation(fields: [municipioId], references: [id])
   telefono           String
   // Flag WhatsApp del teléfono del centro de acopio (feature 017 amplía 016).
   telefonoEsWhatsApp Boolean       @default(false)
@@ -330,4 +335,39 @@ model RecursoSolicitud {
 
   @@unique([solicitudId, recursoId])
   @@map("recursos_solicitud")
+}
+
+// ── Catálogo geográfico de Venezuela (feature 020) ───────────────────────────
+// 24 entidades federales (23 estados + Distrito Capital) y 335 municipios.
+// Solo lectura en la app; se siembra con `pnpm db:seed`.
+
+model EstadoVenezuela {
+  id            String               @id @default(cuid())
+  codigoIso     String               @unique
+  idIne         Int                  @unique
+  nombre        String               @unique
+  capital       String?
+  municipios    MunicipioVenezuela[]
+  usuarios      Usuario[]
+  perfilesAdmin PerfilAdmin[]
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  @@map("estados_venezuela")
+}
+
+model MunicipioVenezuela {
+  id            String          @id @default(cuid())
+  nombre        String
+  capital       String?
+  estadoId      String
+  estado        EstadoVenezuela @relation(fields: [estadoId], references: [id], onDelete: Cascade)
+  usuarios      Usuario[]
+  perfilesAdmin PerfilAdmin[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@unique([estadoId, nombre])
+  @@index([estadoId])
+  @@map("municipios_venezuela")
 }

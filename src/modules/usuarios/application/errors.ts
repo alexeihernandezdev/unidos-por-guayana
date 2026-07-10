@@ -17,7 +17,7 @@ export class EmailYaRegistradoError extends Error {
 
 // ── Datos de contacto y ubicación (feature 017) ───────────────────────────────
 
-// La entrada no cumple las reglas de dominio (cédula/teléfono/estado/parroquia).
+// La entrada no cumple las reglas de dominio (cédula/teléfono/ubicación).
 // El mensaje describe el primer problema encontrado, en español y listo para
 // mostrar al usuario.
 export class DatosContactoInvalidosError extends Error {
