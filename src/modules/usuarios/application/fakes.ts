@@ -1,12 +1,18 @@
 import type { PasswordHasher } from "@/modules/usuarios/domain/PasswordHasher";
+import type {
+  CambiosPerfilAdmin,
+  NuevoPerfilAdmin,
+  PerfilAdmin,
+} from "@/modules/usuarios/domain/PerfilAdmin";
+import type { PerfilAdminRepository } from "@/modules/usuarios/domain/PerfilAdminRepository";
 import type { NuevoUsuario, Usuario } from "@/modules/usuarios/domain/Usuario";
 import type { UsuarioRepository } from "@/modules/usuarios/domain/UsuarioRepository";
-import { EstadoVerificacion } from "@/modules/usuarios/domain/Rol";
+import { EstadoVerificacion, Rol } from "@/modules/usuarios/domain/Rol";
 
 // Dobles en memoria para los tests de casos de uso. No tocan la base ni bcrypt.
 
 export class InMemoryUsuarioRepository implements UsuarioRepository {
-  private readonly porEmail = new Map<string, Usuario>();
+  private readonly porId = new Map<string, Usuario>();
   private secuencia = 0;
 
   async crear(datos: NuevoUsuario): Promise<Usuario> {
@@ -18,12 +24,82 @@ export class InMemoryUsuarioRepository implements UsuarioRepository {
       updatedAt: ahora,
       ...datos,
     };
-    this.porEmail.set(usuario.email, usuario);
+    this.porId.set(usuario.id, usuario);
     return usuario;
   }
 
   async buscarPorEmail(email: string): Promise<Usuario | null> {
-    return this.porEmail.get(email) ?? null;
+    for (const usuario of this.porId.values()) {
+      if (usuario.email === email) return usuario;
+    }
+    return null;
+  }
+
+  async buscarPorId(id: string): Promise<Usuario | null> {
+    return this.porId.get(id) ?? null;
+  }
+
+  async listarAdminsPendientes(): Promise<Usuario[]> {
+    return [...this.porId.values()].filter(
+      (usuario) =>
+        usuario.rol === Rol.ADMIN &&
+        usuario.estadoVerificacion === EstadoVerificacion.PENDIENTE,
+    );
+  }
+
+  async actualizarEstadoVerificacion(
+    id: string,
+    estado: EstadoVerificacion,
+  ): Promise<Usuario> {
+    const usuario = this.porId.get(id);
+    if (!usuario) {
+      throw new Error(`Usuario "${id}" no encontrado.`);
+    }
+    const actualizado: Usuario = {
+      ...usuario,
+      estadoVerificacion: estado,
+      updatedAt: new Date(),
+    };
+    this.porId.set(id, actualizado);
+    return actualizado;
+  }
+}
+
+export class InMemoryPerfilAdminRepository implements PerfilAdminRepository {
+  private readonly porUsuarioId = new Map<string, PerfilAdmin>();
+  private secuencia = 0;
+
+  async crear(datos: NuevoPerfilAdmin): Promise<PerfilAdmin> {
+    const ahora = new Date();
+    const perfil: PerfilAdmin = {
+      id: `perfil-${++this.secuencia}`,
+      createdAt: ahora,
+      updatedAt: ahora,
+      ...datos,
+    };
+    this.porUsuarioId.set(perfil.usuarioId, perfil);
+    return perfil;
+  }
+
+  async buscarPorUsuarioId(usuarioId: string): Promise<PerfilAdmin | null> {
+    return this.porUsuarioId.get(usuarioId) ?? null;
+  }
+
+  async actualizar(
+    usuarioId: string,
+    cambios: CambiosPerfilAdmin,
+  ): Promise<PerfilAdmin> {
+    const actual = this.porUsuarioId.get(usuarioId);
+    if (!actual) {
+      throw new Error(`Perfil de "${usuarioId}" no encontrado.`);
+    }
+    const actualizado: PerfilAdmin = {
+      ...actual,
+      ...cambios,
+      updatedAt: new Date(),
+    };
+    this.porUsuarioId.set(usuarioId, actualizado);
+    return actualizado;
   }
 }
 

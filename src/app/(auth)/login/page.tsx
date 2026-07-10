@@ -18,11 +18,19 @@ export default async function LoginPage({
         </p>
       </div>
 
-      {registrado && (
+      {registrado === "admin" ? (
+        <p
+          className="max-w-sm text-center text-sm text-muted-foreground"
+          role="status"
+        >
+          Cuenta de administrador creada. Un superadministrador debe aprobarla
+          antes de que puedas operar; te avisaremos al iniciar sesión.
+        </p>
+      ) : registrado ? (
         <p className="text-sm text-green-600 dark:text-green-500" role="status">
           Cuenta creada. Ya puedes iniciar sesión.
         </p>
-      )}
+      ) : null}
 
       <LoginForm action={iniciarSesionAction} />
 

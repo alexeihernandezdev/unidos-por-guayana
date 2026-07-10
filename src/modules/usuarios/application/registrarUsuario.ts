@@ -18,9 +18,13 @@ export type RegistrarUsuarioInput = {
 
 /**
  * Da de alta un usuario:
- * 1. Rechaza roles no auto-registrables (p. ej. `ADMIN`) — regla de dominio.
+ * 1. Rechaza roles no auto-registrables (el `SUPERADMIN`) — regla de dominio.
  * 2. Verifica que el email no exista ya.
  * 3. Hashea la contraseña y crea el usuario.
+ *
+ * Desde la feature 015 el `ADMIN` es de registro público: se crea como cualquier
+ * otro rol y nace en `estadoVerificacion = PENDIENTE` (valor por defecto del
+ * repositorio); no opera hasta que un `SUPERADMIN` lo aprueba.
  *
  * Caso de uso puro: solo depende del dominio (repositorio y hasher como
  * contratos). La validación del formato de entrada ocurre en el límite
