@@ -101,6 +101,14 @@ export class InMemoryAporteRepository implements AporteRepository {
     return [...acumulado.values()];
   }
 
+  async contar(filtro?: FiltroAportes): Promise<number> {
+    return [...this.porId.values()].filter((a) => {
+      if (filtro?.estado && a.estado !== filtro.estado) return false;
+      if (filtro?.ayudaId && a.ayudaId !== filtro.ayudaId) return false;
+      return true;
+    }).length;
+  }
+
   private clonar(aporte: Aporte): Aporte {
     return {
       ...aporte,
