@@ -1,4 +1,4 @@
-# Unidos por Guayana — Resumen del proyecto
+# Unidos por la Guaira — Resumen del proyecto
 
 _Documento de presentación para el cliente. Explica en lenguaje llano qué se va a construir, para quién y por qué. El detalle técnico vive en la carpeta `spec/`._
 
@@ -6,7 +6,7 @@ _Documento de presentación para el cliente. Explica en lenguaje llano qué se v
 
 ## 1. El problema
 
-Tras el terremoto ocurrido el **24/06/2026** en la región central del país (Caracas, Vargas, Aragua, entre otros), la región Guayana se ha organizado para enviar ayuda humanitaria. Pero esa ayuda enfrenta un problema **logístico y de coordinación**:
+Tras el terremoto ocurrido el **24/06/2026** en la región central del país (Caracas, Vargas, Aragua, entre otros), La Guaira se ha organizado para enviar ayuda humanitaria. Pero esa ayuda enfrenta un problema **logístico y de coordinación**:
 
 - No hay una forma clara de saber **qué se necesita**, **cuánto se ha reunido** y **cuánto falta** para poder enviar.
 - Los colaboradores quieren ayudar, pero **no siempre saben qué aportar ni a dónde**.
@@ -15,7 +15,7 @@ Tras el terremoto ocurrido el **24/06/2026** en la región central del país (Ca
 
 ## 2. La solución
 
-**Unidos por Guayana** es una aplicación web que **organiza, da transparencia y facilita la recolección** de ayuda humanitaria que sale desde la región Guayana. Coordina tres tipos de recursos:
+**Unidos por la Guaira** es una aplicación web que **organiza, da transparencia y facilita la recolección** de ayuda humanitaria que sale desde La Guaira. Coordina tres tipos de recursos:
 
 - **Suministros** (agua, medicinas, alimentos…).
 - **Transporte** (camiones para los envíos).
@@ -72,7 +72,7 @@ Para evitar malentendidos, la plataforma **deliberadamente**:
 
 - **No reemplaza a los organismos oficiales** — Es apoyo logístico comunitario; no sustituye a Protección Civil, bomberos ni entes del Estado.
 - **No procesa pagos dentro de la app** — La ayuda monetaria es bienvenida, pero se canaliza por medios externos (transferencia, PayPal, Zelle…); la aplicación no cobra ni gestiona transacciones: solo muestra esos medios y registra, para transparencia, los montos ya recibidos.
-- **No es de alcance nacional** — Se enfoca en la ayuda que sale desde la región Guayana.
+- **No es de alcance nacional** — Se enfoca en la ayuda que sale desde La Guaira.
 
 ## 7. Plan de entrega por fases
 
@@ -87,4 +87,4 @@ La construcción es incremental: cada fase entrega valor utilizable antes de pas
 
 ## 8. En una frase
 
-> Una plataforma sencilla y transparente para que la región Guayana **organice y demuestre** su ayuda humanitaria: se ve qué se necesita, quién aporta y a dónde llega cada envío.
+> Una plataforma sencilla y transparente para que La Guaira **organice y demuestre** su ayuda humanitaria: se ve qué se necesita, quién aporta y a dónde llega cada envío.

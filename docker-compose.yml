@@ -3,9 +3,9 @@ services:
     image: postgres:16
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-guayana}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-guayana}
-      POSTGRES_DB: ${POSTGRES_DB:-unidos_por_guayana}
+      POSTGRES_USER: ${POSTGRES_USER:-laguaira}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-laguaira}
+      POSTGRES_DB: ${POSTGRES_DB:-unidos_por_la_guaira}
     ports:
       # host:contenedor — Postgres escucha en 5432 dentro del contenedor.
       # Se publica en el 5435 del host para no chocar con otro Postgres en 5432.
@@ -13,7 +13,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-guayana}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-laguaira}"]
       interval: 5s
       timeout: 5s
       retries: 5

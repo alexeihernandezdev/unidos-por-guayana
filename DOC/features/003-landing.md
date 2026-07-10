@@ -14,7 +14,7 @@ La **página de bienvenida** que presenta el proyecto a quien llega e **invita a
 
 Es la primera pantalla que ve cualquier persona al entrar, **sin necesidad de registrarse**. En pocos segundos deja claro qué es la plataforma y cómo participar:
 
-- **Presenta el proyecto** — qué es "Unidos por Guayana", el problema que resuelve y su objetivo.
+- **Presenta el proyecto** — qué es "Unidos por la Guaira", el problema que resuelve y su objetivo.
 - **Explica cómo funciona** — en lenguaje sencillo, quién puede hacer qué (colaborar, pedir ayuda, o gestionar).
 - **Invita a actuar** — botones claros:
   - **"Quiero colaborar"** → lleva a registrarse como colaborador.

@@ -27,9 +27,9 @@ const ebGaramond = EB_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Unidos por Guayana",
+  title: "Unidos por la Guaira",
   description:
-    "Plataforma para coordinar ayudas, aportes y solicitudes hacia Guayana.",
+    "Plataforma para coordinar ayudas, aportes y solicitudes hacia La Guaira.",
 };
 
 export default async function RootLayout({

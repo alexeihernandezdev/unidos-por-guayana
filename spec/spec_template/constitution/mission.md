@@ -1,6 +1,6 @@
 # Misión
 
-Este proyecto llamado "Unidos por Guayana" es una forma de ayudar en el problema logístico que surge en las ayudas humanitarias provenientes de la región Guayana. Actualmente motivado por el terremoto ocurrido en la región central del país (Caracas, Vargas, Aragua, etc.) el 24/06/2026.
+Este proyecto llamado "Unidos por la Guaira" es una forma de ayudar en el problema logístico que surge en las ayudas humanitarias provenientes de La Guaira. Actualmente motivado por el terremoto ocurrido en la región central del país (Caracas, Vargas, Aragua, etc.) el 24/06/2026.
 
 ## Qué construimos
 
@@ -45,4 +45,4 @@ _Acota el alcance: lo que el proyecto deliberadamente no pretende ser. Evita mal
 
 - **No reemplaza a los organismos oficiales** — Es apoyo logístico comunitario; no sustituye a Protección Civil, bomberos ni entes del Estado.
 - **No es una pasarela de pagos** — La app no procesa pagos ni transacciones financieras dentro del sistema: no integra APIs de cobro, tarjetas, ni saldos. La ayuda monetaria sí es bienvenida, pero se canaliza **por fuera** de la app (transferencia, PayPal, Zelle, etc.); la app solo muestra esos medios externos y registra —de forma manual y para transparencia— los montos ya recibidos.
-- **No es de alcance nacional/global** — Se enfoca en la ayuda que sale desde la región Guayana; no pretende ser una plataforma general para todo el país.
+- **No es de alcance nacional/global** — Se enfoca en la ayuda que sale desde La Guaira; no pretende ser una plataforma general para todo el país.

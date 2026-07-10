@@ -5,7 +5,7 @@ import { obtenerPerfilAdminGestion, requireAdminVerificado } from "@/shared/auth
 import { actualizarPerfilAction } from "./actions";
 
 export const metadata: Metadata = {
-  title: "Mi perfil de centro de acopio | Unidos por Guayana",
+  title: "Mi perfil de centro de acopio | Unidos por la Guaira",
 };
 
 // Perfil del centro de acopio del ADMIN (feature 016): ver y editar los datos

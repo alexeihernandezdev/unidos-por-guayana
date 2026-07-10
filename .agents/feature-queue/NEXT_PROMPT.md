@@ -6,7 +6,7 @@
 
 ---
 
-Implementa **una sola feature** del proyecto Unidos por Guayana.
+Implementa **una sola feature** del proyecto Unidos por la Guaira.
 
 ## Feature objetivo
 

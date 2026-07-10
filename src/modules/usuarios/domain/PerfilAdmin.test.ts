@@ -8,7 +8,7 @@ import {
 } from "./PerfilAdmin";
 
 const datosValidos: DatosPerfilAdmin = {
-  nombreCuenta: "Centro Guayana",
+  nombreCuenta: "Centro La Guaira",
   estado: "Bolívar",
   parroquia: "Cachamay",
   telefono: "+58 412 0000000",

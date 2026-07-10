@@ -8,8 +8,8 @@ Entrega la **página de bienvenida pública** de la plataforma: la primera panta
 cualquiera al entrar (sin necesidad de iniciar sesión). Presenta el proyecto, explica qué busca
 y su objetivo, e **invita a actuar** según quién llega:
 
-- **Presenta el proyecto** — qué es "Unidos por Guayana", el problema logístico que resuelve y su
-  motivación (la ayuda humanitaria que sale desde la región Guayana).
+- **Presenta el proyecto** — qué es "Unidos por la Guaira", el problema logístico que resuelve y su
+  motivación (la ayuda humanitaria que sale desde La Guaira).
 - **Explica cómo funciona** — en lenguaje llano, los tres roles y qué aporta cada uno
   (colaborar, solicitar ayuda, y el rol de gestión del administrador).
 - **Invita a colaborar o solicitar ayuda** — llamadas a la acción claras que llevan a **registro**

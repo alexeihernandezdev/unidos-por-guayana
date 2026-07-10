@@ -15,7 +15,7 @@ import {
 
 const baseInput: CrearPerfilAdminInput = {
   usuarioId: "usuario-1",
-  nombreCuenta: "Fundación Guayana",
+  nombreCuenta: "Fundación La Guaira",
   estado: "Bolívar",
   parroquia: "Cachamay",
   telefono: "+58 412 0000000",

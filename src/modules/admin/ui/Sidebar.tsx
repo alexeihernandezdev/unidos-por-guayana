@@ -36,7 +36,7 @@ export async function Sidebar() {
           />
           <span className="relative pb-[3px] font-serif text-sm leading-none tracking-tight text-foreground">
             <span className="italic text-foreground/60">Unidos por</span>{" "}
-            <span className="font-semibold">Guayana</span>
+            <span className="font-semibold">la Guaira</span>
             <span
               aria-hidden
               className="absolute inset-x-0 bottom-0 h-[2px] bg-primary"

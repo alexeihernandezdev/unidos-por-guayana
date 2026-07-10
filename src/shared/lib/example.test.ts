@@ -6,7 +6,7 @@ import { greet } from "@/shared/lib/example";
 
 describe("configuración base (test de humo)", () => {
   it("resuelve el alias @/… e importa desde shared", () => {
-    expect(greet("Guayana")).toBe("Hola, Guayana");
+    expect(greet("La Guaira")).toBe("Hola, La Guaira");
   });
 
   it("carga librerías instaladas (luxon)", () => {

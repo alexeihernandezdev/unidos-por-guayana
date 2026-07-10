@@ -59,7 +59,7 @@ export async function SiteHeader() {
         <Link
           href="/"
           className="focus-ring inline-flex shrink-0 items-center gap-3 leading-none"
-          aria-label="Unidos por Guayana, ir al inicio"
+          aria-label="Unidos por la Guaira, ir al inicio"
         >
           <Image
             src="/logo-mark.svg"
@@ -71,7 +71,7 @@ export async function SiteHeader() {
           />
           <span className="relative pb-[3px] font-serif text-base leading-none tracking-tight text-foreground">
             <span className="italic text-foreground/60">Unidos por</span>{" "}
-            <span className="font-semibold">Guayana</span>
+            <span className="font-semibold">la Guaira</span>
             <span
               aria-hidden
               className="absolute inset-x-0 bottom-0 h-[2px] bg-primary"

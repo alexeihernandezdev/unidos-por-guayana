@@ -12,7 +12,7 @@ import {
 import { aprobarAdminAction, rechazarAdminAction } from "./actions";
 
 export const metadata: Metadata = {
-  title: "Aprobación de administradores | Unidos por Guayana",
+  title: "Aprobación de administradores | Unidos por la Guaira",
 };
 
 // Bandeja del superadministrador (features 015 + 016). Lista las cuentas `ADMIN`

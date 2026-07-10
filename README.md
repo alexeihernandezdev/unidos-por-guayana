@@ -1,6 +1,6 @@
-# Unidos por Guayana
+# Unidos por la Guaira
 
-Plataforma para coordinar **ayudas, aportes y solicitudes** hacia Guayana. Construida con
+Plataforma para coordinar **ayudas, aportes y solicitudes** hacia La Guaira. Construida con
 Next.js 16 (App Router), React 19, Prisma 7 + PostgreSQL y Auth.js v5, siguiendo una
 arquitectura **Clean + Screaming** (el detalle vive en `spec/`).
 

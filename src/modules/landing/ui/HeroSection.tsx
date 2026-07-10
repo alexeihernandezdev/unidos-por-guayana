@@ -92,7 +92,7 @@ export function HeroSection() {
               }}
               className="mt-8 max-w-[54ch] text-base text-white/90 [text-wrap:pretty] md:text-lg md:leading-relaxed"
             >
-              Coordinamos suministros, transporte y voluntarios desde Guayana
+              Coordinamos suministros, transporte y voluntarios desde La Guaira
               hacia las zonas afectadas por el terremoto. Cada aporte queda
               registrado.
             </p>
@@ -129,7 +129,7 @@ export function HeroSection() {
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
               <span className="h-px w-10 bg-white/40" aria-hidden />
               <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-white/70">
-                Guayana · Venezuela
+                La Guaira · Venezuela
               </span>
             </div>
           </div>

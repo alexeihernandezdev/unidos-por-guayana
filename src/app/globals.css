@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Tokens de diseño (paleta "Unidos por Guayana": ocre + teal anclados al lugar).
+/* Tokens de diseño (paleta "Unidos por la Guaira": ocre + teal anclados al lugar).
    Modo claro/oscuro con prefers-color-scheme (ver tech-stack.md → Estilo visual). */
 :root {
   --radius: 0.625rem;

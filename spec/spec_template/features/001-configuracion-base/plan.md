@@ -57,15 +57,15 @@ prisma/           ← schema.prisma y migraciones
       image: postgres:16
       restart: unless-stopped
       environment:
-        POSTGRES_USER: ${POSTGRES_USER:-guayana}
-        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-guayana}
-        POSTGRES_DB: ${POSTGRES_DB:-unidos_por_guayana}
+        POSTGRES_USER: ${POSTGRES_USER:-laguaira}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-laguaira}
+        POSTGRES_DB: ${POSTGRES_DB:-unidos_por_la_guaira}
       ports:
         - "5435:5432"
       volumes:
         - pgdata:/var/lib/postgresql/data
       healthcheck:
-        test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-guayana}"]
+        test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-laguaira}"]
         interval: 5s
         timeout: 5s
         retries: 5
@@ -94,7 +94,7 @@ prisma/           ← schema.prisma y migraciones
 
 - `.env.example`: documentar `DATABASE_URL` y las credenciales del contenedor
   (`POSTGRES_USER`/`PASSWORD`/`DB`). En dev, `DATABASE_URL` apunta al Postgres de Docker
-  (p. ej. `postgresql://guayana:guayana@localhost:5435/unidos_por_guayana?schema=public`);
+  (p. ej. `postgresql://laguaira:laguaira@localhost:5435/unidos_por_la_guaira?schema=public`);
   en producción, a Supabase. **No** versionar `.env`.
 - Scripts: `"db:generate": "prisma generate"`, `"db:migrate": "prisma migrate dev"`.
 - **Verificación:** `npx prisma generate` corre sin error. La primera migración real se pospone

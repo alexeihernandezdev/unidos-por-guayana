@@ -10,7 +10,7 @@ Abrir al público, **sin necesidad de iniciar sesión**, una pantalla que muestr
 
 ## Qué aporta
 
-La transparencia es uno de los principios centrales de "Unidos por Guayana": cualquiera debería poder ver qué se recolectó, cuánto falta y a dónde fue cada ayuda. Hasta ahora esa información vivía dentro del panel privado del Administrador. Esta pantalla la saca a la luz.
+La transparencia es uno de los principios centrales de "Unidos por la Guaira": cualquiera debería poder ver qué se recolectó, cuánto falta y a dónde fue cada ayuda. Hasta ahora esa información vivía dentro del panel privado del Administrador. Esta pantalla la saca a la luz.
 
 - **Totales de impacto** — de un vistazo: cuántos envíos hay, cuántos ya se entregaron y cuánto se ha recolectado en total. Es la foto grande del esfuerzo.
 - **Qué se ha recolectado, por recurso** — cuánta agua, cuántas cajas de alimentos, cuántos vehículos, cuántas personas voluntarias, etc., sumando lo que ya se confirmó como recibido.

@@ -12,7 +12,7 @@ export function FinalCtaSection() {
       <div className="relative min-h-[560px] w-full overflow-hidden md:min-h-[680px]">
         <Image
           src="/assets/help2.jpg"
-          alt="Contexto de la operación desde Guayana hacia las zonas afectadas."
+          alt="Contexto de la operación desde La Guaira hacia las zonas afectadas."
           fill
           sizes="100vw"
           className="object-cover"

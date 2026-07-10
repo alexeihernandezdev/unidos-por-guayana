@@ -22,7 +22,7 @@ const columns = [
     heading: "Legal",
     links: [
       { label: "Alcance del proyecto", href: "#transparencia" },
-      { label: "Contacto", href: "mailto:contacto@unidosporguayana.org" },
+      { label: "Contacto", href: "mailto:contacto@unidosporlaguaira.org" },
     ],
   },
 ];
@@ -42,12 +42,12 @@ export function SiteFooter() {
                 className="h-7 w-7"
               />
               <span className="text-base font-semibold tracking-tight text-foreground">
-                Unidos por Guayana
+                Unidos por la Guaira
               </span>
             </div>
             <p className="mt-4 max-w-sm text-sm text-muted-foreground [text-wrap:pretty]">
               Apoyo logístico comunitario para la ayuda humanitaria que sale
-              desde la región Guayana. No sustituye a Protección Civil ni a
+              desde La Guaira. No sustituye a Protección Civil ni a
               organismos oficiales. No procesamos pagos: la ayuda monetaria se
               canaliza por fuera de la app.
             </p>
@@ -76,7 +76,7 @@ export function SiteFooter() {
 
         <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-border pt-6 md:flex-row md:items-center">
           <p className="text-xs text-muted-foreground">
-            © 2026 Unidos por Guayana. Iniciativa comunitaria sin fines de
+            © 2026 Unidos por la Guaira. Iniciativa comunitaria sin fines de
             lucro.
           </p>
           <p className="numeric-tnum font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">

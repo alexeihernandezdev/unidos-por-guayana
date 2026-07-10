@@ -1,6 +1,6 @@
 # spec/ — Documentación del proyecto (Spec Driven Development)
 
-> Esta carpeta documenta **Unidos por Guayana** con desarrollo dirigido por especificación (SDD): primero se escribe la spec, luego el plan, luego las tareas, y **solo entonces** se toca el código. El objetivo es que cualquier persona (o agente) entienda qué se construye y por qué antes de programar, y que las decisiones queden por escrito.
+> Esta carpeta documenta **Unidos por la Guaira** con desarrollo dirigido por especificación (SDD): primero se escribe la spec, luego el plan, luego las tareas, y **solo entonces** se toca el código. El objetivo es que cualquier persona (o agente) entienda qué se construye y por qué antes de programar, y que las decisiones queden por escrito.
 
 ## Cómo leer esta carpeta
 

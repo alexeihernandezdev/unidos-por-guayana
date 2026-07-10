@@ -10,9 +10,9 @@ import {
 } from "@/modules/landing/ui";
 
 export const metadata: Metadata = {
-  title: "Unidos por Guayana | Coordina y da transparencia a la ayuda humanitaria",
+  title: "Unidos por la Guaira | Coordina y da transparencia a la ayuda humanitaria",
   description:
-    "Plataforma para organizar la ayuda humanitaria que sale desde Guayana tras el terremoto del 24 de junio. Cada aporte queda registrado; cada envío se rastrea de origen a destino.",
+    "Plataforma para organizar la ayuda humanitaria que sale desde La Guaira tras el terremoto del 24 de junio. Cada aporte queda registrado; cada envío se rastrea de origen a destino.",
 };
 
 export default function Home() {

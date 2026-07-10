@@ -1,6 +1,6 @@
 ---
 name: implement-feature
-description: Implementa exactamente UNA feature del roadmap de Unidos por Guayana siguiendo spec/plan/tasks. Usar cuando un agente cloud debe entregar una feature completa, validarla y cerrar sin continuar con la siguiente.
+description: Implementa exactamente UNA feature del roadmap de Unidos por la Guaira siguiendo spec/plan/tasks. Usar cuando un agente cloud debe entregar una feature completa, validarla y cerrar sin continuar con la siguiente.
 ---
 
 # Implementar una feature (un agente = una feature)
