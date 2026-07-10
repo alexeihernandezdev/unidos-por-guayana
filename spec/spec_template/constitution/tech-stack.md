@@ -67,7 +67,9 @@ Estructura objetivo (a crear conforme avancen las features):
 - `pnpm test` — ejecuta los tests con Vitest (`pnpm test:watch` para el modo interactivo).
 - `pnpm db:generate` — regenera el cliente de Prisma (`prisma generate`).
 - `pnpm db:migrate` — aplica migraciones en desarrollo (`prisma migrate dev`).
+- `pnpm db:migrate:deploy` — aplica migraciones pendientes en producción (`prisma migrate deploy`).
 - `pnpm db:seed` — siembra datos iniciales (el `SUPERADMIN` raíz de confianza; ver feature 002 y 015).
+- En Vercel, `pnpm build` corre `scripts/vercel-build.mjs`: generate → migrate deploy → seed → `next build`.
 - `docker compose up -d` — levanta el contenedor de PostgreSQL para desarrollo local.
 - `docker compose down` — detiene y elimina los contenedores (los datos persisten en el volumen).
 

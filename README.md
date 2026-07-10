@@ -64,8 +64,9 @@ Se configuran en `.env` (nunca se sube al repo; la plantilla es `.env.example`).
 | `pnpm lint`        | Revisa el estilo y los límites de capas (`eslint`).               |
 | `pnpm test`        | Ejecuta los tests con Vitest (`pnpm test:watch` para el modo watch).|
 | `pnpm db:migrate`  | Aplica migraciones en desarrollo (`prisma migrate dev`).           |
+| `pnpm db:migrate:deploy` | Aplica migraciones pendientes en producción (`prisma migrate deploy`). |
 | `pnpm db:generate` | Regenera el cliente de Prisma (`prisma generate`).                 |
-| `pnpm db:seed`     | Siembra datos iniciales (ADMIN).                                    |
+| `pnpm db:seed`     | Siembra datos iniciales (SUPERADMIN).                               |
 
 Base de datos:
 
@@ -106,3 +107,15 @@ Los límites entre capas los **hace cumplir ESLint** (ver `eslint.config.mjs` y
 
 App en **Vercel** y base de datos en **Supabase**. Configura las mismas variables de entorno en
 el proveedor (con la `DATABASE_URL` de Supabase y un `AUTH_SECRET` propio de producción).
+
+En cada deploy, `pnpm build` (`scripts/vercel-build.mjs`) hace:
+
+1. `prisma generate` — cliente Prisma
+2. `prisma migrate deploy` — migraciones pendientes (solo si `VERCEL=1`)
+3. `pnpm db:seed` — SUPERADMIN idempotente (solo si `VERCEL=1`)
+4. `next build`
+
+En Vercel define al menos: `DATABASE_URL`, `AUTH_SECRET`, `SUPERADMIN_EMAIL`,
+`SUPERADMIN_PASSWORD` (y opcionalmente `SUPERADMIN_NOMBRE`). Si usas el pooler de
+Supabase (puerto 6543), para migraciones conviene una URL directa (puerto 5432)
+como `DATABASE_URL` o `DIRECT_URL` según tu setup.
