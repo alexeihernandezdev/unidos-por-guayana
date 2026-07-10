@@ -2,6 +2,13 @@
 
 > Estado: **Pendiente** · Depende de: `001 · Configuración base` · Roadmap: `constitution/roadmap.md`
 
+> **Enmendada por `015`.** Desde la feature 015 el modelo base cambió: existe el rol `SUPERADMIN`
+> (raíz de confianza) y el seed (`pnpm db:seed`) siembra un `SUPERADMIN` en lugar de un `ADMIN`.
+> El `ADMIN` ya **no** es cerrado: es de **registro público**, pero la cuenta nace en
+> `estadoVerificacion = PENDIENTE` y no opera hasta que el `SUPERADMIN` la aprueba (`VERIFICADO`) o la
+> rechaza. Lo que este documento dice sobre «`ADMIN` no auto-asignable» y el «`ADMIN` sembrado» queda
+> reemplazado por lo descrito en `features/015-superadmin-y-registro-de-administradores/`.
+
 ## Qué hace
 
 Da a la plataforma **registro, inicio de sesión y control de acceso por rol**. Es la primera

@@ -3,25 +3,40 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "../src/generated/prisma/client";
 
-// Siembra el ADMIN inicial (obligatorio) y, si estamos en desarrollo, dos usuarios
-// de prueba (COLABORADOR y SOLICITANTE) para no tener que registrarlos a mano al
-// probar las features 006 y 007. Las credenciales vienen del entorno (nunca en el
-// repo); ver `.env.example`.
+// Siembra el SUPERADMIN inicial (obligatorio, raíz de confianza — feature 015) y,
+// si estamos en desarrollo, dos usuarios de prueba (COLABORADOR y SOLICITANTE)
+// para no tener que registrarlos a mano al probar las features 006 y 007. Los
+// ADMIN ya no se siembran: se registran públicamente y los aprueba el SUPERADMIN.
+// Las credenciales vienen del entorno (nunca en el repo); ver `.env.example`.
 // Ejecutar con: `pnpm db:seed`. Es idempotente: re-ejecutarlo actualiza la
 // contraseña de cada usuario existente.
+// El SUPERADMIN se siembra ya VERIFICADO; el estadoVerificacion de los usuarios
+// de prueba se deja en su valor por defecto (PENDIENTE), que no afecta a
+// COLABORADOR/SOLICITANTE (su verificación es la feature 013).
 
 type SembradoUsuario = {
   etiqueta: string;
   email: string | undefined;
   password: string | undefined;
   nombre: string;
-  rol: "ADMIN" | "COLABORADOR" | "SOLICITANTE";
+  rol: "SUPERADMIN" | "COLABORADOR" | "SOLICITANTE";
   requerido: boolean;
+  // La raíz de confianza se siembra ya VERIFICADO. Para los demás se omite y
+  // conserva el valor por defecto del schema (PENDIENTE).
+  estadoVerificacion?: "PENDIENTE" | "VERIFICADO" | "RECHAZADO";
 };
 
 async function sembrarUsuario(
   prisma: PrismaClient,
-  { etiqueta, email, password, nombre, rol, requerido }: SembradoUsuario,
+  {
+    etiqueta,
+    email,
+    password,
+    nombre,
+    rol,
+    requerido,
+    estadoVerificacion,
+  }: SembradoUsuario,
 ): Promise<void> {
   const emailNormalizado = email?.trim().toLowerCase();
   if (!emailNormalizado || !password) {
@@ -35,10 +50,11 @@ async function sembrarUsuario(
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
+  const datosEstado = estadoVerificacion ? { estadoVerificacion } : {};
   const usuario = await prisma.usuario.upsert({
     where: { email: emailNormalizado },
-    update: { passwordHash, nombre, rol },
-    create: { email: emailNormalizado, passwordHash, nombre, rol },
+    update: { passwordHash, nombre, rol, ...datosEstado },
+    create: { email: emailNormalizado, passwordHash, nombre, rol, ...datosEstado },
   });
   console.log(`✔ ${etiqueta} sembrado: ${usuario.email} (${usuario.rol})`);
 }
@@ -48,14 +64,16 @@ async function main() {
   const prisma = new PrismaClient({ adapter });
 
   try {
-    // ADMIN: obligatorio. No puede auto-registrarse desde la UI (ver feature 002).
+    // SUPERADMIN: obligatorio. Raíz de confianza (feature 015): no se auto-registra
+    // ni se promueve desde la app; es la única autoridad que aprueba cuentas ADMIN.
     await sembrarUsuario(prisma, {
-      etiqueta: "ADMIN",
-      email: process.env.ADMIN_EMAIL,
-      password: process.env.ADMIN_PASSWORD,
-      nombre: process.env.ADMIN_NOMBRE?.trim() || "Administrador",
-      rol: "ADMIN",
+      etiqueta: "SUPERADMIN",
+      email: process.env.SUPERADMIN_EMAIL,
+      password: process.env.SUPERADMIN_PASSWORD,
+      nombre: process.env.SUPERADMIN_NOMBRE?.trim() || "Superadministrador",
+      rol: "SUPERADMIN",
       requerido: true,
+      estadoVerificacion: "VERIFICADO",
     });
 
     // COLABORADOR y SOLICITANTE: opcionales. Se siembran si sus credenciales están

@@ -19,6 +19,10 @@ export type NavItem = {
 export function navItemsPorRol(rol: Rol | null): NavItem[] {
   if (!rol) return [];
   switch (rol) {
+    case Rol.SUPERADMIN:
+      return [
+        { label: "Aprobaciones", href: "/superadmin/admins", exact: true },
+      ];
     case Rol.ADMIN:
       return [
         { label: "Panel", href: "/panel", exact: true },
@@ -41,15 +45,18 @@ export function navItemsPorRol(rol: Rol | null): NavItem[] {
 
 // Etiqueta legible del rol para el chip de identidad.
 export const ROL_ETIQUETA: Record<Rol, string> = {
+  [Rol.SUPERADMIN]: "Superadministrador",
   [Rol.ADMIN]: "Administrador",
   [Rol.COLABORADOR]: "Colaborador",
   [Rol.SOLICITANTE]: "Solicitante",
 };
 
-// Color del dot del chip por rol. Ocre = identidad (ADMIN, la voz gestora);
-// teal Orinoco = capa de soporte (COLABORADOR, quien aporta); neutro para
-// SOLICITANTE. Coherente con la "disciplina de acentos" de tech-stack.md.
+// Color del dot del chip por rol. Ocre = identidad (SUPERADMIN raíz de confianza
+// y ADMIN, la voz gestora); teal Orinoco = capa de soporte (COLABORADOR, quien
+// aporta); neutro para SOLICITANTE. Coherente con la "disciplina de acentos" de
+// tech-stack.md. El SUPERADMIN refuerza la marca con el mismo ocre del ADMIN.
 export const ROL_DOT: Record<Rol, string> = {
+  [Rol.SUPERADMIN]: "bg-primary",
   [Rol.ADMIN]: "bg-primary",
   [Rol.COLABORADOR]: "bg-accent",
   [Rol.SOLICITANTE]: "bg-foreground/40",

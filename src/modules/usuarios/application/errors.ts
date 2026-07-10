@@ -14,3 +14,30 @@ export class EmailYaRegistradoError extends Error {
     this.name = "EmailYaRegistradoError";
   }
 }
+
+// ── Gestión de administradores por el SUPERADMIN (feature 015) ────────────────
+
+// El actor de una acción reservada al `SUPERADMIN` no lo es.
+export class SoloSuperadminError extends Error {
+  constructor() {
+    super("Solo el superadministrador puede realizar esta acción.");
+    this.name = "SoloSuperadminError";
+  }
+}
+
+// La cuenta objetivo no existe.
+export class UsuarioNoEncontradoError extends Error {
+  constructor(id: string) {
+    super(`No existe un usuario con el id "${id}".`);
+    this.name = "UsuarioNoEncontradoError";
+  }
+}
+
+// La cuenta objetivo no es un `ADMIN` en `PENDIENTE`, o la transición de
+// verificación solicitada no es válida.
+export class CuentaAdminNoAprobableError extends Error {
+  constructor(mensaje = "La cuenta no está pendiente de aprobación.") {
+    super(mensaje);
+    this.name = "CuentaAdminNoAprobableError";
+  }
+}

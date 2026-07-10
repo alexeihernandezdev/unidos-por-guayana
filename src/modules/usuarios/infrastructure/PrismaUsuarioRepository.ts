@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import type { EstadoVerificacion } from "@/modules/usuarios/domain/Rol";
+import { EstadoVerificacion as EstadoVerificacionEnum, Rol } from "@/modules/usuarios/domain/Rol";
 import type { NuevoUsuario, Usuario } from "@/modules/usuarios/domain/Usuario";
 import type { UsuarioRepository } from "@/modules/usuarios/domain/UsuarioRepository";
 
@@ -12,5 +14,29 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
 
   async buscarPorEmail(email: string): Promise<Usuario | null> {
     return prisma.usuario.findUnique({ where: { email } });
+  }
+
+  async buscarPorId(id: string): Promise<Usuario | null> {
+    return prisma.usuario.findUnique({ where: { id } });
+  }
+
+  async listarAdminsPendientes(): Promise<Usuario[]> {
+    return prisma.usuario.findMany({
+      where: {
+        rol: Rol.ADMIN,
+        estadoVerificacion: EstadoVerificacionEnum.PENDIENTE,
+      },
+      orderBy: { createdAt: "asc" },
+    });
+  }
+
+  async actualizarEstadoVerificacion(
+    id: string,
+    estado: EstadoVerificacion,
+  ): Promise<Usuario> {
+    return prisma.usuario.update({
+      where: { id },
+      data: { estadoVerificacion: estado },
+    });
   }
 }

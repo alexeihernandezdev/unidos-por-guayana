@@ -9,7 +9,6 @@ import {
   RecursoInvalidoError,
   TransicionInvalidaError,
 } from "@/modules/ayudas/application/errors";
-import { Rol } from "@/modules/usuarios/domain/Rol";
 import {
   avanzarEstadoServicio,
   crearAyudaServicio,
@@ -18,7 +17,7 @@ import {
   guardarMetaServicio,
   quitarMetaServicio,
 } from "@/shared/ayudas";
-import { requireRol } from "@/shared/auth";
+import { requireAdminVerificado } from "@/shared/auth";
 
 const RUTA_LISTADO = "/panel/ayudas";
 
@@ -87,7 +86,7 @@ function traducirError(error: unknown): Resultado | null {
 }
 
 export async function crearAyudaAction(input: AyudaInput): Promise<Resultado> {
-  await requireRol(Rol.ADMIN);
+  await requireAdminVerificado();
 
   const parsed = CrearAyudaSchema.safeParse(input);
   if (!parsed.success) {
@@ -118,7 +117,7 @@ export async function editarCabeceraAction(
   id: string,
   input: AyudaInput,
 ): Promise<Resultado> {
-  await requireRol(Rol.ADMIN);
+  await requireAdminVerificado();
 
   const parsed = CabeceraSchema.safeParse(input);
   if (!parsed.success) {
@@ -149,7 +148,7 @@ export async function guardarMetaAction(
   ayudaId: string,
   input: { recursoId: string; cantidadObjetivo: number },
 ): Promise<Resultado> {
-  await requireRol(Rol.ADMIN);
+  await requireAdminVerificado();
 
   const parsed = MetaSchema.safeParse(input);
   if (!parsed.success) {
@@ -176,7 +175,7 @@ export async function quitarMetaAction(
   ayudaId: string,
   recursoId: string,
 ): Promise<Resultado> {
-  await requireRol(Rol.ADMIN);
+  await requireAdminVerificado();
 
   try {
     await quitarMetaServicio(ayudaId, recursoId);
@@ -192,7 +191,7 @@ export async function quitarMetaAction(
 }
 
 export async function avanzarEstadoAction(formData: FormData): Promise<void> {
-  await requireRol(Rol.ADMIN);
+  await requireAdminVerificado();
   const id = formData.get("id");
   if (typeof id === "string" && id) {
     await avanzarEstadoServicio(id);
@@ -202,7 +201,7 @@ export async function avanzarEstadoAction(formData: FormData): Promise<void> {
 }
 
 export async function eliminarAyudaAction(formData: FormData): Promise<void> {
-  await requireRol(Rol.ADMIN);
+  await requireAdminVerificado();
   const id = formData.get("id");
   if (typeof id === "string" && id) {
     await eliminarAyudaServicio(id);

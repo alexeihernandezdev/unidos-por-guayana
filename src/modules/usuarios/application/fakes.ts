@@ -1,12 +1,12 @@
 import type { PasswordHasher } from "@/modules/usuarios/domain/PasswordHasher";
 import type { NuevoUsuario, Usuario } from "@/modules/usuarios/domain/Usuario";
 import type { UsuarioRepository } from "@/modules/usuarios/domain/UsuarioRepository";
-import { EstadoVerificacion } from "@/modules/usuarios/domain/Rol";
+import { EstadoVerificacion, Rol } from "@/modules/usuarios/domain/Rol";
 
 // Dobles en memoria para los tests de casos de uso. No tocan la base ni bcrypt.
 
 export class InMemoryUsuarioRepository implements UsuarioRepository {
-  private readonly porEmail = new Map<string, Usuario>();
+  private readonly porId = new Map<string, Usuario>();
   private secuencia = 0;
 
   async crear(datos: NuevoUsuario): Promise<Usuario> {
@@ -18,12 +18,44 @@ export class InMemoryUsuarioRepository implements UsuarioRepository {
       updatedAt: ahora,
       ...datos,
     };
-    this.porEmail.set(usuario.email, usuario);
+    this.porId.set(usuario.id, usuario);
     return usuario;
   }
 
   async buscarPorEmail(email: string): Promise<Usuario | null> {
-    return this.porEmail.get(email) ?? null;
+    for (const usuario of this.porId.values()) {
+      if (usuario.email === email) return usuario;
+    }
+    return null;
+  }
+
+  async buscarPorId(id: string): Promise<Usuario | null> {
+    return this.porId.get(id) ?? null;
+  }
+
+  async listarAdminsPendientes(): Promise<Usuario[]> {
+    return [...this.porId.values()].filter(
+      (usuario) =>
+        usuario.rol === Rol.ADMIN &&
+        usuario.estadoVerificacion === EstadoVerificacion.PENDIENTE,
+    );
+  }
+
+  async actualizarEstadoVerificacion(
+    id: string,
+    estado: EstadoVerificacion,
+  ): Promise<Usuario> {
+    const usuario = this.porId.get(id);
+    if (!usuario) {
+      throw new Error(`Usuario "${id}" no encontrado.`);
+    }
+    const actualizado: Usuario = {
+      ...usuario,
+      estadoVerificacion: estado,
+      updatedAt: new Date(),
+    };
+    this.porId.set(id, actualizado);
+    return actualizado;
   }
 }
 
