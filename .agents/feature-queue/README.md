@@ -4,11 +4,19 @@ Evita saturar el contexto: **cada Cloud Agent implementa exactamente una feature
 
 ## Inicio rápido
 
-1. Abre `.agents/feature-queue/NEXT_PROMPT.md`
-2. Crea un **nuevo** Cloud Agent en [cursor.com/agents](https://cursor.com/agents)
-3. Pega el prompt completo
-4. Cuando termine (PR + `queue.json` actualizado), **archiva** ese agente
-5. Repite con el nuevo `NEXT_PROMPT.md` generado
+1. El agente implementa **una** feature y al cerrar ejecuta `node scripts/spawn-next-feature-agent.mjs`
+2. Se archiva ese agente; el siguiente arranca con `NEXT_PROMPT.md` (API o manual)
+3. Repetir hasta que no queden features `pending` en `queue.json`
+
+### Primera vez (cola ya preparada, falta agente 2)
+
+La feature **008** ya está hecha en el PR #3, pero **nadie lanzó el agente 2**. Para continuar ahora:
+
+```bash
+node scripts/spawn-next-feature-agent.mjs
+```
+
+O pega `.agents/feature-queue/NEXT_PROMPT.md` en un **nuevo** Cloud Agent (feature **015**).
 
 ## Archivos
 

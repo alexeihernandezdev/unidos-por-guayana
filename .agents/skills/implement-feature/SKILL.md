@@ -49,10 +49,18 @@ Al terminar **solo esta feature**:
 3. Actualiza o crea `DOC/features/NNN-nombre.md` (lenguaje llano para el cliente).
 4. Actualiza `.agents/feature-queue/queue.json`:
    - Feature actual → `"status": "done"`, `completedAt`, `branch`, `pr`.
-   - Siguiente feature → deja `"status": "pending"` (no la implementes).
-5. Regenera `.agents/feature-queue/NEXT_PROMPT.md` con el prompt listo para el **siguiente** agente (usa la plantilla de `.agents/feature-queue/prompt-template.md`).
+   - Siguiente feature → `"status": "pending"` (no la implementes en este agente).
+5. Regenera `.agents/feature-queue/NEXT_PROMPT.md` con el prompt del **siguiente** agente (plantilla en `prompt-template.md`).
 6. Commit descriptivo, `git push -u origin <branch>`, abre PR draft contra `main`.
-7. **Para aquí.** No empieces la siguiente feature en esta misma ejecución.
+7. **Dispara el siguiente agente** (obligatorio para completar el ciclo que pidió el usuario):
+   ```bash
+   node scripts/spawn-next-feature-agent.mjs
+   ```
+   - Con `CURSOR_API_KEY` en el entorno del Cloud Agent → lanza el siguiente run vía API.
+   - Sin API key → el script imprime el prompt; el operador crea un **nuevo** agente en [cursor.com/agents](https://cursor.com/agents) y lo pega.
+8. **Para aquí.** No implementes la siguiente feature en esta misma ejecución.
+
+El pipeline completo es: **agente N implementa → cierra → agente N+1 arranca** (contexto fresco cada vez). Repetir hasta que `queue.json` no tenga `pending`.
 
 ## Qué NO hacer
 
