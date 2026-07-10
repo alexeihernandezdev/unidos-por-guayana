@@ -1,4 +1,5 @@
 import type { PasswordHasher } from "@/modules/usuarios/domain/PasswordHasher";
+import type { DatosContacto } from "@/modules/usuarios/domain/datosContacto";
 import type {
   CambiosPerfilAdmin,
   NuevoPerfilAdmin,
@@ -20,9 +21,17 @@ export class InMemoryUsuarioRepository implements UsuarioRepository {
     const usuario: Usuario = {
       id: `usuario-${++this.secuencia}`,
       estadoVerificacion: EstadoVerificacion.PENDIENTE,
+      cedula: datos.cedula ?? null,
+      telefono: datos.telefono ?? null,
+      telefonoEsWhatsApp: datos.telefonoEsWhatsApp ?? false,
+      estado: datos.estado ?? null,
+      parroquia: datos.parroquia ?? null,
       createdAt: ahora,
       updatedAt: ahora,
-      ...datos,
+      email: datos.email,
+      nombre: datos.nombre,
+      passwordHash: datos.passwordHash,
+      rol: datos.rol,
     };
     this.porId.set(usuario.id, usuario);
     return usuario;
@@ -37,6 +46,13 @@ export class InMemoryUsuarioRepository implements UsuarioRepository {
 
   async buscarPorId(id: string): Promise<Usuario | null> {
     return this.porId.get(id) ?? null;
+  }
+
+  async buscarPorCedula(cedula: string): Promise<Usuario | null> {
+    for (const usuario of this.porId.values()) {
+      if (usuario.cedula === cedula) return usuario;
+    }
+    return null;
   }
 
   async listarAdminsPendientes(): Promise<Usuario[]> {
@@ -58,6 +74,27 @@ export class InMemoryUsuarioRepository implements UsuarioRepository {
     const actualizado: Usuario = {
       ...usuario,
       estadoVerificacion: estado,
+      updatedAt: new Date(),
+    };
+    this.porId.set(id, actualizado);
+    return actualizado;
+  }
+
+  async actualizarDatosContacto(
+    id: string,
+    datos: DatosContacto,
+  ): Promise<Usuario> {
+    const usuario = this.porId.get(id);
+    if (!usuario) {
+      throw new Error(`Usuario "${id}" no encontrado.`);
+    }
+    const actualizado: Usuario = {
+      ...usuario,
+      cedula: datos.cedula,
+      telefono: datos.telefono,
+      telefonoEsWhatsApp: datos.telefonoEsWhatsApp,
+      estado: datos.estado,
+      parroquia: datos.parroquia,
       updatedAt: new Date(),
     };
     this.porId.set(id, actualizado);

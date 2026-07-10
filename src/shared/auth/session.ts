@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth, buscarUsuarioPorId } from "@/lib/auth";
+import { tieneDatosContactoCompletos } from "@/modules/usuarios/domain/datosContacto";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { puedeOperarComoAdmin } from "@/modules/usuarios/domain/verificacion";
 
@@ -36,11 +37,23 @@ export async function requireSesion(): Promise<UsuarioSesion> {
 /**
  * Exige que el usuario tenga uno de los roles indicados. Sin sesión → /login;
  * con sesión pero rol no autorizado → inicio (/). Es el gate por rol para el
- * servidor.
+ * servidor. Además, si el usuario autenticado es `COLABORADOR` o
+ * `SOLICITANTE`, aplica el check de "perfil completo" (feature 017): si le
+ * falta cualquiera de los cuatro campos obligatorios, redirige a
+ * `/completar-perfil` antes de dejarle entrar a la ruta protegida.
  */
 export async function requireRol(...roles: Rol[]): Promise<UsuarioSesion> {
   const usuario = await requireSesion();
   if (!roles.includes(usuario.rol)) redirect("/");
+  if (
+    usuario.rol === Rol.COLABORADOR ||
+    usuario.rol === Rol.SOLICITANTE
+  ) {
+    const fresco = await buscarUsuarioPorId(usuario.id);
+    if (!fresco || !tieneDatosContactoCompletos(fresco)) {
+      redirect("/completar-perfil");
+    }
+  }
   return usuario;
 }
 
@@ -58,6 +71,28 @@ export async function requireAdminVerificado(): Promise<UsuarioSesion> {
 
   const fresco = await buscarUsuarioPorId(usuario.id);
   if (!fresco || !puedeOperarComoAdmin(fresco)) redirect("/cuenta-admin");
+
+  return usuario;
+}
+
+/**
+ * Exige que un `COLABORADOR` / `SOLICITANTE` tenga los cuatro campos
+ * obligatorios (`cedula`, `telefono`, `estado`, `parroquia`); si le falta
+ * cualquiera, redirige a `/completar-perfil`. Otros roles no pasan por este
+ * gate (el ADMIN se atiende con `requireAdminVerificado`; el SUPERADMIN queda
+ * fuera). Es idempotente: si el perfil ya está completo, devuelve la sesión.
+ * Feature 017.
+ */
+export async function requireDatosContactoCompletos(): Promise<UsuarioSesion> {
+  const usuario = await requireSesion();
+  if (usuario.rol !== Rol.COLABORADOR && usuario.rol !== Rol.SOLICITANTE) {
+    return usuario;
+  }
+
+  const fresco = await buscarUsuarioPorId(usuario.id);
+  if (!fresco || !tieneDatosContactoCompletos(fresco)) {
+    redirect("/completar-perfil");
+  }
 
   return usuario;
 }

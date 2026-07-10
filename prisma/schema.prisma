@@ -44,6 +44,15 @@ model Usuario {
   nombre             String
   rol                Rol
   estadoVerificacion EstadoVerificacion @default(PENDIENTE)
+  // Datos de contacto y ubicación (feature 017). Obligatorios en el flujo para
+  // COLABORADOR/SOLICITANTE; opcionales en base para no romper cuentas creadas
+  // antes de la feature (el guard las redirige a `/completar-perfil`). El ADMIN
+  // guarda sus datos en `PerfilAdmin` (016); aquí solo comparte el flag WhatsApp.
+  cedula             String?            @unique
+  telefono           String?
+  telefonoEsWhatsApp Boolean            @default(false)
+  estado             String?
+  parroquia          String?
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 
@@ -77,18 +86,20 @@ enum TipoDocumento {
 // unicidad por `usuarioId` garantiza un solo perfil por cuenta. Se borra en
 // cascada con el usuario.
 model PerfilAdmin {
-  id              String        @id @default(cuid())
-  usuarioId       String        @unique
-  usuario         Usuario       @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  nombreCuenta    String
-  estado          String
-  parroquia       String
-  telefono        String
-  correo          String
-  tipoDocumento   TipoDocumento
-  numeroDocumento String
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id                 String        @id @default(cuid())
+  usuarioId          String        @unique
+  usuario            Usuario       @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  nombreCuenta       String
+  estado             String
+  parroquia          String
+  telefono           String
+  // Flag WhatsApp del teléfono del centro de acopio (feature 017 amplía 016).
+  telefonoEsWhatsApp Boolean       @default(false)
+  correo             String
+  tipoDocumento      TipoDocumento
+  numeroDocumento    String
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
 
   @@map("perfiles_admin")
 }

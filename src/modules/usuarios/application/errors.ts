@@ -15,6 +15,26 @@ export class EmailYaRegistradoError extends Error {
   }
 }
 
+// ── Datos de contacto y ubicación (feature 017) ───────────────────────────────
+
+// La entrada no cumple las reglas de dominio (cédula/teléfono/estado/parroquia).
+// El mensaje describe el primer problema encontrado, en español y listo para
+// mostrar al usuario.
+export class DatosContactoInvalidosError extends Error {
+  constructor(mensaje: string) {
+    super(mensaje);
+    this.name = "DatosContactoInvalidosError";
+  }
+}
+
+// Ya existe otra cuenta con la cédula normalizada indicada.
+export class CedulaYaRegistradaError extends Error {
+  constructor() {
+    super("Ya existe una cuenta con esta cédula.");
+    this.name = "CedulaYaRegistradaError";
+  }
+}
+
 // ── Gestión de administradores por el SUPERADMIN (feature 015) ────────────────
 
 // El actor de una acción reservada al `SUPERADMIN` no lo es.

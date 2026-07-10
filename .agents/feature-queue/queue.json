@@ -60,15 +60,16 @@
     "017-datos-de-contacto-obligatorios": {
       "id": "017",
       "slug": "017-datos-de-contacto-obligatorios",
-      "title": "Datos de contacto obligatorios",
-      "status": "pending",
+      "title": "Datos de contacto obligatorios (colaborador y solicitante)",
+      "status": "done",
       "specDir": "spec/spec_template/features/017-datos-de-contacto-obligatorios",
       "docFile": "DOC/features/017-datos-de-contacto-obligatorios.md",
-      "branch": null,
+      "branch": "cursor/datos-contacto-obligatorios-017-3b92",
       "pr": null,
       "agentBcId": null,
-      "startedAt": null,
-      "completedAt": null
+      "startedAt": "2026-07-10T14:30:00Z",
+      "completedAt": "2026-07-10T15:00:00Z",
+      "notes": "Alcance ampliado con estado/parroquia, flag telefonoEsWhatsApp (usuario + PerfilAdmin, enmienda 016) y /mi-perfil de edición."
     },
     "018-tipos-de-actividad-en-ayuda": {
       "id": "018",

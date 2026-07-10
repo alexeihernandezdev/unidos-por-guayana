@@ -1,38 +1,32 @@
 # Feature 017 · Datos de contacto obligatorios (colaborador y solicitante)
 
-_Documento de cliente. Explica en lenguaje llano qué aporta esta feature y por qué. El detalle técnico vive en `spec/features/017-datos-de-contacto-obligatorios/`._
+_Documento de cliente. Explica en lenguaje llano qué aporta esta feature y por qué. El detalle técnico vive en `spec/spec_template/features/017-datos-de-contacto-obligatorios/`._
 
 ---
 
 ## En una frase
 
-Pedir **cédula y teléfono** a todo colaborador y solicitante al registrarse, para poder contactarlos y, más adelante, verificarlos.
+Pedirle a cada **colaborador** y **solicitante** su **cédula**, **teléfono** y **ubicación** al registrarse, con un flag de **WhatsApp** para saber por qué canal contactarlo.
 
 ## Qué aporta
 
-Esta etapa completa el registro de las dos figuras que participan en el día a día de la ayuda:
+Hasta ahora un colaborador o solicitante podía registrarse solo con nombre, correo y contraseña. El administrador no tenía forma de saber quién estaba detrás ni cómo contactarlo. Con esta etapa:
 
-- **Cédula obligatoria** — el documento de identidad (con su letra `V`, `E` o `J` y su número). La plataforma revisa que el formato sea correcto antes de aceptarlo.
-- **Teléfono obligatorio** — un número de contacto venezolano válido, que también se revisa antes de guardarlo.
-- **Datos ordenados** — la cédula y el teléfono se guardan siempre de la misma forma (sin puntos ni espacios sueltos), para que no haya dos maneras distintas de escribir lo mismo.
-- **Sin cédulas repetidas** — no se permite que dos cuentas usen la misma cédula.
-
-Esto aplica **solo a los Colaboradores y Solicitantes**. El Administrador tiene su propio conjunto de datos ampliados (otra etapa) y el Superadministrador no se registra por la app.
+- **Cédula obligatoria**: se pide el documento de identidad venezolano (con prefijo `V`, `E` o `J`). Se valida el formato, se guarda normalizado y **no se admiten cédulas repetidas** entre cuentas.
+- **Teléfono obligatorio**: número venezolano de 11 dígitos, validado por operadora (móviles `0412`, `0414`, `0416`, `0424`, `0426` y fijos por código de área). Acepta `+58` y separadores en la entrada; se guarda solo con dígitos.
+- **WhatsApp sí/no**: al lado del teléfono, una casilla indica si ese número recibe WhatsApp. Sirve tanto al administrador (para saber cómo contactar) como al centro de acopio en su perfil.
+- **Ubicación**: estado y parroquia del colaborador o solicitante, del mismo modo que el centro de acopio ya declara la suya. Habilita filtrar por zona y coordinar logística.
+- **Simetría para el administrador**: el registro público del administrador también incluye el mismo flag de WhatsApp para su teléfono de contacto (se guarda en su perfil de centro de acopio).
+- **Cuentas antiguas**: los usuarios ya registrados sin estos datos son redirigidos a una pantalla obligatoria de **Completar perfil** al iniciar sesión; no pueden operar hasta rellenarla.
+- **Mi perfil**: colaboradores y solicitantes pueden **editar** su contacto y ubicación en cualquier momento desde `/mi-perfil` (enlazado en el menú de usuario).
 
 ## Por qué importa
 
-Sin un teléfono y una cédula, el administrador **no puede contactar** a quien ofrece un camión o pide ayuda, ni darle después un **sello de confianza**. Estos dos datos son la base para la verificación de usuarios que llega más adelante: son lo mínimo para saber con quién se está tratando en un momento de crisis.
-
-## Qué pasa con las cuentas que ya existían
-
-A las personas que se registraron **antes** de este cambio no se les inventan datos. La próxima vez que inicien sesión, la plataforma les pedirá **completar su cédula y su teléfono** una sola vez, y hasta que lo hagan no podrán seguir usando el resto de funciones. Es un paso rápido y obligatorio, pensado para no perder a nadie por el camino.
+Para poder **confiar** en quien aporta ayuda o pide ayuda, el administrador necesita saber a **quién** contacta y **dónde** está. Sin cédula ni teléfono no hay verificación posible (la verificación real la aborda una etapa posterior); sin ubicación, no hay logística fina. Esta feature es el prerrequisito de datos para toda la parte de confianza y coordinación.
 
 ## Qué queda fuera (por ahora)
 
-- **Verificar que la cédula sea real** (comprobarla contra un registro oficial) no entra aquí: por ahora solo se revisa que el **formato** sea correcto. El sello de confianza que da el administrador llega en una etapa posterior.
-- Los **datos ampliados del administrador** (estado, parroquia, cuenta, documento) se tratan en otra etapa.
-- Editar el resto del perfil más allá de estos dos datos obligatorios.
-
-## Resultado para el cliente
-
-Al terminar, **todo colaborador y solicitante tendrá cédula y teléfono válidos registrados**, tanto los nuevos como los que ya existían, dejando lista la información de contacto que la plataforma necesita para coordinar la ayuda y para el paso siguiente de verificación.
+- La **verificación real** de que la cédula y el teléfono corresponden a la persona: aquí solo se valida el **formato** y la **unicidad**, no la existencia del documento.
+- **Catálogo cerrado** de estados y parroquias: por ahora se guardan como texto libre, igual que ya lo hace el centro de acopio del administrador. Si el cliente lo pide, se cambiará a un catálogo sin re-migrar los datos.
+- Cambiar **email** o **contraseña** desde `/mi-perfil`: fuera de alcance.
+- Cargar la **foto de la cédula** para verificación por el administrador: es parte de la etapa de verificación, no de esta captura de datos.

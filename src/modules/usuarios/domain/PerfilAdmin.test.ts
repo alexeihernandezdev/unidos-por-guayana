@@ -12,6 +12,7 @@ const datosValidos: DatosPerfilAdmin = {
   estado: "Bolívar",
   parroquia: "Cachamay",
   telefono: "+58 412 0000000",
+  telefonoEsWhatsApp: false,
   correo: "centro@example.org",
   tipoDocumento: TipoDocumento.NATURAL,
   numeroDocumento: "V-12345678",

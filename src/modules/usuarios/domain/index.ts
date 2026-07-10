@@ -5,3 +5,4 @@ export * from "./PasswordHasher";
 export * from "./verificacion";
 export * from "./PerfilAdmin";
 export * from "./PerfilAdminRepository";
+export * from "./datosContacto";

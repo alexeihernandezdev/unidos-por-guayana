@@ -19,6 +19,7 @@ const baseInput: CrearPerfilAdminInput = {
   estado: "Bolívar",
   parroquia: "Cachamay",
   telefono: "+58 412 0000000",
+  telefonoEsWhatsApp: true,
   correo: "contacto@fundacion.org",
   tipoDocumento: TipoDocumento.JURIDICO,
   numeroDocumento: "J-12345678-9",

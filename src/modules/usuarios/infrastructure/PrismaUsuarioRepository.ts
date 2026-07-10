@@ -1,6 +1,10 @@
 import { prisma } from "@/lib/prisma";
+import type { DatosContacto } from "@/modules/usuarios/domain/datosContacto";
 import type { EstadoVerificacion } from "@/modules/usuarios/domain/Rol";
-import { EstadoVerificacion as EstadoVerificacionEnum, Rol } from "@/modules/usuarios/domain/Rol";
+import {
+  EstadoVerificacion as EstadoVerificacionEnum,
+  Rol,
+} from "@/modules/usuarios/domain/Rol";
 import type { NuevoUsuario, Usuario } from "@/modules/usuarios/domain/Usuario";
 import type { UsuarioRepository } from "@/modules/usuarios/domain/UsuarioRepository";
 
@@ -20,6 +24,10 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
     return prisma.usuario.findUnique({ where: { id } });
   }
 
+  async buscarPorCedula(cedula: string): Promise<Usuario | null> {
+    return prisma.usuario.findUnique({ where: { cedula } });
+  }
+
   async listarAdminsPendientes(): Promise<Usuario[]> {
     return prisma.usuario.findMany({
       where: {
@@ -37,6 +45,22 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
     return prisma.usuario.update({
       where: { id },
       data: { estadoVerificacion: estado },
+    });
+  }
+
+  async actualizarDatosContacto(
+    id: string,
+    datos: DatosContacto,
+  ): Promise<Usuario> {
+    return prisma.usuario.update({
+      where: { id },
+      data: {
+        cedula: datos.cedula,
+        telefono: datos.telefono,
+        telefonoEsWhatsApp: datos.telefonoEsWhatsApp,
+        estado: datos.estado,
+        parroquia: datos.parroquia,
+      },
     });
   }
 }

@@ -145,7 +145,7 @@ function traducirErrorPropuesta(error: unknown): string | null {
 }
 
 export async function aprobarPropuestaAction(formData: FormData): Promise<void> {
-  await requireRol(Rol.ADMIN);
+  await requireAdminVerificado();
   const id = formData.get("id");
   if (typeof id !== "string" || !id) return;
   try {
@@ -162,7 +162,7 @@ export async function aprobarPropuestaAction(formData: FormData): Promise<void> 
 export async function rechazarPropuestaAction(
   formData: FormData,
 ): Promise<void> {
-  await requireRol(Rol.ADMIN);
+  await requireAdminVerificado();
   const id = formData.get("id");
   if (typeof id !== "string" || !id) return;
   try {
