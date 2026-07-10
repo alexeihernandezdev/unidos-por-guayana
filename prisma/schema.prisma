@@ -51,8 +51,60 @@ model Usuario {
   aportes Aporte[]
   // Relación inversa: solicitudes de ayuda creadas por el solicitante (feature 007).
   solicitudes Solicitud[]
+  // Perfil ampliado de centro de acopio (solo cuentas ADMIN, feature 016). La
+  // regla "solo ADMIN" la asegura la aplicación; Prisma no restringe por enum.
+  perfilAdmin PerfilAdmin?
+  // Puntos de acopio que gestiona este ADMIN (feature 016 declara el lado admin;
+  // el modelo completo lo crea la feature 011).
+  puntosAcopio PuntoAcopio[]
 
   @@map("usuarios")
+}
+
+// Tipo de documento de identidad de un centro de acopio (feature 016). `JURIDICO`
+// para organizaciones, `NATURAL` para personas. Sus valores coinciden con el enum
+// de dominio para mapear sin casts.
+enum TipoDocumento {
+  JURIDICO
+  NATURAL
+}
+
+// PerfilAdmin: extensión uno a uno de una cuenta `ADMIN` que la identifica como
+// centro de acopio dentro de la red (feature 016). Se captura en el registro
+// público del admin (feature 015) y el `SUPERADMIN` lo revisa al aprobar. La
+// unicidad por `usuarioId` garantiza un solo perfil por cuenta. Se borra en
+// cascada con el usuario.
+model PerfilAdmin {
+  id              String        @id @default(cuid())
+  usuarioId       String        @unique
+  usuario         Usuario       @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  nombreCuenta    String
+  estado          String
+  parroquia       String
+  telefono        String
+  correo          String
+  tipoDocumento   TipoDocumento
+  numeroDocumento String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("perfiles_admin")
+}
+
+// PuntoAcopio: centro físico de entrega perteneciente a un `ADMIN`. La feature 016
+// solo declara el lado admin de la relación (`adminId`) para no re-migrar; el
+// modelo completo (nombre, dirección, horarios, qué recibe) lo añade la feature
+// 011. Un `PuntoAcopio` nuevo hereda por defecto `estado`/`parroquia` del
+// `PerfilAdmin` de su admin (regla de dominio que consumirá la 011).
+model PuntoAcopio {
+  id        String   @id @default(cuid())
+  adminId   String
+  admin     Usuario  @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([adminId])
+  @@map("puntos_acopio")
 }
 
 // Categoría de un recurso del catálogo (ver feature 004 y constitution/tech-stack.md).

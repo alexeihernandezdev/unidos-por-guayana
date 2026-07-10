@@ -2,6 +2,12 @@
 
 > Estado: **Pendiente** · Depende de: `016 · Perfil de administrador y centro de acopio` (y por transitividad `015`) · Conecta con: `006 · Aportes` · Roadmap: `constitution/roadmap.md`
 
+> **Base ya disponible (feature 016).** El modelo `PuntoAcopio` existe como stub con la relación
+> `adminId` (FK a `Usuario`, un admin tiene 0..N puntos) y su índice; esta feature lo completa
+> (nombre, dirección, horarios, qué recibe…) con un `ALTER TABLE`, sin re-crear la relación. La
+> función de dominio `ubicacionPorDefecto(perfilAdmin)` (en `src/modules/usuarios/domain/PerfilAdmin.ts`)
+> devuelve el `estado`/`parroquia` del `PerfilAdmin` para prellenar la ubicación de un punto nuevo.
+
 ## Qué hace
 
 Introduce el **punto de acopio**: el **centro físico de entrega** al que un colaborador puede

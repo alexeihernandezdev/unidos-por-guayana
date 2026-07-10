@@ -16,17 +16,17 @@ _Features completadas, en orden de implementación._
 8. **007 · Solicitudes de ayuda** — El `SOLICITANTE` crea y gestiona peticiones por sector, urgencia y recursos necesarios en `/solicitudes`; el `ADMIN` las lista con filtros y marca atendida o cierra en `/panel/solicitudes`. Módulo `src/modules/solicitudes` (Clean + Screaming) con máquina de estados pura.
 9. **008 · Panel de administración** — Tablero read-only del `ADMIN` en `/panel`: métricas agregadas (envíos por estado, solicitudes por urgencia, aportes pendientes, sectores top), bloque «Qué envío sale primero» ordenado por % de metas, y atajos a crear ayuda/recurso/solicitudes. Módulo `src/modules/panel` (solo `application` + `ui`); lecturas agregadas en 005/006/007.
 10. **015 · Rol SUPERADMIN y registro público de administradores** — Nuevo rol `SUPERADMIN` (sembrado por `db:seed`, raíz de confianza). El registro de `ADMIN` pasa a ser **público**: la cuenta se crea en `estadoVerificacion = PENDIENTE` y no puede operar hasta que un `SUPERADMIN` la aprueba (`VERIFICADO`) o la rechaza desde su bandeja (`/superadmin/admins`). Enforcement en un único punto de verdad (`puedeOperarComoAdmin` + guard `requireAdminVerificado`, estado fresco de base). _Enmienda 002 (el seed pasa de `ADMIN` a `SUPERADMIN`; `ADMIN` deja de ser cerrado)._
+11. **016 · Perfil de administrador y centro de acopio** — `PerfilAdmin` (uno a uno con `Usuario` ADMIN): `nombreCuenta`, `estado`, `parroquia`, `telefono`, `correo`, `documento` con `tipoDocumento` ∈ `JURIDICO` | `NATURAL`. Se captura en el registro público de admin (015), se muestra al `SUPERADMIN` en la bandeja de aprobación, y el admin lo edita en `/panel/perfil`. Declara el lado `adminId` de la relación con `PuntoAcopio` (0..N) y la herencia de ubicación por defecto. _Depende de 015; deja lista la base para 011._
 
 ## Siguiente 🔜
 
 _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
 
-11. **016 · Perfil de administrador y centro de acopio** — `PerfilAdmin` con datos ampliados (`nombreCuenta`, `estado`, `parroquia`, `telefono`, `correo`, `documento` con `tipoDocumento` ∈ `JURIDICO` | `NATURAL`); el `ADMIN` funciona como centro de acopio y puede tener uno o varios `PuntoAcopio`. _Depende de 015; conecta con 011._
+12. **017 · Datos de contacto obligatorios (colaborador y solicitante)** — `cedula` y `telefono` obligatorios en el registro de `COLABORADOR` y `SOLICITANTE`. _Enmienda 002._
 
 ## Cambios propuestos por el cliente (revisión de alcance) 🔁
 
 _Cambios solicitados por el cliente que **rompen parte del encaje actual**: tocan features ya "Hecho" (002, 004, 005) y la constitución ya se actualizó (`mission.md`, `tech-stack.md`) para reflejarlos. Cada uno se aborda como feature nueva y, al implementarse, enmienda la feature de origen. Ordenados por dependencia; van antes que el backlog de apoyo porque cambian el modelo base._
-12. **017 · Datos de contacto obligatorios (colaborador y solicitante)** — `cedula` y `telefono` obligatorios en el registro de `COLABORADOR` y `SOLICITANTE`. _Enmienda 002._
 13. **018 · Tipos de actividad en Ayuda (envío / jornada / evento social)** — La entidad Ayuda gana `tipo` ∈ `ENVIO` | `JORNADA` | `EVENTO_SOCIAL`; la acción de crear se **renombra y presenta según el tipo**, compartiendo metas, aportes y seguimiento. _Enmienda 005._
 14. **019 · Propuesta de recursos por el solicitante** — El `SOLICITANTE` puede proponer recursos al catálogo (`estadoAprobacion = PROPUESTO`, con `propuestoPor`); el `ADMIN` aprueba o rechaza. Solo los `APROBADO` se usan en metas y aportes. _Enmienda 004._
 
