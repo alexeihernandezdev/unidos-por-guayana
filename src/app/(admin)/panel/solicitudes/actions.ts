@@ -5,17 +5,16 @@ import {
   SolicitudNoEncontradaError,
   TransicionInvalidaError,
 } from "@/modules/solicitudes/application/errors";
-import { Rol } from "@/modules/usuarios/domain/Rol";
 import {
   cerrarSolicitudServicio,
   marcarAtendidaServicio,
 } from "@/shared/solicitudes";
-import { requireRol } from "@/shared/auth";
+import { requireAdminVerificado } from "@/shared/auth";
 
 const RUTA_LISTADO = "/panel/solicitudes";
 
 export async function marcarAtendidaAction(formData: FormData): Promise<void> {
-  await requireRol(Rol.ADMIN);
+  await requireAdminVerificado();
   const id = formData.get("id");
   if (typeof id !== "string" || !id) return;
 
@@ -35,7 +34,7 @@ export async function marcarAtendidaAction(formData: FormData): Promise<void> {
 }
 
 export async function cerrarSolicitudAction(formData: FormData): Promise<void> {
-  await requireRol(Rol.ADMIN);
+  await requireAdminVerificado();
   const id = formData.get("id");
   if (typeof id !== "string" || !id) return;
 

@@ -8,14 +8,13 @@ import {
   RecursoNoEncontradoError,
 } from "@/modules/recursos/application/errors";
 import { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
-import { Rol } from "@/modules/usuarios/domain/Rol";
 import {
   activarRecursoServicio,
   archivarRecursoServicio,
   crearRecursoServicio,
   editarRecursoServicio,
 } from "@/shared/recursos";
-import { requireRol } from "@/shared/auth";
+import { requireAdminVerificado } from "@/shared/auth";
 
 const RUTA_LISTADO = "/panel/recursos";
 
@@ -54,7 +53,7 @@ function traducirError(error: unknown): Resultado | null {
 export async function crearRecursoAction(
   input: RecursoInput,
 ): Promise<Resultado> {
-  await requireRol(Rol.ADMIN);
+  await requireAdminVerificado();
 
   const parsed = RecursoSchema.safeParse(input);
   if (!parsed.success) {
@@ -84,7 +83,7 @@ export async function editarRecursoAction(
   id: string,
   input: RecursoInput,
 ): Promise<Resultado> {
-  await requireRol(Rol.ADMIN);
+  await requireAdminVerificado();
 
   const parsed = RecursoSchema.safeParse(input);
   if (!parsed.success) {
@@ -111,7 +110,7 @@ export async function editarRecursoAction(
 }
 
 export async function archivarRecursoAction(formData: FormData): Promise<void> {
-  await requireRol(Rol.ADMIN);
+  await requireAdminVerificado();
   const id = formData.get("id");
   if (typeof id === "string" && id) {
     await archivarRecursoServicio(id);
@@ -120,7 +119,7 @@ export async function archivarRecursoAction(formData: FormData): Promise<void> {
 }
 
 export async function activarRecursoAction(formData: FormData): Promise<void> {
-  await requireRol(Rol.ADMIN);
+  await requireAdminVerificado();
   const id = formData.get("id");
   if (typeof id === "string" && id) {
     await activarRecursoServicio(id);

@@ -185,6 +185,9 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Cliente de Prisma generado (no es código nuestro; se regenera).
     "src/generated/**",
+    // Scripts auxiliares de las skills de Claude Code (no son código de la app;
+    // usan CommonJS y no siguen las reglas del proyecto).
+    ".claude/**",
   ]),
 ]);
 

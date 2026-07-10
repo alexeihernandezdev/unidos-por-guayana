@@ -16,8 +16,12 @@ export default auth((req) => {
   requestHeaders.set("x-pathname", pathname);
 
   // Rutas protegidas (deben coincidir con `config.matcher` de más abajo).
+  // El control fino por rol/estado lo aplica cada segmento con `requireRol()` /
+  // `requireAdminVerificado()`; aquí solo se exige sesión en el prefijo.
   const requiereSesion =
     pathname.startsWith("/panel") ||
+    pathname.startsWith("/superadmin") ||
+    pathname === "/cuenta-admin" ||
     pathname === "/mis-aportes" ||
     pathname.startsWith("/solicitudes") ||
     pathname === "/ayudas" ||

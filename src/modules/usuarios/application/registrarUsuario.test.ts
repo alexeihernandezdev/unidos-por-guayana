@@ -34,11 +34,23 @@ describe("registrarUsuario", () => {
     expect(usuario.estadoVerificacion).toBe("PENDIENTE");
   });
 
-  it("rechaza el rol ADMIN (no auto-registrable)", async () => {
+  it("admite el rol ADMIN y lo crea en PENDIENTE (registro público, feature 015)", async () => {
+    const deps = crearDeps();
+
+    const usuario = await registrarUsuario(deps, {
+      ...baseInput,
+      rol: Rol.ADMIN,
+    });
+
+    expect(usuario.rol).toBe(Rol.ADMIN);
+    expect(usuario.estadoVerificacion).toBe("PENDIENTE");
+  });
+
+  it("rechaza el rol SUPERADMIN (no auto-registrable)", async () => {
     const deps = crearDeps();
 
     await expect(
-      registrarUsuario(deps, { ...baseInput, rol: Rol.ADMIN }),
+      registrarUsuario(deps, { ...baseInput, rol: Rol.SUPERADMIN }),
     ).rejects.toBeInstanceOf(RolNoAutoRegistrableError);
 
     expect(await deps.usuarios.buscarPorEmail(baseInput.email)).toBeNull();

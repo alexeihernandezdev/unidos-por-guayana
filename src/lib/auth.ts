@@ -1,6 +1,12 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import {
+  aprobarAdmin,
+  listarAdminsPendientes,
+  rechazarAdmin,
+  type Actor,
+} from "@/modules/usuarios/application/gestionarAdmins";
+import {
   registrarUsuario,
   type RegistrarUsuarioInput,
 } from "@/modules/usuarios/application/registrarUsuario";
@@ -26,6 +32,36 @@ export function registrarNuevoUsuario(
   input: RegistrarUsuarioInput,
 ): Promise<Usuario> {
   return registrarUsuario({ usuarios, hasher }, input);
+}
+
+// ── Gestión de administradores por el SUPERADMIN (feature 015) ────────────────
+// Casos de uso puros con la infraestructura ya inyectada. Los consume la bandeja
+// del superadmin a través de la fachada `@/shared/auth`.
+export function listarAdminsPendientesGestion(actor: Actor): Promise<Usuario[]> {
+  return listarAdminsPendientes({ usuarios }, actor);
+}
+
+export function aprobarAdminGestion(
+  actor: Actor,
+  adminId: string,
+): Promise<Usuario> {
+  return aprobarAdmin({ usuarios }, actor, adminId);
+}
+
+export function rechazarAdminGestion(
+  actor: Actor,
+  adminId: string,
+): Promise<Usuario> {
+  return rechazarAdmin({ usuarios }, actor, adminId);
+}
+
+/**
+ * Lee el usuario fresco de base por id. Lo usa el guard de servidor
+ * `requireAdminVerificado` para comprobar el `estadoVerificacion` real (una
+ * aprobación surte efecto sin re-login, sin fiarse del valor cacheado en el JWT).
+ */
+export function buscarUsuarioPorId(id: string): Promise<Usuario | null> {
+  return usuarios.buscarPorId(id);
 }
 
 // ── Auth.js v5 (NextAuth) ─────────────────────────────────────────────────────

@@ -18,7 +18,7 @@ import {
   marcarRecibidoServicio,
   revertirRecibidoServicio,
 } from "@/shared/aportes";
-import { requireRol } from "@/shared/auth";
+import { requireAdminVerificado, requireRol } from "@/shared/auth";
 
 // Validación en el límite. Las reglas de negocio también viven en los casos de uso;
 // aquí se rechaza pronto con mensajes claros para la UI.
@@ -114,9 +114,9 @@ export async function cancelarAporteAction(formData: FormData): Promise<void> {
   }
 }
 
-/** Marca un aporte como RECIBIDO. Solo ADMIN. */
+/** Marca un aporte como RECIBIDO. Solo ADMIN verificado. */
 export async function marcarRecibidoAction(formData: FormData): Promise<void> {
-  const usuario = await requireRol(Rol.ADMIN);
+  const usuario = await requireAdminVerificado();
   const id = formData.get("id");
   const ayudaId = formData.get("ayudaId");
   if (typeof id !== "string" || !id) return;
@@ -131,11 +131,11 @@ export async function marcarRecibidoAction(formData: FormData): Promise<void> {
   }
 }
 
-/** Revierte un aporte RECIBIDO → COMPROMETIDO. Solo ADMIN. */
+/** Revierte un aporte RECIBIDO → COMPROMETIDO. Solo ADMIN verificado. */
 export async function revertirRecibidoAction(
   formData: FormData,
 ): Promise<void> {
-  const usuario = await requireRol(Rol.ADMIN);
+  const usuario = await requireAdminVerificado();
   const id = formData.get("id");
   const ayudaId = formData.get("ayudaId");
   if (typeof id !== "string" || !id) return;

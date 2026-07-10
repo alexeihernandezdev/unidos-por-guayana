@@ -35,14 +35,14 @@
       "id": "015",
       "slug": "015-superadmin-y-registro-de-administradores",
       "title": "Rol SUPERADMIN y registro público de administradores",
-      "status": "pending",
+      "status": "done",
       "specDir": "spec/spec_template/features/015-superadmin-y-registro-de-administradores",
       "docFile": "DOC/features/015-superadmin-y-registro-de-administradores.md",
       "branch": "cursor/superadmin-registro-admin-015-3b92",
       "pr": null,
       "agentBcId": null,
-      "startedAt": null,
-      "completedAt": null
+      "startedAt": "2026-07-10T13:20:00Z",
+      "completedAt": "2026-07-10T13:40:00Z"
     },
     "016-perfil-de-administrador-y-acopio": {
       "id": "016",

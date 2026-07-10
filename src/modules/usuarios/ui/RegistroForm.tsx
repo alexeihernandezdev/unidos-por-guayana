@@ -11,7 +11,7 @@ type Campos = {
   nombre: string;
   email: string;
   password: string;
-  rol: typeof Rol.COLABORADOR | typeof Rol.SOLICITANTE;
+  rol: typeof Rol.ADMIN | typeof Rol.COLABORADOR | typeof Rol.SOLICITANTE;
 };
 
 type Props = {
@@ -19,7 +19,7 @@ type Props = {
   // el formulario no importa la capa `app` y se mantiene reutilizable.
   action: (
     input: RegistrarUsuarioInput,
-  ) => Promise<{ ok: boolean; error?: string }>;
+  ) => Promise<{ ok: boolean; error?: string; rol?: Rol }>;
 };
 
 const campo =
@@ -40,7 +40,10 @@ export function RegistroForm({ action }: Props) {
     startTransition(async () => {
       const resultado = await action(datos);
       if (resultado.ok) {
-        router.push("/login?registrado=1");
+        // Un ADMIN nace en PENDIENTE: se avisa en /login que un superadministrador
+        // debe aprobar la cuenta antes de que pueda operar (feature 015).
+        const registrado = resultado.rol === Rol.ADMIN ? "admin" : "1";
+        router.push(`/login?registrado=${registrado}`);
       } else {
         setErrorServidor(resultado.error ?? "No se pudo completar el registro.");
       }
@@ -114,7 +117,14 @@ export function RegistroForm({ action }: Props) {
         <select id="rol" className={campo} {...register("rol")}>
           <option value={Rol.COLABORADOR}>Colaborador (quiero aportar)</option>
           <option value={Rol.SOLICITANTE}>Solicitante (pido ayuda)</option>
+          <option value={Rol.ADMIN}>
+            Administrador / centro de acopio (requiere aprobación)
+          </option>
         </select>
+        <p className="text-xs text-muted-foreground">
+          Las cuentas de administrador quedan pendientes hasta que un
+          superadministrador las aprueba.
+        </p>
       </div>
 
       {errorServidor && (

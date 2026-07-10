@@ -13,9 +13,13 @@ datasource db {
 }
 
 // Rol del usuario. Controla los permisos en toda la plataforma (ver
-// constitution/tech-stack.md). `ADMIN` no es auto-registrable: se crea por seed
-// o lo promueve otro `ADMIN` (ver feature 002).
+// constitution/tech-stack.md). `SUPERADMIN` es la raíz de confianza: no se
+// auto-registra, se siembra con `pnpm db:seed` y es la única autoridad que
+// aprueba cuentas `ADMIN`. `ADMIN` sí es de registro público, pero la cuenta
+// nace en `estadoVerificacion = PENDIENTE` y no opera hasta que el `SUPERADMIN`
+// la aprueba (ver feature 015, que enmienda la 002).
 enum Rol {
+  SUPERADMIN
   ADMIN
   COLABORADOR
   SOLICITANTE

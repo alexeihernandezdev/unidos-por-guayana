@@ -7,9 +7,14 @@ export {
   signIn,
   signOut,
   registrarNuevoUsuario,
+  listarAdminsPendientesGestion,
+  aprobarAdminGestion,
+  rechazarAdminGestion,
+  buscarUsuarioPorId,
 } from "@/lib/auth";
 export {
   getUsuarioActual,
+  requireAdminVerificado,
   requireRol,
   requireSesion,
   type UsuarioSesion,
