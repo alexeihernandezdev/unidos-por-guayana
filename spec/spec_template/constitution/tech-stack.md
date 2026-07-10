@@ -67,7 +67,7 @@ Estructura objetivo (a crear conforme avancen las features):
 - `pnpm test` — ejecuta los tests con Vitest (`pnpm test:watch` para el modo interactivo).
 - `pnpm db:generate` — regenera el cliente de Prisma (`prisma generate`).
 - `pnpm db:migrate` — aplica migraciones en desarrollo (`prisma migrate dev`).
-- `pnpm db:seed` — siembra datos iniciales (p. ej. el ADMIN; ver feature 002).
+- `pnpm db:seed` — siembra datos iniciales (el `SUPERADMIN` raíz de confianza; ver feature 002 y 015).
 - `docker compose up -d` — levanta el contenedor de PostgreSQL para desarrollo local.
 - `docker compose down` — detiene y elimina los contenedores (los datos persisten en el volumen).
 
@@ -77,23 +77,27 @@ _Entidades centrales derivadas de la misión. Se documentan aquí las reglas no 
 
 ### Entidades principales
 
-- **Usuario** — `rol` ∈ `ADMIN` | `COLABORADOR` | `SOLICITANTE`. El rol controla los permisos: solo `ADMIN` puede crear/gestionar Ayudas. `estadoVerificacion` ∈ `PENDIENTE` | `VERIFICADO` | `RECHAZADO` (módulo de verificación de usuarios).
-- **Ayuda / Envío** — entidad central. Tiene `fecha` (de salida), `sectorDestino` y un `estado` ∈ `RECOLECTANDO` | `LISTO` | `EN_TRANSITO` | `ENTREGADO`. Sus **metas de recursos** se definen mediante `MetaRecurso`. Solo la crea el `ADMIN`; el paso a `LISTO` lo decide el `ADMIN` (normalmente cuando las metas se cumplen).
+- **Usuario** — `rol` ∈ `SUPERADMIN` | `ADMIN` | `COLABORADOR` | `SOLICITANTE`. El rol controla los permisos: solo `ADMIN` puede crear/gestionar Ayudas; solo `SUPERADMIN` puede aprobar cuentas `ADMIN`. `estadoVerificacion` ∈ `PENDIENTE` | `VERIFICADO` | `RECHAZADO`:
+  - Para `ADMIN` la cuenta se crea por **registro público** en `PENDIENTE` y no puede operar hasta que un `SUPERADMIN` la pasa a `VERIFICADO` (o `RECHAZADO`).
+  - Para `COLABORADOR` y `SOLICITANTE` el registro exige `cedula` y `telefono` obligatorios; su verificación la gestiona el `ADMIN` (módulo de verificación de usuarios).
+  - El `SUPERADMIN` no se registra por la app: se siembra (`db:seed`) y es la raíz de confianza.
+- **PerfilAdmin** — datos ampliados de una cuenta `ADMIN`, que funciona además como **centro de acopio**: `nombreCuenta`, `estado` (del país), `parroquia`, `telefono`, `correo` y `documento` (`tipoDocumento` ∈ `JURIDICO` | `NATURAL` + número). Se completa en el registro público y el `SUPERADMIN` lo revisa al aprobar. Un `ADMIN` puede tener uno o varios `PuntoAcopio` asociados.
+- **Ayuda / Actividad** — entidad central. Tiene `tipo` ∈ `ENVIO` | `JORNADA` | `EVENTO_SOCIAL` (determina cómo se nombra y presenta al crearla; comparte el mismo modelo), `fecha`, `sectorDestino` y un `estado` ∈ `RECOLECTANDO` | `LISTO` | `EN_TRANSITO` | `ENTREGADO`. Sus **metas de recursos** se definen mediante `MetaRecurso`. Solo la crea el `ADMIN`; el paso a `LISTO` lo decide el `ADMIN` (normalmente cuando las metas se cumplen).
 - **Aporte** — lo registra un `COLABORADOR` y se asocia a una Ayuda y a un `Recurso`. Tiene `cantidad` (en la unidad del recurso) y un `estado` ∈ `COMPROMETIDO` | `RECIBIDO`. Solo suma a la meta cuando está `RECIBIDO`. Opcionalmente referencia el `PuntoAcopio` de entrega. El pago nunca ocurre dentro de la app: cuando el `Recurso` es de categoría `MONETARIO`, el `Aporte` solo **registra** el monto (en su moneda) y el `ADMIN` lo marca `RECIBIDO` al confirmarlo por un canal externo (transferencia, PayPal, Zelle…).
 - **Solicitud / Petición** — la crea un `SOLICITANTE`: pide ayuda para un `sector`, con `urgencia` y los recursos que necesita. Tiene `estado` (p. ej. `ABIERTA` | `ATENDIDA` | `CERRADA`). Alimenta la decisión del `ADMIN` sobre qué enviar.
 
 ### Catálogo y metas
 
-- **Recurso** (catálogo) — referencia estable de qué se puede aportar: `nombre` (agua, medicinas, alimentos, camión, voluntario, donación en USD…), `unidad` (litros, cajas, unidades, vehículos, personas, USD/Bs) y `categoria` ∈ `SUMINISTRO` | `TRANSPORTE` | `PERSONAL` | `MONETARIO`. Aportes y metas se miden siempre contra un `Recurso`. Los recursos `MONETARIO` representan ayuda económica que se recibe **por fuera** de la app (la app no procesa el pago; ver `mission.md`).
+- **Recurso** (catálogo) — referencia estable de qué se puede aportar: `nombre` (agua, medicinas, alimentos, camión, voluntario, donación en USD…), `unidad` (litros, cajas, unidades, vehículos, personas, USD/Bs) y `categoria` ∈ `SUMINISTRO` | `TRANSPORTE` | `PERSONAL` | `MONETARIO`. Aportes y metas se miden siempre contra un `Recurso`. Los recursos `MONETARIO` representan ayuda económica que se recibe **por fuera** de la app (la app no procesa el pago; ver `mission.md`). Un `Recurso` tiene `estadoAprobacion` ∈ `APROBADO` | `PROPUESTO` | `RECHAZADO`: el `ADMIN` crea recursos ya `APROBADO`; el `SOLICITANTE` puede **proponer** recursos (`PROPUESTO`, con `propuestoPor`) que el `ADMIN` aprueba o rechaza. Solo los `APROBADO` son seleccionables en metas y aportes.
 - **MetaRecurso** — puente entre `Ayuda` y `Recurso`: `cantidadObjetivo` que el envío necesita de ese recurso. El progreso de una meta = suma de aportes `RECIBIDO` de ese recurso ÷ `cantidadObjetivo`. Una Ayuda tiene varias `MetaRecurso`.
 
 ### Logística y seguimiento
 
-- **PuntoAcopio** — centro físico de entrega: `nombre`, `direccion`, `horarios` y qué recursos recibe.
+- **PuntoAcopio** — centro físico de entrega: `nombre`, `direccion`, `horarios` y qué recursos recibe. **Pertenece a un `ADMIN`** (`adminId`): un administrador puede gestionar uno o varios puntos. Sus datos de ubicación (estado, parroquia) heredan por defecto los del `PerfilAdmin`.
 - **SeguimientoEvento** — historial de trazabilidad de una `Ayuda`: cada cambio de `estado` con `fecha`, `nota` y `evidencia` opcional (foto/URL). Da la traza de origen a destino.
 - **Notificacion** — dirigida a un `Usuario`: `tipo`, `mensaje`, `referencia` (p. ej. la Ayuda relacionada) y `leida`.
 
-> **Invariantes clave:** las cantidades de `Aporte`, `MetaRecurso` y `Recurso` comparten la `unidad` del recurso; un `Aporte` solo cuenta para el progreso cuando su `estado` es `RECIBIDO`; el ciclo de vida de una `Ayuda` avanza en un solo sentido (`RECOLECTANDO → LISTO → EN_TRANSITO → ENTREGADO`) y cada transición registra un `SeguimientoEvento`.
+> **Invariantes clave:** las cantidades de `Aporte`, `MetaRecurso` y `Recurso` comparten la `unidad` del recurso; un `Aporte` solo cuenta para el progreso cuando su `estado` es `RECIBIDO`; el ciclo de vida de una `Ayuda` avanza en un solo sentido (`RECOLECTANDO → LISTO → EN_TRANSITO → ENTREGADO`) y cada transición registra un `SeguimientoEvento`; una cuenta `ADMIN` en `PENDIENTE` no puede crear ni gestionar nada hasta que un `SUPERADMIN` la pasa a `VERIFICADO`; solo un `Recurso` `APROBADO` puede usarse en metas y aportes.
 
 ## Convenciones
 
