@@ -20,12 +20,13 @@ _Features completadas, en orden de implementación._
 12. **018 · Tipos de actividad en Ayuda (envío / jornada / evento social)** — La entidad Ayuda gana `tipo` ∈ `ENVIO` | `JORNADA` | `EVENTO_SOCIAL`. El ADMIN lo elige al crear y la pantalla renombra título y botón ("Crear envío" / "Crear jornada" / "Crear evento social"); el listado muestra el tipo con filtro combinable con el de estado; ciclo de vida, metas, aportes y seguimiento no cambian. Backfill: las Ayudas existentes quedan como `ENVIO`. _Enmienda 005._
 13. **019 · Propuesta de recursos por el solicitante** — El `Recurso` gana `estadoAprobacion` ∈ `APROBADO` | `PROPUESTO` | `RECHAZADO` y `propuestoPor`. El `SOLICITANTE` puede proponer recursos desde `/solicitudes/proponer-recurso`; el `ADMIN` los revisa en `/panel/recursos/propuestas` y los aprueba o rechaza. Solo los `APROBADO` + activos son seleccionables en metas (005) y aportes (006). Backfill: los recursos previos quedan `APROBADO`. _Enmienda 004._
 14. **017 · Datos de contacto obligatorios (colaborador y solicitante)** — `cedula`, `telefono`, `telefonoEsWhatsApp`, `estado` y `parroquia` obligatorios en el registro de `COLABORADOR` y `SOLICITANTE`. Guard de servidor redirige a `/completar-perfil` cuando faltan; edición desde `/mi-perfil`. Añade `telefonoEsWhatsApp` a `PerfilAdmin` (enmienda 016). _Enmienda 002 y 016._
+15. **009 · Tablero público de transparencia** — Vista abierta en `/transparencia` (sin login) con totales de impacto, recolectado por recurso, lista de actividades (envío/jornada/evento) con progreso y destino, y detalle público por actividad. Sin datos personales; reutiliza agregaciones de 005/006/008. Módulo `src/modules/transparencia` (solo `application` + `ui`).
 
 ## Siguiente 🔜
 
 _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
 
-15. **009 · Tablero público de transparencia** — Vista abierta (sin login) con lo recolectado, progreso por envío y destino de cada ayuda.
+16. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
 
 ## Cambios propuestos por el cliente (revisión de alcance) 🔁
 
@@ -39,13 +40,13 @@ _Ordenado según dependencias. Cada uno se convierte en `features/NNN-…/` ante
 
 **Superficies de gestión y transparencia**
 
-16. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
+17. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
 
 **Módulos de apoyo**
 
-17. **011 · Puntos de acopio** — Centros físicos de entrega (dirección, horarios, qué reciben), **cada uno perteneciente a un `ADMIN`** (ver 016).
-18. **012 · Notificaciones** — Avisos a colaboradores sobre envíos que necesitan recursos o metas cumplidas.
-19. **013 · Verificación de usuarios** — Validación de `COLABORADOR` y `SOLICITANTE` (`estadoVerificacion`) por parte del `ADMIN`. La verificación de cuentas `ADMIN` la cubre 015 (superadmin).
-20. **014 · Donaciones monetarias externas** — Mostrar medios externos para donar dinero (cuenta bancaria, PayPal, Zelle…) y permitir al `ADMIN` registrar manualmente montos recibidos por fuera (recursos `MONETARIO`) para reflejarlos en la transparencia. La app no procesa el pago.
+18. **011 · Puntos de acopio** — Centros físicos de entrega (dirección, horarios, qué reciben), **cada uno perteneciente a un `ADMIN`** (ver 016).
+19. **012 · Notificaciones** — Avisos a colaboradores sobre envíos que necesitan recursos o metas cumplidas.
+20. **013 · Verificación de usuarios** — Validación de `COLABORADOR` y `SOLICITANTE` (`estadoVerificacion`) por parte del `ADMIN`. La verificación de cuentas `ADMIN` la cubre 015 (superadmin).
+21. **014 · Donaciones monetarias externas** — Mostrar medios externos para donar dinero (cuenta bancaria, PayPal, Zelle…) y permitir al `ADMIN` registrar manualmente montos recibidos por fuera (recursos `MONETARIO`) para reflejarlos en la transparencia. La app no procesa el pago.
 
 > Cada feature nueva se crea como `features/NNN-nombre-feature/` con `spec.md`, `plan.md` y `tasks.md` antes de tocar código.
