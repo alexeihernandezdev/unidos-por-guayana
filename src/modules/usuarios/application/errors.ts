@@ -41,3 +41,30 @@ export class CuentaAdminNoAprobableError extends Error {
     this.name = "CuentaAdminNoAprobableError";
   }
 }
+
+// ── Perfil de administrador / centro de acopio (feature 016) ──────────────────
+
+// Los datos del perfil no cumplen las reglas de dominio (documento sin tipo o
+// número, correo/teléfono vacíos, etc.). El mensaje describe el primer problema.
+export class PerfilAdminInvalidoError extends Error {
+  constructor(mensaje: string) {
+    super(mensaje);
+    this.name = "PerfilAdminInvalidoError";
+  }
+}
+
+// Ya existe un `PerfilAdmin` para ese `usuarioId` (uno por cuenta).
+export class PerfilAdminDuplicadoError extends Error {
+  constructor(usuarioId: string) {
+    super(`La cuenta "${usuarioId}" ya tiene un perfil de administrador.`);
+    this.name = "PerfilAdminDuplicadoError";
+  }
+}
+
+// No existe un `PerfilAdmin` para ese `usuarioId`.
+export class PerfilAdminNoEncontradoError extends Error {
+  constructor(usuarioId: string) {
+    super(`La cuenta "${usuarioId}" no tiene un perfil de administrador.`);
+    this.name = "PerfilAdminNoEncontradoError";
+  }
+}

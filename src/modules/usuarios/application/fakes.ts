@@ -1,4 +1,10 @@
 import type { PasswordHasher } from "@/modules/usuarios/domain/PasswordHasher";
+import type {
+  CambiosPerfilAdmin,
+  NuevoPerfilAdmin,
+  PerfilAdmin,
+} from "@/modules/usuarios/domain/PerfilAdmin";
+import type { PerfilAdminRepository } from "@/modules/usuarios/domain/PerfilAdminRepository";
 import type { NuevoUsuario, Usuario } from "@/modules/usuarios/domain/Usuario";
 import type { UsuarioRepository } from "@/modules/usuarios/domain/UsuarioRepository";
 import { EstadoVerificacion, Rol } from "@/modules/usuarios/domain/Rol";
@@ -55,6 +61,44 @@ export class InMemoryUsuarioRepository implements UsuarioRepository {
       updatedAt: new Date(),
     };
     this.porId.set(id, actualizado);
+    return actualizado;
+  }
+}
+
+export class InMemoryPerfilAdminRepository implements PerfilAdminRepository {
+  private readonly porUsuarioId = new Map<string, PerfilAdmin>();
+  private secuencia = 0;
+
+  async crear(datos: NuevoPerfilAdmin): Promise<PerfilAdmin> {
+    const ahora = new Date();
+    const perfil: PerfilAdmin = {
+      id: `perfil-${++this.secuencia}`,
+      createdAt: ahora,
+      updatedAt: ahora,
+      ...datos,
+    };
+    this.porUsuarioId.set(perfil.usuarioId, perfil);
+    return perfil;
+  }
+
+  async buscarPorUsuarioId(usuarioId: string): Promise<PerfilAdmin | null> {
+    return this.porUsuarioId.get(usuarioId) ?? null;
+  }
+
+  async actualizar(
+    usuarioId: string,
+    cambios: CambiosPerfilAdmin,
+  ): Promise<PerfilAdmin> {
+    const actual = this.porUsuarioId.get(usuarioId);
+    if (!actual) {
+      throw new Error(`Perfil de "${usuarioId}" no encontrado.`);
+    }
+    const actualizado: PerfilAdmin = {
+      ...actual,
+      ...cambios,
+      updatedAt: new Date(),
+    };
+    this.porUsuarioId.set(usuarioId, actualizado);
     return actualizado;
   }
 }

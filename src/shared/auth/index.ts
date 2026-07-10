@@ -7,9 +7,12 @@ export {
   signIn,
   signOut,
   registrarNuevoUsuario,
+  registrarAdministradorConPerfil,
   listarAdminsPendientesGestion,
   aprobarAdminGestion,
   rechazarAdminGestion,
+  obtenerPerfilAdminGestion,
+  actualizarPerfilAdminGestion,
   buscarUsuarioPorId,
 } from "@/lib/auth";
 export {

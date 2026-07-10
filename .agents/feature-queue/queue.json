@@ -48,14 +48,14 @@
       "id": "016",
       "slug": "016-perfil-de-administrador-y-acopio",
       "title": "Perfil de administrador y centro de acopio",
-      "status": "pending",
+      "status": "done",
       "specDir": "spec/spec_template/features/016-perfil-de-administrador-y-acopio",
       "docFile": "DOC/features/016-perfil-de-administrador-y-acopio.md",
-      "branch": null,
+      "branch": "cursor/perfil-admin-acopio-016-3b92",
       "pr": null,
       "agentBcId": null,
-      "startedAt": null,
-      "completedAt": null
+      "startedAt": "2026-07-10T13:45:00Z",
+      "completedAt": "2026-07-10T14:05:00Z"
     },
     "017-datos-de-contacto-obligatorios": {
       "id": "017",

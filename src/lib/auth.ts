@@ -7,13 +7,24 @@ import {
   type Actor,
 } from "@/modules/usuarios/application/gestionarAdmins";
 import {
+  actualizarPerfilAdmin,
+  crearPerfilAdmin,
+  obtenerPerfilAdmin,
+} from "@/modules/usuarios/application/gestionarPerfilAdmin";
+import {
   registrarUsuario,
   type RegistrarUsuarioInput,
 } from "@/modules/usuarios/application/registrarUsuario";
 import { validarCredenciales } from "@/modules/usuarios/application/validarCredenciales";
-import type { Rol } from "@/modules/usuarios/domain/Rol";
+import type {
+  CambiosPerfilAdmin,
+  DatosPerfilAdmin,
+  PerfilAdmin,
+} from "@/modules/usuarios/domain/PerfilAdmin";
+import { Rol } from "@/modules/usuarios/domain/Rol";
 import type { Usuario } from "@/modules/usuarios/domain/Usuario";
 import { BcryptPasswordHasher } from "@/modules/usuarios/infrastructure/BcryptPasswordHasher";
+import { PrismaPerfilAdminRepository } from "@/modules/usuarios/infrastructure/PrismaPerfilAdminRepository";
 import { PrismaUsuarioRepository } from "@/modules/usuarios/infrastructure/PrismaUsuarioRepository";
 
 // ── Composition root ────────────────────────────────────────────────────────
@@ -21,6 +32,7 @@ import { PrismaUsuarioRepository } from "@/modules/usuarios/infrastructure/Prism
 // implementaciones concretas con los casos de uso puros. Se instancian una sola
 // vez y se reutilizan.
 const usuarios = new PrismaUsuarioRepository();
+const perfiles = new PrismaPerfilAdminRepository();
 const hasher = new BcryptPasswordHasher();
 
 /**
@@ -32,6 +44,40 @@ export function registrarNuevoUsuario(
   input: RegistrarUsuarioInput,
 ): Promise<Usuario> {
   return registrarUsuario({ usuarios, hasher }, input);
+}
+
+// ── Perfil de administrador / centro de acopio (feature 016) ──────────────────
+
+/**
+ * Registro público de un administrador con su perfil de centro de acopio: crea
+ * la cuenta `ADMIN` (nace en `PENDIENTE`, feature 015) y su `PerfilAdmin` en el
+ * mismo acto. Los datos se validan antes en el límite y en los casos de uso; si
+ * la creación del perfil fallara, la cuenta quedaría sin perfil (se registra el
+ * fallo). El caso de uso de registro sigue rechazando roles no auto-registrables.
+ */
+export async function registrarAdministradorConPerfil(
+  cuenta: Omit<RegistrarUsuarioInput, "rol">,
+  perfil: DatosPerfilAdmin,
+): Promise<Usuario> {
+  const usuario = await registrarUsuario(
+    { usuarios, hasher },
+    { ...cuenta, rol: Rol.ADMIN },
+  );
+  await crearPerfilAdmin({ perfiles }, { usuarioId: usuario.id, ...perfil });
+  return usuario;
+}
+
+export function obtenerPerfilAdminGestion(
+  usuarioId: string,
+): Promise<PerfilAdmin | null> {
+  return obtenerPerfilAdmin({ perfiles }, usuarioId);
+}
+
+export function actualizarPerfilAdminGestion(
+  usuarioId: string,
+  cambios: CambiosPerfilAdmin,
+): Promise<PerfilAdmin> {
+  return actualizarPerfilAdmin({ perfiles }, usuarioId, cambios);
 }
 
 // ── Gestión de administradores por el SUPERADMIN (feature 015) ────────────────

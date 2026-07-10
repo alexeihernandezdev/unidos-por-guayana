@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BoxesIcon,
+  BuildingIcon,
   LayoutDashboardIcon,
   PackageIcon,
   ScrollTextIcon,
@@ -19,6 +20,7 @@ const ICONOS: Record<IconoNav, LucideIcon> = {
   envios: PackageIcon,
   solicitudes: ScrollTextIcon,
   recursos: BoxesIcon,
+  perfil: BuildingIcon,
 };
 
 type Props = {

@@ -5,7 +5,8 @@ export type IconoNav =
   | "panel"
   | "envios"
   | "solicitudes"
-  | "recursos";
+  | "recursos"
+  | "perfil";
 
 // Ítem de navegación del panel. `exact` = activo solo con la ruta exacta.
 export type AdminNavItem = {
@@ -35,6 +36,12 @@ export const ADMIN_NAV: AdminNavSection[] = [
     label: "Catálogo",
     items: [
       { label: "Recursos", href: "/panel/recursos", icon: "recursos" },
+    ],
+  },
+  {
+    label: "Mi cuenta",
+    items: [
+      { label: "Mi centro de acopio", href: "/panel/perfil", icon: "perfil" },
     ],
   },
 ];
