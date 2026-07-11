@@ -1,6 +1,10 @@
 import type { EstadoAyuda } from "./EstadoAyuda";
 import type { TipoActividad } from "./TipoActividad";
 import type { Ayuda, CambiosAyuda, NuevaAyuda, NuevaMeta } from "./Ayuda";
+import type {
+  NuevoEventoSeguimiento,
+  SeguimientoEvento,
+} from "./SeguimientoEvento";
 
 // Filtro de listado de ayudas. `estado` acota por etapa del ciclo de vida,
 // `tipo` por tipo de actividad (feature 018) y `adminId` por dueño (feature 022);
@@ -23,6 +27,20 @@ export interface AyudaRepository {
   // (única por [ayuda, recurso]).
   upsertMeta(ayudaId: string, meta: NuevaMeta): Promise<Ayuda>;
   quitarMeta(ayudaId: string, recursoId: string): Promise<Ayuda>;
-  cambiarEstado(id: string, estado: EstadoAyuda): Promise<Ayuda>;
+  // Cambia el estado de la Ayuda **e** inserta el evento de seguimiento de la
+  // transición en la misma transacción (feature 010): nunca un estado sin su
+  // evento ni un evento sin su cambio. Devuelve la Ayuda ya actualizada.
+  avanzarConSeguimiento(
+    id: string,
+    nuevoEstado: EstadoAyuda,
+    evento: NuevoEventoSeguimiento,
+  ): Promise<Ayuda>;
+  // Registra un evento suelto (p. ej. el de creación, `estadoAnterior = null`).
+  registrarEvento(
+    ayudaId: string,
+    evento: NuevoEventoSeguimiento,
+  ): Promise<SeguimientoEvento>;
+  // Historial de una Ayuda ordenado por `ocurridoEn` ascendente (cronológico).
+  listarSeguimiento(ayudaId: string): Promise<SeguimientoEvento[]>;
   eliminar(id: string): Promise<void>;
 }

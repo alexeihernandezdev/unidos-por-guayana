@@ -6,12 +6,16 @@ import type {
   NuevaAyuda,
   NuevaMeta,
 } from "@/modules/ayudas/domain/Ayuda";
-import type { EstadoAyuda } from "@/modules/ayudas/domain/EstadoAyuda";
+import { EstadoAyuda } from "@/modules/ayudas/domain/EstadoAyuda";
 import type { TipoActividad } from "@/modules/ayudas/domain/TipoActividad";
 import type {
   AyudaRepository,
   FiltroAyudas,
 } from "@/modules/ayudas/domain/AyudaRepository";
+import type {
+  NuevoEventoSeguimiento,
+  SeguimientoEvento,
+} from "@/modules/ayudas/domain/SeguimientoEvento";
 
 // Se incluyen las metas con el recurso asociado para poder mostrar nombre/unidad en
 // el detalle. Se ordenan por nombre del recurso para una lectura estable.
@@ -79,6 +83,32 @@ function mapearAyuda(fila: FilaAyuda): Ayuda {
   };
 }
 
+// Fila del evento de seguimiento (feature 010). Los enums de dominio y de Prisma
+// comparten valores, así que `estadoAnterior`/`estadoNuevo` se asignan sin casts.
+type FilaEvento = {
+  id: string;
+  ayudaId: string;
+  estadoAnterior: EstadoAyuda | null;
+  estadoNuevo: EstadoAyuda;
+  nota: string | null;
+  evidenciaUrl: string | null;
+  ocurridoEn: Date;
+  registradoPor: string | null;
+};
+
+function mapearEvento(fila: FilaEvento): SeguimientoEvento {
+  return {
+    id: fila.id,
+    ayudaId: fila.ayudaId,
+    estadoAnterior: fila.estadoAnterior,
+    estadoNuevo: fila.estadoNuevo,
+    nota: fila.nota,
+    evidenciaUrl: fila.evidenciaUrl,
+    ocurridoEn: fila.ocurridoEn,
+    registradoPor: fila.registradoPor,
+  };
+}
+
 // Implementación del repositorio sobre Prisma. Los enums de dominio y los de Prisma
 // comparten los mismos valores (misma unión de strings), así que `estado` es
 // asignable sin conversiones.
@@ -97,6 +127,16 @@ export class PrismaAyudaRepository implements AyudaRepository {
             recursoId: m.recursoId,
             cantidadObjetivo: m.cantidadObjetivo,
           })),
+        },
+        // Evento de creación (origen de la línea de tiempo, feature 010),
+        // atómico con el alta vía escritura anidada. `registradoPor` es el ADMIN
+        // creador; nunca se expone en superficies públicas.
+        seguimiento: {
+          create: {
+            estadoAnterior: null,
+            estadoNuevo: EstadoAyuda.RECOLECTANDO,
+            registradoPor: datos.adminId,
+          },
         },
       },
       include: INCLUDE_METAS,
@@ -154,13 +194,56 @@ export class PrismaAyudaRepository implements AyudaRepository {
     return this.requerir(ayudaId);
   }
 
-  async cambiarEstado(id: string, estado: EstadoAyuda): Promise<Ayuda> {
-    const fila = await prisma.ayuda.update({
-      where: { id },
-      data: { estado },
-      include: INCLUDE_METAS,
-    });
+  async avanzarConSeguimiento(
+    id: string,
+    nuevoEstado: EstadoAyuda,
+    evento: NuevoEventoSeguimiento,
+  ): Promise<Ayuda> {
+    // Atómico: cambia el estado e inserta el evento en la misma transacción. Si
+    // cualquiera falla, ninguna se aplica (nunca un estado sin su evento).
+    const [fila] = await prisma.$transaction([
+      prisma.ayuda.update({
+        where: { id },
+        data: { estado: nuevoEstado },
+        include: INCLUDE_METAS,
+      }),
+      prisma.seguimientoEvento.create({
+        data: {
+          ayudaId: id,
+          estadoAnterior: evento.estadoAnterior,
+          estadoNuevo: evento.estadoNuevo,
+          nota: evento.nota ?? null,
+          evidenciaUrl: evento.evidenciaUrl ?? null,
+          registradoPor: evento.registradoPor ?? null,
+        },
+      }),
+    ]);
     return mapearAyuda(fila);
+  }
+
+  async registrarEvento(
+    ayudaId: string,
+    evento: NuevoEventoSeguimiento,
+  ): Promise<SeguimientoEvento> {
+    const fila = await prisma.seguimientoEvento.create({
+      data: {
+        ayudaId,
+        estadoAnterior: evento.estadoAnterior,
+        estadoNuevo: evento.estadoNuevo,
+        nota: evento.nota ?? null,
+        evidenciaUrl: evento.evidenciaUrl ?? null,
+        registradoPor: evento.registradoPor ?? null,
+      },
+    });
+    return mapearEvento(fila);
+  }
+
+  async listarSeguimiento(ayudaId: string): Promise<SeguimientoEvento[]> {
+    const filas = await prisma.seguimientoEvento.findMany({
+      where: { ayudaId },
+      orderBy: { ocurridoEn: "asc" },
+    });
+    return filas.map(mapearEvento);
   }
 
   async eliminar(id: string): Promise<void> {

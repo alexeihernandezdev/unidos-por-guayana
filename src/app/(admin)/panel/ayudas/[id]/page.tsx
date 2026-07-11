@@ -7,6 +7,7 @@ import {
 import type { Ayuda } from "@/modules/ayudas/domain/Ayuda";
 import { esEditable } from "@/modules/ayudas/domain/maquinaEstados";
 import { AvanzarEstadoBoton } from "@/modules/ayudas/ui/AvanzarEstadoBoton";
+import { LineaTiempoSeguimiento } from "@/modules/ayudas/ui/LineaTiempoSeguimiento";
 import { EstadoBadge } from "@/modules/ayudas/ui/EstadoBadge";
 import { TipoBadge } from "@/modules/ayudas/ui/TipoBadge";
 import { etiquetaTipo } from "@/modules/ayudas/ui/tipos";
@@ -14,7 +15,10 @@ import { formatearFecha } from "@/modules/ayudas/ui/fechas";
 import { AportesTabla } from "@/modules/aportes/ui/AportesTabla";
 import { ProgresoMetas } from "@/modules/aportes/ui/ProgresoMetas";
 import { Rol } from "@/modules/usuarios/domain/Rol";
-import { obtenerAyudaServicio } from "@/shared/ayudas";
+import {
+  obtenerAyudaServicio,
+  listarSeguimientoServicio,
+} from "@/shared/ayudas";
 import {
   listarAportesPorAyudaServicio,
   progresoDeAyudaServicio,
@@ -52,10 +56,14 @@ export default async function AyudaDetallePage({ params }: Props) {
   const { id } = await params;
   const ayuda = await cargarAyuda(id, sesion.id);
   const editable = esEditable(ayuda.estado);
-  const [progreso, aportes] = await Promise.all([
+  const [progreso, aportes, seguimiento] = await Promise.all([
     progresoDeAyudaServicio(ayuda.id),
     listarAportesPorAyudaServicio(ayuda.id),
+    listarSeguimientoServicio(ayuda.id),
   ]);
+  // Solo el dueño avanza estados (feature 022), así que todos los eventos los
+  // registró el ADMIN de la sesión: basta su nombre para "quién lo registró".
+  const registradores = { [sesion.id]: sesion.nombre ?? "el administrador" };
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 p-6 md:p-8">
@@ -115,6 +123,17 @@ export default async function AyudaDetallePage({ params }: Props) {
           ayudaId={ayuda.id}
           estado={ayuda.estado}
           avanzarAction={avanzarEstadoAction}
+        />
+      </section>
+
+      <section className="flex flex-col gap-3 border-t border-border pt-6">
+        <h2 className="text-lg font-semibold">Seguimiento del envío</h2>
+        <p className="text-sm text-muted-foreground">
+          Historial de trazabilidad: cada paso, con su fecha, nota y evidencia.
+        </p>
+        <LineaTiempoSeguimiento
+          eventos={seguimiento}
+          registradores={registradores}
         />
       </section>
 

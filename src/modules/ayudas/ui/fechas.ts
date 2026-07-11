@@ -18,3 +18,15 @@ export function formatearFecha(fecha: Date): string {
 export function fechaParaInput(fecha: Date): string {
   return DateTime.fromJSDate(fecha, { zone: "utc" }).toFormat("yyyy-MM-dd");
 }
+
+/**
+ * Fecha y hora de un evento de seguimiento (feature 010), p. ej.
+ * "01/08/2026, 14:30". `ocurridoEn` se guarda en UTC (instante exacto) y se
+ * muestra en la zona de Venezuela (`America/Caracas`) para el lector local.
+ */
+export function formatearFechaHora(fecha: Date): string {
+  return DateTime.fromJSDate(fecha)
+    .setZone("America/Caracas")
+    .setLocale("es-VE")
+    .toFormat("dd/MM/yyyy, HH:mm");
+}

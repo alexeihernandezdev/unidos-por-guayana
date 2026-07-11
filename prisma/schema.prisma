@@ -264,6 +264,7 @@ model Ayuda {
   descripcion   String?
   metas         MetaRecurso[]
   aportes       Aporte[]
+  seguimiento   SeguimientoEvento[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
@@ -272,6 +273,28 @@ model Ayuda {
   @@index([estado])
   @@index([fecha])
   @@map("ayudas")
+}
+
+// SeguimientoEvento: historial de trazabilidad de una Ayuda (feature 010). Cada
+// transición de estado deja un evento inmutable con cuándo ocurrió, una nota y una
+// evidencia (URL a una foto) opcionales. El evento de creación tiene
+// `estadoAnterior = null`. `registradoPor` guarda el id del ADMIN que lo registró
+// para auditoría interna: NUNCA se expone en superficies públicas (feature 009).
+// Se borra en cascada con su Ayuda (solo posible en `RECOLECTANDO`).
+model SeguimientoEvento {
+  id             String       @id @default(cuid())
+  ayudaId        String
+  ayuda          Ayuda        @relation(fields: [ayudaId], references: [id], onDelete: Cascade)
+  estadoAnterior EstadoAyuda?
+  estadoNuevo    EstadoAyuda
+  nota           String?
+  evidenciaUrl   String?
+  ocurridoEn     DateTime     @default(now())
+  registradoPor  String?
+  createdAt      DateTime     @default(now())
+
+  @@index([ayudaId])
+  @@map("seguimiento_eventos")
 }
 
 // MetaRecurso: puente entre `Ayuda` y `Recurso`. `cantidadObjetivo` es cuánto

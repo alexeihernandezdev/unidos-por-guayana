@@ -2,6 +2,8 @@ export * from "./AyudaForm";
 export * from "./AyudasTabla";
 export * from "./AvanzarEstadoBoton";
 export * from "./EstadoBadge";
+export * from "./EventoSeguimiento";
+export * from "./LineaTiempoSeguimiento";
 export * from "./MetasEditor";
 export * from "./estados";
 export * from "./fechas";

@@ -9,5 +9,7 @@ export {
   guardarMetaServicio,
   quitarMetaServicio,
   avanzarEstadoServicio,
+  listarSeguimientoServicio,
+  listarSeguimientoPublicoServicio,
   eliminarAyudaServicio,
 } from "@/lib/ayudas";

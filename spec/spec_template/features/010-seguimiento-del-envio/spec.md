@@ -1,6 +1,6 @@
 # 010 · Seguimiento del envío
 
-> Estado: **Pendiente** · Depende de: `002 · Autenticación y roles`, `005 · Ayudas / Envío` · Alimenta: `009 · Tablero público de transparencia` · Roadmap: `constitution/roadmap.md`
+> Estado: **Hecho ✅** · Depende de: `002 · Autenticación y roles`, `005 · Ayudas / Envío` · Alimenta: `009 · Tablero público de transparencia` · Roadmap: `constitution/roadmap.md`
 
 ## Qué hace
 
@@ -125,25 +125,25 @@ mostrar el recorrido, no solo el estado final.
 
 ## Criterios de aceptación
 
-- [ ] Al **avanzar el estado** de una Ayuda, se crea un `SeguimientoEvento` con `estadoAnterior`,
+- [x] Al **avanzar el estado** de una Ayuda, se crea un `SeguimientoEvento` con `estadoAnterior`,
       `estadoNuevo`, `ocurridoEn` y (si se aportaron) `nota` y `evidenciaUrl`, **en la misma
       transacción** que el cambio de estado.
-- [ ] La máquina de estados se respeta: solo transiciones válidas
+- [x] La máquina de estados se respeta: solo transiciones válidas
       (`RECOLECTANDO → LISTO → EN_TRANSITO → ENTREGADO`); `ENTREGADO` es terminal. Una transición
       inválida **no** crea evento ni cambia el estado.
-- [ ] El detalle de la Ayuda (`ADMIN`) muestra la **línea de tiempo** ordenada cronológicamente, con
+- [x] El detalle de la Ayuda (`ADMIN`) muestra la **línea de tiempo** ordenada cronológicamente, con
       fecha, nota, evidencia y quién la registró.
-- [ ] El detalle **público** (009) muestra la misma traza **sin** `registradoPor` ni ningún dato
+- [x] El detalle **público** (009) muestra la misma traza **sin** `registradoPor` ni ningún dato
       personal.
-- [ ] Al pasar a `ENTREGADO`, la UI **solicita** nota y evidencia (sin bloquear la operación si faltan,
+- [x] Al pasar a `ENTREGADO`, la UI **solicita** nota y evidencia (sin bloquear la operación si faltan,
       en el MVP).
-- [ ] Un evento registrado **no** se puede editar ni borrar de forma aislada; al borrar la Ayuda
+- [x] Un evento registrado **no** se puede editar ni borrar de forma aislada; al borrar la Ayuda
       (solo en `RECOLECTANDO`) sus eventos caen en cascada.
-- [ ] Las fechas se muestran en español (`dd/MM/yyyy`, Luxon `es-VE`); almacenadas en UTC.
-- [ ] La **migración** crea `seguimiento_eventos` y su índice sin errores.
-- [ ] `pnpm test` cubre: creación del evento en la transición, respeto de la máquina de estados,
+- [x] Las fechas se muestran en español (`dd/MM/yyyy`, Luxon `es-VE`); almacenadas en UTC.
+- [x] La **migración** crea `seguimiento_eventos` y su índice sin errores.
+- [x] `pnpm test` cubre: creación del evento en la transición, respeto de la máquina de estados,
       atomicidad, orden cronológico y ausencia de `registradoPor` en la lectura pública — en verde.
-- [ ] `pnpm lint` / `pnpm build` sin errores; `ayudas/domain` y `ayudas/application` **puras** (sin
+- [x] `pnpm lint` / `pnpm build` sin errores; `ayudas/domain` y `ayudas/application` **puras** (sin
       framework ni Prisma).
 
 ## Notas y riesgos

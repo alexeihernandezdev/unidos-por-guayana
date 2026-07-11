@@ -1,8 +1,19 @@
-import { avanzarEstado } from "@/modules/ayudas/application/avanzarEstado";
+import {
+  avanzarEstado,
+  type DetalleAvance,
+} from "@/modules/ayudas/application/avanzarEstado";
 import {
   crearAyuda,
   type CrearAyudaInput,
 } from "@/modules/ayudas/application/crearAyuda";
+import {
+  listarSeguimiento,
+  listarSeguimientoPublico,
+} from "@/modules/ayudas/application/listarSeguimiento";
+import type {
+  SeguimientoEvento,
+  SeguimientoEventoPublico,
+} from "@/modules/ayudas/domain/SeguimientoEvento";
 import {
   editarCabecera,
   type EditarCabeceraInput,
@@ -70,8 +81,21 @@ export function quitarMetaServicio(
 export function avanzarEstadoServicio(
   id: string,
   adminId: string,
+  detalle?: DetalleAvance,
 ): Promise<Ayuda> {
-  return avanzarEstado(deps, id, adminId);
+  return avanzarEstado(deps, id, adminId, detalle);
+}
+
+export function listarSeguimientoServicio(
+  ayudaId: string,
+): Promise<SeguimientoEvento[]> {
+  return listarSeguimiento(deps, ayudaId);
+}
+
+export function listarSeguimientoPublicoServicio(
+  ayudaId: string,
+): Promise<SeguimientoEventoPublico[]> {
+  return listarSeguimientoPublico(deps, ayudaId);
 }
 
 export function eliminarAyudaServicio(

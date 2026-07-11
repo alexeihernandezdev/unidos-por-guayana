@@ -81,4 +81,62 @@ describe("avanzarEstado", () => {
       avanzarEstado(deps, ayuda.id, OTRO_ADMIN),
     ).rejects.toBeInstanceOf(ActividadNoPerteneceAlAdminError);
   });
+
+  it("registra un evento de seguimiento con estadoAnterior/estadoNuevo correctos", async () => {
+    const { deps, ayuda } = ctx;
+
+    await avanzarEstado(deps, ayuda.id, ADMIN, {
+      nota: "Salió del acopio",
+      evidenciaUrl: "https://fotos.example/1.jpg",
+    });
+
+    const eventos = await deps.ayudas.listarSeguimiento(ayuda.id);
+    // El primero es el evento de creación (estadoAnterior null).
+    expect(eventos[0]?.estadoAnterior).toBeNull();
+    expect(eventos[0]?.estadoNuevo).toBe(EstadoAyuda.RECOLECTANDO);
+    // El último es la transición recién registrada.
+    const ultimo = eventos.at(-1);
+    expect(ultimo?.estadoAnterior).toBe(EstadoAyuda.RECOLECTANDO);
+    expect(ultimo?.estadoNuevo).toBe(EstadoAyuda.LISTO);
+    expect(ultimo?.nota).toBe("Salió del acopio");
+    expect(ultimo?.evidenciaUrl).toBe("https://fotos.example/1.jpg");
+    expect(ultimo?.registradoPor).toBe(ADMIN);
+  });
+
+  it("una transición inválida no registra evento ni cambia el estado", async () => {
+    const { deps, ayuda } = ctx;
+    await avanzarEstado(deps, ayuda.id, ADMIN); // LISTO
+    await avanzarEstado(deps, ayuda.id, ADMIN); // EN_TRANSITO
+    await avanzarEstado(deps, ayuda.id, ADMIN); // ENTREGADO
+    const antes = await deps.ayudas.listarSeguimiento(ayuda.id);
+
+    await expect(avanzarEstado(deps, ayuda.id, ADMIN)).rejects.toBeInstanceOf(
+      TransicionInvalidaError,
+    );
+
+    const despues = await deps.ayudas.listarSeguimiento(ayuda.id);
+    expect(despues.length).toBe(antes.length);
+    const actual = await deps.ayudas.buscarPorId(ayuda.id);
+    expect(actual?.estado).toBe(EstadoAyuda.ENTREGADO);
+  });
+
+  it("atomicidad: si el repo falla al registrar el evento, el estado no cambia", async () => {
+    const { deps, ayuda } = ctx;
+    // Doble que simula el fallo del insert del evento sin tocar el estado (la
+    // infraestructura real lo garantiza con `prisma.$transaction`). Solo se
+    // implementan los métodos que usa `avanzarEstado`.
+    const ayudasFalla = {
+      buscarPorId: (id: string) => deps.ayudas.buscarPorId(id),
+      avanzarConSeguimiento: async () => {
+        throw new Error("fallo al insertar el evento");
+      },
+    } as unknown as typeof deps.ayudas;
+
+    await expect(
+      avanzarEstado({ ayudas: ayudasFalla }, ayuda.id, ADMIN),
+    ).rejects.toThrow("fallo al insertar el evento");
+
+    const actual = await deps.ayudas.buscarPorId(ayuda.id);
+    expect(actual?.estado).toBe(EstadoAyuda.RECOLECTANDO);
+  });
 });

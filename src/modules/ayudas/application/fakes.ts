@@ -11,6 +11,10 @@ import type {
   AyudaRepository,
   FiltroAyudas,
 } from "@/modules/ayudas/domain/AyudaRepository";
+import type {
+  NuevoEventoSeguimiento,
+  SeguimientoEvento,
+} from "@/modules/ayudas/domain/SeguimientoEvento";
 import { AyudaNoEncontradaError } from "./errors";
 
 // Doble en memoria para los tests de casos de uso. No toca la base ni Prisma. Las
@@ -18,8 +22,10 @@ import { AyudaNoEncontradaError } from "./errors";
 // la lógica de aplicación; el detalle enriquecido lo resuelve la infraestructura.
 export class InMemoryAyudaRepository implements AyudaRepository {
   private readonly porId = new Map<string, Ayuda>();
+  private readonly eventos: SeguimientoEvento[] = [];
   private secuencia = 0;
   private metaSecuencia = 0;
+  private eventoSecuencia = 0;
 
   private nuevaMeta(meta: NuevaMeta): MetaRecurso {
     return {
@@ -46,6 +52,12 @@ export class InMemoryAyudaRepository implements AyudaRepository {
       updatedAt: ahora,
     };
     this.porId.set(ayuda.id, ayuda);
+    // Evento de creación (origen de la línea de tiempo, feature 010).
+    this.insertarEvento(ayuda.id, {
+      estadoAnterior: null,
+      estadoNuevo: Estados.RECOLECTANDO,
+      registradoPor: datos.adminId,
+    });
     return this.clonar(ayuda);
   }
 
@@ -105,16 +117,62 @@ export class InMemoryAyudaRepository implements AyudaRepository {
     return this.clonar(actualizado);
   }
 
-  async cambiarEstado(id: string, estado: EstadoAyuda): Promise<Ayuda> {
+  async avanzarConSeguimiento(
+    id: string,
+    nuevoEstado: EstadoAyuda,
+    evento: NuevoEventoSeguimiento,
+  ): Promise<Ayuda> {
     const actual = this.requerir(id);
-    const actualizado: Ayuda = { ...actual, estado, updatedAt: new Date() };
+    const actualizado: Ayuda = {
+      ...actual,
+      estado: nuevoEstado,
+      updatedAt: new Date(),
+    };
     this.porId.set(id, actualizado);
+    // Atómico en espíritu: el estado ya cambió arriba y el evento se inserta a
+    // continuación sin puntos de fallo intermedios.
+    this.insertarEvento(id, evento);
     return this.clonar(actualizado);
+  }
+
+  async registrarEvento(
+    ayudaId: string,
+    evento: NuevoEventoSeguimiento,
+  ): Promise<SeguimientoEvento> {
+    this.requerir(ayudaId);
+    return { ...this.insertarEvento(ayudaId, evento) };
+  }
+
+  async listarSeguimiento(ayudaId: string): Promise<SeguimientoEvento[]> {
+    return this.eventos
+      .filter((e) => e.ayudaId === ayudaId)
+      .sort((a, b) => a.ocurridoEn.getTime() - b.ocurridoEn.getTime())
+      .map((e) => ({ ...e }));
   }
 
   async eliminar(id: string): Promise<void> {
     this.requerir(id);
     this.porId.delete(id);
+  }
+
+  private insertarEvento(
+    ayudaId: string,
+    evento: NuevoEventoSeguimiento,
+  ): SeguimientoEvento {
+    const registro: SeguimientoEvento = {
+      id: `evento-${++this.eventoSecuencia}`,
+      ayudaId,
+      estadoAnterior: evento.estadoAnterior,
+      estadoNuevo: evento.estadoNuevo,
+      nota: evento.nota ?? null,
+      evidenciaUrl: evento.evidenciaUrl ?? null,
+      // Incremento monotónico para un orden cronológico estable en los tests, aun
+      // cuando varios eventos se creen en el mismo milisegundo.
+      ocurridoEn: new Date(Date.now() + this.eventoSecuencia),
+      registradoPor: evento.registradoPor ?? null,
+    };
+    this.eventos.push(registro);
+    return registro;
   }
 
   private requerir(id: string): Ayuda {

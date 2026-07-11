@@ -203,14 +203,42 @@ export async function quitarMetaAction(
   }
 }
 
+// Detalle opcional del avance de estado (feature 010). La nota se recorta y limita;
+// la evidencia, si viene, debe ser una URL `https` (se restringe el esquema para no
+// enlazar hosts arbitrarios por descuido). Un detalle inválido no bloquea el avance:
+// se descarta el campo problemático y el estado avanza igual (MVP resiliente).
+const DetalleAvanceSchema = z.object({
+  nota: z.string().trim().max(1000).optional(),
+  evidenciaUrl: z
+    .string()
+    .trim()
+    .url()
+    .refine((u) => u.startsWith("https://"), "El enlace debe empezar por https://")
+    .optional(),
+});
+
+function textoOpcional(valor: FormDataEntryValue | null): string | undefined {
+  return typeof valor === "string" && valor.trim() !== "" ? valor : undefined;
+}
+
 export async function avanzarEstadoAction(formData: FormData): Promise<void> {
   const sesion = await requireAdminVerificado();
   const id = formData.get("id");
-  if (typeof id === "string" && id) {
-    await avanzarEstadoServicio(id, sesion.id);
-    revalidatePath(RUTA_LISTADO);
-    revalidatePath(`${RUTA_LISTADO}/${id}`);
-  }
+  if (typeof id !== "string" || !id) return;
+
+  const parsed = DetalleAvanceSchema.safeParse({
+    nota: textoOpcional(formData.get("nota")),
+    evidenciaUrl: textoOpcional(formData.get("evidenciaUrl")),
+  });
+  // Si el detalle no valida (p. ej. URL mal formada), se avanza sin él.
+  const detalle = parsed.success ? parsed.data : {};
+
+  await avanzarEstadoServicio(id, sesion.id, {
+    nota: detalle.nota ?? null,
+    evidenciaUrl: detalle.evidenciaUrl ?? null,
+  });
+  revalidatePath(RUTA_LISTADO);
+  revalidatePath(`${RUTA_LISTADO}/${id}`);
 }
 
 export async function eliminarAyudaAction(formData: FormData): Promise<void> {

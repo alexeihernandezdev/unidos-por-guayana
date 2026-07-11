@@ -1,20 +1,24 @@
 import Link from "next/link";
 import { EstadoBadge } from "@/modules/ayudas/ui/EstadoBadge";
 import { TipoBadge } from "@/modules/ayudas/ui/TipoBadge";
+import { LineaTiempoSeguimiento } from "@/modules/ayudas/ui/LineaTiempoSeguimiento";
 import { formatearFecha } from "@/modules/ayudas/ui/fechas";
 import { EstadoAyuda } from "@/modules/ayudas/domain/EstadoAyuda";
+import type { SeguimientoEventoPublico } from "@/modules/ayudas/domain/SeguimientoEvento";
 import type { DetallePublico } from "@/modules/transparencia/application/obtener-detalle-publico";
 import { BarraProgreso } from "./BarraProgreso";
 
 type Props = {
   detalle: DetallePublico;
+  // Traza pública del envío (feature 010): sin `registradoPor` ni datos personales.
+  seguimiento?: SeguimientoEventoPublico[];
 };
 
 function formatearNumero(n: number): string {
   return new Intl.NumberFormat("es-VE", { maximumFractionDigits: 2 }).format(n);
 }
 
-export function DetalleEnvioPublico({ detalle }: Props) {
+export function DetalleEnvioPublico({ detalle, seguimiento = [] }: Props) {
   const entregado = detalle.estado === EstadoAyuda.ENTREGADO;
 
   return (
@@ -94,6 +98,20 @@ export function DetalleEnvioPublico({ detalle }: Props) {
             ))}
           </ul>
         )}
+      </section>
+
+      <section aria-labelledby="titulo-recorrido" className="flex flex-col gap-4">
+        <h2
+          id="titulo-recorrido"
+          className="font-serif text-2xl font-medium tracking-tight"
+        >
+          Recorrido del envío
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          De origen a destino: cada etapa, con su fecha y evidencia. Sin datos
+          personales.
+        </p>
+        <LineaTiempoSeguimiento eventos={seguimiento} />
       </section>
     </article>
   );
