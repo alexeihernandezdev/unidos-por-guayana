@@ -1,6 +1,16 @@
 # 012 · Notificaciones
 
-> Estado: **Pendiente** · Depende de: `002 · Autenticación y roles`, `005 · Ayudas / Envío`, `006 · Aportes` · Roadmap: `constitution/roadmap.md`
+> Estado: **Pendiente** · Depende de: `002 · Autenticación y roles`, `005 · Ayudas / Envío`, `006 · Aportes`, `024 · Actividad: renombre y ciclo de vida por tipo`, `025 · Afiliación a centros de acopio y categorías de aporte` · Roadmap: `constitution/roadmap.md`
+
+> **Actualización (post-025).** El disparador `NUEVA_AYUDA` de esta spec decía originalmente "todos los
+> `COLABORADOR` verificados". Tras `025 · Afiliación a centros de acopio`, el destinatario correcto es la
+> **red apta** del `ADMIN` dueño: los `COLABORADOR` verificados **afiliados a ese admin** cuya categoría
+> declarada coincide con la categoría de **al menos un** recurso de las metas de la Actividad. Esta
+> feature debe implementarse **después** de `024` y `025`, ya con esta lógica desde el primer día (no
+> como una enmienda posterior). El resto de la tabla de "Disparadores" más abajo queda vigente tal cual
+> (incluida la idempotencia y el resto de reglas); solo cambia la resolución de destinatarios de
+> `NUEVA_AYUDA`, que pasa de `UsuarioRepository.listarVerificados()` a
+> `AfiliacionRepository.listarRedDeAdmin(adminId)` filtrada por categoría e intersección con las metas.
 
 ## Qué hace
 

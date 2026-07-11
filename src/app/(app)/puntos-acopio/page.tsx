@@ -12,8 +12,14 @@ export const metadata: Metadata = {
 
 // Directorio de la red para el colaborador (feature 011): dónde entregar lo
 // que aporta. Solo puntos activos; sin datos del admin dueño.
-export default async function PuntosAcopioDirectorioPage() {
+export default async function PuntosAcopioDirectorioPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ vista?: string }>;
+}) {
   await requireRol(Rol.COLABORADOR);
+
+  const { vista } = await searchParams;
 
   const [puntos, catalogo] = await Promise.all([
     listarPuntosActivosServicio(),
@@ -46,6 +52,7 @@ export default async function PuntosAcopioDirectorioPage() {
         puntos={puntosVista}
         estados={catalogo.estados}
         municipios={catalogo.municipios}
+        vistaInicial={vista === "mapa" ? "mapa" : "directorio"}
       />
     </main>
   );
