@@ -34,14 +34,6 @@ _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
 
 21. **011 · Puntos de acopio** — Centros físicos de entrega (dirección, horarios, qué reciben), **cada uno perteneciente a un `ADMIN`** (ver 016).
 
-## Cambios propuestos por el cliente (revisión de alcance) 🔁
-
-_Cambios solicitados por el cliente que **rompen parte del encaje actual**: tocan features ya "Hecho" (002, 004, 005, 006, 008) y la constitución ya se actualizó (`mission.md`, `tech-stack.md`) para reflejarlos. Cada uno se aborda como feature nueva y, al implementarse, enmienda la feature de origen._
-
-- **023 · Registro de aportantes visible al colaborador** — El detalle de la actividad (`/ayudas/[id]`) muestra a los usuarios **autenticados** un **registro de quiénes han aportado** (nombre, recurso, cantidad, estado), reutilizando el modelo de aportes. Solo el `nombre`, sin datos de contacto; la transparencia pública sigue anónima. Sin migración. Enmienda **006**. _Pendiente. Ver `features/023-registro-de-aportantes-colaborador/`._
-
-> **Nota:** la petición del cliente "un `ADMIN` puede crear varios centros de acopio" ya está cubierta por la feature **011 · Puntos de acopio** (pendiente, más abajo), que declara explícitamente "un administrador puede tener uno o varios puntos". No requiere feature nueva: basta con priorizar su implementación.
-
 ## Backlog / ideas 💡
 
 _Ordenado según dependencias. Cada uno se convierte en `features/NNN-…/` antes de tocar código._
