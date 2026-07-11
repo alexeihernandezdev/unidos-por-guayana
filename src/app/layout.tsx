@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { EB_Garamond, Geist, Geist_Mono } from "next/font/google";
 import { SiteHeader } from "@/modules/landing/ui/SiteHeader";
+import { PublicHeaderVisibility } from "@/modules/landing/ui/PublicHeaderVisibility";
 import { getUsuarioActual } from "@/shared/auth";
 import { rutaInicioPorRol, VolverAlPanelHeader } from "@/shared/ui/app-shell";
 import { Providers } from "./providers";
@@ -50,7 +51,6 @@ export default async function RootLayout({
   const pathname = (await headers()).get("x-pathname") ?? "";
   const esPaginaPublica =
     pathname === "/" || pathname.startsWith("/transparencia");
-  const esRutaAuth = pathname === "/login" || pathname === "/registro";
 
   return (
     <html
@@ -60,7 +60,11 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <Providers>
-          {!usuario && !esRutaAuth && <SiteHeader />}
+          {!usuario && (
+            <PublicHeaderVisibility>
+              <SiteHeader />
+            </PublicHeaderVisibility>
+          )}
           {usuario && esPaginaPublica && (
             <VolverAlPanelHeader rutaPanel={rutaInicioPorRol(usuario.rol)} />
           )}
