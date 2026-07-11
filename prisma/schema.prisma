@@ -120,19 +120,38 @@ model PerfilAdmin {
   @@map("perfiles_admin")
 }
 
-// PuntoAcopio: centro físico de entrega perteneciente a un `ADMIN`. La feature 016
-// solo declara el lado admin de la relación (`adminId`) para no re-migrar; el
-// modelo completo (nombre, dirección, horarios, qué recibe) lo añade la feature
-// 011. Un `PuntoAcopio` nuevo hereda por defecto `estadoId`/`municipioId` del
-// `PerfilAdmin` de su admin (regla de dominio que consumirá la 011).
+// PuntoAcopio: ubicación física perteneciente a un `ADMIN` (feature 011). Un
+// admin puede tener 0..N puntos. El punto NO declara "qué recibe": los aportes
+// van a Ayudas (envíos/jornadas/eventos), no a puntos. La ubicación se captura
+// como coordenadas `latitud`/`longitud` (Leaflet en la UI) más `estadoId`/
+// `municipioId` del catálogo (feature 020) para filtrar y agrupar. Al crear,
+// `estadoId`/`municipioId` heredan del `PerfilAdmin` como valor efectivo (se
+// copian, no se referencian vivos). `referencia` es texto orientativo para el
+// que va a llegar (el mapa da la posición exacta). Soft-archive con `activo`.
 model PuntoAcopio {
-  id        String   @id @default(cuid())
-  adminId   String
-  admin     Usuario  @relation(fields: [adminId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String    @id @default(cuid())
+  adminId            String
+  admin              Usuario   @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  nombre             String
+  referencia         String
+  latitud            Decimal   @db.Decimal(9, 6)
+  longitud           Decimal   @db.Decimal(9, 6)
+  horarios           String
+  telefono           String
+  telefonoEsWhatsApp Boolean   @default(true)
+  correo             String?
+  estadoId           String
+  estadoUbicacion    Estado    @relation(fields: [estadoId], references: [id])
+  municipioId        String
+  municipioUbicacion Municipio @relation(fields: [municipioId], references: [id])
+  activo             Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
+  @@unique([adminId, nombre])
   @@index([adminId])
+  @@index([estadoId])
+  @@index([municipioId])
   @@map("puntos_acopio")
 }
 
@@ -151,6 +170,7 @@ model Estado {
   municipios    Municipio[]
   usuarios      Usuario[]
   perfilesAdmin PerfilAdmin[]
+  puntosAcopio  PuntoAcopio[]
 
   @@map("estados")
 }
@@ -167,6 +187,7 @@ model Municipio {
 
   usuarios      Usuario[]
   perfilesAdmin PerfilAdmin[]
+  puntosAcopio  PuntoAcopio[]
 
   @@index([estadoId])
   @@map("municipios")
