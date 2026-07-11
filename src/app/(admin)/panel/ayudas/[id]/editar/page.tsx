@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { AyudaNoEncontradaError } from "@/modules/ayudas/application/errors";
+import {
+  ActividadNoPerteneceAlAdminError,
+  AyudaNoEncontradaError,
+} from "@/modules/ayudas/application/errors";
 import type { Ayuda } from "@/modules/ayudas/domain/Ayuda";
 import { esEditable } from "@/modules/ayudas/domain/maquinaEstados";
 import type { AyudaFormValores } from "@/modules/ayudas/ui/AyudaForm";
@@ -21,20 +24,25 @@ type Props = {
   params: Promise<{ id: string }>;
 };
 
-async function cargarAyuda(id: string): Promise<Ayuda> {
+async function cargarAyuda(id: string, adminId: string): Promise<Ayuda> {
   try {
-    return await obtenerAyudaServicio(id);
+    return await obtenerAyudaServicio(id, adminId);
   } catch (error) {
-    if (error instanceof AyudaNoEncontradaError) notFound();
+    if (
+      error instanceof AyudaNoEncontradaError ||
+      error instanceof ActividadNoPerteneceAlAdminError
+    ) {
+      notFound();
+    }
     throw error;
   }
 }
 
 export default async function EditarAyudaPage({ params }: Props) {
-  await requireRol(Rol.ADMIN);
+  const sesion = await requireRol(Rol.ADMIN);
 
   const { id } = await params;
-  const ayuda = await cargarAyuda(id);
+  const ayuda = await cargarAyuda(id, sesion.id);
 
   // Solo se edita en RECOLECTANDO; si ya avanzó, se bloquea (vuelve al detalle).
   if (!esEditable(ayuda.estado)) {

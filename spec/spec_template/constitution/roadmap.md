@@ -21,18 +21,23 @@ _Features completadas, en orden de implementación._
 13. **019 · Propuesta de recursos por el solicitante** — El `Recurso` gana `estadoAprobacion` ∈ `APROBADO` | `PROPUESTO` | `RECHAZADO` y `propuestoPor`. El `SOLICITANTE` puede proponer recursos desde `/solicitudes/proponer-recurso`; el `ADMIN` los revisa en `/panel/recursos/propuestas` y los aprueba o rechaza. Solo los `APROBADO` + activos son seleccionables en metas (005) y aportes (006). Backfill: los recursos previos quedan `APROBADO`. _Enmienda 004._
 14. **017 · Datos de contacto obligatorios (colaborador y solicitante)** — `cedula`, `telefono`, `telefonoEsWhatsApp`, `estado` y `parroquia` obligatorios en el registro de `COLABORADOR` y `SOLICITANTE`. Guard de servidor redirige a `/completar-perfil` cuando faltan; edición desde `/mi-perfil`. Añade `telefonoEsWhatsApp` a `PerfilAdmin` (enmienda 016). _Enmienda 002 y 016._
 15. **009 · Tablero público de transparencia** — Vista abierta en `/transparencia` (sin login) con totales de impacto, recolectado por recurso, lista de actividades (envío/jornada/evento) con progreso y destino, y detalle público por actividad. Sin datos personales; reutiliza agregaciones de 005/006/008. Módulo `src/modules/transparencia` (solo `application` + `ui`).
+16. **022 · Actividades por administrador (aislamiento por dueño)** — La `Ayuda` gana `adminId` (dueño inmutable al crear). El panel de gestión (`/panel/ayudas` y métricas de `/panel`) filtra y protege por dueño; colaborador y `/transparencia` siguen viendo la red completa. Migración con backfill. _Enmienda 005 y 008._
+17. **021 · Espacio del usuario logeado (sidebar) y navbar solo público** — Al iniciar sesión, todo rol (`COLABORADOR`, `SOLICITANTE`, `ADMIN`, `SUPERADMIN`) navega en un shell con sidebar del mismo estilo que el panel de admin (008), reutilizando las rutas existentes; el navbar global (`SiteHeader`) se oculta siempre que hay sesión y tras el login `/inicio` aterriza en el espacio por rol. Shell compartido `src/shared/ui/app-shell/*` (generaliza el de 008), route group `(app)/layout.tsx`, layouts de `(admin)`/`superadmin` y root layout actualizados. Solo cambia el chrome/navegación: sin entidades, dominio ni permisos nuevos. _Enmienda 003 (navbar) y generaliza el shell de 008._
+18. **020 · Catálogo de ubicación: estado y municipio seleccionables** — La ubicación (`estado` y lo que era `parroquia`) pasa de texto libre a **listas seleccionables** respaldadas por un catálogo sembrado de Venezuela (24 `Estado` y 335 `Municipio`, nuevas entidades). Se **sustituye `parroquia` por `municipio`**; `Usuario` y `PerfilAdmin` referencian el catálogo por `estadoId`/`municipioId` (FK) y el servidor valida la coherencia estado↔municipio. Selector dependiente (estado→municipio) en registro (colaborador/solicitante y admin), `/completar-perfil`, `/mi-perfil` y `/panel/perfil`; migración que crea `estados`/`municipios`, añade las FKs y elimina las columnas de texto libre (los datos previos se descartan y el guard reenvía a `/completar-perfil`). Módulo `src/modules/ubicacion` (Clean + Screaming). _Enmienda 016 y 017; actualiza `mission.md`/`tech-stack.md` (parroquia→municipio; ubicación por catálogo)._
 
 ## Siguiente 🔜
 
 _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
 
-16. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
+18. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
 
 ## Cambios propuestos por el cliente (revisión de alcance) 🔁
 
-_Cambios solicitados por el cliente que **rompen parte del encaje actual**: tocan features ya "Hecho" (002, 004, 005) y la constitución ya se actualizó (`mission.md`, `tech-stack.md`) para reflejarlos. Cada uno se aborda como feature nueva y, al implementarse, enmienda la feature de origen._
+_Cambios solicitados por el cliente que **rompen parte del encaje actual**: tocan features ya "Hecho" (002, 004, 005, 006, 008) y la constitución ya se actualizó (`mission.md`, `tech-stack.md`) para reflejarlos. Cada uno se aborda como feature nueva y, al implementarse, enmienda la feature de origen._
 
-_Ninguno pendiente._
+- **023 · Registro de aportantes visible al colaborador** — El detalle de la actividad (`/ayudas/[id]`) muestra a los usuarios **autenticados** un **registro de quiénes han aportado** (nombre, recurso, cantidad, estado), reutilizando el modelo de aportes. Solo el `nombre`, sin datos de contacto; la transparencia pública sigue anónima. Sin migración. Enmienda **006**. _Pendiente. Ver `features/023-registro-de-aportantes-colaborador/`._
+
+> **Nota:** la petición del cliente "un `ADMIN` puede crear varios centros de acopio" ya está cubierta por la feature **011 · Puntos de acopio** (pendiente, más abajo), que declara explícitamente "un administrador puede tener uno o varios puntos". No requiere feature nueva: basta con priorizar su implementación.
 
 ## Backlog / ideas 💡
 
@@ -40,7 +45,7 @@ _Ordenado según dependencias. Cada uno se convierte en `features/NNN-…/` ante
 
 **Superficies de gestión y transparencia**
 
-17. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
+18. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
 
 **Módulos de apoyo**
 

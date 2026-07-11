@@ -12,7 +12,7 @@ Dar al **Administrador** un tablero único desde el que ve **de un vistazo** el 
 
 Hasta ahora, para saber cómo va la operación había que abrir cada módulo por separado (envíos, aportes, solicitudes, catálogo) y componerlo mentalmente. Este panel comprime esa lectura en una sola pantalla.
 
-- **Métricas clave en tarjetas** — cuántos envíos hay en cada etapa (recolectando, listo, en tránsito), cuántas solicitudes están abiertas por nivel de urgencia, cuántos aportes esperan confirmación.
+- **Métricas clave en tarjetas** — cuántos envíos hay en cada etapa (recolectando, listo, en tránsito), cuántas solicitudes están abiertas por nivel de urgencia, cuántos aportes esperan confirmación. Desde la feature 022, los números de envíos, prioridad y aportes pendientes cuentan **solo las actividades del administrador en sesión** (no las de toda la red).
 - **"Qué envío sale primero"** — lista de los envíos aún en preparación, ordenada por **porcentaje completado** (los más cerca de salir, arriba), y con un indicador de cuántas solicitudes de ese sector están abiertas. Es información para decidir, no una decisión automática.
 - **Sectores más demandados ahora** — los cinco sectores que aparecen más en las solicitudes abiertas, para que el Administrador sepa dónde se concentra la necesidad.
 - **Accesos directos** — botones para crear un nuevo envío, un nuevo recurso o ver las solicitudes sin dar vueltas por el menú.

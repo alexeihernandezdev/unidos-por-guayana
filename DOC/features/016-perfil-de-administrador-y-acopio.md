@@ -12,11 +12,11 @@ Dar a cada **administrador** un perfil completo que lo identifica como **centro 
 
 Un administrador no es solo quien gestiona las ayudas: también funciona como **centro de acopio**, un punto de referencia y confianza dentro de la red. Esta etapa le da una identidad clara:
 
-- **Datos del centro de acopio:** nombre de la cuenta, estado del país y parroquia a los que pertenece, teléfono, correo y documento de identidad.
+- **Datos del centro de acopio:** nombre de la cuenta, estado del país y municipio a los que pertenece, teléfono, correo y documento de identidad. _(Desde la feature 020, el estado y el municipio se eligen de un catálogo de Venezuela; antes se escribían a mano como estado/parroquia.)_
 - **Documento jurídico o natural:** se distingue si el administrador es una **organización** (jurídico) o una **persona** (natural), con su número de documento.
 - **Se captura al registrarse:** cuando alguien se registra como administrador, completa estos datos en el mismo momento; así el **superadministrador** los tiene a la vista para revisar antes de aprobar la cuenta.
 - **Editable después:** una vez aprobado, el administrador puede ver y actualizar su perfil cuando lo necesite.
-- **Base para sus puntos de acopio:** como cada administrador puede tener uno o varios puntos físicos de entrega, esos puntos parten por defecto del mismo estado y parroquia del perfil, evitando volver a escribir la ubicación.
+- **Base para sus puntos de acopio:** como cada administrador puede tener uno o varios puntos físicos de entrega, esos puntos parten por defecto del mismo estado y municipio del perfil, evitando volver a escribir la ubicación.
 
 ## Por qué importa
 

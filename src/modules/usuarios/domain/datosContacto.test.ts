@@ -2,12 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   normalizarCedula,
   normalizarTelefono,
-  normalizarUbicacion,
   tieneDatosContactoCompletos,
   validarCedula,
   validarDatosContacto,
+  validarSeleccionUbicacion,
   validarTelefono,
-  validarUbicacion,
 } from "./datosContacto";
 
 describe("validarCedula", () => {
@@ -114,34 +113,28 @@ describe("validarTelefono", () => {
   });
 });
 
-describe("validarUbicacion", () => {
+describe("validarSeleccionUbicacion", () => {
   it("rechaza estado vacío", () => {
-    const r = validarUbicacion({ estado: "   ", parroquia: "Catia" });
+    const r = validarSeleccionUbicacion({ estadoId: "   ", municipioId: "m1" });
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.error).toBe("Indica el estado.");
+    if (!r.ok) expect(r.error).toBe("Selecciona el estado.");
   });
 
-  it("rechaza parroquia vacía", () => {
-    const r = validarUbicacion({ estado: "La Guaira", parroquia: "" });
+  it("rechaza municipio vacío", () => {
+    const r = validarSeleccionUbicacion({ estadoId: "e1", municipioId: "" });
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.error).toBe("Indica la parroquia.");
+    if (!r.ok) expect(r.error).toBe("Selecciona el municipio.");
   });
 
-  it("normaliza espacios múltiples", () => {
-    const r = validarUbicacion({
-      estado: "  La   Guaira  ",
-      parroquia: "  Catia  La  Mar ",
+  it("normaliza (trim) los identificadores", () => {
+    const r = validarSeleccionUbicacion({
+      estadoId: "  e1  ",
+      municipioId: " m1 ",
     });
     expect(r).toEqual({
       ok: true,
-      valor: { estado: "La Guaira", parroquia: "Catia La Mar" },
+      valor: { estadoId: "e1", municipioId: "m1" },
     });
-  });
-
-  it("normalizarUbicacion devuelve null si es inválida", () => {
-    expect(
-      normalizarUbicacion({ estado: "", parroquia: "Catia" }),
-    ).toBeNull();
   });
 });
 
@@ -151,20 +144,20 @@ describe("validarDatosContacto", () => {
       cedula: "",
       telefono: "04121234567",
       telefonoEsWhatsApp: true,
-      estado: "La Guaira",
-      parroquia: "Catia La Mar",
+      estadoId: "e1",
+      municipioId: "m1",
     });
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toBe("La cédula es obligatoria.");
   });
 
-  it("normaliza y agrupa los cinco campos", () => {
+  it("normaliza y agrupa los campos (ubicación por id de catálogo)", () => {
     const r = validarDatosContacto({
       cedula: "v-12.345.678",
       telefono: "+58 412 1234567",
       telefonoEsWhatsApp: true,
-      estado: "  La Guaira  ",
-      parroquia: "Catia La Mar",
+      estadoId: "  est-guaira  ",
+      municipioId: " mun-vargas ",
     });
     expect(r).toEqual({
       ok: true,
@@ -172,8 +165,8 @@ describe("validarDatosContacto", () => {
         cedula: "V12345678",
         telefono: "04121234567",
         telefonoEsWhatsApp: true,
-        estado: "La Guaira",
-        parroquia: "Catia La Mar",
+        estadoId: "est-guaira",
+        municipioId: "mun-vargas",
       },
     });
   });
@@ -185,8 +178,8 @@ describe("tieneDatosContactoCompletos", () => {
       tieneDatosContactoCompletos({
         cedula: "V12345678",
         telefono: "04121234567",
-        estado: "La Guaira",
-        parroquia: "Catia La Mar",
+        estadoId: "est-guaira",
+        municipioId: "mun-vargas",
       }),
     ).toBe(true);
   });
@@ -195,13 +188,13 @@ describe("tieneDatosContactoCompletos", () => {
     const base = {
       cedula: "V12345678",
       telefono: "04121234567",
-      estado: "La Guaira",
-      parroquia: "Catia",
+      estadoId: "est-guaira",
+      municipioId: "mun-vargas",
     };
     expect(tieneDatosContactoCompletos({ ...base, cedula: null })).toBe(false);
     expect(tieneDatosContactoCompletos({ ...base, telefono: null })).toBe(false);
-    expect(tieneDatosContactoCompletos({ ...base, estado: null })).toBe(false);
-    expect(tieneDatosContactoCompletos({ ...base, parroquia: null })).toBe(
+    expect(tieneDatosContactoCompletos({ ...base, estadoId: null })).toBe(false);
+    expect(tieneDatosContactoCompletos({ ...base, municipioId: null })).toBe(
       false,
     );
   });

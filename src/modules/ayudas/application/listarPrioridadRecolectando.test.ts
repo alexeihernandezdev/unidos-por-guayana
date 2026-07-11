@@ -30,6 +30,7 @@ describe("listarPrioridadRecolectando", () => {
 
   it("ordena por porcentaje desc y fecha asc en empate", async () => {
     const tarde = await crearAyuda(deps, {
+      adminId: "admin-1",
       titulo: "Tarde",
       sectorDestino: "A",
       fecha: new Date("2026-09-10"),
@@ -37,6 +38,7 @@ describe("listarPrioridadRecolectando", () => {
       metas: [{ recursoId: aguaId, cantidadObjetivo: 100 }],
     });
     const temprano = await crearAyuda(deps, {
+      adminId: "admin-1",
       titulo: "Temprano",
       sectorDestino: "B",
       fecha: new Date("2026-09-01"),
@@ -61,5 +63,28 @@ describe("listarPrioridadRecolectando", () => {
     expect(lista).toHaveLength(2);
     expect(lista[0]?.ayuda.titulo).toBe("Tarde");
     expect(lista[0]?.porcentaje).toBeGreaterThan(lista[1]?.porcentaje ?? 0);
+  });
+
+  it("acota la prioridad al adminId", async () => {
+    await crearAyuda(deps, {
+      adminId: "admin-1",
+      titulo: "Mía",
+      sectorDestino: "A",
+      fecha: new Date("2026-09-01"),
+      tipo: "ENVIO",
+      metas: [{ recursoId: aguaId, cantidadObjetivo: 100 }],
+    });
+    await crearAyuda(deps, {
+      adminId: "admin-2",
+      titulo: "Ajena",
+      sectorDestino: "B",
+      fecha: new Date("2026-09-02"),
+      tipo: "ENVIO",
+      metas: [{ recursoId: aguaId, cantidadObjetivo: 100 }],
+    });
+
+    const lista = await listarPrioridadRecolectando(deps, "admin-1");
+    expect(lista).toHaveLength(1);
+    expect(lista[0]?.ayuda.titulo).toBe("Mía");
   });
 });

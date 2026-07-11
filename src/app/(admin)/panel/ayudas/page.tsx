@@ -25,11 +25,11 @@ const campo =
   "rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 export default async function AyudasPage({ searchParams }: Props) {
-  await requireRol(Rol.ADMIN);
+  const sesion = await requireRol(Rol.ADMIN);
 
   const { estado, tipo } = await searchParams;
 
-  const filtro: FiltroAyudas = {};
+  const filtro: FiltroAyudas = { adminId: sesion.id };
   if (estado && esEstadoAyuda(estado)) filtro.estado = estado;
   if (tipo && esTipoActividad(tipo)) filtro.tipo = tipo;
 

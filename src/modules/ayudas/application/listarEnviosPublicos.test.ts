@@ -31,6 +31,7 @@ describe("listarEnviosPublicos", () => {
 
   it("incluye todos los estados y ordena por fecha desc", async () => {
     const antigua = await crearAyuda(deps, {
+      adminId: "admin-1",
       titulo: "Antigua",
       sectorDestino: "A",
       fecha: new Date("2026-08-01"),
@@ -38,15 +39,16 @@ describe("listarEnviosPublicos", () => {
       metas: [{ recursoId: aguaId, cantidadObjetivo: 100 }],
     });
     await crearAyuda(deps, {
+      adminId: "admin-1",
       titulo: "Reciente",
       sectorDestino: "B",
       fecha: new Date("2026-09-01"),
       tipo: "JORNADA",
       metas: [{ recursoId: aguaId, cantidadObjetivo: 50 }],
     });
-    await avanzarEstado(deps, antigua.id);
-    await avanzarEstado(deps, antigua.id);
-    await avanzarEstado(deps, antigua.id);
+    await avanzarEstado(deps, antigua.id, "admin-1");
+    await avanzarEstado(deps, antigua.id, "admin-1");
+    await avanzarEstado(deps, antigua.id, "admin-1");
 
     const lista = await listarEnviosPublicos(deps);
     expect(lista).toHaveLength(2);
@@ -56,6 +58,7 @@ describe("listarEnviosPublicos", () => {
 
   it("calcula el porcentaje global con aportes RECIBIDO", async () => {
     const ayuda = await crearAyuda(deps, {
+      adminId: "admin-1",
       titulo: "Con aporte",
       sectorDestino: "C",
       fecha: new Date("2026-09-10"),

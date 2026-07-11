@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { RegistroForm } from "@/modules/usuarios/ui/RegistroForm";
+import { cargarCatalogoUbicacion } from "@/shared/ubicacion";
 import { registrarUsuarioAction } from "./actions";
 
-export default function RegistroPage() {
+export default async function RegistroPage() {
+  const { estados, municipios } = await cargarCatalogoUbicacion();
+
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-6 p-8">
       <div className="flex flex-col items-center gap-1 text-center">
@@ -12,7 +15,11 @@ export default function RegistroPage() {
         </p>
       </div>
 
-      <RegistroForm action={registrarUsuarioAction} />
+      <RegistroForm
+        action={registrarUsuarioAction}
+        estados={estados}
+        municipios={municipios}
+      />
 
       <p className="text-sm text-muted-foreground">
         ¿Ya tienes cuenta?{" "}

@@ -15,8 +15,8 @@ const RUTA_PERFIL = "/panel/perfil";
 // correo válido) también viven en el caso de uso; aquí se rechaza pronto.
 const PerfilSchema = z.object({
   nombreCuenta: z.string().trim().min(1, "Indica el nombre de la cuenta.").max(120),
-  estado: z.string().trim().min(1, "Indica el estado.").max(80),
-  parroquia: z.string().trim().min(1, "Indica la parroquia.").max(80),
+  estadoId: z.string().trim().min(1, "Selecciona el estado.").max(40),
+  municipioId: z.string().trim().min(1, "Selecciona el municipio.").max(40),
   telefono: z.string().trim().min(1, "Indica un teléfono.").max(40),
   correo: z.email("Indica un correo de contacto válido."),
   tipoDocumento: z.enum(TipoDocumento, { message: "Tipo de documento no válido." }),

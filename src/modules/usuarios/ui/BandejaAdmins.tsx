@@ -8,9 +8,12 @@ import { Button } from "@/shared/ui/button";
 
 // Cada cuenta pendiente con su perfil de centro de acopio (feature 016). El
 // perfil puede faltar en cuentas antiguas registradas antes de la 016.
+// `ubicacion` trae los nombres de estado/municipio ya resueltos desde el catálogo
+// (feature 020): el perfil guarda `estadoId`/`municipioId`, no texto.
 export type AdminPendiente = {
   admin: Pick<Usuario, "id" | "nombre" | "email" | "createdAt">;
   perfil: PerfilAdmin | null;
+  ubicacion: { estado: string; municipio: string } | null;
 };
 
 type Props = {
@@ -58,7 +61,7 @@ export function BandejaAdmins({ pendientes, aprobarAction, rechazarAction }: Pro
 
   return (
     <ul className="flex flex-col gap-4">
-      {pendientes.map(({ admin, perfil }) => (
+      {pendientes.map(({ admin, perfil, ubicacion }) => (
         <li
           key={admin.id}
           className="flex flex-col gap-4 rounded-lg border border-border bg-background p-4"
@@ -95,8 +98,8 @@ export function BandejaAdmins({ pendientes, aprobarAction, rechazarAction }: Pro
           {perfil ? (
             <dl className="grid grid-cols-2 gap-3 border-t border-border pt-3 sm:grid-cols-3">
               <Dato etiqueta="Responsable" valor={admin.nombre} />
-              <Dato etiqueta="Estado" valor={perfil.estado} />
-              <Dato etiqueta="Parroquia" valor={perfil.parroquia} />
+              <Dato etiqueta="Estado" valor={ubicacion?.estado ?? "—"} />
+              <Dato etiqueta="Municipio" valor={ubicacion?.municipio ?? "—"} />
               <Dato etiqueta="Teléfono" valor={perfil.telefono} />
               <Dato etiqueta="Correo" valor={perfil.correo} />
               <Dato

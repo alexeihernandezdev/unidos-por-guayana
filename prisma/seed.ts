@@ -2,6 +2,11 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "../src/generated/prisma/client";
+import {
+  CATALOGO_UBICACION,
+  TOTAL_ESTADOS,
+  TOTAL_MUNICIPIOS,
+} from "./data/venezuela-ubicacion";
 
 // Siembra el SUPERADMIN inicial (obligatorio, raíz de confianza — feature 015) y,
 // si estamos en desarrollo, dos usuarios de prueba (COLABORADOR y SOLICITANTE)
@@ -59,11 +64,45 @@ async function sembrarUsuario(
   console.log(`✔ ${etiqueta} sembrado: ${usuario.email} (${usuario.rol})`);
 }
 
+// Siembra el catálogo de ubicación (feature 020): 24 estados y ~335 municipios
+// de Venezuela. Idempotente: hace upsert por `codigo` (clave natural estable), de
+// modo que re-ejecutar el seed no duplica filas ni rompe las FKs que apuntan al
+// catálogo. Se ejecuta antes de los usuarios de prueba.
+async function sembrarCatalogoUbicacion(prisma: PrismaClient): Promise<void> {
+  let municipios = 0;
+  for (const estado of CATALOGO_UBICACION) {
+    const estadoFila = await prisma.estado.upsert({
+      where: { codigo: estado.codigo },
+      update: { nombre: estado.nombre },
+      create: { codigo: estado.codigo, nombre: estado.nombre },
+    });
+    for (const municipio of estado.municipios) {
+      await prisma.municipio.upsert({
+        where: { codigo: municipio.codigo },
+        update: { nombre: municipio.nombre, estadoId: estadoFila.id },
+        create: {
+          codigo: municipio.codigo,
+          nombre: municipio.nombre,
+          estadoId: estadoFila.id,
+        },
+      });
+      municipios += 1;
+    }
+  }
+  console.log(
+    `✔ Catálogo de ubicación sembrado: ${TOTAL_ESTADOS} estados y ${municipios} municipios (esperados ${TOTAL_MUNICIPIOS}).`,
+  );
+}
+
 async function main() {
   const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
   const prisma = new PrismaClient({ adapter });
 
   try {
+    // Catálogo de ubicación primero (feature 020): usuarios y perfiles pueden
+    // referenciarlo por FK.
+    await sembrarCatalogoUbicacion(prisma);
+
     // SUPERADMIN: obligatorio. Raíz de confianza (feature 015): no se auto-registra
     // ni se promueve desde la app; es la única autoridad que aprueba cuentas ADMIN.
     await sembrarUsuario(prisma, {

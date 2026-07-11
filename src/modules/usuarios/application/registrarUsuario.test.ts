@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { catalogoDePrueba } from "@/modules/ubicacion/application/fakes";
 import type { DatosContacto } from "@/modules/usuarios/domain/datosContacto";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import {
@@ -17,10 +18,14 @@ import {
   type RegistrarUsuarioInput,
 } from "./registrarUsuario";
 
+// Catálogo de prueba (feature 020): La Guaira→Vargas, Miranda→Baruta.
+const { repo: catalogo, guaira, vargas, baruta } = catalogoDePrueba();
+
 function crearDeps() {
   return {
     usuarios: new InMemoryUsuarioRepository(),
     hasher: new FakePasswordHasher(),
+    catalogo,
   };
 }
 
@@ -28,8 +33,8 @@ const datosContactoBase: DatosContacto = {
   cedula: "V12345678",
   telefono: "04121234567",
   telefonoEsWhatsApp: true,
-  estado: "La Guaira",
-  parroquia: "Catia La Mar",
+  estadoId: guaira.id,
+  municipioId: vargas.id,
 };
 
 const baseInput: RegistrarUsuarioInput = {
@@ -50,8 +55,8 @@ describe("registrarUsuario", () => {
         cedula: "v-12.345.678",
         telefono: "+58 412 1234567",
         telefonoEsWhatsApp: true,
-        estado: "  La Guaira  ",
-        parroquia: "Catia La Mar",
+        estadoId: `  ${guaira.id}  `,
+        municipioId: vargas.id,
       },
     });
 
@@ -62,8 +67,21 @@ describe("registrarUsuario", () => {
     expect(usuario.cedula).toBe("V12345678");
     expect(usuario.telefono).toBe("04121234567");
     expect(usuario.telefonoEsWhatsApp).toBe(true);
-    expect(usuario.estado).toBe("La Guaira");
-    expect(usuario.parroquia).toBe("Catia La Mar");
+    expect(usuario.estadoId).toBe(guaira.id);
+    expect(usuario.municipioId).toBe(vargas.id);
+  });
+
+  it("rechaza un municipio que no pertenece al estado elegido (servidor)", async () => {
+    const deps = crearDeps();
+    await expect(
+      registrarUsuario(deps, {
+        ...baseInput,
+        datosContacto: { ...datosContactoBase, municipioId: baruta.id },
+      }),
+    ).rejects.toMatchObject({
+      name: "DatosContactoInvalidosError",
+      message: "El municipio no pertenece al estado seleccionado.",
+    });
   });
 
   it("crea un solicitante también con los cinco campos", async () => {
@@ -125,8 +143,8 @@ describe("registrarUsuario", () => {
         cedula: "irrelevante",
         telefono: "irrelevante",
         telefonoEsWhatsApp: true,
-        estado: "irrelevante",
-        parroquia: "irrelevante",
+        estadoId: "irrelevante",
+        municipioId: "irrelevante",
       },
     });
 

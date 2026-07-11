@@ -31,6 +31,7 @@ describe("obtenerDetallePublico", () => {
 
   it("devuelve metas y porcentaje global sin datos personales", async () => {
     const ayuda = await crearAyuda(deps, {
+      adminId: "admin-1",
       titulo: "Detalle",
       sectorDestino: "Upata",
       fecha: new Date("2026-10-01"),

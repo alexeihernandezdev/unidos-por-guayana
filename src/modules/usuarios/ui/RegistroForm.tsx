@@ -3,6 +3,9 @@
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import type { Estado } from "@/modules/ubicacion/domain/Estado";
+import type { Municipio } from "@/modules/ubicacion/domain/Municipio";
+import { SelectorUbicacion } from "@/modules/ubicacion/ui/SelectorUbicacion";
 import type { DatosContacto } from "@/modules/usuarios/domain/datosContacto";
 import {
   TipoDocumento,
@@ -30,12 +33,13 @@ type Campos = {
   email: string;
   password: string;
   rol: typeof Rol.ADMIN | typeof Rol.COLABORADOR | typeof Rol.SOLICITANTE;
-  // Contacto y ubicación (COLABORADOR/SOLICITANTE, feature 017).
+  // Contacto y ubicación (COLABORADOR/SOLICITANTE, feature 017; ubicación por
+  // catálogo desde 020).
   cedula: string;
   telefono: string;
   telefonoEsWhatsApp: boolean;
-  estado: string;
-  parroquia: string;
+  estadoId: string;
+  municipioId: string;
   // Perfil de administrador (solo se envían y validan si rol === ADMIN).
   nombreCuenta: string;
   correo: string;
@@ -51,17 +55,21 @@ type Props = {
   action: (
     input: RegistroInput,
   ) => Promise<{ ok: boolean; error?: string; rol?: Rol }>;
+  // Catálogo de ubicación (feature 020): estados y municipios para el selector.
+  estados: Estado[];
+  municipios: Municipio[];
 };
 
 const campo =
   "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive";
 
-export function RegistroForm({ action }: Props) {
+export function RegistroForm({ action, estados, municipios }: Props) {
   const router = useRouter();
   const [pendiente, startTransition] = useTransition();
   const [errorServidor, setErrorServidor] = useState<string | null>(null);
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<Campos>({
@@ -70,6 +78,8 @@ export function RegistroForm({ action }: Props) {
       tipoDocumento: TipoDocumento.JURIDICO,
       telefonoEsWhatsApp: true,
       perfilTelefonoEsWhatsApp: true,
+      estadoId: "",
+      municipioId: "",
     },
   });
 
@@ -91,21 +101,21 @@ export function RegistroForm({ action }: Props) {
             cedula: "",
             telefono: "",
             telefonoEsWhatsApp: datos.perfilTelefonoEsWhatsApp,
-            estado: "",
-            parroquia: "",
+            estadoId: "",
+            municipioId: "",
           }
         : {
             cedula: datos.cedula,
             telefono: datos.telefono,
             telefonoEsWhatsApp: datos.telefonoEsWhatsApp,
-            estado: datos.estado,
-            parroquia: datos.parroquia,
+            estadoId: datos.estadoId,
+            municipioId: datos.municipioId,
           },
       perfil: esAdmin
         ? {
             nombreCuenta: datos.nombreCuenta,
-            estado: datos.estado,
-            parroquia: datos.parroquia,
+            estadoId: datos.estadoId,
+            municipioId: datos.municipioId,
             telefono: datos.telefono,
             telefonoEsWhatsApp: datos.perfilTelefonoEsWhatsApp,
             correo: datos.correo,
@@ -215,7 +225,13 @@ export function RegistroForm({ action }: Props) {
       </div>
 
       {!esAdmin && (
-        <DatosContactoFields<Campos> register={register} errors={errors} />
+        <DatosContactoFields<Campos>
+          register={register}
+          control={control}
+          errors={errors}
+          estados={estados}
+          municipios={municipios}
+        />
       )}
 
       {esAdmin && (
@@ -243,44 +259,12 @@ export function RegistroForm({ action }: Props) {
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="estado" className="text-sm font-medium">
-                Estado
-              </label>
-              <input
-                id="estado"
-                className={campo}
-                aria-invalid={Boolean(errors.estado)}
-                {...register("estado", {
-                  required: esAdmin && "Indica el estado.",
-                })}
-              />
-              {errors.estado && (
-                <p className="text-sm text-destructive">
-                  {errors.estado.message}
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="parroquia" className="text-sm font-medium">
-                Parroquia
-              </label>
-              <input
-                id="parroquia"
-                className={campo}
-                aria-invalid={Boolean(errors.parroquia)}
-                {...register("parroquia", {
-                  required: esAdmin && "Indica la parroquia.",
-                })}
-              />
-              {errors.parroquia && (
-                <p className="text-sm text-destructive">
-                  {errors.parroquia.message}
-                </p>
-              )}
-            </div>
-          </div>
+          <SelectorUbicacion<Campos>
+            control={control}
+            errors={errors}
+            estados={estados}
+            municipios={municipios}
+          />
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">

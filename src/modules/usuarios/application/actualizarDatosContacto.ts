@@ -1,3 +1,5 @@
+import type { CatalogoUbicacionRepository } from "@/modules/ubicacion/domain/CatalogoUbicacionRepository";
+import { validarUbicacion } from "@/modules/ubicacion/domain/validarUbicacion";
 import {
   validarDatosContacto,
   type DatosContacto,
@@ -13,6 +15,8 @@ import {
 
 export type ActualizarDatosContactoDeps = {
   usuarios: UsuarioRepository;
+  // Catálogo de ubicación (feature 020): valida coherencia estado↔municipio.
+  catalogo: CatalogoUbicacionRepository;
 };
 
 export type ActualizarDatosContactoInput = DatosContacto;
@@ -29,7 +33,7 @@ export type ActualizarDatosContactoInput = DatosContacto;
  *   propio usuario "guarde sin cambiar" (cédula igual a la suya actual).
  */
 export async function actualizarDatosContacto(
-  { usuarios }: ActualizarDatosContactoDeps,
+  { usuarios, catalogo }: ActualizarDatosContactoDeps,
   usuarioId: string,
   input: ActualizarDatosContactoInput,
 ): Promise<Usuario> {
@@ -46,6 +50,18 @@ export async function actualizarDatosContacto(
   const validacion = validarDatosContacto(input);
   if (!validacion.ok) {
     throw new DatosContactoInvalidosError(validacion.error);
+  }
+
+  // Coherencia estado↔municipio contra el catálogo (feature 020).
+  const ubicacion = await validarUbicacion(
+    {
+      estadoId: validacion.valor.estadoId,
+      municipioId: validacion.valor.municipioId,
+    },
+    catalogo,
+  );
+  if (!ubicacion.ok) {
+    throw new DatosContactoInvalidosError(ubicacion.error);
   }
 
   const existente = await usuarios.buscarPorCedula(validacion.valor.cedula);

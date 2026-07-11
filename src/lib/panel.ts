@@ -10,6 +10,6 @@ const aportes = new PrismaAporteRepository();
 const solicitudes = new PrismaSolicitudRepository();
 const deps = { ayudas, recursos, aportes, solicitudes };
 
-export function obtenerResumenPanelServicio() {
-  return obtenerResumenPanel(deps);
+export function obtenerResumenPanelServicio(adminId: string) {
+  return obtenerResumenPanel(deps, adminId);
 }

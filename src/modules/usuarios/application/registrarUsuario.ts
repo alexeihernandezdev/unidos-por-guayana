@@ -1,3 +1,5 @@
+import type { CatalogoUbicacionRepository } from "@/modules/ubicacion/domain/CatalogoUbicacionRepository";
+import { validarUbicacion } from "@/modules/ubicacion/domain/validarUbicacion";
 import type { PasswordHasher } from "@/modules/usuarios/domain/PasswordHasher";
 import {
   validarDatosContacto,
@@ -20,6 +22,10 @@ import {
 export type RegistrarUsuarioDeps = {
   usuarios: UsuarioRepository;
   hasher: PasswordHasher;
+  // Catálogo de ubicación (feature 020): valida coherencia estado↔municipio de
+  // COLABORADOR/SOLICITANTE. Puerto de dominio; la infra concreta se inyecta en
+  // el composition root.
+  catalogo: CatalogoUbicacionRepository;
 };
 
 // Entrada del caso de uso. Los datos de contacto son opcionales aquí: se
@@ -51,7 +57,7 @@ export type RegistrarUsuarioInput = {
  * (presentación); aquí se aplican las reglas de negocio.
  */
 export async function registrarUsuario(
-  { usuarios, hasher }: RegistrarUsuarioDeps,
+  { usuarios, hasher, catalogo }: RegistrarUsuarioDeps,
   input: RegistrarUsuarioInput,
 ): Promise<Usuario> {
   if (!esRolAutoRegistrable(input.rol)) {
@@ -76,6 +82,19 @@ export async function registrarUsuario(
     if (!validacion.ok) {
       throw new DatosContactoInvalidosError(validacion.error);
     }
+    // Coherencia estado↔municipio contra el catálogo (feature 020): existencia y
+    // pertenencia. El servidor rechaza combinaciones inválidas aunque el
+    // formulario se las saltara.
+    const ubicacion = await validarUbicacion(
+      {
+        estadoId: validacion.valor.estadoId,
+        municipioId: validacion.valor.municipioId,
+      },
+      catalogo,
+    );
+    if (!ubicacion.ok) {
+      throw new DatosContactoInvalidosError(ubicacion.error);
+    }
     const cedulaExistente = await usuarios.buscarPorCedula(validacion.valor.cedula);
     if (cedulaExistente) {
       throw new CedulaYaRegistradaError();
@@ -88,8 +107,8 @@ export async function registrarUsuario(
       cedula: validacion.valor.cedula,
       telefono: validacion.valor.telefono,
       telefonoEsWhatsApp: validacion.valor.telefonoEsWhatsApp,
-      estado: validacion.valor.estado,
-      parroquia: validacion.valor.parroquia,
+      estadoId: ubicacion.valor.estadoId,
+      municipioId: ubicacion.valor.municipioId,
     });
   }
 

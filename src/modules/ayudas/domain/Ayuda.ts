@@ -23,9 +23,11 @@ export type MetaRecurso = {
 };
 
 // Ayuda / Envío: la entidad central. Nace en `RECOLECTANDO` y avanza por la máquina
-// de estados (ver `maquinaEstados.ts`).
+// de estados (ver `maquinaEstados.ts`). `adminId` es el dueño (ADMIN que la creó);
+// inmutable tras el alta (feature 022).
 export type Ayuda = {
   id: string;
+  adminId: string;
   titulo: string;
   sectorDestino: string;
   fecha: Date;
@@ -45,8 +47,10 @@ export type NuevaMeta = {
 
 // Datos para dar de alta una Ayuda con sus metas iniciales. `estado` no se pide:
 // nace en `RECOLECTANDO` por defecto (ver schema). `tipo` sí se pide: lo elige
-// el ADMIN al iniciar el alta (feature 018) y es inmutable después.
+// el ADMIN al iniciar el alta (feature 018) y es inmutable después. `adminId` es
+// el dueño (feature 022); no entra en `CambiosAyuda`.
 export type NuevaAyuda = {
+  adminId: string;
   titulo: string;
   sectorDestino: string;
   fecha: Date;

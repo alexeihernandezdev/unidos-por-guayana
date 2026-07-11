@@ -1,18 +1,33 @@
+import { LogOutIcon } from "lucide-react";
 import { getUsuarioActual } from "@/shared/auth";
 import { cerrarSesionAction } from "@/shared/auth/actions";
-import { LogOutIcon } from "lucide-react";
-import { Sidebar } from "./Sidebar";
-import { MobileSidebar } from "./MobileSidebar";
+import { AppSidebar } from "./app-sidebar";
+import { AppMobileSidebar } from "./app-mobile-sidebar";
+import type { NavSection } from "./navConfig";
 
-// Shell del panel de administrador. Server component: renderiza el sidebar
-// (server + client interactivo dentro), el topbar móvil con Sheet, y una
-// zona `main` que hospeda el contenido. Sidebar y main comparten background
-// (spec: "sidebars: mismo background que canvas, borde suficiente separación").
-export async function AdminShell({ children }: { children: React.ReactNode }) {
+type Props = {
+  sections: NavSection[];
+  homeHref: string;
+  ariaLabel: string;
+  children: React.ReactNode;
+};
+
+// Shell del espacio logeado (feature 021, generalizado desde `AdminShell` 008).
+// Server component: renderiza el sidebar (server + client interactivo dentro),
+// el topbar móvil con Sheet, y una zona `main` que hospeda el contenido. Sidebar
+// y main comparten background (spec: "sidebars: mismo background que canvas,
+// borde suficiente separación"). El mismo shell sirve a ADMIN, SUPERADMIN,
+// COLABORADOR y SOLICITANTE, parametrizado por `sections`/`homeHref`/`ariaLabel`.
+export async function AppShell({
+  sections,
+  homeHref,
+  ariaLabel,
+  children,
+}: Props) {
   const usuario = await getUsuarioActual();
 
-  // Cluster de sesión: se renderiza en el server y se inyecta al Sheet móvil
-  // como slot, evitando duplicar lógica de sesión en el cliente.
+  // Cluster de sesión: se renderiza en el server y se inyecta al sidebar y al
+  // Sheet móvil como slot, evitando duplicar lógica de sesión en el cliente.
   const clusterSesion = (
     <>
       {usuario && (
@@ -42,11 +57,21 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-[100dvh] flex-col md:flex-row">
-      <Sidebar />
+      <AppSidebar
+        sections={sections}
+        homeHref={homeHref}
+        ariaLabel={ariaLabel}
+        slotSesion={clusterSesion}
+      />
 
       {/* Topbar móvil: solo visible < md. Ancla el hamburguesa + wordmark. */}
       <div className="flex h-14 items-center justify-between border-b border-border bg-background px-4 md:hidden">
-        <MobileSidebar slotSesion={clusterSesion} />
+        <AppMobileSidebar
+          sections={sections}
+          homeHref={homeHref}
+          ariaLabel={ariaLabel}
+          slotSesion={clusterSesion}
+        />
         <span className="relative pb-[2px] font-serif text-sm leading-none tracking-tight">
           <span className="italic text-foreground/60">Unidos por</span>{" "}
           <span className="font-semibold">la Guaira</span>

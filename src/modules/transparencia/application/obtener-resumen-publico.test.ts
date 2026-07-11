@@ -43,6 +43,7 @@ describe("obtenerResumenPublico", () => {
 
   it("compone totales, recolectado y envíos ordenados por fecha desc", async () => {
     const antigua = await crearAyuda(deps, {
+      adminId: "admin-1",
       titulo: "Antigua",
       sectorDestino: "A",
       fecha: new Date("2026-08-01"),
@@ -53,6 +54,7 @@ describe("obtenerResumenPublico", () => {
       ],
     });
     const reciente = await crearAyuda(deps, {
+      adminId: "admin-1",
       titulo: "Reciente",
       sectorDestino: "B",
       fecha: new Date("2026-09-01"),
@@ -74,9 +76,9 @@ describe("obtenerResumenPublico", () => {
     });
     await marcarRecibido(deps, aporte.id, { id: "admin", rol: Rol.ADMIN });
     await marcarRecibido(deps, usdAporte.id, { id: "admin", rol: Rol.ADMIN });
-    await avanzarEstado(deps, antigua.id);
-    await avanzarEstado(deps, antigua.id);
-    await avanzarEstado(deps, antigua.id);
+    await avanzarEstado(deps, antigua.id, "admin-1");
+    await avanzarEstado(deps, antigua.id, "admin-1");
+    await avanzarEstado(deps, antigua.id, "admin-1");
 
     const resumen = await obtenerResumenPublico(deps);
 
@@ -95,6 +97,7 @@ describe("obtenerResumenPublico", () => {
 
   it("no incluye campos personales en el JSON del DTO", async () => {
     await crearAyuda(deps, {
+      adminId: "admin-1",
       titulo: "Solo cabecera",
       sectorDestino: "C",
       fecha: new Date("2026-09-10"),

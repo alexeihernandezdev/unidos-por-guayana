@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { EB_Garamond, Geist, Geist_Mono } from "next/font/google";
 import { SiteHeader } from "@/modules/landing/ui/SiteHeader";
+import { getUsuarioActual } from "@/shared/auth";
+import { rutaInicioPorRol, VolverAlPanelHeader } from "@/shared/ui/app-shell";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -37,12 +39,17 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // El navbar global (SiteHeader) NO se muestra dentro del panel del
-  // administrador: /panel/* usa su propio shell con sidebar (ver
-  // `src/modules/admin/ui/AdminShell.tsx`). La ruta actual llega vía el header
-  // `x-pathname` que setea `src/proxy.ts` en cada request.
+  // Chrome de navegación por sesión (feature 021):
+  //  - Sin sesión → navbar público global (`SiteHeader`) en toda la app.
+  //  - Con sesión → el navbar desaparece. Las rutas de trabajo traen su propio
+  //    shell con sidebar (route groups (app)/(admin) y /superadmin); en las
+  //    páginas públicas (landing `/` y `/transparencia`) se muestra una banda
+  //    mínima "Ir a mi panel" para no dejar al usuario sin salida.
+  // La ruta actual llega vía el header `x-pathname` que setea `src/proxy.ts`.
+  const usuario = await getUsuarioActual();
   const pathname = (await headers()).get("x-pathname") ?? "";
-  const esRutaAdmin = pathname.startsWith("/panel");
+  const esPaginaPublica =
+    pathname === "/" || pathname.startsWith("/transparencia");
 
   return (
     <html
@@ -52,7 +59,10 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <Providers>
-          {!esRutaAdmin && <SiteHeader />}
+          {!usuario && <SiteHeader />}
+          {usuario && esPaginaPublica && (
+            <VolverAlPanelHeader rutaPanel={rutaInicioPorRol(usuario.rol)} />
+          )}
           {children}
         </Providers>
       </body>

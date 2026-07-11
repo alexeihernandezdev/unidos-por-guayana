@@ -45,6 +45,7 @@ describe("crearAyuda", () => {
     const { deps, agua, alimentos } = ctx;
 
     const ayuda = await crearAyuda(deps, {
+      adminId: "admin-1",
       titulo: "Envío a Upata",
       sectorDestino: "Upata",
       fecha: new Date("2026-08-01T00:00:00.000Z"),
@@ -56,6 +57,7 @@ describe("crearAyuda", () => {
     });
 
     expect(ayuda.id).toBeTruthy();
+    expect(ayuda.adminId).toBe("admin-1");
     expect(ayuda.estado).toBe(EstadoAyuda.RECOLECTANDO);
     expect(ayuda.metas).toHaveLength(2);
     expect(ayuda.metas.map((m) => m.recursoId)).toContain(agua.id);
@@ -65,6 +67,7 @@ describe("crearAyuda", () => {
     const { deps, agua } = ctx;
 
     const ayuda = await crearAyuda(deps, {
+      adminId: "admin-1",
       titulo: "  Envío a Upata  ",
       sectorDestino: "  Upata ",
       fecha: new Date(),
@@ -83,6 +86,7 @@ describe("crearAyuda", () => {
 
     await expect(
       crearAyuda(deps, {
+      adminId: "admin-1",
         titulo: "   ",
         sectorDestino: "Upata",
         fecha: new Date(),
@@ -97,6 +101,7 @@ describe("crearAyuda", () => {
 
     await expect(
       crearAyuda(deps, {
+      adminId: "admin-1",
         titulo: "Envío",
         sectorDestino: "  ",
         fecha: new Date(),
@@ -111,6 +116,7 @@ describe("crearAyuda", () => {
 
     await expect(
       crearAyuda(deps, {
+      adminId: "admin-1",
         titulo: "Envío",
         sectorDestino: "Upata",
         fecha: new Date(),
@@ -125,6 +131,7 @@ describe("crearAyuda", () => {
 
     await expect(
       crearAyuda(deps, {
+      adminId: "admin-1",
         titulo: "Envío",
         sectorDestino: "Upata",
         fecha: new Date(),
@@ -142,6 +149,7 @@ describe("crearAyuda", () => {
 
     await expect(
       crearAyuda(deps, {
+      adminId: "admin-1",
         titulo: "Envío",
         sectorDestino: "Upata",
         fecha: new Date(),
@@ -156,6 +164,7 @@ describe("crearAyuda", () => {
 
     await expect(
       crearAyuda(deps, {
+      adminId: "admin-1",
         titulo: "Envío",
         sectorDestino: "Upata",
         fecha: new Date(),
@@ -170,6 +179,7 @@ describe("crearAyuda", () => {
 
     await expect(
       crearAyuda(deps, {
+      adminId: "admin-1",
         titulo: "Envío",
         sectorDestino: "Upata",
         fecha: new Date(),
@@ -183,6 +193,7 @@ describe("crearAyuda", () => {
     const { deps, agua } = ctx;
 
     const jornada = await crearAyuda(deps, {
+      adminId: "admin-1",
       titulo: "Jornada de salud",
       sectorDestino: "Upata",
       fecha: new Date("2026-09-01"),
@@ -190,6 +201,7 @@ describe("crearAyuda", () => {
       metas: [{ recursoId: agua.id, cantidadObjetivo: 5 }],
     });
     const evento = await crearAyuda(deps, {
+      adminId: "admin-1",
       titulo: "Feria comunitaria",
       sectorDestino: "San Félix",
       fecha: new Date("2026-09-02"),
@@ -206,6 +218,7 @@ describe("crearAyuda", () => {
 
     await expect(
       crearAyuda(deps, {
+      adminId: "admin-1",
         titulo: "Envío",
         sectorDestino: "Upata",
         fecha: new Date(),

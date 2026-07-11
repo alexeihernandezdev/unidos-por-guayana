@@ -26,6 +26,7 @@ async function armar() {
   const ayuda = await crearAyuda(
     { ayudas: ayudasRepo, recursos },
     {
+      adminId: "admin-1",
       titulo: "Envío",
       sectorDestino: "Upata",
       fecha: new Date(),

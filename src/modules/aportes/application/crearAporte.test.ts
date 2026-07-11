@@ -35,6 +35,7 @@ async function armarContexto() {
   const ayuda = await crearAyuda(
     { ayudas: ayudasRepo, recursos },
     {
+      adminId: "admin-1",
       titulo: "Envío 1",
       sectorDestino: "Upata",
       fecha: new Date(),
@@ -112,7 +113,7 @@ describe("crearAporte", () => {
 
   it("rechaza si la Ayuda ya no está en RECOLECTANDO", async () => {
     const { deps, ayuda, agua } = ctx;
-    await avanzarEstado(deps, ayuda.id); // → LISTO
+    await avanzarEstado(deps, ayuda.id, "admin-1"); // → LISTO
 
     await expect(
       crearAporte(deps, {

@@ -5,8 +5,15 @@ import { avanzarEstado } from "./avanzarEstado";
 import { crearAyuda } from "./crearAyuda";
 import type { AyudaDeps } from "./deps";
 import { editarCabecera } from "./editarCabecera";
-import { AyudaNoEditableError, DatosAyudaInvalidosError } from "./errors";
+import {
+  ActividadNoPerteneceAlAdminError,
+  AyudaNoEditableError,
+  DatosAyudaInvalidosError,
+} from "./errors";
 import { InMemoryAyudaRepository } from "./fakes";
+
+const ADMIN = "admin-1";
+const OTRO_ADMIN = "admin-2";
 
 async function crearAyudaBase() {
   const recursos = new InMemoryRecursoRepository();
@@ -18,6 +25,7 @@ async function crearAyudaBase() {
   });
   const deps: AyudaDeps = { ayudas: new InMemoryAyudaRepository(), recursos };
   const ayuda = await crearAyuda(deps, {
+    adminId: ADMIN,
     titulo: "Envío",
     sectorDestino: "Upata",
     fecha: new Date("2026-08-01T00:00:00.000Z"),
@@ -37,40 +45,49 @@ describe("editarCabecera", () => {
   it("edita la cabecera mientras la ayuda está en RECOLECTANDO", async () => {
     const { deps, ayuda } = ctx;
 
-    const actualizada = await editarCabecera(deps, ayuda.id, {
+    const actualizada = await editarCabecera(deps, ayuda.id, ADMIN, {
       titulo: "  Envío urgente a Upata ",
       sectorDestino: "Upata Norte",
     });
 
     expect(actualizada.titulo).toBe("Envío urgente a Upata");
     expect(actualizada.sectorDestino).toBe("Upata Norte");
+    expect(actualizada.adminId).toBe(ADMIN);
   });
 
   it("rechaza un título vacío", async () => {
     const { deps, ayuda } = ctx;
 
     await expect(
-      editarCabecera(deps, ayuda.id, { titulo: "   " }),
+      editarCabecera(deps, ayuda.id, ADMIN, { titulo: "   " }),
     ).rejects.toBeInstanceOf(DatosAyudaInvalidosError);
   });
 
-  it("no cambia el tipo de actividad al editar la cabecera", async () => {
+  it("no cambia el tipo ni el dueño al editar la cabecera", async () => {
     const { deps, ayuda } = ctx;
 
-    const actualizada = await editarCabecera(deps, ayuda.id, {
+    const actualizada = await editarCabecera(deps, ayuda.id, ADMIN, {
       titulo: "Otro título",
-      // el input de editarCabecera no admite tipo — es inmutable por construcción.
     });
 
     expect(actualizada.tipo).toBe(ayuda.tipo);
+    expect(actualizada.adminId).toBe(ADMIN);
   });
 
   it("bloquea la edición una vez la ayuda pasa a LISTO", async () => {
     const { deps, ayuda } = ctx;
-    await avanzarEstado(deps, ayuda.id);
+    await avanzarEstado(deps, ayuda.id, ADMIN);
 
     await expect(
-      editarCabecera(deps, ayuda.id, { titulo: "Otro título" }),
+      editarCabecera(deps, ayuda.id, ADMIN, { titulo: "Otro título" }),
     ).rejects.toBeInstanceOf(AyudaNoEditableError);
+  });
+
+  it("rechaza editar una actividad de otro administrador", async () => {
+    const { deps, ayuda } = ctx;
+
+    await expect(
+      editarCabecera(deps, ayuda.id, OTRO_ADMIN, { titulo: "Hack" }),
+    ).rejects.toBeInstanceOf(ActividadNoPerteneceAlAdminError);
   });
 });

@@ -30,6 +30,7 @@ import type { Usuario } from "@/modules/usuarios/domain/Usuario";
 import { BcryptPasswordHasher } from "@/modules/usuarios/infrastructure/BcryptPasswordHasher";
 import { PrismaPerfilAdminRepository } from "@/modules/usuarios/infrastructure/PrismaPerfilAdminRepository";
 import { PrismaUsuarioRepository } from "@/modules/usuarios/infrastructure/PrismaUsuarioRepository";
+import { catalogoUbicacion } from "@/lib/ubicacion";
 
 // ── Composition root ────────────────────────────────────────────────────────
 // `src/lib` es infraestructura global (tech-stack.md): aquí se cablean las
@@ -38,6 +39,9 @@ import { PrismaUsuarioRepository } from "@/modules/usuarios/infrastructure/Prism
 const usuarios = new PrismaUsuarioRepository();
 const perfiles = new PrismaPerfilAdminRepository();
 const hasher = new BcryptPasswordHasher();
+// Catálogo de ubicación (feature 020): se inyecta en los casos de uso que validan
+// coherencia estado↔municipio.
+const catalogo = catalogoUbicacion;
 
 /**
  * Registro con la infraestructura ya inyectada. Lo consume el server action de
@@ -47,7 +51,7 @@ const hasher = new BcryptPasswordHasher();
 export function registrarNuevoUsuario(
   input: RegistrarUsuarioInput,
 ): Promise<Usuario> {
-  return registrarUsuario({ usuarios, hasher }, input);
+  return registrarUsuario({ usuarios, hasher, catalogo }, input);
 }
 
 // ── Perfil de administrador / centro de acopio (feature 016) ──────────────────
@@ -64,24 +68,27 @@ export async function registrarAdministradorConPerfil(
   perfil: DatosPerfilAdmin,
 ): Promise<Usuario> {
   const usuario = await registrarUsuario(
-    { usuarios, hasher },
+    { usuarios, hasher, catalogo },
     { ...cuenta, rol: Rol.ADMIN },
   );
-  await crearPerfilAdmin({ perfiles }, { usuarioId: usuario.id, ...perfil });
+  await crearPerfilAdmin(
+    { perfiles, catalogo },
+    { usuarioId: usuario.id, ...perfil },
+  );
   return usuario;
 }
 
 export function obtenerPerfilAdminGestion(
   usuarioId: string,
 ): Promise<PerfilAdmin | null> {
-  return obtenerPerfilAdmin({ perfiles }, usuarioId);
+  return obtenerPerfilAdmin({ perfiles, catalogo }, usuarioId);
 }
 
 export function actualizarPerfilAdminGestion(
   usuarioId: string,
   cambios: CambiosPerfilAdmin,
 ): Promise<PerfilAdmin> {
-  return actualizarPerfilAdmin({ perfiles }, usuarioId, cambios);
+  return actualizarPerfilAdmin({ perfiles, catalogo }, usuarioId, cambios);
 }
 
 // ── Gestión de administradores por el SUPERADMIN (feature 015) ────────────────
@@ -123,7 +130,7 @@ export function actualizarDatosContactoUsuario(
   usuarioId: string,
   input: ActualizarDatosContactoInput,
 ): Promise<Usuario> {
-  return actualizarDatosContactoCaso({ usuarios }, usuarioId, input);
+  return actualizarDatosContactoCaso({ usuarios, catalogo }, usuarioId, input);
 }
 
 // ── Auth.js v5 (NextAuth) ─────────────────────────────────────────────────────

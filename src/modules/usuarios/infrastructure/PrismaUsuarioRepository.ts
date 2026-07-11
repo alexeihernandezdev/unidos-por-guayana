@@ -58,8 +58,8 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
         cedula: datos.cedula,
         telefono: datos.telefono,
         telefonoEsWhatsApp: datos.telefonoEsWhatsApp,
-        estado: datos.estado,
-        parroquia: datos.parroquia,
+        estadoId: datos.estadoId,
+        municipioId: datos.municipioId,
       },
     });
   }

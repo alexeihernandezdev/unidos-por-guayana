@@ -1,6 +1,6 @@
 # 021 · Espacio del usuario logeado (sidebar) y navbar solo público
 
-> Estado: **Pendiente** · Depende de: `002 · Autenticación y roles`, `003 · Landing`, `008 · Panel de administración` (patrón de shell con sidebar) · Roadmap: `constitution/roadmap.md`
+> Estado: **Hecho** · Depende de: `002 · Autenticación y roles`, `003 · Landing`, `008 · Panel de administración` (patrón de shell con sidebar) · Roadmap: `constitution/roadmap.md`
 >
 > _Feature de **experiencia y navegación**: no introduce entidades ni lógica de dominio nuevas. Reorganiza el "chrome" (marco de navegación) de la app según haya o no sesión, y unifica el patrón de shell con sidebar para todos los roles logeados._
 

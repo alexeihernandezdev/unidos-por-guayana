@@ -1,3 +1,5 @@
+import type { Ayuda } from "./Ayuda";
+
 // Reglas de dominio puras de la Ayuda / Envío. Sin framework ni Prisma.
 
 /** Normaliza un texto: recorta espacios de los extremos. */
@@ -32,4 +34,9 @@ export function normalizarDescripcion(
 ): string | null {
   const limpia = descripcion?.trim();
   return limpia ? limpia : null;
+}
+
+/** ¿El `adminId` del solicitante es el dueño de la actividad? (feature 022). */
+export function esDueño(ayuda: Pick<Ayuda, "adminId">, adminId: string): boolean {
+  return ayuda.adminId === adminId;
 }

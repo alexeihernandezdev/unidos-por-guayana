@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import type { Estado } from "@/modules/ubicacion/domain/Estado";
+import type { Municipio } from "@/modules/ubicacion/domain/Municipio";
 import type { DatosContacto } from "@/modules/usuarios/domain/datosContacto";
 import { Button } from "@/shared/ui/button";
 import { DatosContactoFields, type CamposDatosContacto } from "./DatosContactoFields";
@@ -13,6 +15,9 @@ type Props = {
   modo: Modo;
   valoresIniciales?: Partial<DatosContacto>;
   action: (input: DatosContacto) => Promise<{ ok: boolean; error?: string }>;
+  // Catálogo de ubicación (feature 020): estados y municipios para el selector.
+  estados: Estado[];
+  municipios: Municipio[];
   // Ruta a la que redirige tras un guardado correcto. En "completar" suele ser
   // `/` o la ruta que el guard interrumpió; en "editar" vuelve a `/mi-perfil`.
   destinoOk: string;
@@ -24,6 +29,8 @@ export function DatosContactoForm({
   modo,
   valoresIniciales,
   action,
+  estados,
+  municipios,
   destinoOk,
 }: Props) {
   const router = useRouter();
@@ -32,6 +39,7 @@ export function DatosContactoForm({
   const [guardado, setGuardado] = useState(false);
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<CamposDatosContacto>({
@@ -39,8 +47,8 @@ export function DatosContactoForm({
       cedula: valoresIniciales?.cedula ?? "",
       telefono: valoresIniciales?.telefono ?? "",
       telefonoEsWhatsApp: valoresIniciales?.telefonoEsWhatsApp ?? true,
-      estado: valoresIniciales?.estado ?? "",
-      parroquia: valoresIniciales?.parroquia ?? "",
+      estadoId: valoresIniciales?.estadoId ?? "",
+      municipioId: valoresIniciales?.municipioId ?? "",
     },
   });
 
@@ -63,7 +71,10 @@ export function DatosContactoForm({
     <form onSubmit={onSubmit} className="flex w-full max-w-lg flex-col gap-4">
       <DatosContactoFields<CamposDatosContacto>
         register={register}
+        control={control}
         errors={errors}
+        estados={estados}
+        municipios={municipios}
       />
 
       {errorServidor && (

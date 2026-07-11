@@ -1,21 +1,25 @@
 "use client";
 
 import type {
+  Control,
   FieldErrors,
   FieldValues,
   Path,
   UseFormRegister,
 } from "react-hook-form";
+import type { Estado } from "@/modules/ubicacion/domain/Estado";
+import type { Municipio } from "@/modules/ubicacion/domain/Municipio";
+import { SelectorUbicacion } from "@/modules/ubicacion/ui/SelectorUbicacion";
 import {
   validarCedula,
   validarTelefono,
-  validarUbicacion,
 } from "@/modules/usuarios/domain/datosContacto";
 
 // Campos de contacto y ubicación exigidos a COLABORADOR/SOLICITANTE
-// (feature 017). Componente reutilizado por `RegistroForm`,
-// `/completar-perfil` y `/mi-perfil`; la validación de formato la delega en
-// el dominio para mantener una sola fuente de verdad entre cliente y servidor.
+// (feature 017; ubicación por catálogo desde 020). Componente reutilizado por
+// `RegistroForm`, `/completar-perfil` y `/mi-perfil`; la validación de formato la
+// delega en el dominio para mantener una sola fuente de verdad, y la ubicación en
+// el `SelectorUbicacion` dependiente (estado → municipio).
 
 const campo =
   "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive";
@@ -27,20 +31,28 @@ export type CamposDatosContacto = {
   cedula: string;
   telefono: string;
   telefonoEsWhatsApp: boolean;
-  estado: string;
-  parroquia: string;
+  estadoId: string;
+  municipioId: string;
 };
 
 type Props<T extends FieldValues & CamposDatosContacto> = {
   register: UseFormRegister<T>;
+  control: Control<T>;
   errors: FieldErrors<T>;
+  estados: Estado[];
+  municipios: Municipio[];
 };
 
 export function DatosContactoFields<T extends FieldValues & CamposDatosContacto>({
   register,
+  control,
   errors,
+  estados,
+  municipios,
 }: Props<T>) {
-  const errorFor = (nombre: keyof CamposDatosContacto): string | undefined => {
+  const errorFor = (
+    nombre: keyof Pick<CamposDatosContacto, "cedula" | "telefono">,
+  ): string | undefined => {
     const e = errors[nombre as Path<T>];
     if (!e) return undefined;
     return typeof e.message === "string" ? e.message : undefined;
@@ -105,54 +117,12 @@ export function DatosContactoFields<T extends FieldValues & CamposDatosContacto>
         Este número recibe WhatsApp
       </label>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="estado" className="text-sm font-medium">
-            Estado
-          </label>
-          <input
-            id="estado"
-            className={campo}
-            placeholder="La Guaira"
-            aria-invalid={Boolean(errorFor("estado"))}
-            {...register("estado" as Path<T>, {
-              validate: (valor: unknown) => {
-                const r = validarUbicacion({
-                  estado: String(valor ?? ""),
-                  parroquia: "placeholder",
-                });
-                return r.ok ? true : r.error;
-              },
-            })}
-          />
-          {errorFor("estado") && (
-            <p className="text-sm text-destructive">{errorFor("estado")}</p>
-          )}
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="parroquia" className="text-sm font-medium">
-            Parroquia
-          </label>
-          <input
-            id="parroquia"
-            className={campo}
-            placeholder="Catia La Mar"
-            aria-invalid={Boolean(errorFor("parroquia"))}
-            {...register("parroquia" as Path<T>, {
-              validate: (valor: unknown) => {
-                const r = validarUbicacion({
-                  estado: "placeholder",
-                  parroquia: String(valor ?? ""),
-                });
-                return r.ok ? true : r.error;
-              },
-            })}
-          />
-          {errorFor("parroquia") && (
-            <p className="text-sm text-destructive">{errorFor("parroquia")}</p>
-          )}
-        </div>
-      </div>
+      <SelectorUbicacion<T>
+        control={control}
+        errors={errors}
+        estados={estados}
+        municipios={municipios}
+      />
     </fieldset>
   );
 }

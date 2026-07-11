@@ -4,8 +4,9 @@ import { AuthError } from "next-auth";
 import { signIn } from "@/shared/auth";
 
 // Inicia sesión con el provider de credenciales. En éxito, `signIn` lanza una
-// redirección (a `/`) que debe propagarse; solo capturamos el error de
-// credenciales inválidas para devolver un mensaje al formulario.
+// redirección (a `/inicio`, el despachador por rol de la feature 021) que debe
+// propagarse; solo capturamos el error de credenciales inválidas para devolver
+// un mensaje al formulario.
 export async function iniciarSesionAction(input: {
   email: string;
   password: string;
@@ -14,7 +15,7 @@ export async function iniciarSesionAction(input: {
     await signIn("credentials", {
       email: input.email,
       password: input.password,
-      redirectTo: "/",
+      redirectTo: "/inicio",
     });
   } catch (error) {
     if (error instanceof AuthError) {

@@ -44,15 +44,20 @@ model Usuario {
   nombre             String
   rol                Rol
   estadoVerificacion EstadoVerificacion @default(PENDIENTE)
-  // Datos de contacto y ubicación (feature 017). Obligatorios en el flujo para
-  // COLABORADOR/SOLICITANTE; opcionales en base para no romper cuentas creadas
-  // antes de la feature (el guard las redirige a `/completar-perfil`). El ADMIN
-  // guarda sus datos en `PerfilAdmin` (016); aquí solo comparte el flag WhatsApp.
+  // Datos de contacto y ubicación (feature 017; ubicación por catálogo desde la
+  // 020). Obligatorios en el flujo para COLABORADOR/SOLICITANTE; opcionales en
+  // base para no romper cuentas creadas antes (el guard las redirige a
+  // `/completar-perfil`). El ADMIN guarda sus datos en `PerfilAdmin` (016); aquí
+  // solo comparte el flag WhatsApp. `estadoId`/`municipioId` referencian el
+  // catálogo de ubicación (020, sustituye a los antiguos `estado`/`parroquia` de
+  // texto libre).
   cedula             String?            @unique
   telefono           String?
   telefonoEsWhatsApp Boolean            @default(false)
-  estado             String?
-  parroquia          String?
+  estadoId           String?
+  estadoUbicacion    Estado?            @relation(fields: [estadoId], references: [id])
+  municipioId        String?
+  municipioUbicacion Municipio?         @relation(fields: [municipioId], references: [id])
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 
@@ -68,7 +73,11 @@ model Usuario {
   // Puntos de acopio que gestiona este ADMIN (feature 016 declara el lado admin;
   // el modelo completo lo crea la feature 011).
   puntosAcopio PuntoAcopio[]
+  // Actividades (Ayuda) que este ADMIN creó y gestiona (feature 022).
+  ayudas Ayuda[]
 
+  @@index([estadoId])
+  @@index([municipioId])
   @@map("usuarios")
 }
 
@@ -90,8 +99,13 @@ model PerfilAdmin {
   usuarioId          String        @unique
   usuario            Usuario       @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   nombreCuenta       String
-  estado             String
-  parroquia          String
+  // Ubicación por catálogo (feature 020, sustituye a los antiguos `estado`/
+  // `parroquia` de texto libre). Nullable en base para no bloquear la migración;
+  // el flujo de registro/edición del admin los exige.
+  estadoId           String?
+  estadoUbicacion    Estado?       @relation(fields: [estadoId], references: [id])
+  municipioId        String?
+  municipioUbicacion Municipio?    @relation(fields: [municipioId], references: [id])
   telefono           String
   // Flag WhatsApp del teléfono del centro de acopio (feature 017 amplía 016).
   telefonoEsWhatsApp Boolean       @default(false)
@@ -101,13 +115,15 @@ model PerfilAdmin {
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
 
+  @@index([estadoId])
+  @@index([municipioId])
   @@map("perfiles_admin")
 }
 
 // PuntoAcopio: centro físico de entrega perteneciente a un `ADMIN`. La feature 016
 // solo declara el lado admin de la relación (`adminId`) para no re-migrar; el
 // modelo completo (nombre, dirección, horarios, qué recibe) lo añade la feature
-// 011. Un `PuntoAcopio` nuevo hereda por defecto `estado`/`parroquia` del
+// 011. Un `PuntoAcopio` nuevo hereda por defecto `estadoId`/`municipioId` del
 // `PerfilAdmin` de su admin (regla de dominio que consumirá la 011).
 model PuntoAcopio {
   id        String   @id @default(cuid())
@@ -118,6 +134,42 @@ model PuntoAcopio {
 
   @@index([adminId])
   @@map("puntos_acopio")
+}
+
+// Catálogo de ubicación (feature 020). `Estado` y `Municipio` modelan la división
+// político-territorial de Venezuela (24 entidades federales y ~335 municipios) y
+// se siembran con `pnpm db:seed`. `codigo` es la clave natural estable (ISO
+// 3166-2:VE para el estado, `<codigoEstado>-<nn>` para el municipio) que hace la
+// siembra idempotente (upsert por `codigo`). Es de solo lectura para la app: no
+// hay CRUD; se mantiene vía seed. `Usuario` y `PerfilAdmin` referencian este
+// catálogo por `estadoId`/`municipioId` en vez de guardar texto libre.
+model Estado {
+  id     String @id @default(cuid())
+  codigo String @unique
+  nombre String
+
+  municipios    Municipio[]
+  usuarios      Usuario[]
+  perfilesAdmin PerfilAdmin[]
+
+  @@map("estados")
+}
+
+// Municipio del catálogo. Cuelga de un `Estado` (relación obligatoria); el
+// desplegable de municipio se filtra por el `estadoId` elegido. `codigo` único
+// global permite corregir nombres sin romper las FKs que lo referencian.
+model Municipio {
+  id       String @id @default(cuid())
+  codigo   String @unique
+  nombre   String
+  estadoId String
+  estado   Estado @relation(fields: [estadoId], references: [id], onDelete: Cascade)
+
+  usuarios      Usuario[]
+  perfilesAdmin PerfilAdmin[]
+
+  @@index([estadoId])
+  @@map("municipios")
 }
 
 // Categoría de un recurso del catálogo (ver feature 004 y constitution/tech-stack.md).
@@ -201,6 +253,9 @@ enum EstadoAyuda {
 // siga en ese estado (después quedan congeladas para medir el progreso).
 model Ayuda {
   id            String        @id @default(cuid())
+  // Dueño: el ADMIN que creó la actividad (feature 022). Inmutable tras el alta.
+  adminId       String
+  admin         Usuario       @relation(fields: [adminId], references: [id])
   titulo        String
   sectorDestino String
   fecha         DateTime
@@ -212,6 +267,7 @@ model Ayuda {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
+  @@index([adminId])
   @@index([tipo])
   @@index([estado])
   @@index([fecha])
