@@ -43,23 +43,27 @@ type Props = {
 export function PuntoAcopioCard({ punto, mostrarEstado = false, acciones }: Props) {
   return (
     <Card className="gap-0 overflow-hidden p-0">
-      {/* Placeholder de foto (campo imagen: mejora futura). */}
-      <div className="relative flex aspect-video items-center justify-center border-b bg-muted">
+      {/* Placeholder de foto (campo imagen: mejora futura). Baño ocre suave:
+          calidez de marca mientras no hay imagen real. */}
+      <div className="relative flex aspect-video items-center justify-center border-b bg-primary/10">
         <Warehouse
           strokeWidth={1.5}
-          className="size-10 text-muted-foreground/40"
+          className="size-10 text-primary-ink/40"
           aria-hidden="true"
         />
-        {mostrarEstado && (
-          <Badge
-            variant="outline"
-            className={`absolute top-2 right-2 bg-background ${
-              punto.activo ? "text-primary-ink" : "text-muted-foreground"
-            }`}
-          >
-            {punto.activo ? "Activo" : "Archivado"}
-          </Badge>
-        )}
+        {mostrarEstado &&
+          (punto.activo ? (
+            <Badge className="absolute top-2 right-2 border-transparent bg-primary/15 text-primary-ink">
+              Activo
+            </Badge>
+          ) : (
+            <Badge
+              variant="outline"
+              className="absolute top-2 right-2 bg-background text-muted-foreground"
+            >
+              Archivado
+            </Badge>
+          ))}
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-4">
@@ -107,10 +111,15 @@ export function PuntoAcopioCard({ punto, mostrarEstado = false, acciones }: Prop
       </div>
 
       <div className="flex flex-col gap-2 border-t p-4 pt-3">
+        {/* CTAs con el icono en teal (--accent, color de interacción). */}
         <div className="grid grid-cols-2 gap-2">
           <Button asChild variant="outline" size="sm">
             <a href={urlMaps(punto)} target="_blank" rel="noopener noreferrer">
-              <MapPin strokeWidth={1.5} aria-hidden="true" />
+              <MapPin
+                strokeWidth={1.5}
+                className="text-accent"
+                aria-hidden="true"
+              />
               Cómo llegar
             </a>
           </Button>
@@ -121,14 +130,21 @@ export function PuntoAcopioCard({ punto, mostrarEstado = false, acciones }: Prop
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <IconoWhatsApp className="size-4" aria-hidden="true" />
+                <IconoWhatsApp
+                  className="size-4 text-accent"
+                  aria-hidden="true"
+                />
                 WhatsApp
               </a>
             </Button>
           ) : (
             <Button asChild variant="outline" size="sm">
               <a href={`tel:${punto.telefono.replace(/\s/g, "")}`}>
-                <Phone strokeWidth={1.5} aria-hidden="true" />
+                <Phone
+                  strokeWidth={1.5}
+                  className="text-accent"
+                  aria-hidden="true"
+                />
                 Llamar
               </a>
             </Button>

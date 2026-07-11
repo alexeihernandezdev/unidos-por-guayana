@@ -119,14 +119,21 @@ export default async function DetallePuntoAcopioPage({ params }: Props) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <IconoWhatsApp className="size-4" aria-hidden="true" />
+                  <IconoWhatsApp
+                    className="size-4 text-accent"
+                    aria-hidden="true"
+                  />
                   Escribir por WhatsApp
                 </a>
               </Button>
             ) : (
               <Button asChild variant="outline">
                 <a href={`tel:${punto.telefono.replace(/\s/g, "")}`}>
-                  <Phone strokeWidth={1.5} aria-hidden="true" />
+                  <Phone
+                    strokeWidth={1.5}
+                    className="text-accent"
+                    aria-hidden="true"
+                  />
                   Llamar
                 </a>
               </Button>
