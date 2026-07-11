@@ -1,10 +1,17 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import { Button } from "@/shared/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { CATEGORIA_LABEL } from "./categorias";
 
 export type RecursoFormValores = {
@@ -43,6 +50,7 @@ export function RecursoForm({
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<RecursoFormValores>({
     defaultValues: {
@@ -107,16 +115,25 @@ export function RecursoForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="categoria" className="text-sm font-medium">
-          Categoría
-        </label>
-        <select id="categoria" className={campo} {...register("categoria")}>
-          {CATEGORIAS.map((categoria) => (
-            <option key={categoria} value={categoria}>
-              {CATEGORIA_LABEL[categoria]}
-            </option>
-          ))}
-        </select>
+        <span className="text-sm font-medium">Categoría</span>
+        <Controller
+          control={control}
+          name="categoria"
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger aria-label="Categoría" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORIAS.map((categoria) => (
+                  <SelectItem key={categoria} value={categoria}>
+                    {CATEGORIA_LABEL[categoria]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
       </div>
 
       <div className="flex flex-col gap-1.5">

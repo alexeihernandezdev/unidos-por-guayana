@@ -5,6 +5,13 @@ import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import type { MetaRecurso } from "@/modules/ayudas/domain/Ayuda";
 import { Button } from "@/shared/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import type { RecursoOpcion } from "./AyudaForm";
 
 type Resultado = { ok: boolean; error?: string };
@@ -134,27 +141,29 @@ export function MetasEditor({
 
       <div className="flex flex-wrap items-end gap-3 border-t border-border pt-4">
         <div className="flex min-w-40 flex-1 flex-col gap-1.5">
-          <label htmlFor="nueva-meta-recurso" className="text-xs font-medium">
-            Añadir recurso
-          </label>
-          <select
-            id="nueva-meta-recurso"
-            className={campo}
+          <span className="text-xs font-medium">Añadir recurso</span>
+          <Select
             value={nuevoRecursoId}
-            onChange={(e) => setNuevoRecursoId(e.target.value)}
+            onValueChange={setNuevoRecursoId}
             disabled={disponibles.length === 0}
           >
-            <option value="">
-              {disponibles.length === 0
-                ? "No quedan recursos disponibles"
-                : "Elige un recurso…"}
-            </option>
-            {disponibles.map((recurso) => (
-              <option key={recurso.id} value={recurso.id}>
-                {recurso.nombre} ({recurso.unidad})
-              </option>
-            ))}
-          </select>
+            <SelectTrigger aria-label="Añadir recurso" className="w-full">
+              <SelectValue
+                placeholder={
+                  disponibles.length === 0
+                    ? "No quedan recursos disponibles"
+                    : "Elige un recurso…"
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {disponibles.map((recurso) => (
+                <SelectItem key={recurso.id} value={recurso.id}>
+                  {recurso.nombre} ({recurso.unidad})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex w-32 flex-col gap-1.5">
           <label htmlFor="nueva-meta-cantidad" className="text-xs font-medium">

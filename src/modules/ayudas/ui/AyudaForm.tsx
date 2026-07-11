@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import {
@@ -9,6 +9,13 @@ import {
   TipoActividad,
 } from "@/modules/ayudas/domain/TipoActividad";
 import { Button } from "@/shared/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { etiquetaTipo } from "./tipos";
 
 // Opción de recurso para el selector de metas (recursos activos del catálogo).
@@ -114,21 +121,30 @@ export function AyudaForm({
     <form onSubmit={onSubmit} className="flex w-full max-w-2xl flex-col gap-4">
       {conMetas && (
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="tipo" className="text-sm font-medium">
-            Tipo de actividad
-          </label>
-          <select
-            id="tipo"
-            className={campo}
-            aria-invalid={Boolean(errors.tipo)}
-            {...register("tipo", { required: "Elige el tipo de actividad." })}
-          >
-            {TIPOS_ACTIVIDAD.map((t) => (
-              <option key={t} value={t}>
-                {etiquetaTipo(t)}
-              </option>
-            ))}
-          </select>
+          <span className="text-sm font-medium">Tipo de actividad</span>
+          <Controller
+            control={control}
+            name="tipo"
+            rules={{ required: "Elige el tipo de actividad." }}
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger
+                  aria-label="Tipo de actividad"
+                  aria-invalid={Boolean(errors.tipo)}
+                  className="w-full"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TIPOS_ACTIVIDAD.map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {etiquetaTipo(t)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
         </div>
       )}
 
@@ -223,25 +239,34 @@ export function AyudaForm({
                     className="flex flex-wrap items-end gap-3 sm:flex-nowrap"
                   >
                     <div className="flex min-w-40 flex-1 flex-col gap-1.5">
-                      <label
-                        htmlFor={`meta-recurso-${index}`}
-                        className="text-xs font-medium text-muted-foreground"
-                      >
+                      <span className="text-xs font-medium text-muted-foreground">
                         Recurso
-                      </label>
-                      <select
-                        id={`meta-recurso-${index}`}
-                        className={campo}
-                        {...register(`metas.${index}.recursoId`, {
-                          required: "Elige un recurso.",
-                        })}
-                      >
-                        {recursos.map((recurso) => (
-                          <option key={recurso.id} value={recurso.id}>
-                            {recurso.nombre} ({recurso.unidad})
-                          </option>
-                        ))}
-                      </select>
+                      </span>
+                      <Controller
+                        control={control}
+                        name={`metas.${index}.recursoId`}
+                        rules={{ required: "Elige un recurso." }}
+                        render={({ field: recursoField }) => (
+                          <Select
+                            value={recursoField.value}
+                            onValueChange={recursoField.onChange}
+                          >
+                            <SelectTrigger
+                              aria-label="Recurso"
+                              className="w-full"
+                            >
+                              <SelectValue placeholder="Elige un recurso…" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {recursos.map((recurso) => (
+                                <SelectItem key={recurso.id} value={recurso.id}>
+                                  {recurso.nombre} ({recurso.unidad})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
                     </div>
 
                     <div className="flex w-32 flex-col gap-1.5">

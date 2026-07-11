@@ -1,13 +1,20 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import {
   CATEGORIAS_RECURSO,
   CategoriaRecurso,
 } from "@/modules/recursos/domain/CategoriaRecurso";
 import { Button } from "@/shared/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { CATEGORIA_LABEL } from "./categorias";
 
 export type ProponerRecursoFormValores = {
@@ -37,6 +44,7 @@ export function ProponerRecursoForm({ action, rutaExito }: Props) {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<ProponerRecursoFormValores>({
     defaultValues: {
@@ -103,20 +111,26 @@ export function ProponerRecursoForm({ action, rutaExito }: Props) {
         </div>
 
         <div className="flex flex-1 flex-col gap-1.5">
-          <label htmlFor="categoria" className="text-sm font-medium">
-            Categoría
-          </label>
-          <select
-            id="categoria"
-            className={campo}
-            {...register("categoria", { required: "Elige una categoría." })}
-          >
-            {CATEGORIAS_RECURSO.map((c) => (
-              <option key={c} value={c}>
-                {CATEGORIA_LABEL[c]}
-              </option>
-            ))}
-          </select>
+          <span className="text-sm font-medium">Categoría</span>
+          <Controller
+            control={control}
+            name="categoria"
+            rules={{ required: "Elige una categoría." }}
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger aria-label="Categoría" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIAS_RECURSO.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {CATEGORIA_LABEL[c]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
         </div>
       </div>
 

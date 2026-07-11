@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import type { Estado } from "@/modules/ubicacion/domain/Estado";
 import type { Municipio } from "@/modules/ubicacion/domain/Municipio";
@@ -13,7 +13,15 @@ import {
 } from "@/modules/usuarios/domain/PerfilAdmin";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { Button } from "@/shared/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { DatosContactoFields } from "./DatosContactoFields";
+import { PasswordInput } from "./PasswordInput";
 
 // Payload que el formulario envía al server action. Cuando el rol es ADMIN,
 // incluye el perfil de centro de acopio (feature 016) con `telefonoEsWhatsApp`.
@@ -61,7 +69,7 @@ type Props = {
 };
 
 const campo =
-  "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive";
+  "auth-field w-full aria-invalid:border-destructive";
 
 export function RegistroForm({ action, estados, municipios }: Props) {
   const router = useRouter();
@@ -87,7 +95,6 @@ export function RegistroForm({ action, estados, municipios }: Props) {
   // memoización del React Compiler) para mostrar los campos condicionales.
   const [rolActual, setRolActual] = useState<Rol>(Rol.COLABORADOR);
   const esAdmin = rolActual === Rol.ADMIN;
-  const rolField = register("rol");
 
   const onSubmit = handleSubmit((datos) => {
     setErrorServidor(null);
@@ -138,7 +145,7 @@ export function RegistroForm({ action, estados, municipios }: Props) {
   });
 
   return (
-    <form onSubmit={onSubmit} className="flex w-full max-w-sm flex-col gap-4">
+    <form onSubmit={onSubmit} className="flex w-full flex-col gap-5">
       <div className="flex flex-col gap-1.5">
         <label htmlFor="nombre" className="text-sm font-medium">
           Nombre
@@ -178,9 +185,8 @@ export function RegistroForm({ action, estados, municipios }: Props) {
         <label htmlFor="password" className="text-sm font-medium">
           Contraseña
         </label>
-        <input
+        <PasswordInput
           id="password"
-          type="password"
           autoComplete="new-password"
           className={campo}
           aria-invalid={Boolean(errors.password)}
@@ -198,24 +204,38 @@ export function RegistroForm({ action, estados, municipios }: Props) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="rol" className="text-sm font-medium">
-          Quiero registrarme como
-        </label>
-        <select
-          id="rol"
-          className={campo}
-          {...rolField}
-          onChange={(event) => {
-            rolField.onChange(event);
-            setRolActual(event.target.value as Rol);
-          }}
-        >
-          <option value={Rol.COLABORADOR}>Colaborador (quiero aportar)</option>
-          <option value={Rol.SOLICITANTE}>Solicitante (pido ayuda)</option>
-          <option value={Rol.ADMIN}>
-            Administrador / centro de acopio (requiere aprobación)
-          </option>
-        </select>
+        <span className="text-sm font-medium">Quiero registrarme como</span>
+        <Controller
+          control={control}
+          name="rol"
+          render={({ field }) => (
+            <Select
+              value={field.value}
+              onValueChange={(valor) => {
+                field.onChange(valor);
+                setRolActual(valor as Rol);
+              }}
+            >
+              <SelectTrigger
+                aria-label="Quiero registrarme como"
+                className="w-full"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={Rol.COLABORADOR}>
+                  Colaborador (quiero aportar)
+                </SelectItem>
+                <SelectItem value={Rol.SOLICITANTE}>
+                  Solicitante (pido ayuda)
+                </SelectItem>
+                <SelectItem value={Rol.ADMIN}>
+                  Administrador / centro de acopio (requiere aprobación)
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        />
         {esAdmin && (
           <p className="text-xs text-muted-foreground">
             Las cuentas de administrador quedan pendientes hasta que un
@@ -235,7 +255,7 @@ export function RegistroForm({ action, estados, municipios }: Props) {
       )}
 
       {esAdmin && (
-        <fieldset className="flex flex-col gap-4 rounded-lg border border-border p-4">
+        <fieldset className="flex flex-col gap-5 border-l-2 border-primary/35 bg-primary/[0.035] p-5">
           <legend className="px-1 text-sm font-medium">
             Datos del centro de acopio
           </legend>
@@ -266,7 +286,7 @@ export function RegistroForm({ action, estados, municipios }: Props) {
             municipios={municipios}
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <label htmlFor="telefono" className="text-sm font-medium">
                 Teléfono
@@ -315,19 +335,31 @@ export function RegistroForm({ action, estados, municipios }: Props) {
             Este número recibe WhatsApp
           </label>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="tipoDocumento" className="text-sm font-medium">
-                Tipo de documento
-              </label>
-              <select
-                id="tipoDocumento"
-                className={campo}
-                {...register("tipoDocumento")}
-              >
-                <option value={TipoDocumento.JURIDICO}>Jurídico</option>
-                <option value={TipoDocumento.NATURAL}>Natural</option>
-              </select>
+              <span className="text-sm font-medium">Tipo de documento</span>
+              <Controller
+                control={control}
+                name="tipoDocumento"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger
+                      aria-label="Tipo de documento"
+                      className="w-full"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={TipoDocumento.JURIDICO}>
+                        Jurídico
+                      </SelectItem>
+                      <SelectItem value={TipoDocumento.NATURAL}>
+                        Natural
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
             <div className="flex flex-col gap-1.5">
               <label htmlFor="numeroDocumento" className="text-sm font-medium">
@@ -357,7 +389,7 @@ export function RegistroForm({ action, estados, municipios }: Props) {
         </p>
       )}
 
-      <Button type="submit" disabled={pendiente}>
+      <Button type="submit" size="lg" disabled={pendiente} className="mt-1 w-full active:scale-[0.985]">
         {pendiente ? "Creando cuenta…" : "Crear cuenta"}
       </Button>
     </form>

@@ -10,14 +10,19 @@ import {
 } from "react-hook-form";
 import type { Estado } from "@/modules/ubicacion/domain/Estado";
 import type { Municipio } from "@/modules/ubicacion/domain/Municipio";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 
 // Selector de ubicación dependiente (feature 020): dos desplegables estado →
-// municipio, integrado con React Hook Form. Al cambiar el estado se filtran los
-// municipios y se resetea el municipio elegido. El catálogo (≈335 municipios) se
-// precarga en el servidor y llega por props; el filtrado ocurre en el cliente.
-
-const campo =
-  "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive";
+// municipio (Select de shadcn/Radix), integrado con React Hook Form vía
+// useController. Al cambiar el estado se filtran los municipios y se resetea el
+// municipio elegido. El catálogo (≈335 municipios) se precarga en el servidor y
+// llega por props; el filtrado ocurre en el cliente.
 
 // Los formularios que usan este componente deben declarar estos nombres en su
 // tipo `T` (dos strings con el id de catálogo).
@@ -62,57 +67,65 @@ export function SelectorUbicacion<T extends FieldValues & CamposUbicacion>({
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="estadoId" className="text-sm font-medium">
-          Estado
-        </label>
-        <select
-          id="estadoId"
-          className={campo}
-          aria-invalid={Boolean(errorEstado)}
+        <span className="text-sm font-medium">Estado</span>
+        <Select
           value={estadoId}
           name={estadoCtrl.field.name}
-          onChange={(event) => {
-            estadoCtrl.field.onChange(event.target.value);
+          onValueChange={(valor) => {
+            estadoCtrl.field.onChange(valor);
             // Resetea el municipio: el elegido puede no pertenecer al nuevo estado.
             municipioCtrl.field.onChange("");
           }}
         >
-          <option value="">Selecciona un estado…</option>
-          {estados.map((estado) => (
-            <option key={estado.id} value={estado.id}>
-              {estado.nombre}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger
+            aria-label="Estado"
+            aria-invalid={Boolean(errorEstado)}
+            className="w-full"
+          >
+            <SelectValue placeholder="Selecciona un estado…" />
+          </SelectTrigger>
+          <SelectContent>
+            {estados.map((estado) => (
+              <SelectItem key={estado.id} value={estado.id}>
+                {estado.nombre}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         {errorEstado && (
           <p className="text-sm text-destructive">{errorEstado}</p>
         )}
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="municipioId" className="text-sm font-medium">
-          Municipio
-        </label>
-        <select
-          id="municipioId"
-          className={campo}
-          aria-invalid={Boolean(errorMunicipio)}
-          disabled={estadoId.length === 0}
+        <span className="text-sm font-medium">Municipio</span>
+        <Select
           value={String(municipioCtrl.field.value ?? "")}
           name={municipioCtrl.field.name}
-          onChange={(event) => municipioCtrl.field.onChange(event.target.value)}
+          disabled={estadoId.length === 0}
+          onValueChange={(valor) => municipioCtrl.field.onChange(valor)}
         >
-          <option value="">
-            {estadoId.length === 0
-              ? "Elige primero un estado"
-              : "Selecciona un municipio…"}
-          </option>
-          {municipiosDelEstado.map((municipio) => (
-            <option key={municipio.id} value={municipio.id}>
-              {municipio.nombre}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger
+            aria-label="Municipio"
+            aria-invalid={Boolean(errorMunicipio)}
+            className="w-full"
+          >
+            <SelectValue
+              placeholder={
+                estadoId.length === 0
+                  ? "Elige primero un estado"
+                  : "Selecciona un municipio…"
+              }
+            />
+          </SelectTrigger>
+          <SelectContent>
+            {municipiosDelEstado.map((municipio) => (
+              <SelectItem key={municipio.id} value={municipio.id}>
+                {municipio.nombre}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         {errorMunicipio && (
           <p className="text-sm text-destructive">{errorMunicipio}</p>
         )}

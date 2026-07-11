@@ -15,6 +15,7 @@ import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarSolicitudesServicio } from "@/shared/solicitudes";
 import { requireRol } from "@/shared/auth";
 import { Button } from "@/shared/ui/button";
+import { FiltroSelect } from "@/shared/ui/filtro-select";
 
 type Props = {
   searchParams: Promise<{
@@ -68,41 +69,35 @@ export default async function SolicitudesAdminPage({ searchParams }: Props) {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="urgencia" className="text-sm font-medium">
-            Urgencia
-          </label>
-          <select
-            id="urgencia"
+          <span className="text-sm font-medium">Urgencia</span>
+          <FiltroSelect
             name="urgencia"
-            defaultValue={filtro.urgencia ?? ""}
-            className={campo}
-          >
-            <option value="">Todas</option>
-            {URGENCIAS_SOLICITUD.map((u) => (
-              <option key={u} value={u}>
-                {URGENCIA_LABEL[u]}
-              </option>
-            ))}
-          </select>
+            ariaLabel="Filtrar por urgencia"
+            defaultValue={filtro.urgencia ?? "todas"}
+            opciones={[
+              { value: "todas", label: "Todas" },
+              ...URGENCIAS_SOLICITUD.map((u) => ({
+                value: u,
+                label: URGENCIA_LABEL[u],
+              })),
+            ]}
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="estado" className="text-sm font-medium">
-            Estado
-          </label>
-          <select
-            id="estado"
+          <span className="text-sm font-medium">Estado</span>
+          <FiltroSelect
             name="estado"
-            defaultValue={filtro.estado ?? ""}
-            className={campo}
-          >
-            <option value="">Todos</option>
-            {ESTADOS_SOLICITUD.map((e) => (
-              <option key={e} value={e}>
-                {ESTADO_LABEL[e]}
-              </option>
-            ))}
-          </select>
+            ariaLabel="Filtrar por estado"
+            defaultValue={filtro.estado ?? "todos"}
+            opciones={[
+              { value: "todos", label: "Todos" },
+              ...ESTADOS_SOLICITUD.map((e) => ({
+                value: e,
+                label: ESTADO_LABEL[e],
+              })),
+            ]}
+          />
         </div>
 
         <Button type="submit" variant="outline">

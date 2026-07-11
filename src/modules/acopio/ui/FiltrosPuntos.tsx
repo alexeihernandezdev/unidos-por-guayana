@@ -6,6 +6,13 @@ import type { Estado } from "@/modules/ubicacion/domain/Estado";
 import type { Municipio } from "@/modules/ubicacion/domain/Municipio";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import type { PuntoAcopioConUbicacion } from "./PuntoAcopioCard";
 
 // Filtros del listado de puntos de acopio (feature 011). Client-side: los
@@ -59,8 +66,8 @@ const OPCIONES_ACTIVO: { valor: FiltroEstadoActivo; label: string }[] = [
   { valor: "archivados", label: "Archivados" },
 ];
 
-const select =
-  "h-9 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50";
+// Radix no admite items con value="": sentinela para la opción "Todos".
+const TODOS = "_todos";
 
 type Props = {
   valor: FiltroPuntosValor;
@@ -111,38 +118,53 @@ export function FiltrosPuntos({
           />
         </div>
 
-        <select
-          value={valor.estadoId}
-          onChange={(e) =>
-            onCambio({ ...valor, estadoId: e.target.value, municipioId: "" })
+        <Select
+          value={valor.estadoId || TODOS}
+          onValueChange={(v) =>
+            onCambio({
+              ...valor,
+              estadoId: v === TODOS ? "" : v,
+              municipioId: "",
+            })
           }
-          aria-label="Filtrar por estado"
-          className={select}
         >
-          <option value="">Todos los estados</option>
-          {estados.map((estado) => (
-            <option key={estado.id} value={estado.id}>
-              {estado.nombre}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger aria-label="Filtrar por estado" className="min-w-44">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={TODOS}>Todos los estados</SelectItem>
+            {estados.map((estado) => (
+              <SelectItem key={estado.id} value={estado.id}>
+                {estado.nombre}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-        <select
-          value={valor.municipioId}
-          onChange={(e) => onCambio({ ...valor, municipioId: e.target.value })}
+        <Select
+          value={valor.municipioId || TODOS}
+          onValueChange={(v) =>
+            onCambio({ ...valor, municipioId: v === TODOS ? "" : v })
+          }
           disabled={!valor.estadoId}
-          aria-label="Filtrar por municipio"
-          className={select}
         >
-          <option value="">
-            {valor.estadoId ? "Todos los municipios" : "Municipio"}
-          </option>
-          {municipiosDelEstado.map((municipio) => (
-            <option key={municipio.id} value={municipio.id}>
-              {municipio.nombre}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger
+            aria-label="Filtrar por municipio"
+            className="min-w-44"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={TODOS}>
+              {valor.estadoId ? "Todos los municipios" : "Municipio"}
+            </SelectItem>
+            {municipiosDelEstado.map((municipio) => (
+              <SelectItem key={municipio.id} value={municipio.id}>
+                {municipio.nombre}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         {conEstadoActivo && (
           <div

@@ -1,9 +1,16 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { Button } from "@/shared/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 
 // Opción para el selector: recursos que forman parte de las metas de la Ayuda.
 // La unidad se muestra junto al campo de cantidad para dar contexto al colaborador.
@@ -79,20 +86,30 @@ export function AporteForm({ action, opciones, volverHref }: Props) {
   return (
     <form onSubmit={onSubmit} className="flex w-full max-w-lg flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="recursoId" className="text-sm font-medium">
-          Recurso
-        </label>
-        <select
-          id="recursoId"
-          className={campo}
-          {...register("recursoId", { required: "Elige un recurso." })}
-        >
-          {opciones.map((o) => (
-            <option key={o.recursoId} value={o.recursoId}>
-              {o.nombre} ({o.unidad})
-            </option>
-          ))}
-        </select>
+        <span className="text-sm font-medium">Recurso</span>
+        <Controller
+          control={control}
+          name="recursoId"
+          rules={{ required: "Elige un recurso." }}
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger
+                aria-label="Recurso"
+                aria-invalid={Boolean(errors.recursoId)}
+                className="w-full"
+              >
+                <SelectValue placeholder="Elige un recurso…" />
+              </SelectTrigger>
+              <SelectContent>
+                {opciones.map((o) => (
+                  <SelectItem key={o.recursoId} value={o.recursoId}>
+                    {o.nombre} ({o.unidad})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
         {errors.recursoId && (
           <p className="text-sm text-destructive">{errors.recursoId.message}</p>
         )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import type { Estado } from "@/modules/ubicacion/domain/Estado";
 import type { Municipio } from "@/modules/ubicacion/domain/Municipio";
 import { SelectorUbicacion } from "@/modules/ubicacion/ui/SelectorUbicacion";
@@ -10,6 +10,13 @@ import {
   type DatosPerfilAdmin,
 } from "@/modules/usuarios/domain/PerfilAdmin";
 import { Button } from "@/shared/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 
 type Props = {
   // Valores actuales del perfil, para prellenar el formulario.
@@ -123,13 +130,27 @@ export function PerfilAdminForm({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="tipoDocumento" className="text-sm font-medium">
-            Tipo de documento
-          </label>
-          <select id="tipoDocumento" className={campo} {...register("tipoDocumento")}>
-            <option value={TipoDocumento.JURIDICO}>Jurídico</option>
-            <option value={TipoDocumento.NATURAL}>Natural</option>
-          </select>
+          <span className="text-sm font-medium">Tipo de documento</span>
+          <Controller
+            control={control}
+            name="tipoDocumento"
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger
+                  aria-label="Tipo de documento"
+                  className="w-full"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={TipoDocumento.JURIDICO}>
+                    Jurídico
+                  </SelectItem>
+                  <SelectItem value={TipoDocumento.NATURAL}>Natural</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor="numeroDocumento" className="text-sm font-medium">

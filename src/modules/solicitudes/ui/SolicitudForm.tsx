@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import {
@@ -9,6 +9,13 @@ import {
   UrgenciaSolicitud,
 } from "@/modules/solicitudes/domain/UrgenciaSolicitud";
 import { Button } from "@/shared/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { URGENCIA_LABEL } from "./urgencias";
 
 export type RecursoOpcion = {
@@ -111,20 +118,26 @@ export function SolicitudForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="urgencia" className="text-sm font-medium">
-          Urgencia
-        </label>
-        <select
-          id="urgencia"
-          className={campo}
-          {...register("urgencia", { required: "Indica la urgencia." })}
-        >
-          {URGENCIAS_SOLICITUD.map((u) => (
-            <option key={u} value={u}>
-              {URGENCIA_LABEL[u]}
-            </option>
-          ))}
-        </select>
+        <span className="text-sm font-medium">Urgencia</span>
+        <Controller
+          control={control}
+          name="urgencia"
+          rules={{ required: "Indica la urgencia." }}
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger aria-label="Urgencia" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {URGENCIAS_SOLICITUD.map((u) => (
+                  <SelectItem key={u} value={u}>
+                    {URGENCIA_LABEL[u]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -166,25 +179,34 @@ export function SolicitudForm({
                   className="flex flex-wrap items-end gap-3 sm:flex-nowrap"
                 >
                   <div className="flex min-w-40 flex-1 flex-col gap-1.5">
-                    <label
-                      htmlFor={`recurso-${index}`}
-                      className="text-xs font-medium text-muted-foreground"
-                    >
+                    <span className="text-xs font-medium text-muted-foreground">
                       Recurso
-                    </label>
-                    <select
-                      id={`recurso-${index}`}
-                      className={campo}
-                      {...register(`recursos.${index}.recursoId`, {
-                        required: "Elige un recurso.",
-                      })}
-                    >
-                      {recursos.map((recurso) => (
-                        <option key={recurso.id} value={recurso.id}>
-                          {recurso.nombre} ({recurso.unidad})
-                        </option>
-                      ))}
-                    </select>
+                    </span>
+                    <Controller
+                      control={control}
+                      name={`recursos.${index}.recursoId`}
+                      rules={{ required: "Elige un recurso." }}
+                      render={({ field: recursoField }) => (
+                        <Select
+                          value={recursoField.value}
+                          onValueChange={recursoField.onChange}
+                        >
+                          <SelectTrigger
+                            aria-label="Recurso"
+                            className="w-full"
+                          >
+                            <SelectValue placeholder="Elige un recurso…" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {recursos.map((recurso) => (
+                              <SelectItem key={recurso.id} value={recurso.id}>
+                                {recurso.nombre} ({recurso.unidad})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
                   </div>
 
                   <div className="flex w-36 flex-col gap-1.5">

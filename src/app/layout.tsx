@@ -50,6 +50,7 @@ export default async function RootLayout({
   const pathname = (await headers()).get("x-pathname") ?? "";
   const esPaginaPublica =
     pathname === "/" || pathname.startsWith("/transparencia");
+  const esRutaAuth = pathname === "/login" || pathname === "/registro";
 
   return (
     <html
@@ -59,7 +60,7 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <Providers>
-          {!usuario && <SiteHeader />}
+          {!usuario && !esRutaAuth && <SiteHeader />}
           {usuario && esPaginaPublica && (
             <VolverAlPanelHeader rutaPanel={rutaInicioPorRol(usuario.rol)} />
           )}
