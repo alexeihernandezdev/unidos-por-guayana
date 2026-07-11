@@ -32,7 +32,7 @@ _Features completadas, en orden de implementación._
 
 _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
 
-17. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
+20. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
 
 ## Cambios propuestos por el cliente (revisión de alcance) 🔁
 
@@ -48,13 +48,13 @@ _Ordenado según dependencias. Cada uno se convierte en `features/NNN-…/` ante
 
 **Superficies de gestión y transparencia**
 
-18. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
+21. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
 
 **Módulos de apoyo**
 
-18. **011 · Puntos de acopio** — Centros físicos de entrega (dirección, horarios, qué reciben), **cada uno perteneciente a un `ADMIN`** (ver 016).
-19. **012 · Notificaciones** — Avisos a colaboradores sobre envíos que necesitan recursos o metas cumplidas.
-20. **013 · Verificación de usuarios** — Validación de `COLABORADOR` y `SOLICITANTE` (`estadoVerificacion`) por parte del `ADMIN`. La verificación de cuentas `ADMIN` la cubre 015 (superadmin).
-21. **014 · Donaciones monetarias externas** — Mostrar medios externos para donar dinero (cuenta bancaria, PayPal, Zelle…) y permitir al `ADMIN` registrar manualmente montos recibidos por fuera (recursos `MONETARIO`) para reflejarlos en la transparencia. La app no procesa el pago.
+22. **011 · Puntos de acopio** — Centros físicos de entrega (dirección, horarios, qué reciben), **cada uno perteneciente a un `ADMIN`** (ver 016).
+23. **012 · Notificaciones** — Avisos a colaboradores sobre envíos que necesitan recursos o metas cumplidas.
+24. **013 · Verificación de usuarios** — Validación de `COLABORADOR` y `SOLICITANTE` (`estadoVerificacion`) por parte del `ADMIN`. La verificación de cuentas `ADMIN` la cubre 015 (superadmin).
+25. **014 · Donaciones monetarias externas** — Mostrar medios externos para donar dinero (cuenta bancaria, PayPal, Zelle…) y permitir al `ADMIN` registrar manualmente montos recibidos por fuera (recursos `MONETARIO`) para reflejarlos en la transparencia. La app no procesa el pago.
 
 > Cada feature nueva se crea como `features/NNN-nombre-feature/` con `spec.md`, `plan.md` y `tasks.md` antes de tocar código.
