@@ -15,12 +15,17 @@ function aporteBase(
     recursoId: "rec-1",
     colaboradorId: "col-1",
     cantidad: 10,
+    moneda: null,
     estado: EstadoAporte.COMPROMETIDO,
     nota: null,
+    registradoPorId: null,
+    medioDonacionId: null,
+    referencia: null,
     recibidoEn: null,
     updatedAt: overrides.createdAt,
     recurso: { id: "rec-1", nombre: "Agua", unidad: "litros" },
     colaborador: { id: "col-1", nombre: "Ana Pérez", email: "ana@ejemplo.com" },
+    medio: null,
     ...overrides,
   };
 }

@@ -19,19 +19,28 @@ export class InMemoryAporteRepository implements AporteRepository {
 
   async crear(datos: NuevoAporte): Promise<Aporte> {
     const ahora = new Date();
+    // Por defecto nace `COMPROMETIDO` (flujo 006); el ingreso monetario externo
+    // (014) pasa `estado = RECIBIDO` y su `recibidoEn`.
+    const estado = datos.estado ?? Estados.COMPROMETIDO;
     const aporte: Aporte = {
       id: `aporte-${++this.secuencia}`,
       ayudaId: datos.ayudaId,
       recursoId: datos.recursoId,
       colaboradorId: datos.colaboradorId,
       cantidad: datos.cantidad,
-      estado: Estados.COMPROMETIDO,
+      moneda: datos.moneda ?? null,
+      estado,
       nota: datos.nota,
-      recibidoEn: null,
+      registradoPorId: datos.registradoPorId ?? null,
+      medioDonacionId: datos.medioDonacionId ?? null,
+      referencia: datos.referencia ?? null,
+      recibidoEn:
+        datos.recibidoEn ?? (estado === Estados.RECIBIDO ? ahora : null),
       createdAt: ahora,
       updatedAt: ahora,
       recurso: null,
       colaborador: null,
+      medio: null,
     };
     this.porId.set(aporte.id, aporte);
     return this.clonar(aporte);
@@ -125,6 +134,17 @@ export class InMemoryAporteRepository implements AporteRepository {
     return [...acumulado.values()];
   }
 
+  async listarIngresosExternos(): Promise<Aporte[]> {
+    return [...this.porId.values()]
+      .filter((a) => a.registradoPorId !== null)
+      .sort((a, b) => {
+        const fa = (a.recibidoEn ?? a.createdAt).getTime();
+        const fb = (b.recibidoEn ?? b.createdAt).getTime();
+        return fb - fa;
+      })
+      .map((a) => this.clonar(a));
+  }
+
   async recolectadoGlobalPorRecurso(): Promise<RecolectadoPorRecursoId[]> {
     const acumulado = new Map<string, number>();
     for (const aporte of this.porId.values()) {
@@ -155,6 +175,7 @@ export class InMemoryAporteRepository implements AporteRepository {
       ...aporte,
       recurso: aporte.recurso ? { ...aporte.recurso } : null,
       colaborador: aporte.colaborador ? { ...aporte.colaborador } : null,
+      medio: aporte.medio ? { ...aporte.medio } : null,
     };
   }
 }

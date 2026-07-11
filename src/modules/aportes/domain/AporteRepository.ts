@@ -63,6 +63,12 @@ export interface AporteRepository {
   progresoPorAyuda(ayudaId: string): Promise<AgregadoPorMeta[]>;
   /** Suma de cantidades RECIBIDO agrupada por recurso en toda la plataforma. */
   recolectadoGlobalPorRecurso(): Promise<RecolectadoPorRecursoId[]>;
+  /**
+   * Ingresos monetarios externos imputados por un ADMIN (feature 014): aportes con
+   * `registradoPorId` no nulo, del más reciente al más antiguo. Incluye el detalle
+   * de recurso y medio para la tabla del panel.
+   */
+  listarIngresosExternos(): Promise<Aporte[]>;
   /** Cuenta aportes que coinciden con el filtro. */
   contar(filtro?: FiltroAportes): Promise<number>;
   /**

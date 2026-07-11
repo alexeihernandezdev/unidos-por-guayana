@@ -38,6 +38,14 @@ export async function cancelarAporte(
     );
   }
 
+  // Un aporte sin actividad (ingreso de "caja general", feature 014) nace RECIBIDO
+  // y no llega aquí; el guard mantiene la invariante y contenta al tipado.
+  if (!aporte.ayudaId) {
+    throw new TransicionInvalidaError(
+      "Un aporte sin actividad asociada no se cancela por este flujo.",
+    );
+  }
+
   const ayuda = await ayudas.buscarPorId(aporte.ayudaId);
   if (!ayuda) throw new AyudaNoEncontradaError(aporte.ayudaId);
   if (ayuda.estado !== EstadoAyuda.RECOLECTANDO) {

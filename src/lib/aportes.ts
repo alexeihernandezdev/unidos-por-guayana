@@ -10,8 +10,13 @@ import {
   listarAportesRecientes,
 } from "@/modules/aportes/application/listarAportes";
 import { listarAportantesDeAyuda } from "@/modules/aportes/application/listarAportantesDeAyuda";
+import { listarIngresosExternos } from "@/modules/aportes/application/listarIngresosExternos";
 import { marcarRecibido } from "@/modules/aportes/application/marcarRecibido";
 import { progresoDeAyuda } from "@/modules/aportes/application/progresoDeAyuda";
+import {
+  registrarAporteExterno,
+  type RegistrarAporteExternoInput,
+} from "@/modules/aportes/application/registrarAporteExterno";
 import { revertirRecibido } from "@/modules/aportes/application/revertirRecibido";
 import type { Aporte, ProgresoMetaDetalle } from "@/modules/aportes/domain/Aporte";
 import type {
@@ -79,4 +84,17 @@ export function progresoDeAyudaServicio(
   ayudaId: string,
 ): Promise<ProgresoMetaDetalle[]> {
   return progresoDeAyuda(deps, ayudaId);
+}
+
+// ── Ingreso monetario externo (feature 014) ─────────────────────────────────
+
+export function registrarAporteExternoServicio(
+  input: RegistrarAporteExternoInput,
+  actor: Actor,
+): Promise<Aporte> {
+  return registrarAporteExterno(deps, input, actor);
+}
+
+export function listarIngresosExternosServicio(): Promise<Aporte[]> {
+  return listarIngresosExternos(deps);
 }

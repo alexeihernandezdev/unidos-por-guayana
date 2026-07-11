@@ -102,9 +102,12 @@ que avanza. Es requisito directo de 008 (panel del admin) y 009 (tablero públic
 - **Notificaciones** al colaborador cuando su aporte se marca `RECIBIDO` (feature 012).
 - **Evidencia de entrega** (foto, nota estructurada) — es parte del seguimiento (010).
 - **Vinculación con `PuntoAcopio`** en la UI (011). Campo previsto pero opcional y sin selector.
-- **Registro manual de aportes por el `ADMIN`** en nombre de un tercero: se contempla si el `ADMIN`
-  necesita imputar un aporte externo (típico en `MONETARIO` recibido por transferencia). Si se decide
-  incluir, entra como caso de uso `registrarAporteExterno` en 014; por ahora, fuera.
+- **Registro manual de aportes por el `ADMIN`** en nombre de un tercero: para imputar un aporte
+  externo (típico en `MONETARIO` recibido por transferencia). **Implementado en 014** como el caso de
+  uso `registrarAporteExterno` (aquí en `aportes/application`): crea un `Aporte` `MONETARIO` que nace en
+  `RECIBIDO`, con `colaboradorId` opcional (donación anónima) y `registradoPorId` = el `ADMIN`. La 014
+  enmienda este modelo (hace `colaboradorId` y `ayudaId` opcionales y añade
+  `registradoPorId`/`medioDonacionId`/`moneda`/`referencia`).
 - **Reportes/exports** de aportes.
 - Aportes a Ayudas en estados distintos de `RECOLECTANDO`.
 

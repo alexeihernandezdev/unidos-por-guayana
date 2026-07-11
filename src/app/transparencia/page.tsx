@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { MediosDonacionPublicos } from "@/modules/donaciones/ui/MediosDonacionPublicos";
 import { ResumenTransparencia } from "@/modules/transparencia/ui";
+import { listarMediosPublicablesServicio } from "@/shared/donaciones";
 import { obtenerResumenPublicoServicio } from "@/shared/transparencia";
 
 export const metadata: Metadata = {
@@ -9,11 +11,19 @@ export const metadata: Metadata = {
 };
 
 export default async function TransparenciaPage() {
-  const resumen = await obtenerResumenPublicoServicio();
+  const [resumen, mediosDonacion] = await Promise.all([
+    obtenerResumenPublicoServicio(),
+    listarMediosPublicablesServicio(),
+  ]);
 
   return (
     <main className="flex-1 border-t border-border bg-background">
       <ResumenTransparencia resumen={resumen} />
+      {mediosDonacion.length > 0 && (
+        <div className="mx-auto w-full max-w-5xl px-6 pb-12 md:px-8">
+          <MediosDonacionPublicos medios={mediosDonacion} />
+        </div>
+      )}
     </main>
   );
 }

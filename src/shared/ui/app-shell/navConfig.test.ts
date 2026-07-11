@@ -35,12 +35,13 @@ describe("navSectionsPorRol", () => {
     ]);
   });
 
-  it("conserva la navegación del panel del ADMIN (008 + puntos de 011)", () => {
+  it("conserva la navegación del panel del ADMIN (008 + puntos de 011 + donaciones de 014)", () => {
     expect(hrefs(Rol.ADMIN)).toEqual([
       "/panel",
       "/panel/ayudas",
       "/panel/solicitudes",
       "/panel/recursos",
+      "/panel/donaciones",
       "/panel/perfil",
       "/panel/puntos-acopio",
     ]);

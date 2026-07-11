@@ -20,7 +20,14 @@ export default async function MisAportesPage() {
   const aportes = await listarAportesDeColaboradorServicio(usuario.id);
 
   // Cargamos las cabeceras de las ayudas asociadas para poder mostrar título/fecha.
-  const ayudaIds = Array.from(new Set(aportes.map((a) => a.ayudaId)));
+  // Un aporte de "caja general" (feature 014) puede no tener ayuda: se omite aquí.
+  const ayudaIds = Array.from(
+    new Set(
+      aportes
+        .map((a) => a.ayudaId)
+        .filter((id): id is string => id !== null),
+    ),
+  );
   const ayudasPorId = new Map(
     await Promise.all(
       ayudaIds.map(async (id) => [id, await obtenerAyudaServicio(id)] as const),
@@ -55,7 +62,7 @@ export default async function MisAportesPage() {
             </thead>
             <tbody>
               {aportes.map((a) => {
-                const ayuda = ayudasPorId.get(a.ayudaId);
+                const ayuda = a.ayudaId ? ayudasPorId.get(a.ayudaId) : undefined;
                 const puedeCancelar = a.estado === EstadoAporte.COMPROMETIDO;
                 return (
                   <tr
@@ -75,7 +82,7 @@ export default async function MisAportesPage() {
                           </span>
                         </div>
                       ) : (
-                        <span>{a.ayudaId}</span>
+                        <span>{a.ayudaId ?? "Donación general"}</span>
                       )}
                     </td>
                     <td className={celda}>
@@ -97,7 +104,7 @@ export default async function MisAportesPage() {
                           <input
                             type="hidden"
                             name="ayudaId"
-                            value={a.ayudaId}
+                            value={a.ayudaId ?? ""}
                           />
                           <Button type="submit" variant="ghost" size="sm">
                             Cancelar

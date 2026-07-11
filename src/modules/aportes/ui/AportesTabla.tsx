@@ -77,14 +77,14 @@ export function AportesTabla({
                     <>
                       <form action={marcarRecibidoAction}>
                         <input type="hidden" name="id" value={a.id} />
-                        <input type="hidden" name="ayudaId" value={a.ayudaId} />
+                        <input type="hidden" name="ayudaId" value={a.ayudaId ?? ""} />
                         <Button type="submit" size="sm">
                           Marcar recibido
                         </Button>
                       </form>
                       <form action={cancelarAporteAction}>
                         <input type="hidden" name="id" value={a.id} />
-                        <input type="hidden" name="ayudaId" value={a.ayudaId} />
+                        <input type="hidden" name="ayudaId" value={a.ayudaId ?? ""} />
                         <Button type="submit" variant="ghost" size="sm">
                           Cancelar
                         </Button>
@@ -94,7 +94,7 @@ export function AportesTabla({
                   {a.estado === EstadoAporte.RECIBIDO && (
                     <form action={revertirRecibidoAction}>
                       <input type="hidden" name="id" value={a.id} />
-                      <input type="hidden" name="ayudaId" value={a.ayudaId} />
+                      <input type="hidden" name="ayudaId" value={a.ayudaId ?? ""} />
                       <Button type="submit" variant="outline" size="sm">
                         Revertir
                       </Button>

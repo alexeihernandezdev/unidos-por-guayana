@@ -10,25 +10,32 @@ import type {
   RecolectadoPorRecursoId,
 } from "@/modules/aportes/domain/AporteRepository";
 
-// Incluye recurso y colaborador para las vistas (tabla admin, "mis aportes").
+// Incluye recurso, colaborador y medio de donación para las vistas (tabla admin,
+// "mis aportes", ingresos monetarios de la feature 014).
 const INCLUDE_DETALLE = {
   recurso: true,
   colaborador: true,
+  medioDonacion: true,
 } as const;
 
 type FilaAporte = {
   id: string;
-  ayudaId: string;
+  ayudaId: string | null;
   recursoId: string;
-  colaboradorId: string;
+  colaboradorId: string | null;
   cantidad: { toNumber: () => number };
+  moneda: string | null;
   estado: EstadoAporte;
   nota: string | null;
+  registradoPorId: string | null;
+  medioDonacionId: string | null;
+  referencia: string | null;
   recibidoEn: Date | null;
   createdAt: Date;
   updatedAt: Date;
   recurso: { id: string; nombre: string; unidad: string } | null;
   colaborador: { id: string; nombre: string; email: string } | null;
+  medioDonacion: { id: string; tipo: string; titular: string } | null;
 };
 
 function mapear(fila: FilaAporte): Aporte {
@@ -38,8 +45,12 @@ function mapear(fila: FilaAporte): Aporte {
     recursoId: fila.recursoId,
     colaboradorId: fila.colaboradorId,
     cantidad: fila.cantidad.toNumber(),
+    moneda: fila.moneda,
     estado: fila.estado,
     nota: fila.nota,
+    registradoPorId: fila.registradoPorId,
+    medioDonacionId: fila.medioDonacionId,
+    referencia: fila.referencia,
     recibidoEn: fila.recibidoEn,
     createdAt: fila.createdAt,
     updatedAt: fila.updatedAt,
@@ -57,6 +68,13 @@ function mapear(fila: FilaAporte): Aporte {
           email: fila.colaborador.email,
         }
       : null,
+    medio: fila.medioDonacion
+      ? {
+          id: fila.medioDonacion.id,
+          tipo: fila.medioDonacion.tipo,
+          titular: fila.medioDonacion.titular,
+        }
+      : null,
   };
 }
 
@@ -66,9 +84,20 @@ export class PrismaAporteRepository implements AporteRepository {
       data: {
         ayudaId: datos.ayudaId,
         recursoId: datos.recursoId,
+        // Nulo cuando es un ingreso monetario externo sin colaborador (014).
         colaboradorId: datos.colaboradorId,
         cantidad: datos.cantidad,
         nota: datos.nota,
+        // Campos del ingreso monetario externo (014); Prisma aplica el default
+        // `COMPROMETIDO` / `null` cuando el flujo de colaborador (006) los omite.
+        moneda: datos.moneda ?? null,
+        ...(datos.estado ? { estado: datos.estado } : {}),
+        registradoPorId: datos.registradoPorId ?? null,
+        medioDonacionId: datos.medioDonacionId ?? null,
+        referencia: datos.referencia ?? null,
+        ...(datos.recibidoEn !== undefined
+          ? { recibidoEn: datos.recibidoEn }
+          : {}),
       },
       include: INCLUDE_DETALLE,
     });
@@ -127,7 +156,9 @@ export class PrismaAporteRepository implements AporteRepository {
     });
     return filas.map((fila) => ({
       id: fila.id,
-      aportanteNombre: fila.colaborador.nombre,
+      // Un ingreso monetario externo (014) puede no tener colaborador: se muestra
+      // como donación externa, sin exponer dato de contacto alguno.
+      aportanteNombre: fila.colaborador?.nombre ?? "Donación externa",
       recursoNombre: fila.recurso.nombre,
       recursoUnidad: fila.recurso.unidad,
       cantidad: fila.cantidad.toNumber(),
@@ -192,6 +223,15 @@ export class PrismaAporteRepository implements AporteRepository {
       porRecurso.set(g.recursoId, actual);
     }
     return [...porRecurso.values()];
+  }
+
+  async listarIngresosExternos(): Promise<Aporte[]> {
+    const filas = await prisma.aporte.findMany({
+      where: { registradoPorId: { not: null } },
+      orderBy: [{ recibidoEn: "desc" }, { createdAt: "desc" }],
+      include: INCLUDE_DETALLE,
+    });
+    return filas.map(mapear);
   }
 
   async recolectadoGlobalPorRecurso(): Promise<RecolectadoPorRecursoId[]> {

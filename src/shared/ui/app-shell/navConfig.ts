@@ -12,6 +12,7 @@ export type IconoNav =
   | "puntos"
   | "perfil"
   | "aportes"
+  | "donaciones"
   | "nuevaSolicitud"
   | "proponer"
   | "aprobaciones";
@@ -45,6 +46,12 @@ const NAV_ADMIN: NavSection[] = [
   {
     label: "Catálogo",
     items: [{ label: "Recursos", href: "/panel/recursos", icon: "recursos" }],
+  },
+  {
+    label: "Donaciones",
+    items: [
+      { label: "Donaciones", href: "/panel/donaciones", icon: "donaciones" },
+    ],
   },
   {
     label: "Mi cuenta",

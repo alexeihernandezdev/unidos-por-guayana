@@ -1,6 +1,12 @@
 # 014 · Donaciones monetarias externas
 
-> Estado: **Pendiente** · Depende de: `002 · Autenticación y roles`, `004 · Catálogo de recursos`, `006 · Aportes` · Relacionado (consume las lecturas): `009 · Tablero público de transparencia` · Roadmap: `constitution/roadmap.md`
+> Estado: **Hecho ✅** · Depende de: `002 · Autenticación y roles`, `004 · Catálogo de recursos`, `006 · Aportes` · Relacionado (consume las lecturas): `009 · Tablero público de transparencia` · Roadmap: `constitution/roadmap.md`
+>
+> **Nota de implementación (enmienda a 006 no listada en el plan original):** para cumplir el
+> criterio "un ingreso sin actividad asociada cuenta en el agregado general", además de
+> `colaboradorId` se hizo **`Aporte.ayudaId` opcional** (migración `aporte_ayuda_opcional`). Un ingreso
+> de "caja general" nace en `RECIBIDO` sin `ayudaId`; los aportes de colaborador (006) siempre la
+> llevan. El registro de montos se implementó como `registrarAporteExterno` en `aportes/application`.
 
 ## Qué hace
 
@@ -150,36 +156,36 @@ hueco respetando el límite duro: **transparencia, no cobro**.
 
 ## Criterios de aceptación
 
-- [ ] La app **no procesa ningún pago**: no hay pasarela, checkout, tarjeta ni saldo en ninguna ruta ni
+- [x] La app **no procesa ningún pago**: no hay pasarela, checkout, tarjeta ni saldo en ninguna ruta ni
       caso de uso de esta feature. (Verificado por ausencia y por diseño.)
-- [ ] Un `ADMIN` puede **crear, editar, activar y desactivar** un `MedioDonacion` con `tipo`, `titular`,
+- [x] Un `ADMIN` puede **crear, editar, activar y desactivar** un `MedioDonacion` con `tipo`, `titular`,
       `moneda` válida, `datos` y `nota` opcional. Un `MedioDonacion` con ingresos asociados **no se
       borra**, se **desactiva**.
-- [ ] `listarMediosPublicables` devuelve **solo** los `MedioDonacion` con `activo = true`, ordenados por
+- [x] `listarMediosPublicables` devuelve **solo** los `MedioDonacion` con `activo = true`, ordenados por
       `orden`. Un medio inactivo **no** aparece en superficies públicas.
-- [ ] Un `ADMIN` puede **registrar un monto recibido** (recurso `MONETARIO`, `monto > 0`, `moneda`,
+- [x] Un `ADMIN` puede **registrar un monto recibido** (recurso `MONETARIO`, `monto > 0`, `moneda`,
       `MedioDonacion` opcional, `fecha de recepción`, `ayudaId` opcional, `referencia` opcional). El
       registro se crea como `Aporte` `MONETARIO` en **`RECIBIDO`** (no pasa por `COMPROMETIDO`).
-- [ ] El registro admite **donación sin colaborador identificado**: el `Aporte` queda sin
+- [x] El registro admite **donación sin colaborador identificado**: el `Aporte` queda sin
       `colaboradorId`, con `registradoPorId` = el `ADMIN`. Un aporte imputado nunca queda huérfano de
       auditoría.
-- [ ] El sistema **rechaza**: registrar un ingreso sobre un recurso no `MONETARIO`, `monto ≤ 0`, o
+- [x] El sistema **rechaza**: registrar un ingreso sobre un recurso no `MONETARIO`, `monto ≤ 0`, o
       `moneda` fuera del conjunto permitido. Validado en servidor.
-- [ ] Si el ingreso se asocia a una `ayudaId`, **suma al progreso** de su meta `MONETARIO` (como
+- [x] Si el ingreso se asocia a una `ayudaId`, **suma al progreso** de su meta `MONETARIO` (como
       cualquier aporte `RECIBIDO` de 006). Si no se asocia, cuenta en el **agregado general** de dinero
       recibido.
-- [ ] El **tablero público (009)** refleja el dinero recibido como **monto agregado por moneda**, con
+- [x] El **tablero público (009)** refleja el dinero recibido como **monto agregado por moneda**, con
       nota de que el pago es por canal externo; **sin** datos personales del donante y **sin** ninguna
       operación de cobro.
-- [ ] Las fechas de recepción se muestran en español (`dd/MM/yyyy`, Luxon `es-VE`); nunca ISO ni
+- [x] Las fechas de recepción se muestran en español (`dd/MM/yyyy`, Luxon `es-VE`); nunca ISO ni
       `MM/DD/AAAA` en texto visible. Ningún em-dash ni en-dash en textos visibles.
-- [ ] La **migración** crea `medios_donacion` y el enum `TipoMedioDonacion`, y altera `aportes`
+- [x] La **migración** crea `medios_donacion` y el enum `TipoMedioDonacion`, y altera `aportes`
       (`colaboradorId` opcional, `registradoPorId`, `medioDonacionId`, `moneda`, `referencia`) sin
       errores.
-- [ ] `pnpm test` cubre: reglas de `MedioDonacion`, `registrarAporteExterno` (creación en `RECIBIDO`,
+- [x] `pnpm test` cubre: reglas de `MedioDonacion`, `registrarAporteExterno` (creación en `RECIBIDO`,
       rechazos, ausencia de colaborador, asociación a medio/ayuda) y `listarMediosPublicables` (solo
       activos) — en verde.
-- [ ] `pnpm lint` / `pnpm build` sin errores; `donaciones/domain`, `donaciones/application` y la
+- [x] `pnpm lint` / `pnpm build` sin errores; `donaciones/domain`, `donaciones/application` y la
       extensión de `aportes/*` **puras** (sin framework ni Prisma en dominio/aplicación).
 
 ## Notas y riesgos

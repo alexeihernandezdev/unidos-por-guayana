@@ -11,4 +11,6 @@ export {
   listarAportesRecientesServicio,
   listarAportantesDeAyudaServicio,
   progresoDeAyudaServicio,
+  registrarAporteExternoServicio,
+  listarIngresosExternosServicio,
 } from "@/lib/aportes";

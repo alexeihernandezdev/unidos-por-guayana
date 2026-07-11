@@ -4,6 +4,8 @@ export * from "./crearAporte";
 export * from "./cancelarAporte";
 export * from "./marcarRecibido";
 export * from "./revertirRecibido";
+export * from "./registrarAporteExterno";
 export * from "./listarAportes";
+export * from "./listarIngresosExternos";
 export * from "./listarAportantesDeAyuda";
 export * from "./progresoDeAyuda";
