@@ -15,21 +15,19 @@ import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarAyudasServicio } from "@/shared/ayudas";
 import { requireRol } from "@/shared/auth";
 import { Button } from "@/shared/ui/button";
+import { FiltroSelect } from "@/shared/ui/filtro-select";
 import { eliminarAyudaAction } from "./actions";
 
 type Props = {
   searchParams: Promise<{ estado?: string; tipo?: string }>;
 };
 
-const campo =
-  "rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
-
 export default async function AyudasPage({ searchParams }: Props) {
-  await requireRol(Rol.ADMIN);
+  const sesion = await requireRol(Rol.ADMIN);
 
   const { estado, tipo } = await searchParams;
 
-  const filtro: FiltroAyudas = {};
+  const filtro: FiltroAyudas = { adminId: sesion.id };
   if (estado && esEstadoAyuda(estado)) filtro.estado = estado;
   if (tipo && esTipoActividad(tipo)) filtro.tipo = tipo;
 
@@ -56,41 +54,35 @@ export default async function AyudasPage({ searchParams }: Props) {
         className="flex flex-wrap items-end gap-3 border-t border-border pt-4"
       >
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="tipo" className="text-sm font-medium">
-            Tipo
-          </label>
-          <select
-            id="tipo"
+          <span className="text-sm font-medium">Tipo</span>
+          <FiltroSelect
             name="tipo"
-            defaultValue={filtro.tipo ?? ""}
-            className={campo}
-          >
-            <option value="">Todos</option>
-            {TIPOS_ACTIVIDAD.map((t) => (
-              <option key={t} value={t}>
-                {etiquetaTipo(t)}
-              </option>
-            ))}
-          </select>
+            ariaLabel="Filtrar por tipo"
+            defaultValue={filtro.tipo ?? "todos"}
+            opciones={[
+              { value: "todos", label: "Todos" },
+              ...TIPOS_ACTIVIDAD.map((t) => ({
+                value: t,
+                label: etiquetaTipo(t),
+              })),
+            ]}
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="estado" className="text-sm font-medium">
-            Estado
-          </label>
-          <select
-            id="estado"
+          <span className="text-sm font-medium">Estado</span>
+          <FiltroSelect
             name="estado"
-            defaultValue={filtro.estado ?? ""}
-            className={campo}
-          >
-            <option value="">Todos</option>
-            {ESTADOS_AYUDA.map((e) => (
-              <option key={e} value={e}>
-                {ESTADO_LABEL[e]}
-              </option>
-            ))}
-          </select>
+            ariaLabel="Filtrar por estado"
+            defaultValue={filtro.estado ?? "todos"}
+            opciones={[
+              { value: "todos", label: "Todos" },
+              ...ESTADOS_AYUDA.map((e) => ({
+                value: e,
+                label: ESTADO_LABEL[e],
+              })),
+            ]}
+          />
         </div>
 
         <Button type="submit" variant="outline">

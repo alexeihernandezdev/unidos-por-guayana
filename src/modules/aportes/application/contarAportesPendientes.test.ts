@@ -25,6 +25,7 @@ describe("contarAportesPendientes", () => {
       recursos,
     };
     const ayuda = await crearAyuda(deps, {
+      adminId: "admin-1",
       titulo: "Envío",
       sectorDestino: "Upata",
       fecha: new Date(),

@@ -32,6 +32,7 @@ async function armarConAporte() {
   const ayuda = await crearAyuda(
     { ayudas: ayudasRepo, recursos },
     {
+      adminId: "admin-1",
       titulo: "Envío",
       sectorDestino: "Upata",
       fecha: new Date(),
@@ -89,7 +90,7 @@ describe("cancelarAporte", () => {
 
   it("no se puede cancelar si la Ayuda ya no está en RECOLECTANDO", async () => {
     const { deps, aporte, ayuda } = ctx;
-    await avanzarEstado(deps, ayuda.id); // → LISTO
+    await avanzarEstado(deps, ayuda.id, "admin-1"); // → LISTO
     await expect(
       cancelarAporte(deps, aporte.id, COL),
     ).rejects.toBeInstanceOf(AyudaNoAceptaAportesError);

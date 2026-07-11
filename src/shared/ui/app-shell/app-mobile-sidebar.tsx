@@ -10,10 +10,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/shared/ui/sheet";
-import { ADMIN_NAV } from "./navConfig";
-import { SidebarNav } from "./SidebarNav";
+import { AppSidebarNav } from "./app-sidebar-nav";
+import type { NavSection } from "./navConfig";
 
 type Props = {
+  sections: NavSection[];
+  homeHref: string;
+  ariaLabel: string;
   // El cluster de sesión (nombre + cerrar sesión) se renderiza en el server y se
   // inyecta como slot para no duplicar lógica de sesión en el cliente.
   slotSesion: React.ReactNode;
@@ -21,9 +24,14 @@ type Props = {
 
 /**
  * Toggle + Sheet para el sidebar en móvil (< md). El botón vive en el topbar
- * móvil del `AdminShell`. Al navegar, el Sheet se cierra vía callback.
+ * móvil del `AppShell`. Al navegar, el Sheet se cierra vía callback.
  */
-export function MobileSidebar({ slotSesion }: Props) {
+export function AppMobileSidebar({
+  sections,
+  homeHref,
+  ariaLabel,
+  slotSesion,
+}: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -36,15 +44,15 @@ export function MobileSidebar({ slotSesion }: Props) {
       </SheetTrigger>
 
       <SheetContent side="left" className="w-72 max-w-[80vw] p-0">
-        <SheetTitle className="sr-only">Panel de administración</SheetTitle>
+        <SheetTitle className="sr-only">{ariaLabel}</SheetTitle>
 
         <div className="flex h-full flex-col">
           <div className="flex flex-col gap-8 px-4 pt-6">
             <Link
-              href="/panel"
+              href={homeHref}
               onClick={() => setOpen(false)}
               className="focus-ring inline-flex items-center gap-3 px-2 leading-none"
-              aria-label="Ir al panel de administración"
+              aria-label={ariaLabel}
             >
               <Image
                 src="/logo-mark.svg"
@@ -64,10 +72,7 @@ export function MobileSidebar({ slotSesion }: Props) {
               </span>
             </Link>
 
-            <SidebarNav
-              sections={ADMIN_NAV}
-              onNavigate={() => setOpen(false)}
-            />
+            <AppSidebarNav sections={sections} onNavigate={() => setOpen(false)} />
           </div>
 
           <div className="mt-auto flex flex-col gap-3 border-t border-border px-4 py-4">

@@ -5,12 +5,16 @@ import { avanzarEstado } from "./avanzarEstado";
 import { crearAyuda } from "./crearAyuda";
 import type { AyudaDeps } from "./deps";
 import {
+  ActividadNoPerteneceAlAdminError,
   AyudaNoEditableError,
   DatosAyudaInvalidosError,
   RecursoInvalidoError,
 } from "./errors";
 import { InMemoryAyudaRepository } from "./fakes";
 import { guardarMeta, quitarMeta } from "./gestionarMetas";
+
+const ADMIN = "admin-1";
+const OTRO_ADMIN = "admin-2";
 
 async function crearDeps() {
   const recursos = new InMemoryRecursoRepository();
@@ -28,6 +32,7 @@ async function crearDeps() {
   });
   const deps: AyudaDeps = { ayudas: new InMemoryAyudaRepository(), recursos };
   const ayuda = await crearAyuda(deps, {
+    adminId: ADMIN,
     titulo: "Envío",
     sectorDestino: "Upata",
     fecha: new Date(),
@@ -47,7 +52,7 @@ describe("gestionarMetas", () => {
   it("añade una meta nueva para un recurso distinto", async () => {
     const { deps, ayuda, alimentos } = ctx;
 
-    const actualizada = await guardarMeta(deps, ayuda.id, {
+    const actualizada = await guardarMeta(deps, ayuda.id, ADMIN, {
       recursoId: alimentos.id,
       cantidadObjetivo: 200,
     });
@@ -58,7 +63,7 @@ describe("gestionarMetas", () => {
   it("actualiza el objetivo si el recurso ya tenía meta (upsert, sin duplicar)", async () => {
     const { deps, ayuda, agua } = ctx;
 
-    const actualizada = await guardarMeta(deps, ayuda.id, {
+    const actualizada = await guardarMeta(deps, ayuda.id, ADMIN, {
       recursoId: agua.id,
       cantidadObjetivo: 750,
     });
@@ -70,7 +75,7 @@ describe("gestionarMetas", () => {
   it("quita una meta existente", async () => {
     const { deps, ayuda, agua } = ctx;
 
-    const actualizada = await quitarMeta(deps, ayuda.id, agua.id);
+    const actualizada = await quitarMeta(deps, ayuda.id, ADMIN, agua.id);
 
     expect(actualizada.metas).toHaveLength(0);
   });
@@ -79,7 +84,7 @@ describe("gestionarMetas", () => {
     const { deps, ayuda, alimentos } = ctx;
 
     await expect(
-      guardarMeta(deps, ayuda.id, {
+      guardarMeta(deps, ayuda.id, ADMIN, {
         recursoId: alimentos.id,
         cantidadObjetivo: -5,
       }),
@@ -90,7 +95,7 @@ describe("gestionarMetas", () => {
     const { deps, ayuda } = ctx;
 
     await expect(
-      guardarMeta(deps, ayuda.id, {
+      guardarMeta(deps, ayuda.id, ADMIN, {
         recursoId: "no-existe",
         cantidadObjetivo: 10,
       }),
@@ -99,10 +104,10 @@ describe("gestionarMetas", () => {
 
   it("bloquea añadir metas una vez la ayuda pasa a LISTO", async () => {
     const { deps, ayuda, alimentos } = ctx;
-    await avanzarEstado(deps, ayuda.id);
+    await avanzarEstado(deps, ayuda.id, ADMIN);
 
     await expect(
-      guardarMeta(deps, ayuda.id, {
+      guardarMeta(deps, ayuda.id, ADMIN, {
         recursoId: alimentos.id,
         cantidadObjetivo: 100,
       }),
@@ -111,10 +116,21 @@ describe("gestionarMetas", () => {
 
   it("bloquea quitar metas una vez la ayuda pasa a LISTO", async () => {
     const { deps, ayuda, agua } = ctx;
-    await avanzarEstado(deps, ayuda.id);
+    await avanzarEstado(deps, ayuda.id, ADMIN);
 
-    await expect(quitarMeta(deps, ayuda.id, agua.id)).rejects.toBeInstanceOf(
-      AyudaNoEditableError,
-    );
+    await expect(
+      quitarMeta(deps, ayuda.id, ADMIN, agua.id),
+    ).rejects.toBeInstanceOf(AyudaNoEditableError);
+  });
+
+  it("rechaza gestionar metas de una actividad ajena", async () => {
+    const { deps, ayuda, alimentos } = ctx;
+
+    await expect(
+      guardarMeta(deps, ayuda.id, OTRO_ADMIN, {
+        recursoId: alimentos.id,
+        cantidadObjetivo: 10,
+      }),
+    ).rejects.toBeInstanceOf(ActividadNoPerteneceAlAdminError);
   });
 });

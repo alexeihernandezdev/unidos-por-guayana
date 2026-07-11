@@ -14,13 +14,16 @@ type Deps = Pick<AyudaDeps, "ayudas"> & Pick<AporteDeps, "aportes" | "ayudas">;
 
 /**
  * Envíos en RECOLECTANDO ordenados por % de metas completado (desc) y, en empate,
- * por fecha de salida ascendente (más próximo primero).
+ * por fecha de salida ascendente (más próximo primero). Con `adminId` acota al
+ * dueño (panel, feature 022).
  */
 export async function listarPrioridadRecolectando(
   deps: Deps,
+  adminId?: string,
 ): Promise<EnvioPrioridad[]> {
   const recolectando = await deps.ayudas.listar({
     estado: EstadoAyuda.RECOLECTANDO,
+    ...(adminId ? { adminId } : {}),
   });
 
   const conPorcentaje = await Promise.all(

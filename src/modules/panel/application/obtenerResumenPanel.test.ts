@@ -10,6 +10,9 @@ import { InMemoryRecursoRepository } from "@/modules/recursos/application/fakes"
 import { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import { UrgenciaSolicitud } from "@/modules/solicitudes/domain/UrgenciaSolicitud";
 
+const ADMIN = "admin-1";
+const OTRO_ADMIN = "admin-2";
+
 describe("obtenerResumenPanel", () => {
   let aguaId: string;
   const ayudas = new InMemoryAyudaRepository();
@@ -31,8 +34,9 @@ describe("obtenerResumenPanel", () => {
     aguaId = agua.id;
   });
 
-  it("compone el resumen con prioridad y conteos", async () => {
+  it("compone el resumen con prioridad y conteos del dueño", async () => {
     const ayuda = await crearAyuda(deps, {
+      adminId: ADMIN,
       titulo: "Envío principal",
       sectorDestino: "Upata",
       fecha: new Date("2026-10-01"),
@@ -60,7 +64,7 @@ describe("obtenerResumenPanel", () => {
       recursos: [{ recursoId: aguaId, cantidadEstimada: 5 }],
     });
 
-    const resumen = await obtenerResumenPanel(deps);
+    const resumen = await obtenerResumenPanel(deps, ADMIN);
 
     expect(resumen.enviosPorEstado.RECOLECTANDO).toBe(1);
     expect(resumen.aportesPendientesConteo).toBe(1);
@@ -69,5 +73,43 @@ describe("obtenerResumenPanel", () => {
     expect(resumen.enviosPrioridad[0]?.ayudaId).toBe(ayuda.id);
     expect(resumen.enviosPrioridad[0]?.solicitudesAfinesConteo).toBe(2);
     expect(resumen.progresoAgregadoRecolectando.metasBajo).toBe(1);
+  });
+
+  it("acota envíos y aportes pendientes al adminId (no mezcla dueños)", async () => {
+    const propia = await crearAyuda(deps, {
+      adminId: ADMIN,
+      titulo: "Mía",
+      sectorDestino: "Upata",
+      fecha: new Date("2026-10-01"),
+      tipo: "ENVIO",
+      metas: [{ recursoId: aguaId, cantidadObjetivo: 50 }],
+    });
+    const ajena = await crearAyuda(deps, {
+      adminId: OTRO_ADMIN,
+      titulo: "Ajena",
+      sectorDestino: "Tumeremo",
+      fecha: new Date("2026-10-02"),
+      tipo: "ENVIO",
+      metas: [{ recursoId: aguaId, cantidadObjetivo: 50 }],
+    });
+    await crearAporte(deps, {
+      ayudaId: propia.id,
+      recursoId: aguaId,
+      colaboradorId: "col-1",
+      cantidad: 10,
+    });
+    await crearAporte(deps, {
+      ayudaId: ajena.id,
+      recursoId: aguaId,
+      colaboradorId: "col-2",
+      cantidad: 20,
+    });
+
+    const resumen = await obtenerResumenPanel(deps, ADMIN);
+
+    expect(resumen.enviosPorEstado.RECOLECTANDO).toBe(1);
+    expect(resumen.aportesPendientesConteo).toBe(1);
+    expect(resumen.enviosPrioridad).toHaveLength(1);
+    expect(resumen.enviosPrioridad[0]?.ayudaId).toBe(propia.id);
   });
 });

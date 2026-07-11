@@ -10,14 +10,12 @@ import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarRecursosServicio } from "@/shared/recursos";
 import { requireRol } from "@/shared/auth";
 import { Button } from "@/shared/ui/button";
+import { FiltroSelect } from "@/shared/ui/filtro-select";
 import { activarRecursoAction, archivarRecursoAction } from "./actions";
 
 type Props = {
   searchParams: Promise<{ categoria?: string; estado?: string }>;
 };
-
-const campo =
-  "rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 export default async function RecursosPage({ searchParams }: Props) {
   await requireRol(Rol.ADMIN);
@@ -56,37 +54,32 @@ export default async function RecursosPage({ searchParams }: Props) {
         className="flex flex-wrap items-end gap-3 border-t border-border pt-4"
       >
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="categoria" className="text-sm font-medium">
-            Categoría
-          </label>
-          <select
-            id="categoria"
+          <span className="text-sm font-medium">Categoría</span>
+          <FiltroSelect
             name="categoria"
-            defaultValue={filtro.categoria ?? ""}
-            className={campo}
-          >
-            <option value="">Todas</option>
-            {CATEGORIAS_RECURSO.map((c) => (
-              <option key={c} value={c}>
-                {CATEGORIA_LABEL[c]}
-              </option>
-            ))}
-          </select>
+            ariaLabel="Filtrar por categoría"
+            defaultValue={filtro.categoria ?? "todas"}
+            opciones={[
+              { value: "todas", label: "Todas" },
+              ...CATEGORIAS_RECURSO.map((c) => ({
+                value: c,
+                label: CATEGORIA_LABEL[c],
+              })),
+            ]}
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="estado" className="text-sm font-medium">
-            Estado
-          </label>
-          <select
-            id="estado"
+          <span className="text-sm font-medium">Estado</span>
+          <FiltroSelect
             name="estado"
-            defaultValue={estado === "activos" ? "activos" : ""}
-            className={campo}
-          >
-            <option value="">Todos</option>
-            <option value="activos">Solo activos</option>
-          </select>
+            ariaLabel="Filtrar por estado"
+            defaultValue={estado === "activos" ? "activos" : "todos"}
+            opciones={[
+              { value: "todos", label: "Todos" },
+              { value: "activos", label: "Solo activos" },
+            ]}
+          />
         </div>
 
         <Button type="submit" variant="outline">

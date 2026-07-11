@@ -1,11 +1,18 @@
 import { describe, expect, it } from "vitest";
+import { catalogoDePrueba } from "@/modules/ubicacion/application/fakes";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { FakePasswordHasher, InMemoryUsuarioRepository } from "./fakes";
 import { registrarUsuario } from "./registrarUsuario";
 import { validarCredenciales } from "./validarCredenciales";
 
+const { repo: catalogo, guaira, vargas } = catalogoDePrueba();
+
 async function crearDepsConUsuario() {
-  const deps = { usuarios: new InMemoryUsuarioRepository(), hasher: new FakePasswordHasher() };
+  const deps = {
+    usuarios: new InMemoryUsuarioRepository(),
+    hasher: new FakePasswordHasher(),
+    catalogo,
+  };
   await registrarUsuario(deps, {
     nombre: "Ana Pérez",
     email: "ana@example.com",
@@ -15,8 +22,8 @@ async function crearDepsConUsuario() {
       cedula: "V12345678",
       telefono: "04121234567",
       telefonoEsWhatsApp: true,
-      estado: "La Guaira",
-      parroquia: "Catia La Mar",
+      estadoId: guaira.id,
+      municipioId: vargas.id,
     },
   });
   return deps;

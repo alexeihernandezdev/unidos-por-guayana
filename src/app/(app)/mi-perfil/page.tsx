@@ -1,7 +1,8 @@
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { DatosContactoForm } from "@/modules/usuarios/ui/DatosContactoForm";
 import { buscarUsuarioPorId, requireRol } from "@/shared/auth";
-import { guardarDatosContactoAction } from "../completar-perfil/actions";
+import { cargarCatalogoUbicacion } from "@/shared/ubicacion";
+import { guardarDatosContactoAction } from "@/app/completar-perfil/actions";
 
 // Perfil editable del COLABORADOR/SOLICITANTE (feature 017). Muestra los cinco
 // campos precargados con los datos actuales; permite actualizarlos en
@@ -11,6 +12,7 @@ import { guardarDatosContactoAction } from "../completar-perfil/actions";
 export default async function MiPerfilPage() {
   const sesion = await requireRol(Rol.COLABORADOR, Rol.SOLICITANTE);
   const usuario = await buscarUsuarioPorId(sesion.id);
+  const { estados, municipios } = await cargarCatalogoUbicacion();
 
   return (
     <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 p-6 md:p-8">
@@ -28,9 +30,11 @@ export default async function MiPerfilPage() {
           cedula: usuario?.cedula ?? "",
           telefono: usuario?.telefono ?? "",
           telefonoEsWhatsApp: usuario?.telefonoEsWhatsApp ?? true,
-          estado: usuario?.estado ?? "",
-          parroquia: usuario?.parroquia ?? "",
+          estadoId: usuario?.estadoId ?? "",
+          municipioId: usuario?.municipioId ?? "",
         }}
+        estados={estados}
+        municipios={municipios}
         action={guardarDatosContactoAction}
         destinoOk="/mi-perfil"
       />

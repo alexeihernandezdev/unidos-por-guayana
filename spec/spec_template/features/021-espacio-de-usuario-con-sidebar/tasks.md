@@ -5,74 +5,71 @@
 
 ## 0. Preparación
 
-- [ ] Leer la guía de Next.js 16 en `node_modules/next/dist/docs/` (layouts, route groups, server components).
-- [ ] Repasar el shell de admin (008): `src/modules/admin/ui/{Sidebar,SidebarNav,MobileSidebar,AdminShell,navConfig}.tsx`.
-- [ ] Repasar `src/modules/landing/ui/navConfig.ts` (`navItemsPorRol`) y `src/app/layout.tsx` (condición actual del navbar).
-- [ ] Levantar la base y sembrar usuarios de cada rol (`db:seed`).
+- [x] Leer la guía de Next.js 16 en `node_modules/next/dist/docs/` (layouts, route groups, server components).
+- [x] Repasar el shell de admin (008): `Sidebar`, `SidebarNav`, `MobileSidebar`, `AdminShell`, `navConfig`.
+- [x] Repasar `src/modules/landing/ui/navConfig.ts` (`navItemsPorRol`) y `src/app/layout.tsx` (condición del navbar).
+- [x] Instalar dependencias (`pnpm install`) y sembrar usuarios de cada rol (`db:seed`). _(La BD/seed la gestiona el operador; ver AGENTS.md.)_
 
 ## 1. Generalizar el shell con sidebar
 
-- [ ] Crear el shell genérico (recomendado `src/shared/ui/app-shell/`):
-      - `AppShell({ secciones, homeHref, ariaLabel, children })` (server component; lee `getUsuarioActual`).
-      - `AppSidebar({ secciones, homeHref, ariaLabel, usuario })` (sin `ADMIN_NAV`/`/panel` hardcodeados).
-      - Mover/reexportar `SidebarNav` y `MobileSidebar` parametrizados.
-- [ ] Ampliar `IconoNav` + mapa `ICONOS` (lucide) con los iconos que falten (aportes, solicitudes, nueva, proponer, perfil…).
-- [ ] Convertir `AdminShell` en wrapper delgado sobre `AppShell` con la config de admin; **verificar que el panel de admin se ve igual**.
+- [x] Shell genérico en `src/shared/ui/app-shell/`:
+      - `app-shell.tsx` (`AppShell`, server; lee `getUsuarioActual`).
+      - `app-sidebar.tsx` (`AppSidebar`, sin `ADMIN_NAV`/`/panel` hardcodeados).
+      - `app-sidebar-nav.tsx` (`AppSidebarNav`, client) y `app-mobile-sidebar.tsx` (`AppMobileSidebar`, client), parametrizados.
+- [x] Ampliar `IconoNav` + mapa `ICONOS` (lucide) con los iconos nuevos (actividades, aportes, solicitudes, nueva, proponer, perfil, aprobaciones…).
+- [x] `(admin)/layout.tsx` pasa a usar `AppShell` con la config de admin; se eliminan los componentes viejos de `src/modules/admin/ui` (queda solo `DispatchStrip`). El panel de admin conserva su aspecto (mismas clases).
 
 ## 2. Config de navegación por rol
 
-- [ ] `navSectionsPorRol(rol)` con las secciones de `ADMIN`, `SUPERADMIN`, `COLABORADOR`, `SOLICITANTE` (ver `plan.md` §3).
-- [ ] Hacer que los destinos coincidan con `navItemsPorRol` (landing); reutilizar o derivar para no divergir.
-- [ ] `rutaInicioPorRol(rol)` con los destinos por rol.
-- [ ] Test unitario de `navSectionsPorRol` y `rutaInicioPorRol`.
+- [x] `navSectionsPorRol(rol)` con las secciones de `ADMIN`, `SUPERADMIN`, `COLABORADOR`, `SOLICITANTE`.
+- [x] Destinos alineados con `navItemsPorRol` (landing).
+- [x] `rutaInicioPorRol(rol)` con los destinos por rol.
+- [x] Test unitario de `navSectionsPorRol` y `rutaInicioPorRol` (`navConfig.test.ts`, 7 casos en verde).
 
 ## 3. Route group + layout del espacio de usuario
 
-- [ ] Crear `src/app/(app)/layout.tsx` que exige rol no-admin (`requireRol(COLABORADOR, SOLICITANTE)`) y renderiza `AppShell` con `navSectionsPorRol(usuario.rol)`.
-- [ ] Mover al grupo **sin cambiar URLs**:
-      - `src/app/ayudas/**` → `src/app/(app)/ayudas/**`.
-      - `src/app/mis-aportes/**` → `src/app/(app)/mis-aportes/**`.
-      - `src/app/mi-perfil/**` → `src/app/(app)/mi-perfil/**`.
-- [ ] Revisar/reapuntar imports de server actions afectados (p. ej. `src/app/aportes/actions.ts`).
-- [ ] Confirmar que `proxy.ts` sigue cubriendo los prefijos protegidos (no cambian las URLs).
+- [x] `src/app/(app)/layout.tsx` exige sesión (`requireSesion`) y renderiza `AppShell` con `navSectionsPorRol(usuario.rol)`; la autorización fina la mantienen las páginas.
+- [x] Mover al grupo **sin cambiar URLs**: `ayudas`, `mis-aportes`, `mi-perfil` → `src/app/(app)/…` (`solicitudes` ya estaba).
+- [x] Reapuntar el import roto de `mi-perfil` a `@/app/completar-perfil/actions` (alias absoluto).
+- [x] Confirmar que `proxy.ts` sigue cubriendo los prefijos protegidos (no cambian las URLs).
 
 ## 4. Navbar condicionado a sesión
 
-- [ ] En `src/app/layout.tsx`, mostrar `SiteHeader` **solo** cuando no hay usuario en sesión (`getUsuarioActual`).
-- [ ] Revisar si `x-pathname` sigue siendo necesario; si nada lo usa, simplificar (sin romper `proxy.ts`).
+- [x] En `src/app/layout.tsx`, mostrar `SiteHeader` **solo** sin sesión; con sesión, banda "Ir a mi panel" solo en páginas públicas (`/`, `/transparencia`).
 
 ## 5. Layout del SUPERADMIN
 
-- [ ] Actualizar `src/app/superadmin/layout.tsx` para usar `AppShell` con la sección "Aprobaciones".
-- [ ] Verificar que `SUPERADMIN` navega a `/superadmin/admins` desde el sidebar (ya sin navbar).
+- [x] `src/app/superadmin/layout.tsx` usa `AppShell` con la sección "Aprobaciones", conservando el contenedor centrado del contenido.
 
 ## 6. Despacho post-login + affordance
 
-- [ ] Ruta despachadora `/inicio` (server component) que redirige con `rutaInicioPorRol(rol)`.
-- [ ] `iniciarSesionAction` (`src/app/(auth)/login/actions.ts`): `redirectTo: "/inicio"`.
-- [ ] Affordance "Ir a mi panel" en páginas públicas (`/`, `/transparencia`) visible solo con sesión.
-- [ ] Onboarding (`/completar-perfil`, `/cuenta-admin`, `/(auth)/*`) se muestra sin sidebar, con "Cerrar sesión" donde aplique.
+- [x] Ruta despachadora `/inicio` (server) que redirige con `rutaInicioPorRol(rol)`.
+- [x] `iniciarSesionAction`: `redirectTo: "/inicio"`.
+- [x] `VolverAlPanelHeader` (banda "Ir a mi panel" + cerrar sesión) en páginas públicas con sesión.
+- [x] `completar-perfil` gana botón "Cerrar sesión" (sin navbar) y `destinoOk="/inicio"`; `cuenta-admin` ya tenía salida.
 
 ## 7. Tests (Vitest)
 
-- [ ] `rutaInicioPorRol` — destino correcto por rol.
-- [ ] `navSectionsPorRol` — secciones/ítems correctos por rol.
-- [ ] Todos en verde.
+- [x] `rutaInicioPorRol` — destino correcto por rol.
+- [x] `navSectionsPorRol` — secciones/ítems correctos por rol.
+- [x] Suite completa en verde (229 tests).
 
 ## 8. Validación final
 
-- [ ] `pnpm test` en verde.
-- [ ] `pnpm lint` (`pnpm exec eslint src`) / `pnpm build` sin errores.
-- [ ] `pnpm dev`, por cada rol (ver `plan.md` §Validación):
+- [x] `pnpm test` en verde (229 passed).
+- [x] `pnpm exec eslint` de los archivos tocados: sin errores ni warnings (nombres kebab-case en `src/shared/ui`).
+- [x] `tsc --noEmit`: **cero errores atribuibles a esta feature**. Los 35 errores restantes son del refactor en curso de la **020** (`estado`/`parroquia` → `estadoId`/`municipioId`) y de sus tests; ajenos a 021.
+- [ ] `pnpm build` completo: bloqueado por los errores de tipo de la **020** (en curso en el mismo árbol). Validar cuando 020 cierre.
+- [ ] `pnpm dev` (validación a ojo por rol): pendiente de ejecutar en navegador por el operador.
       - [ ] `COLABORADOR`: login → `/ayudas`; sidebar correcto; móvil ok; sin navbar.
       - [ ] `SOLICITANTE`: login → `/solicitudes`; sidebar correcto; móvil ok; sin navbar.
       - [ ] `ADMIN`: panel idéntico a antes; login → `/panel`.
       - [ ] `SUPERADMIN`: login → `/superadmin/admins`; sidebar con "Aprobaciones".
-      - [ ] Sin sesión: navbar presente en `/` y `/transparencia`; login/registro sin sidebar.
-      - [ ] Logeado en `/` y `/transparencia`: sin navbar, con affordance "Ir a mi panel".
+      - [ ] Sin sesión: navbar en `/` y `/transparencia`; login/registro sin sidebar.
+      - [ ] Logeado en `/` y `/transparencia`: sin navbar, con banda "Ir a mi panel".
 
 ## 9. Cierre
 
-- [ ] Verificar que el shell reutilizado no introduce imports de `infrastructure` en `ui`.
-- [ ] Generar/actualizar `DOC/features/021-espacio-de-usuario-con-sidebar.md`.
-- [ ] Mover `021` a **Hecho ✅** en `constitution/roadmap.md`.
+- [x] El shell reutilizado no introduce imports de `infrastructure` en `ui`.
+- [x] `DOC/features/021-espacio-de-usuario-con-sidebar.md` generado.
+- [x] `021` movido a **Hecho ✅** en `constitution/roadmap.md`.

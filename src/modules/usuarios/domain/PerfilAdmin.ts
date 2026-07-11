@@ -20,8 +20,9 @@ export type PerfilAdmin = {
   id: string;
   usuarioId: string;
   nombreCuenta: string;
-  estado: string;
-  parroquia: string;
+  // Ubicación por catálogo (feature 020, sustituye a `estado`/`parroquia` texto).
+  estadoId: string;
+  municipioId: string;
   telefono: string;
   telefonoEsWhatsApp: boolean;
   correo: string;
@@ -34,8 +35,8 @@ export type PerfilAdmin = {
 // Datos del perfil sin identidad ni marcas de tiempo (los pone la persistencia).
 export type DatosPerfilAdmin = {
   nombreCuenta: string;
-  estado: string;
-  parroquia: string;
+  estadoId: string;
+  municipioId: string;
   telefono: string;
   telefonoEsWhatsApp: boolean;
   correo: string;
@@ -76,11 +77,13 @@ export function problemasDePerfilAdmin(datos: DatosPerfilAdmin): string[] {
   if (datos.nombreCuenta.trim().length === 0) {
     problemas.push("Indica el nombre de la cuenta o centro de acopio.");
   }
-  if (datos.estado.trim().length === 0) {
-    problemas.push("Indica el estado.");
+  // Presencia de la ubicación del catálogo; la coherencia estado↔municipio la
+  // valida el caso de uso contra el catálogo (feature 020).
+  if (datos.estadoId.trim().length === 0) {
+    problemas.push("Selecciona el estado.");
   }
-  if (datos.parroquia.trim().length === 0) {
-    problemas.push("Indica la parroquia.");
+  if (datos.municipioId.trim().length === 0) {
+    problemas.push("Selecciona el municipio.");
   }
   if (datos.telefono.trim().length === 0) {
     problemas.push("Indica un teléfono de contacto.");
@@ -98,12 +101,12 @@ export function problemasDePerfilAdmin(datos: DatosPerfilAdmin): string[] {
 }
 
 /**
- * Ubicación por defecto (`estado`, `parroquia`) que un `PuntoAcopio` nuevo hereda
- * del `PerfilAdmin` de su administrador. La consume la feature 011 al prellenar
- * la ubicación de un punto; puede sobrescribirse.
+ * Ubicación por defecto (`estadoId`, `municipioId`) que un `PuntoAcopio` nuevo
+ * hereda del `PerfilAdmin` de su administrador. La consume la feature 011 al
+ * prellenar la ubicación de un punto; puede sobrescribirse (feature 020).
  */
 export function ubicacionPorDefecto(
-  perfil: Pick<PerfilAdmin, "estado" | "parroquia">,
-): { estado: string; parroquia: string } {
-  return { estado: perfil.estado, parroquia: perfil.parroquia };
+  perfil: Pick<PerfilAdmin, "estadoId" | "municipioId">,
+): { estadoId: string; municipioId: string } {
+  return { estadoId: perfil.estadoId, municipioId: perfil.municipioId };
 }

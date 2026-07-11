@@ -6,7 +6,7 @@ import {
   normalizarDescripcion,
   normalizarTexto,
 } from "@/modules/ayudas/domain/reglas";
-import type { AyudaDeps } from "./deps";
+import { type AyudaDeps, assertEsDueño } from "./deps";
 import { AyudaNoEditableError, AyudaNoEncontradaError } from "./errors";
 import { DatosAyudaInvalidosError } from "./errors";
 
@@ -19,17 +19,20 @@ export type EditarCabeceraInput = {
 
 /**
  * Edita la cabecera (título, sector, fecha, descripción) de una Ayuda, solo si
- * sigue en `RECOLECTANDO`. Valida los campos que vengan y persiste únicamente esos.
+ * sigue en `RECOLECTANDO` y pertenece al `adminId` solicitante. Valida los
+ * campos que vengan y persiste únicamente esos. El dueño no se transfiere.
  */
 export async function editarCabecera(
   { ayudas }: Pick<AyudaDeps, "ayudas">,
   id: string,
+  adminId: string,
   input: EditarCabeceraInput,
 ): Promise<Ayuda> {
   const actual = await ayudas.buscarPorId(id);
   if (!actual) {
     throw new AyudaNoEncontradaError(id);
   }
+  assertEsDueño(actual, adminId);
   if (!esEditable(actual.estado)) {
     throw new AyudaNoEditableError(
       "Solo se puede editar una ayuda mientras está en RECOLECTANDO.",

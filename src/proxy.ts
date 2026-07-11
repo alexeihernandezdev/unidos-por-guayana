@@ -23,6 +23,7 @@ export default auth((req) => {
     pathname.startsWith("/superadmin") ||
     pathname === "/cuenta-admin" ||
     pathname === "/mis-aportes" ||
+    pathname.startsWith("/puntos-acopio") ||
     pathname.startsWith("/solicitudes") ||
     pathname === "/ayudas" ||
     /^\/ayudas\/[^/]+/.test(pathname);

@@ -1,6 +1,6 @@
 # 022 · Actividades por administrador (aislamiento por dueño)
 
-> Estado: **Pendiente** · Enmienda: `005 · Ayudas / Envío` y `008 · Panel de administración` · Depende de: `005`, `008`, `015`, `018` · Roadmap: `constitution/roadmap.md`
+> Estado: **Hecho** · Enmienda: `005 · Ayudas / Envío` y `008 · Panel de administración` · Depende de: `005`, `008`, `015`, `018` · Roadmap: `constitution/roadmap.md`
 
 ## Qué hace
 

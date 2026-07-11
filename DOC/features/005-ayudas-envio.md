@@ -16,7 +16,7 @@ Esta etapa introduce el **corazón de la plataforma**: la **Ayuda** (un envío c
 - **Un ciclo de vida claro** — cada envío avanza, en un solo sentido, por cuatro etapas: **Recolectando, Listo, En tránsito y Entregado**. El Administrador lo hace avanzar (normalmente pasa a "Listo" cuando las metas se cumplen). No se puede retroceder ni saltarse pasos.
 - **Metas ajustables al principio** — mientras el envío está en "Recolectando", el Administrador puede añadir, cambiar o quitar metas, y también corregir destino o fecha. Una vez pasa a "Listo", todo queda fijo para poder medir el progreso con seriedad.
 - **Envíos aún en preparación se pueden descartar** — si un envío se creó por error o ya no tiene sentido, el Administrador puede eliminarlo mientras siga en "Recolectando". A partir de "Listo" ya no se elimina, porque forma parte del historial.
-- **Vista de gestión** — lista de todos los envíos con su estado (con filtro por etapa) y un detalle con sus metas y el objetivo de cada una.
+- **Vista de gestión** — lista de los envíos **del administrador en sesión** con su estado (con filtro por etapa) y un detalle con sus metas y el objetivo de cada una. Desde la feature 022 cada actividad tiene dueño: un admin no gestiona las de otro.
 
 ## Por qué importa
 

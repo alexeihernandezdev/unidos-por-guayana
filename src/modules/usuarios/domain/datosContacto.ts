@@ -170,41 +170,32 @@ export function normalizarTelefono(entrada: string): string | null {
   return resultado.ok ? resultado.valor : null;
 }
 
-// ── Ubicación ─────────────────────────────────────────────────────────────────
+// ── Ubicación (catálogo, feature 020) ─────────────────────────────────────────
 
-export type Ubicacion = {
-  estado: string;
-  parroquia: string;
+// La ubicación ya no es texto libre: son dos identificadores del catálogo
+// (`estadoId`, `municipioId`). Aquí solo se comprueba su **presencia**; la
+// coherencia estado↔municipio (existencia y pertenencia) la valida el dominio de
+// `ubicacion` (`validarUbicacion`) contra el catálogo, en el caso de uso.
+export type SeleccionUbicacion = {
+  estadoId: string;
+  municipioId: string;
 };
 
-/**
- * Valida `estado` y `parroquia`: no vacíos tras trim. Se guardan como texto
- * libre (igual que `PerfilAdmin` de la feature 016) para no arrastrar el
- * mantenimiento de un catálogo cerrado antes de tenerlo definido.
- */
-export function validarUbicacion(
-  entrada: Ubicacion,
-): ResultadoValidacion<Ubicacion> {
-  const estado = colapsarEspacios(entrada.estado);
-  const parroquia = colapsarEspacios(entrada.parroquia);
+/** Comprueba que se haya elegido estado y municipio (no vacíos tras trim). */
+export function validarSeleccionUbicacion(
+  entrada: SeleccionUbicacion,
+): ResultadoValidacion<SeleccionUbicacion> {
+  const estadoId = entrada.estadoId?.trim() ?? "";
+  const municipioId = entrada.municipioId?.trim() ?? "";
 
-  if (estado.length === 0) {
-    return { ok: false, error: "Indica el estado." };
+  if (estadoId.length === 0) {
+    return { ok: false, error: "Selecciona el estado." };
   }
-  if (parroquia.length === 0) {
-    return { ok: false, error: "Indica la parroquia." };
+  if (municipioId.length === 0) {
+    return { ok: false, error: "Selecciona el municipio." };
   }
 
-  return { ok: true, valor: { estado, parroquia } };
-}
-
-export function normalizarUbicacion(entrada: Ubicacion): Ubicacion | null {
-  const resultado = validarUbicacion(entrada);
-  return resultado.ok ? resultado.valor : null;
-}
-
-function colapsarEspacios(valor: string): string {
-  return valor.trim().replace(/\s+/g, " ");
+  return { ok: true, valor: { estadoId, municipioId } };
 }
 
 // ── Datos de contacto completos ───────────────────────────────────────────────
@@ -213,14 +204,15 @@ export type DatosContacto = {
   cedula: string;
   telefono: string;
   telefonoEsWhatsApp: boolean;
-  estado: string;
-  parroquia: string;
+  estadoId: string;
+  municipioId: string;
 };
 
 /**
- * Valida y normaliza los cinco campos obligatorios. Devuelve el primer error
- * encontrado, en el orden en que se ven en el formulario, para dar feedback
- * consistente entre cliente y servidor.
+ * Valida y normaliza los datos de contacto. Comprueba cédula y teléfono (formato)
+ * y la **presencia** de estado/municipio; la coherencia estado↔municipio contra
+ * el catálogo se valida aparte en el caso de uso (necesita consultar el catálogo).
+ * Devuelve el primer error encontrado, en el orden en que se ven en el formulario.
  */
 export function validarDatosContacto(
   entrada: DatosContacto,
@@ -231,9 +223,9 @@ export function validarDatosContacto(
   const telefono = validarTelefono(entrada.telefono);
   if (!telefono.ok) return telefono;
 
-  const ubicacion = validarUbicacion({
-    estado: entrada.estado,
-    parroquia: entrada.parroquia,
+  const ubicacion = validarSeleccionUbicacion({
+    estadoId: entrada.estadoId,
+    municipioId: entrada.municipioId,
   });
   if (!ubicacion.ok) return ubicacion;
 
@@ -243,8 +235,8 @@ export function validarDatosContacto(
       cedula: cedula.valor,
       telefono: telefono.valor,
       telefonoEsWhatsApp: Boolean(entrada.telefonoEsWhatsApp),
-      estado: ubicacion.valor.estado,
-      parroquia: ubicacion.valor.parroquia,
+      estadoId: ubicacion.valor.estadoId,
+      municipioId: ubicacion.valor.municipioId,
     },
   };
 }
@@ -252,18 +244,19 @@ export function validarDatosContacto(
 /**
  * Devuelve `true` si un usuario `COLABORADOR`/`SOLICITANTE` tiene todos los
  * datos obligatorios completos. Lo consume el guard de servidor para redirigir
- * a `/completar-perfil` mientras falte cualquiera de los cuatro campos.
+ * a `/completar-perfil` mientras falte cualquiera de los cuatro campos
+ * (feature 020: la ubicación se comprueba por `estadoId` y `municipioId`).
  */
 export function tieneDatosContactoCompletos(datos: {
   cedula: string | null;
   telefono: string | null;
-  estado: string | null;
-  parroquia: string | null;
+  estadoId: string | null;
+  municipioId: string | null;
 }): boolean {
   return (
     Boolean(datos.cedula) &&
     Boolean(datos.telefono) &&
-    Boolean(datos.estado) &&
-    Boolean(datos.parroquia)
+    Boolean(datos.estadoId) &&
+    Boolean(datos.municipioId)
   );
 }

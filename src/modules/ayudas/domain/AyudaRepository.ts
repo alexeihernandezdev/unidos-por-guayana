@@ -2,11 +2,13 @@ import type { EstadoAyuda } from "./EstadoAyuda";
 import type { TipoActividad } from "./TipoActividad";
 import type { Ayuda, CambiosAyuda, NuevaAyuda, NuevaMeta } from "./Ayuda";
 
-// Filtro de listado de ayudas. `estado` acota por etapa del ciclo de vida y
-// `tipo` por tipo de actividad (feature 018); son combinables.
+// Filtro de listado de ayudas. `estado` acota por etapa del ciclo de vida,
+// `tipo` por tipo de actividad (feature 018) y `adminId` por dueño (feature 022);
+// son combinables. El listado de gestión del ADMIN siempre pasa `adminId`.
 export type FiltroAyudas = {
   estado?: EstadoAyuda;
   tipo?: TipoActividad;
+  adminId?: string;
 };
 
 // Contrato de persistencia de ayudas. La implementación concreta (Prisma) vive en

@@ -34,6 +34,7 @@ export class InMemoryAyudaRepository implements AyudaRepository {
     const ahora = new Date();
     const ayuda: Ayuda = {
       id: `ayuda-${++this.secuencia}`,
+      adminId: datos.adminId,
       titulo: datos.titulo,
       sectorDestino: datos.sectorDestino,
       fecha: datos.fecha,
@@ -55,6 +56,9 @@ export class InMemoryAyudaRepository implements AyudaRepository {
     }
     if (filtro?.tipo) {
       ayudas = ayudas.filter((a) => a.tipo === filtro.tipo);
+    }
+    if (filtro?.adminId) {
+      ayudas = ayudas.filter((a) => a.adminId === filtro.adminId);
     }
     return ayudas.map((a) => this.clonar(a));
   }

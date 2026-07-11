@@ -1,4 +1,4 @@
-import { contarAportesPendientes } from "@/modules/aportes/application/contarAportesPendientes";
+import { EstadoAporte } from "@/modules/aportes/domain/EstadoAporte";
 import { progresoDeAyuda } from "@/modules/aportes/application/progresoDeAyuda";
 import {
   contarAyudasPorEstado,
@@ -43,9 +43,11 @@ export type ResumenPanel = {
 
 async function calcularProgresoAgregadoRecolectando(
   deps: PanelDeps,
+  adminId: string,
 ): Promise<ProgresoAgregadoRecolectando> {
   const recolectando = await deps.ayudas.listar({
     estado: EstadoAyuda.RECOLECTANDO,
+    adminId,
   });
   if (recolectando.length === 0) {
     return { metasAlCien: 0, metasBajo: 0, porcentajePromedio: 0 };
@@ -76,9 +78,32 @@ async function calcularProgresoAgregadoRecolectando(
   };
 }
 
-/** Vista consolidada read-only del panel del ADMIN. */
+/** Aportes COMPROMETIDO solo de las actividades del ADMIN dueño (feature 022). */
+async function contarAportesPendientesDelAdmin(
+  deps: PanelDeps,
+  adminId: string,
+): Promise<number> {
+  const ayudas = await deps.ayudas.listar({ adminId });
+  const conteos = await Promise.all(
+    ayudas.map((ayuda) =>
+      deps.aportes.contar({
+        estado: EstadoAporte.COMPROMETIDO,
+        ayudaId: ayuda.id,
+      }),
+    ),
+  );
+  return conteos.reduce((acc, n) => acc + n, 0);
+}
+
+/**
+ * Vista consolidada read-only del panel del ADMIN. Las métricas de actividades
+ * (envíos, prioridad, progreso, aportes pendientes sobre esas actividades) se
+ * acotan al `adminId` de sesión (feature 022). Solicitudes/sectores siguen
+ * globales (no se aíslan en esta feature).
+ */
 export async function obtenerResumenPanel(
   deps: PanelDeps,
+  adminId: string,
 ): Promise<ResumenPanel> {
   const [
     conteosTotales,
@@ -88,12 +113,12 @@ export async function obtenerResumenPanel(
     sectores,
     progresoAgregadoRecolectando,
   ] = await Promise.all([
-    contarAyudasPorEstado(deps),
-    listarPrioridadRecolectando(deps),
+    contarAyudasPorEstado(deps, { adminId }),
+    listarPrioridadRecolectando(deps, adminId),
     contarSolicitudesPorUrgencia(deps),
-    contarAportesPendientes(deps),
+    contarAportesPendientesDelAdmin(deps, adminId),
     sectoresTop(deps),
-    calcularProgresoAgregadoRecolectando(deps),
+    calcularProgresoAgregadoRecolectando(deps, adminId),
   ]);
 
   const enviosPrioridad = await Promise.all(

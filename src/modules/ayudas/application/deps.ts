@@ -1,7 +1,13 @@
+import type { Ayuda } from "@/modules/ayudas/domain/Ayuda";
+import { esDueño } from "@/modules/ayudas/domain/reglas";
 import type { RecursoRepository } from "@/modules/recursos/domain/RecursoRepository";
 import type { AyudaRepository } from "@/modules/ayudas/domain/AyudaRepository";
 import { esCantidadObjetivoValida } from "@/modules/ayudas/domain/reglas";
-import { DatosAyudaInvalidosError, RecursoInvalidoError } from "./errors";
+import {
+  ActividadNoPerteneceAlAdminError,
+  DatosAyudaInvalidosError,
+  RecursoInvalidoError,
+} from "./errors";
 
 // Dependencias que inyectan los casos de uso de ayudas. `recursos` (contrato del
 // catálogo, feature 004) se usa para validar que cada meta apunte a un recurso
@@ -35,5 +41,15 @@ export async function validarMeta(
     throw new RecursoInvalidoError(
       `El recurso "${recurso.nombre}" está archivado y no puede usarse en una meta.`,
     );
+  }
+}
+
+/**
+ * Punto único de verdad de la propiedad (feature 022): si el solicitante no es
+ * el dueño, lanza `ActividadNoPerteneceAlAdminError` (la app lo traduce a 404).
+ */
+export function assertEsDueño(ayuda: Ayuda, adminId: string): void {
+  if (!esDueño(ayuda, adminId)) {
+    throw new ActividadNoPerteneceAlAdminError(ayuda.id);
   }
 }

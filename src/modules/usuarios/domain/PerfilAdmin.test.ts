@@ -9,8 +9,8 @@ import {
 
 const datosValidos: DatosPerfilAdmin = {
   nombreCuenta: "Centro La Guaira",
-  estado: "Bolívar",
-  parroquia: "Cachamay",
+  estadoId: "est-bolivar",
+  municipioId: "mun-caroni",
   telefono: "+58 412 0000000",
   telefonoEsWhatsApp: false,
   correo: "centro@example.org",
@@ -49,10 +49,12 @@ describe("esDocumentoValido", () => {
 });
 
 describe("ubicacionPorDefecto", () => {
-  it("devuelve estado y parroquia del perfil (herencia para PuntoAcopio, feature 011)", () => {
-    expect(ubicacionPorDefecto({ estado: "Bolívar", parroquia: "Unare" })).toEqual({
-      estado: "Bolívar",
-      parroquia: "Unare",
+  it("devuelve estadoId y municipioId del perfil (herencia para PuntoAcopio, feature 011)", () => {
+    expect(
+      ubicacionPorDefecto({ estadoId: "est-bolivar", municipioId: "mun-caroni" }),
+    ).toEqual({
+      estadoId: "est-bolivar",
+      municipioId: "mun-caroni",
     });
   });
 });

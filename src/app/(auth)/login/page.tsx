@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthShell } from "@/modules/usuarios/ui/AuthShell";
 import { LoginForm } from "@/modules/usuarios/ui/LoginForm";
 import { iniciarSesionAction } from "./actions";
 
@@ -10,39 +11,31 @@ export default async function LoginPage({
   const { registrado } = await searchParams;
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-6 p-8">
-      <div className="flex flex-col items-center gap-1 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Iniciar sesión</h1>
-        <p className="text-sm text-muted-foreground">
-          Accede con tu email y contraseña.
+    <AuthShell
+      eyebrow="Acceso a la red"
+      title="Qué bueno tenerte de vuelta."
+      description="Entra para coordinar solicitudes, aportes y entregas desde un solo lugar."
+      footer={
+        <p>
+          ¿Aún no tienes cuenta?{" "}
+          <Link href="/registro" className="auth-inline-link focus-ring">
+            Crear una cuenta
+          </Link>
         </p>
-      </div>
-
+      }
+    >
       {registrado === "admin" ? (
-        <p
-          className="max-w-sm text-center text-sm text-muted-foreground"
-          role="status"
-        >
+        <p className="auth-notice mb-6" role="status">
           Cuenta de administrador creada. Un superadministrador debe aprobarla
           antes de que puedas operar; te avisaremos al iniciar sesión.
         </p>
       ) : registrado ? (
-        <p className="text-sm text-green-600 dark:text-green-500" role="status">
+        <p className="auth-success mb-6" role="status">
           Cuenta creada. Ya puedes iniciar sesión.
         </p>
       ) : null}
 
       <LoginForm action={iniciarSesionAction} />
-
-      <p className="text-sm text-muted-foreground">
-        ¿No tienes cuenta?{" "}
-        <Link
-          href="/registro"
-          className="text-primary underline-offset-4 hover:underline"
-        >
-          Regístrate
-        </Link>
-      </p>
-    </main>
+    </AuthShell>
   );
 }

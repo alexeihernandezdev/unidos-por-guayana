@@ -5,9 +5,9 @@ import { requireRol } from "@/shared/auth";
 import { obtenerResumenPanelServicio } from "@/shared/panel";
 
 export default async function PanelPage() {
-  await requireRol(Rol.ADMIN);
+  const sesion = await requireRol(Rol.ADMIN);
 
-  const resumen = await obtenerResumenPanelServicio();
+  const resumen = await obtenerResumenPanelServicio(sesion.id);
 
   const partes: string[] = [];
   if (resumen.enviosPorEstado.RECOLECTANDO > 0) {

@@ -1,6 +1,6 @@
 # 020 · Catálogo de ubicación: estado y municipio seleccionables
 
-> Estado: **Pendiente** · Depende de: `016 · Perfil de administrador`, `017 · Datos de contacto obligatorios` · Enmienda: `016`, `017` (y prosa de `mission.md` / `tech-stack.md`) · Roadmap: `constitution/roadmap.md`
+> Estado: **Hecho ✅** · Depende de: `016 · Perfil de administrador`, `017 · Datos de contacto obligatorios` · Enmienda: `016`, `017` (y prosa de `mission.md` / `tech-stack.md`) · Roadmap: `constitution/roadmap.md`
 
 ## Qué hace
 

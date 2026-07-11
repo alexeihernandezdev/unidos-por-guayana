@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
+  ActividadNoPerteneceAlAdminError,
   AyudaNoEditableError,
   AyudaNoEncontradaError,
   DatosAyudaInvalidosError,
@@ -86,14 +87,17 @@ function traducirError(error: unknown): Resultado | null {
   if (error instanceof AyudaNoEditableError) {
     return { ok: false, error: error.message };
   }
-  if (error instanceof AyudaNoEncontradaError) {
+  if (
+    error instanceof AyudaNoEncontradaError ||
+    error instanceof ActividadNoPerteneceAlAdminError
+  ) {
     return { ok: false, error: "La actividad ya no existe." };
   }
   return null;
 }
 
 export async function crearAyudaAction(input: AyudaInput): Promise<Resultado> {
-  await requireAdminVerificado();
+  const sesion = await requireAdminVerificado();
 
   const parsed = CrearAyudaSchema.safeParse(input);
   if (!parsed.success) {
@@ -105,6 +109,7 @@ export async function crearAyudaAction(input: AyudaInput): Promise<Resultado> {
 
   try {
     await crearAyudaServicio({
+      adminId: sesion.id,
       titulo: parsed.data.titulo,
       sectorDestino: parsed.data.sectorDestino,
       fecha: parseFecha(parsed.data.fecha),
@@ -125,7 +130,7 @@ export async function editarCabeceraAction(
   id: string,
   input: AyudaInput,
 ): Promise<Resultado> {
-  await requireAdminVerificado();
+  const sesion = await requireAdminVerificado();
 
   const parsed = CabeceraSchema.safeParse(input);
   if (!parsed.success) {
@@ -136,7 +141,7 @@ export async function editarCabeceraAction(
   }
 
   try {
-    await editarCabeceraServicio(id, {
+    await editarCabeceraServicio(id, sesion.id, {
       titulo: parsed.data.titulo,
       sectorDestino: parsed.data.sectorDestino,
       fecha: parseFecha(parsed.data.fecha),
@@ -156,7 +161,7 @@ export async function guardarMetaAction(
   ayudaId: string,
   input: { recursoId: string; cantidadObjetivo: number },
 ): Promise<Resultado> {
-  await requireAdminVerificado();
+  const sesion = await requireAdminVerificado();
 
   const parsed = MetaSchema.safeParse(input);
   if (!parsed.success) {
@@ -167,7 +172,7 @@ export async function guardarMetaAction(
   }
 
   try {
-    await guardarMetaServicio(ayudaId, parsed.data);
+    await guardarMetaServicio(ayudaId, sesion.id, parsed.data);
     revalidatePath(RUTA_LISTADO);
     revalidatePath(`${RUTA_LISTADO}/${ayudaId}`);
     revalidatePath(`${RUTA_LISTADO}/${ayudaId}/editar`);
@@ -183,10 +188,10 @@ export async function quitarMetaAction(
   ayudaId: string,
   recursoId: string,
 ): Promise<Resultado> {
-  await requireAdminVerificado();
+  const sesion = await requireAdminVerificado();
 
   try {
-    await quitarMetaServicio(ayudaId, recursoId);
+    await quitarMetaServicio(ayudaId, sesion.id, recursoId);
     revalidatePath(RUTA_LISTADO);
     revalidatePath(`${RUTA_LISTADO}/${ayudaId}`);
     revalidatePath(`${RUTA_LISTADO}/${ayudaId}/editar`);
@@ -199,20 +204,20 @@ export async function quitarMetaAction(
 }
 
 export async function avanzarEstadoAction(formData: FormData): Promise<void> {
-  await requireAdminVerificado();
+  const sesion = await requireAdminVerificado();
   const id = formData.get("id");
   if (typeof id === "string" && id) {
-    await avanzarEstadoServicio(id);
+    await avanzarEstadoServicio(id, sesion.id);
     revalidatePath(RUTA_LISTADO);
     revalidatePath(`${RUTA_LISTADO}/${id}`);
   }
 }
 
 export async function eliminarAyudaAction(formData: FormData): Promise<void> {
-  await requireAdminVerificado();
+  const sesion = await requireAdminVerificado();
   const id = formData.get("id");
   if (typeof id === "string" && id) {
-    await eliminarAyudaServicio(id);
+    await eliminarAyudaServicio(id, sesion.id);
     revalidatePath(RUTA_LISTADO);
   }
 }

@@ -36,35 +36,47 @@ export function listarAyudasServicio(filtro?: FiltroAyudas): Promise<Ayuda[]> {
   return listarAyudas(deps, filtro);
 }
 
-export function obtenerAyudaServicio(id: string): Promise<Ayuda> {
-  return obtenerAyuda(deps, id);
+export function obtenerAyudaServicio(
+  id: string,
+  adminId?: string,
+): Promise<Ayuda> {
+  return obtenerAyuda(deps, id, adminId);
 }
 
 export function editarCabeceraServicio(
   id: string,
+  adminId: string,
   input: EditarCabeceraInput,
 ): Promise<Ayuda> {
-  return editarCabecera(deps, id, input);
+  return editarCabecera(deps, id, adminId, input);
 }
 
 export function guardarMetaServicio(
   ayudaId: string,
+  adminId: string,
   meta: NuevaMeta,
 ): Promise<Ayuda> {
-  return guardarMeta(deps, ayudaId, meta);
+  return guardarMeta(deps, ayudaId, adminId, meta);
 }
 
 export function quitarMetaServicio(
   ayudaId: string,
+  adminId: string,
   recursoId: string,
 ): Promise<Ayuda> {
-  return quitarMeta(deps, ayudaId, recursoId);
+  return quitarMeta(deps, ayudaId, adminId, recursoId);
 }
 
-export function avanzarEstadoServicio(id: string): Promise<Ayuda> {
-  return avanzarEstado(deps, id);
+export function avanzarEstadoServicio(
+  id: string,
+  adminId: string,
+): Promise<Ayuda> {
+  return avanzarEstado(deps, id, adminId);
 }
 
-export function eliminarAyudaServicio(id: string): Promise<void> {
-  return eliminarAyuda(deps, id);
+export function eliminarAyudaServicio(
+  id: string,
+  adminId: string,
+): Promise<void> {
+  return eliminarAyuda(deps, id, adminId);
 }

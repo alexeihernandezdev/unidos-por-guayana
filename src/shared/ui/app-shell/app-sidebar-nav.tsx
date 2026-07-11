@@ -5,42 +5,55 @@ import { usePathname } from "next/navigation";
 import {
   BoxesIcon,
   BuildingIcon,
+  FilePlus2Icon,
+  HandHeartIcon,
   LayoutDashboardIcon,
+  LightbulbIcon,
+  MapPinnedIcon,
   PackageIcon,
   ScrollTextIcon,
+  UserRoundIcon,
+  UserCheckIcon,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import type { AdminNavItem, AdminNavSection, IconoNav } from "./navConfig";
+import type { IconoNav, NavItem, NavSection } from "./navConfig";
 
 // Mapa nombre → componente de icono. Vive en el client porque los server
 // components no pueden pasar funciones (componentes) a los client como prop.
 const ICONOS: Record<IconoNav, LucideIcon> = {
   panel: LayoutDashboardIcon,
-  envios: PackageIcon,
+  actividades: PackageIcon,
   solicitudes: ScrollTextIcon,
   recursos: BoxesIcon,
-  perfil: BuildingIcon,
+  acopio: BuildingIcon,
+  puntos: MapPinnedIcon,
+  perfil: UserRoundIcon,
+  aportes: HandHeartIcon,
+  nuevaSolicitud: FilePlus2Icon,
+  proponer: LightbulbIcon,
+  aprobaciones: UserCheckIcon,
 };
 
 type Props = {
-  sections: AdminNavSection[];
+  sections: NavSection[];
   onNavigate?: () => void;
 };
 
-function esActivo(pathname: string, item: AdminNavItem): boolean {
+function esActivo(pathname: string, item: NavItem): boolean {
   if (item.exact) return pathname === item.href;
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }
 
 /**
- * Navegación interna del sidebar. Cada ítem activo lleva:
+ * Navegación interna del sidebar (feature 021, generalizada desde el panel de
+ * admin 008). Cada ítem activo lleva:
  *  - Un borde izquierdo ocre de 2px (identidad del panel de despacho).
- *  - Fondo ocre muy tenue (bg-primary/8) para reforzar sin saturar.
+ *  - Fondo ocre muy tenue (bg-primary/10) para reforzar sin saturar.
  *  - Texto primary-ink con peso medium.
  * Los inactivos usan el sweep teal en hover, coherente con el navbar global.
  */
-export function SidebarNav({ sections, onNavigate }: Props) {
+export function AppSidebarNav({ sections, onNavigate }: Props) {
   const pathname = usePathname();
 
   return (

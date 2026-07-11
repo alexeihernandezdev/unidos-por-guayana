@@ -11,11 +11,16 @@ const ESTADOS: EstadoAyuda[] = [
   Estados.ENTREGADO,
 ];
 
-/** Cuenta ayudas agrupadas por estado del ciclo de vida. */
-export async function contarAyudasPorEstado({
-  ayudas,
-}: Pick<AyudaDeps, "ayudas">): Promise<ConteosPorEstadoAyuda> {
-  const todas = await ayudas.listar();
+/**
+ * Cuenta ayudas agrupadas por estado del ciclo de vida. Con `adminId` acota al
+ * dueño (panel del ADMIN, feature 022); sin él cuenta la red completa
+ * (transparencia pública).
+ */
+export async function contarAyudasPorEstado(
+  { ayudas }: Pick<AyudaDeps, "ayudas">,
+  filtro?: { adminId?: string },
+): Promise<ConteosPorEstadoAyuda> {
+  const todas = await ayudas.listar(filtro);
   const conteos: ConteosPorEstadoAyuda = {
     [Estados.RECOLECTANDO]: 0,
     [Estados.LISTO]: 0,

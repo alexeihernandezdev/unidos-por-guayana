@@ -42,3 +42,12 @@ export class DatosAyudaInvalidosError extends Error {
     this.name = "DatosAyudaInvalidosError";
   }
 }
+
+// Se lanza cuando un ADMIN intenta gestionar una actividad que no le pertenece
+// (feature 022). La capa `app` lo traduce a 404 para no filtrar existencia.
+export class ActividadNoPerteneceAlAdminError extends Error {
+  constructor(ayudaId: string) {
+    super(`La actividad "${ayudaId}" no pertenece al administrador solicitante.`);
+    this.name = "ActividadNoPerteneceAlAdminError";
+  }
+}

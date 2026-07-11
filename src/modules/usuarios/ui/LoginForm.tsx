@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/shared/ui/button";
+import { PasswordInput } from "./PasswordInput";
 
 type Campos = { email: string; password: string };
 
@@ -11,7 +12,7 @@ type Props = {
 };
 
 const campo =
-  "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive";
+  "auth-field w-full aria-invalid:border-destructive";
 
 export function LoginForm({ action }: Props) {
   const [pendiente, startTransition] = useTransition();
@@ -34,7 +35,7 @@ export function LoginForm({ action }: Props) {
   });
 
   return (
-    <form onSubmit={onSubmit} className="flex w-full max-w-sm flex-col gap-4">
+    <form onSubmit={onSubmit} className="flex w-full flex-col gap-5">
       <div className="flex flex-col gap-1.5">
         <label htmlFor="email" className="text-sm font-medium">
           Email
@@ -56,9 +57,8 @@ export function LoginForm({ action }: Props) {
         <label htmlFor="password" className="text-sm font-medium">
           Contraseña
         </label>
-        <input
+        <PasswordInput
           id="password"
-          type="password"
           autoComplete="current-password"
           className={campo}
           aria-invalid={Boolean(errors.password)}
@@ -75,7 +75,7 @@ export function LoginForm({ action }: Props) {
         </p>
       )}
 
-      <Button type="submit" disabled={pendiente}>
+      <Button type="submit" size="lg" disabled={pendiente} className="mt-1 w-full active:scale-[0.985]">
         {pendiente ? "Entrando…" : "Iniciar sesión"}
       </Button>
     </form>

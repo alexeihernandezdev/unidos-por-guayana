@@ -9,6 +9,7 @@ import {
   obtenerPerfilAdminGestion,
   requireRol,
 } from "@/shared/auth";
+import { cargarCatalogoUbicacion } from "@/shared/ubicacion";
 import { aprobarAdminAction, rechazarAdminAction } from "./actions";
 
 export const metadata: Metadata = {
@@ -22,11 +23,24 @@ export const metadata: Metadata = {
 export default async function AprobacionAdminsPage() {
   const sesion = await requireRol(Rol.SUPERADMIN);
   const admins = await listarAdminsPendientesGestion({ rol: sesion.rol });
+
+  // Catálogo para resolver los nombres de estado/municipio del perfil (que guarda
+  // ids, feature 020).
+  const { estados, municipios } = await cargarCatalogoUbicacion();
+  const nombreEstado = new Map(estados.map((e) => [e.id, e.nombre]));
+  const nombreMunicipio = new Map(municipios.map((m) => [m.id, m.nombre]));
+
   const pendientes: AdminPendiente[] = await Promise.all(
-    admins.map(async (admin) => ({
-      admin,
-      perfil: await obtenerPerfilAdminGestion(admin.id),
-    })),
+    admins.map(async (admin) => {
+      const perfil = await obtenerPerfilAdminGestion(admin.id);
+      const ubicacion = perfil
+        ? {
+            estado: nombreEstado.get(perfil.estadoId) ?? "—",
+            municipio: nombreMunicipio.get(perfil.municipioId) ?? "—",
+          }
+        : null;
+      return { admin, perfil, ubicacion };
+    }),
   );
 
   return (

@@ -34,6 +34,7 @@ type FilaMeta = {
 
 type FilaAyuda = {
   id: string;
+  adminId: string;
   titulo: string;
   sectorDestino: string;
   fecha: Date;
@@ -65,6 +66,7 @@ function mapearMeta(fila: FilaMeta): MetaRecurso {
 function mapearAyuda(fila: FilaAyuda): Ayuda {
   return {
     id: fila.id,
+    adminId: fila.adminId,
     titulo: fila.titulo,
     sectorDestino: fila.sectorDestino,
     fecha: fila.fecha,
@@ -84,6 +86,7 @@ export class PrismaAyudaRepository implements AyudaRepository {
   async crear(datos: NuevaAyuda): Promise<Ayuda> {
     const fila = await prisma.ayuda.create({
       data: {
+        adminId: datos.adminId,
         titulo: datos.titulo,
         sectorDestino: datos.sectorDestino,
         fecha: datos.fecha,
@@ -106,6 +109,7 @@ export class PrismaAyudaRepository implements AyudaRepository {
       where: {
         ...(filtro?.estado ? { estado: filtro.estado } : {}),
         ...(filtro?.tipo ? { tipo: filtro.tipo } : {}),
+        ...(filtro?.adminId ? { adminId: filtro.adminId } : {}),
       },
       orderBy: { fecha: "desc" },
       include: INCLUDE_METAS,

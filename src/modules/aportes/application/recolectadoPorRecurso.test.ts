@@ -39,6 +39,7 @@ describe("recolectadoPorRecurso", () => {
 
   it("suma solo aportes RECIBIDO y agrupa por recurso", async () => {
     const ayuda = await crearAyuda(deps, {
+      adminId: "admin-1",
       titulo: "Envío",
       sectorDestino: "A",
       fecha: new Date("2026-09-01"),

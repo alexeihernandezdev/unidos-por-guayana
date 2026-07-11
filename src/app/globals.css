@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 /* Tokens de diseño (paleta "Unidos por la Guaira": ocre + teal anclados al lugar).
    Modo claro/oscuro con prefers-color-scheme (ver tech-stack.md → Estilo visual). */
@@ -314,5 +315,270 @@
 @media (prefers-reduced-motion: reduce) {
   body::before {
     animation: none;
+  }
+}
+
+/* Autenticación: panel documental compartido por login y registro. */
+.auth-shell {
+  display: grid;
+  min-height: 100svh;
+  background: var(--background);
+}
+
+.auth-visual {
+  position: relative;
+  min-height: 13rem;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.auth-visual-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, oklch(0.16 0.025 200 / 0.28), oklch(0.13 0.025 200 / 0.82)),
+    linear-gradient(90deg, oklch(0.18 0.055 194 / 0.4), transparent 70%);
+}
+
+.auth-wordmark {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.5rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+}
+
+.auth-visual-copy {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  z-index: 1;
+  color: white;
+}
+
+.auth-visual-copy blockquote {
+  max-width: 30rem;
+  border-left: 3px solid oklch(0.72 0.14 75);
+  padding-left: 1rem;
+  font-family: var(--font-serif);
+  font-size: clamp(1.45rem, 3vw, 2.7rem);
+  font-weight: 500;
+  line-height: 1.08;
+}
+
+.auth-location {
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  font-family: var(--font-geist-mono);
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.68);
+}
+
+.auth-location span {
+  width: 2.75rem;
+  height: 1px;
+  background: rgb(255 255 255 / 0.45);
+}
+
+.auth-content {
+  display: flex;
+  justify-content: center;
+  padding: 2.25rem 1.5rem 3rem;
+  background: oklch(0.985 0.004 200);
+}
+
+.auth-content-inner {
+  width: 100%;
+  align-self: center;
+}
+
+.auth-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 3rem;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  transition: color 160ms var(--ease-out-emil), transform 160ms var(--ease-out-emil);
+}
+
+.auth-back:hover {
+  color: var(--foreground);
+  transform: translateX(-2px);
+}
+
+.auth-field {
+  min-height: 2.875rem;
+  border: 1px solid var(--input);
+  border-radius: calc(var(--radius) - 2px);
+  background: oklch(1 0 0);
+  padding: 0.7rem 0.85rem;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 160ms var(--ease-out-emil), box-shadow 160ms var(--ease-out-emil);
+}
+
+.auth-field:focus-visible {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 14%, transparent);
+}
+
+.auth-inline-link {
+  font-weight: 600;
+  color: var(--primary-ink);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklch, var(--primary) 35%, transparent);
+  text-underline-offset: 4px;
+}
+
+.auth-notice,
+.auth-success {
+  border-left: 2px solid var(--primary);
+  background: color-mix(in oklch, var(--primary) 6%, white);
+  padding: 0.85rem 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.35rem;
+  color: var(--muted-foreground);
+}
+
+.auth-success {
+  color: var(--primary-ink);
+}
+
+@media (min-width: 64rem) {
+  .auth-shell {
+    grid-template-columns: minmax(25rem, 46%) minmax(0, 54%);
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  .auth-visual {
+    min-height: 100svh;
+  }
+
+  .auth-wordmark {
+    top: 2rem;
+    left: 2.5rem;
+  }
+
+  .auth-visual-copy {
+    right: 3.5rem;
+    bottom: 3.25rem;
+    left: 2.5rem;
+  }
+
+  .auth-location {
+    display: flex;
+  }
+
+  .auth-content {
+    overflow-y: auto;
+    padding: 3rem clamp(3rem, 7vw, 7rem);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .auth-visual {
+    animation: auth-reveal 540ms var(--ease-out-emil) both;
+  }
+
+  [data-auth-rise] {
+    animation: auth-rise 480ms 100ms var(--ease-out-emil) both;
+  }
+
+  @keyframes auth-reveal {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes auth-rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* Marcadores del directorio: selección visible sin depender solo del color. */
+.acopio-map-pin {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 2px solid white;
+  border-radius: 50% 50% 50% 0;
+  background: var(--primary);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.22);
+  transform: rotate(-45deg);
+  transition: width 180ms var(--ease-out-emil), height 180ms var(--ease-out-emil), background-color 180ms var(--ease-out-emil);
+}
+
+.acopio-map-pin span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: white;
+}
+
+.acopio-map-pin.is-selected {
+  width: 34px;
+  height: 34px;
+  background: var(--primary-ink);
+  outline: 3px solid color-mix(in oklch, var(--primary) 24%, transparent);
+  outline-offset: 2px;
+}
+
+.acopio-map-cluster-wrapper {
+  display: grid;
+  place-items: center;
+  background: transparent;
+}
+
+.acopio-map-cluster {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 3px solid white;
+  border-radius: 50%;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-family: var(--font-geist-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 2px 7px rgb(0 0 0 / 0.24), 0 0 0 7px color-mix(in oklch, var(--primary) 20%, transparent);
+  transition: transform 180ms var(--ease-out-emil), box-shadow 180ms var(--ease-out-emil);
+}
+
+.acopio-map-cluster-md {
+  background: var(--primary-ink);
+}
+
+.acopio-map-cluster-lg {
+  width: 46px;
+  height: 46px;
+  background: var(--accent);
+}
+
+.acopio-map-cluster:hover {
+  transform: scale(1.08);
+  box-shadow: 0 3px 8px rgb(0 0 0 / 0.28), 0 0 0 9px color-mix(in oklch, var(--primary) 23%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .acopio-map-pin {
+    transition: none;
+  }
+
+  .acopio-map-cluster,
+  .leaflet-cluster-anim .leaflet-marker-icon,
+  .leaflet-cluster-anim .leaflet-marker-shadow {
+    transition: none !important;
   }
 }
