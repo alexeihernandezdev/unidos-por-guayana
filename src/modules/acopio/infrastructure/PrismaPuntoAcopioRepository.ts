@@ -6,6 +6,7 @@ import type {
 } from "@/modules/acopio/domain/PuntoAcopio";
 import type {
   FiltroPuntosAcopio,
+  FiltroPuntosActivos,
   PuntoAcopioRepository,
 } from "@/modules/acopio/domain/PuntoAcopioRepository";
 
@@ -55,6 +56,23 @@ export class PrismaPuntoAcopioRepository implements PuntoAcopioRepository {
   ): Promise<PuntoAcopio[]> {
     const where: { adminId: string; activo?: boolean } = { adminId };
     if (filtro?.activo !== undefined) where.activo = filtro.activo;
+    const filas = await prisma.puntoAcopio.findMany({
+      where,
+      orderBy: { nombre: "asc" },
+    });
+    return filas.map(aDominio);
+  }
+
+  async listarActivos(
+    filtro?: FiltroPuntosActivos,
+  ): Promise<PuntoAcopio[]> {
+    const where: {
+      activo: true;
+      estadoId?: string;
+      municipioId?: string;
+    } = { activo: true };
+    if (filtro?.estadoId) where.estadoId = filtro.estadoId;
+    if (filtro?.municipioId) where.municipioId = filtro.municipioId;
     const filas = await prisma.puntoAcopio.findMany({
       where,
       orderBy: { nombre: "asc" },

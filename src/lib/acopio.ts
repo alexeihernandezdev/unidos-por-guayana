@@ -10,10 +10,17 @@ import {
   editarPuntoAcopio,
   type EditarPuntoAcopioInput,
 } from "@/modules/acopio/application/editarPuntoAcopio";
+import {
+  listarPuntosActivos,
+  verPuntoAcopioActivo,
+} from "@/modules/acopio/application/listarPuntosActivos";
 import { listarPuntosDeAdmin } from "@/modules/acopio/application/listarPuntosDeAdmin";
 import type { CentroMapa } from "@/modules/acopio/domain/LectorCentroMapa";
 import type { PuntoAcopio } from "@/modules/acopio/domain/PuntoAcopio";
-import type { FiltroPuntosAcopio } from "@/modules/acopio/domain/PuntoAcopioRepository";
+import type {
+  FiltroPuntosAcopio,
+  FiltroPuntosActivos,
+} from "@/modules/acopio/domain/PuntoAcopioRepository";
 import { PrismaLectorCentroMapa } from "@/modules/acopio/infrastructure/PrismaLectorCentroMapa";
 import { PrismaLectorUbicacionAdmin } from "@/modules/acopio/infrastructure/PrismaLectorUbicacionAdmin";
 import { PrismaPuntoAcopioRepository } from "@/modules/acopio/infrastructure/PrismaPuntoAcopioRepository";
@@ -74,6 +81,18 @@ export function activarPuntoAcopioServicio(
   id: string,
 ): Promise<PuntoAcopio> {
   return activarPuntoAcopio({ puntos }, adminId, id);
+}
+
+export function listarPuntosActivosServicio(
+  filtro?: FiltroPuntosActivos,
+): Promise<PuntoAcopio[]> {
+  return listarPuntosActivos({ puntos }, filtro);
+}
+
+export function verPuntoAcopioActivoServicio(
+  id: string,
+): Promise<PuntoAcopio | null> {
+  return verPuntoAcopioActivo({ puntos }, id);
 }
 
 /**

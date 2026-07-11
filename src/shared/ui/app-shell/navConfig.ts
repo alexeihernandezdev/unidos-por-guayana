@@ -9,6 +9,7 @@ export type IconoNav =
   | "solicitudes"
   | "recursos"
   | "acopio"
+  | "puntos"
   | "perfil"
   | "aportes"
   | "nuevaSolicitud"
@@ -49,6 +50,11 @@ const NAV_ADMIN: NavSection[] = [
     label: "Mi cuenta",
     items: [
       { label: "Mi centro de acopio", href: "/panel/perfil", icon: "acopio" },
+      {
+        label: "Puntos de acopio",
+        href: "/panel/puntos-acopio",
+        icon: "puntos",
+      },
     ],
   },
 ];
@@ -77,6 +83,7 @@ const NAV_COLABORADOR: NavSection[] = [
     items: [
       { label: "Actividades", href: "/ayudas", icon: "actividades", exact: true },
       { label: "Mis aportes", href: "/mis-aportes", icon: "aportes", exact: true },
+      { label: "Puntos de acopio", href: "/puntos-acopio", icon: "puntos" },
     ],
   },
   {

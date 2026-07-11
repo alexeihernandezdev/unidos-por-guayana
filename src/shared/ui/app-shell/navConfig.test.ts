@@ -17,10 +17,11 @@ describe("rutaInicioPorRol", () => {
 });
 
 describe("navSectionsPorRol", () => {
-  it("da al COLABORADOR sus destinos (actividades, aportes, perfil)", () => {
+  it("da al COLABORADOR sus destinos (actividades, aportes, puntos, perfil)", () => {
     expect(hrefs(Rol.COLABORADOR)).toEqual([
       "/ayudas",
       "/mis-aportes",
+      "/puntos-acopio",
       "/mi-perfil",
     ]);
   });
@@ -34,13 +35,14 @@ describe("navSectionsPorRol", () => {
     ]);
   });
 
-  it("conserva la navegación del panel del ADMIN (008)", () => {
+  it("conserva la navegación del panel del ADMIN (008 + puntos de 011)", () => {
     expect(hrefs(Rol.ADMIN)).toEqual([
       "/panel",
       "/panel/ayudas",
       "/panel/solicitudes",
       "/panel/recursos",
       "/panel/perfil",
+      "/panel/puntos-acopio",
     ]);
   });
 

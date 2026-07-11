@@ -6,6 +6,7 @@ import type {
 } from "@/modules/acopio/domain/PuntoAcopio";
 import type {
   FiltroPuntosAcopio,
+  FiltroPuntosActivos,
   PuntoAcopioRepository,
 } from "@/modules/acopio/domain/PuntoAcopioRepository";
 import {
@@ -54,6 +55,19 @@ export class InMemoryPuntoAcopioRepository implements PuntoAcopioRepository {
     let puntos = [...this.porId.values()].filter((p) => p.adminId === adminId);
     if (filtro?.activo !== undefined) {
       puntos = puntos.filter((p) => p.activo === filtro.activo);
+    }
+    return puntos;
+  }
+
+  async listarActivos(
+    filtro?: FiltroPuntosActivos,
+  ): Promise<PuntoAcopio[]> {
+    let puntos = [...this.porId.values()].filter((p) => p.activo);
+    if (filtro?.estadoId) {
+      puntos = puntos.filter((p) => p.estadoId === filtro.estadoId);
+    }
+    if (filtro?.municipioId) {
+      puntos = puntos.filter((p) => p.municipioId === filtro.municipioId);
     }
     return puntos;
   }
