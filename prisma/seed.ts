@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "../src/generated/prisma/client";
+import { CAPITALES_VENEZUELA } from "./data/venezuela-capitales";
 import {
   CATALOGO_UBICACION,
   TOTAL_ESTADOS,
@@ -69,12 +70,25 @@ async function sembrarUsuario(
 // modo que re-ejecutar el seed no duplica filas ni rompe las FKs que apuntan al
 // catálogo. Se ejecuta antes de los usuarios de prueba.
 async function sembrarCatalogoUbicacion(prisma: PrismaClient): Promise<void> {
+  // Coordenadas de la capital por código de estado (feature 011): centro
+  // inicial del mapa al crear un punto de acopio.
+  const capitalPorCodigo = new Map(
+    CAPITALES_VENEZUELA.map((c) => [c.codigoEstado, c]),
+  );
   let municipios = 0;
   for (const estado of CATALOGO_UBICACION) {
+    const capital = capitalPorCodigo.get(estado.codigo);
+    const coordenadasCapital = capital
+      ? { latitudCapital: capital.latitud, longitudCapital: capital.longitud }
+      : {};
     const estadoFila = await prisma.estado.upsert({
       where: { codigo: estado.codigo },
-      update: { nombre: estado.nombre },
-      create: { codigo: estado.codigo, nombre: estado.nombre },
+      update: { nombre: estado.nombre, ...coordenadasCapital },
+      create: {
+        codigo: estado.codigo,
+        nombre: estado.nombre,
+        ...coordenadasCapital,
+      },
     });
     for (const municipio of estado.municipios) {
       await prisma.municipio.upsert({

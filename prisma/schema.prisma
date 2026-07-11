@@ -166,6 +166,11 @@ model Estado {
   id     String @id @default(cuid())
   codigo String @unique
   nombre String
+  // Coordenadas de la capital del estado (feature 011): centro inicial del mapa
+  // al crear un punto de acopio. Nullable en base (el seed las llena; upsert por
+  // `codigo`); el consumidor cae a un centro por defecto de Venezuela si faltan.
+  latitudCapital  Decimal? @db.Decimal(9, 6)
+  longitudCapital Decimal? @db.Decimal(9, 6)
 
   municipios    Municipio[]
   usuarios      Usuario[]

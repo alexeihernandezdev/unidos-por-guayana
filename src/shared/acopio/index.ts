@@ -8,4 +8,7 @@ export {
   editarPuntoAcopioServicio,
   archivarPuntoAcopioServicio,
   activarPuntoAcopioServicio,
+  centroMapaPorDefectoServicio,
 } from "@/lib/acopio";
+export type { CentroMapa } from "@/modules/acopio/domain/LectorCentroMapa";
+export type { PuntoAcopio } from "@/modules/acopio/domain/PuntoAcopio";

@@ -11,8 +11,10 @@ import {
   type EditarPuntoAcopioInput,
 } from "@/modules/acopio/application/editarPuntoAcopio";
 import { listarPuntosDeAdmin } from "@/modules/acopio/application/listarPuntosDeAdmin";
+import type { CentroMapa } from "@/modules/acopio/domain/LectorCentroMapa";
 import type { PuntoAcopio } from "@/modules/acopio/domain/PuntoAcopio";
 import type { FiltroPuntosAcopio } from "@/modules/acopio/domain/PuntoAcopioRepository";
+import { PrismaLectorCentroMapa } from "@/modules/acopio/infrastructure/PrismaLectorCentroMapa";
 import { PrismaLectorUbicacionAdmin } from "@/modules/acopio/infrastructure/PrismaLectorUbicacionAdmin";
 import { PrismaPuntoAcopioRepository } from "@/modules/acopio/infrastructure/PrismaPuntoAcopioRepository";
 import { PrismaCatalogoUbicacionRepository } from "@/modules/ubicacion/infrastructure/PrismaCatalogoUbicacionRepository";
@@ -26,6 +28,7 @@ import { PrismaCatalogoUbicacionRepository } from "@/modules/ubicacion/infrastru
 const puntos = new PrismaPuntoAcopioRepository();
 const ubicacionAdmin = new PrismaLectorUbicacionAdmin();
 const catalogoUbicacion = new PrismaCatalogoUbicacionRepository();
+const centroMapa = new PrismaLectorCentroMapa();
 
 export function crearPuntoAcopioServicio(
   adminId: string,
@@ -71,4 +74,15 @@ export function activarPuntoAcopioServicio(
   id: string,
 ): Promise<PuntoAcopio> {
   return activarPuntoAcopio({ puntos }, adminId, id);
+}
+
+/**
+ * Centro inicial del mapa al crear un punto: la capital del estado del
+ * `PerfilAdmin`, o `null` si el admin no tiene ubicación (el mapa cae al
+ * centro de Venezuela). Solo presentación; no se persiste.
+ */
+export function centroMapaPorDefectoServicio(
+  adminId: string,
+): Promise<CentroMapa | null> {
+  return centroMapa.centroPorAdminId(adminId);
 }
