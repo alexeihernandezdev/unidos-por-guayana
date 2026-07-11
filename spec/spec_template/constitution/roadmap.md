@@ -32,6 +32,8 @@ _Features completadas, en orden de implementación._
 
 21. **025 · Afiliación a centros de acopio y categorías de aporte** — El `COLABORADOR` declara al menos una `CategoriaRecurso` que puede aportar (obligatorio en el registro, editable en `/mi-perfil`) y se afilia (opcional, inmediato, multi-centro) a uno o varios `ADMIN` desde `/mi-perfil` (descubrimiento de centros verificados filtrable por estado y expandible a sus puntos activos). El `ADMIN` ve "su red" en `/panel/red` (nombre, categorías, verificación, teléfono/WhatsApp; filtro por categoría; remover sin bloquear re-afiliación) y un conteo de aptos por categoría al elegir el recurso de una meta al crear una Actividad. Modelo: `Afiliacion` (tabla puente sin estado) y `Usuario.categoriasAporte` (array de enum). La convocatoria de 012 nace resolviendo destinatarios con la red apta (afiliados verificados cuya categoría intersecta las metas); el envío del aviso queda para 012. Puramente informativa: no restringe a qué Actividad puede aportar un colaborador. _Enmienda 002 y 017. Depende de 002, 013, 016, 020 y 024._
 
+22. **014 · Donaciones monetarias externas** — Mostrar medios externos para donar dinero (cuenta bancaria, PayPal, Zelle…) y permitir al `ADMIN` registrar manualmente montos recibidos por fuera (recursos `MONETARIO`) para reflejarlos en la transparencia. La app no procesa el pago.
+
 ## Siguiente 🔜
 
 _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
@@ -55,6 +57,5 @@ _Ordenado según dependencias. Cada uno se convierte en `features/NNN-…/` ante
 23. **011 · Puntos de acopio** — Centros físicos de entrega (dirección, horarios, qué reciben), **cada uno perteneciente a un `ADMIN`** (ver 016).
 24. **012 · Notificaciones** — Avisos a colaboradores sobre actividades que necesitan recursos o metas cumplidas. **Actualizada:** el disparador `NUEVA_AYUDA`/`NUEVA_ACTIVIDAD` notifica a la **red apta** del admin dueño (afiliados verificados cuya categoría coincide con la de algún recurso de la Actividad, ver 025), no a "todos los colaboradores verificados" como se especificó originalmente. Depende de 025 (se implementa después, ya con esta lógica).
 25. **013 · Verificación de usuarios** — Validación de `COLABORADOR` y `SOLICITANTE` (`estadoVerificacion`) por parte del `ADMIN`. La verificación de cuentas `ADMIN` la cubre 015 (superadmin).
-26. **014 · Donaciones monetarias externas** — Mostrar medios externos para donar dinero (cuenta bancaria, PayPal, Zelle…) y permitir al `ADMIN` registrar manualmente montos recibidos por fuera (recursos `MONETARIO`) para reflejarlos en la transparencia. La app no procesa el pago.
 
 > Cada feature nueva se crea como `features/NNN-nombre-feature/` con `spec.md`, `plan.md` y `tasks.md` antes de tocar código.
