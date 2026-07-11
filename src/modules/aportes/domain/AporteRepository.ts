@@ -21,6 +21,21 @@ export type RecolectadoPorRecursoId = {
   cantidadRecibida: number;
 };
 
+/**
+ * Lectura de reconocimiento por actividad (feature 023): solo el nombre del
+ * aportante, nunca cédula/teléfono/correo/ubicación. La infraestructura debe
+ * proyectar con `select` explícito; no devolver el `Usuario` completo.
+ */
+export type AportanteDeAyuda = {
+  id: string;
+  aportanteNombre: string;
+  recursoNombre: string;
+  recursoUnidad: string;
+  cantidad: number;
+  estado: EstadoAporte;
+  fecha: Date;
+};
+
 // Contrato de persistencia de aportes. La implementación concreta (Prisma) vive
 // en la capa de infraestructura; el dominio solo define la interfaz.
 export interface AporteRepository {
@@ -28,6 +43,11 @@ export interface AporteRepository {
   buscarPorId(id: string): Promise<Aporte | null>;
   listarPorAyuda(ayudaId: string, filtro?: FiltroAportes): Promise<Aporte[]>;
   listarDeColaborador(colaboradorId: string): Promise<Aporte[]>;
+  /**
+   * Registro de aportantes de una actividad (feature 023): orden `createdAt`
+   * desc, sin datos de contacto del aportante.
+   */
+  listarAportantesDeAyuda(ayudaId: string): Promise<AportanteDeAyuda[]>;
   /**
    * Transiciona el estado de un aporte de forma idempotente: solo cambia si el
    * estado actual coincide con `desde`. Devuelve el aporte actualizado o `null`

@@ -9,5 +9,6 @@ export {
   listarAportesPorAyudaServicio,
   listarAportesDeColaboradorServicio,
   listarAportesRecientesServicio,
+  listarAportantesDeAyudaServicio,
   progresoDeAyudaServicio,
 } from "@/lib/aportes";

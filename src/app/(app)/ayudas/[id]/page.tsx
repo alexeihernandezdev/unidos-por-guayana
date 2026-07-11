@@ -4,11 +4,15 @@ import { AyudaNoEncontradaError } from "@/modules/ayudas/application/errors";
 import { EstadoAyuda } from "@/modules/ayudas/domain/EstadoAyuda";
 import { EstadoBadge } from "@/modules/ayudas/ui/EstadoBadge";
 import { formatearFecha } from "@/modules/ayudas/ui/fechas";
+import { AportantesTabla } from "@/modules/aportes/ui/AportantesTabla";
 import { ProgresoMetas } from "@/modules/aportes/ui/ProgresoMetas";
 import { Rol } from "@/modules/usuarios/domain/Rol";
-import { progresoDeAyudaServicio } from "@/shared/aportes";
-import { obtenerAyudaServicio } from "@/shared/ayudas";
+import {
+  listarAportantesDeAyudaServicio,
+  progresoDeAyudaServicio,
+} from "@/shared/aportes";
 import { requireRol } from "@/shared/auth";
+import { obtenerAyudaServicio } from "@/shared/ayudas";
 import { Button } from "@/shared/ui/button";
 
 type Props = {
@@ -16,11 +20,11 @@ type Props = {
 };
 
 // Detalle del envío para el colaborador autenticado: cabecera, progreso por meta
-// (reusa `ProgresoMetas`) y el botón "Aportar" cuando el envío sigue en
-// `RECOLECTANDO`. Es la vista pública/autenticada de una Ayuda que pedía la
-// feature 006 como origen del flujo de aporte.
+// (reusa `ProgresoMetas`), registro de aportantes (feature 023) y el botón
+// "Aportar" cuando el envío sigue en `RECOLECTANDO`. Los nombres de aportantes
+// solo se cargan con sesión (gate de privacidad de 023).
 export default async function AyudaDetallePublicoPage({ params }: Props) {
-  await requireRol(Rol.COLABORADOR, Rol.ADMIN);
+  const usuario = await requireRol(Rol.COLABORADOR, Rol.ADMIN);
 
   const { id } = await params;
   let ayuda;
@@ -31,7 +35,12 @@ export default async function AyudaDetallePublicoPage({ params }: Props) {
     throw error;
   }
 
-  const progreso = await progresoDeAyudaServicio(ayuda.id);
+  const [progreso, aportantes] = await Promise.all([
+    progresoDeAyudaServicio(ayuda.id),
+    usuario
+      ? listarAportantesDeAyudaServicio(ayuda.id)
+      : Promise.resolve(null),
+  ]);
   const aceptaAportes = ayuda.estado === EstadoAyuda.RECOLECTANDO;
 
   return (
@@ -72,6 +81,23 @@ export default async function AyudaDetallePublicoPage({ params }: Props) {
         {!aceptaAportes && (
           <p className="text-sm text-muted-foreground">
             Esta actividad ya no acepta aportes (estado actual: {ayuda.estado}).
+          </p>
+        )}
+      </section>
+
+      <section className="flex flex-col gap-3 border-t border-border pt-6">
+        <h2 className="text-lg font-semibold">Quiénes han aportado</h2>
+        {aportantes ? (
+          <AportantesTabla aportantes={aportantes} />
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Inicia sesión para ver quiénes han aportado a esta actividad.{" "}
+            <Link
+              href="/login"
+              className="text-primary underline-offset-4 hover:underline"
+            >
+              Iniciar sesión
+            </Link>
           </p>
         )}
       </section>
