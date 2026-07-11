@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import type { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import type { DatosContacto } from "@/modules/usuarios/domain/datosContacto";
 import type { EstadoVerificacion } from "@/modules/usuarios/domain/Rol";
 import {
@@ -61,6 +62,16 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
         estadoId: datos.estadoId,
         municipioId: datos.municipioId,
       },
+    });
+  }
+
+  async actualizarCategoriasAporte(
+    id: string,
+    categorias: CategoriaRecurso[],
+  ): Promise<Usuario> {
+    return prisma.usuario.update({
+      where: { id },
+      data: { categoriasAporte: { set: categorias } },
     });
   }
 }

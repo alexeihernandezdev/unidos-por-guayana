@@ -6,7 +6,7 @@ import type { EstadoAporte } from "@/modules/aportes/domain/EstadoAporte";
 import { EstadoAporte as Estados } from "@/modules/aportes/domain/EstadoAporte";
 import type {
   AgregadoPorMeta,
-  AportanteDeAyuda,
+  AportanteDeActividad,
   AporteRepository,
   FiltroAportes,
   RecolectadoPorRecursoId,
@@ -24,7 +24,7 @@ export class InMemoryAporteRepository implements AporteRepository {
     const estado = datos.estado ?? Estados.COMPROMETIDO;
     const aporte: Aporte = {
       id: `aporte-${++this.secuencia}`,
-      ayudaId: datos.ayudaId,
+      actividadId: datos.actividadId,
       recursoId: datos.recursoId,
       colaboradorId: datos.colaboradorId,
       cantidad: datos.cantidad,
@@ -51,12 +51,12 @@ export class InMemoryAporteRepository implements AporteRepository {
     return aporte ? this.clonar(aporte) : null;
   }
 
-  async listarPorAyuda(
-    ayudaId: string,
+  async listarPorActividad(
+    actividadId: string,
     filtro?: FiltroAportes,
   ): Promise<Aporte[]> {
     return [...this.porId.values()]
-      .filter((a) => a.ayudaId === ayudaId)
+      .filter((a) => a.actividadId === actividadId)
       .filter((a) => (filtro?.estado ? a.estado === filtro.estado : true))
       .map((a) => this.clonar(a));
   }
@@ -74,9 +74,9 @@ export class InMemoryAporteRepository implements AporteRepository {
     this.porId.set(aporte.id, this.clonar(aporte));
   }
 
-  async listarAportantesDeAyuda(ayudaId: string): Promise<AportanteDeAyuda[]> {
+  async listarAportantesDeActividad(actividadId: string): Promise<AportanteDeActividad[]> {
     return [...this.porId.values()]
-      .filter((a) => a.ayudaId === ayudaId)
+      .filter((a) => a.actividadId === actividadId)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .map((a) => ({
         id: a.id,
@@ -117,10 +117,10 @@ export class InMemoryAporteRepository implements AporteRepository {
       .map((a) => this.clonar(a));
   }
 
-  async progresoPorAyuda(ayudaId: string): Promise<AgregadoPorMeta[]> {
+  async progresoPorActividad(actividadId: string): Promise<AgregadoPorMeta[]> {
     const acumulado = new Map<string, AgregadoPorMeta>();
     for (const aporte of this.porId.values()) {
-      if (aporte.ayudaId !== ayudaId) continue;
+      if (aporte.actividadId !== actividadId) continue;
       const actual = acumulado.get(aporte.recursoId) ?? {
         recursoId: aporte.recursoId,
         recibido: 0,
@@ -165,7 +165,7 @@ export class InMemoryAporteRepository implements AporteRepository {
   async contar(filtro?: FiltroAportes): Promise<number> {
     return [...this.porId.values()].filter((a) => {
       if (filtro?.estado && a.estado !== filtro.estado) return false;
-      if (filtro?.ayudaId && a.ayudaId !== filtro.ayudaId) return false;
+      if (filtro?.actividadId && a.actividadId !== filtro.actividadId) return false;
       return true;
     }).length;
   }

@@ -3,6 +3,7 @@ import { catalogoDePrueba } from "@/modules/ubicacion/application/fakes";
 import type { DatosContacto } from "@/modules/usuarios/domain/datosContacto";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import {
+  CategoriasAporteVaciasError,
   CedulaYaRegistradaError,
   DatosContactoInvalidosError,
   EmailYaRegistradoError,
@@ -43,6 +44,8 @@ const baseInput: RegistrarUsuarioInput = {
   password: "contraseña-segura",
   rol: Rol.COLABORADOR,
   datosContacto: datosContactoBase,
+  // Feature 025: el COLABORADOR declara al menos una categoría de aporte.
+  categoriasAporte: ["SUMINISTRO", "TRANSPORTE"],
 };
 
 describe("registrarUsuario", () => {
@@ -69,6 +72,24 @@ describe("registrarUsuario", () => {
     expect(usuario.telefonoEsWhatsApp).toBe(true);
     expect(usuario.estadoId).toBe(guaira.id);
     expect(usuario.municipioId).toBe(vargas.id);
+    expect(usuario.categoriasAporte).toEqual(["SUMINISTRO", "TRANSPORTE"]);
+  });
+
+  it("rechaza un colaborador sin categorías de aporte (feature 025)", async () => {
+    const deps = crearDeps();
+    await expect(
+      registrarUsuario(deps, { ...baseInput, categoriasAporte: [] }),
+    ).rejects.toBeInstanceOf(CategoriasAporteVaciasError);
+  });
+
+  it("el solicitante no necesita categorías de aporte", async () => {
+    const deps = crearDeps();
+    const usuario = await registrarUsuario(deps, {
+      ...baseInput,
+      rol: Rol.SOLICITANTE,
+      categoriasAporte: [],
+    });
+    expect(usuario.categoriasAporte).toEqual([]);
   });
 
   it("rechaza un municipio que no pertenece al estado elegido (servidor)", async () => {

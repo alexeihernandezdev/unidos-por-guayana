@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Plus, Warehouse } from "lucide-react";
+import { Clock3, MapPin, Pencil, Phone, Plus, Warehouse } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Estado } from "@/modules/ubicacion/domain/Estado";
@@ -19,10 +19,7 @@ import {
   filtrarPuntos,
   type FiltroPuntosValor,
 } from "./FiltrosPuntos";
-import {
-  PuntoAcopioCard,
-  type PuntoAcopioConUbicacion,
-} from "./PuntoAcopioCard";
+import type { PuntoAcopioConUbicacion } from "./PuntoAcopioCard";
 import type { CoordenadasMapa } from "./PuntoAcopioMapa";
 import {
   PuntoAcopioForm,
@@ -83,7 +80,7 @@ export function PuntosAcopioGestion({
 
   return (
     <>
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border bg-card p-4">
         <p className="text-sm text-muted-foreground">
           {puntos.length === 0
             ? "Aún no tienes puntos registrados."
@@ -133,16 +130,24 @@ export function PuntosAcopioGestion({
           Ningún punto coincide con los filtros.
         </p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="divide-y overflow-hidden rounded-lg border bg-card">
           {visibles.map((punto) => (
-            <PuntoAcopioCard
-              key={punto.id}
-              punto={punto}
-              mostrarEstado
-              acciones={
-                <div className="grid grid-cols-2 gap-2">
+            <article key={punto.id} className="flex flex-col gap-4 p-4 transition-colors duration-150 hover:bg-muted/30 md:flex-row md:items-center md:justify-between">
+              <div className="flex min-w-0 items-start gap-3">
+                <span className="profile-icon size-10"><Warehouse aria-hidden="true" /></span>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2"><h2 className="font-semibold">{punto.nombre}</h2><span className={punto.activo ? "rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary-ink" : "rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"}>{punto.activo ? "Activo" : "Archivado"}</span></div>
+                  <p className="mt-0.5 text-sm text-muted-foreground">{punto.referencia}</p>
+                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                    <span className="inline-flex items-center gap-1"><MapPin className="size-3.5" />{punto.municipioNombre}, {punto.estadoNombre}</span>
+                    <span className="inline-flex items-center gap-1"><Clock3 className="size-3.5" />{punto.horarios}</span>
+                    <span className="inline-flex items-center gap-1"><Phone className="size-3.5" />{punto.telefono}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex shrink-0 gap-2 md:justify-end">
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => setModal({ modo: "editar", punto })}
                   >
@@ -154,13 +159,12 @@ export function PuntosAcopioGestion({
                     className="contents"
                   >
                     <input type="hidden" name="id" value={punto.id} />
-                    <Button type="submit" variant="ghost" size="sm">
+                    <Button type="submit" variant="secondary" size="sm">
                       {punto.activo ? "Archivar" : "Activar"}
                     </Button>
                   </form>
-                </div>
-              }
-            />
+              </div>
+            </article>
           ))}
         </div>
       )}

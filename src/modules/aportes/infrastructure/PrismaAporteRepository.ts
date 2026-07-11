@@ -4,14 +4,13 @@ import type { EstadoAporte } from "@/modules/aportes/domain/EstadoAporte";
 import { EstadoAporte as Estados } from "@/modules/aportes/domain/EstadoAporte";
 import type {
   AgregadoPorMeta,
-  AportanteDeAyuda,
+  AportanteDeActividad,
   AporteRepository,
   FiltroAportes,
   RecolectadoPorRecursoId,
 } from "@/modules/aportes/domain/AporteRepository";
 
-// Incluye recurso, colaborador y medio de donación para las vistas (tabla admin,
-// "mis aportes", ingresos monetarios de la feature 014).
+// Incluye recurso y colaborador para las vistas (tabla admin, "mis aportes").
 const INCLUDE_DETALLE = {
   recurso: true,
   colaborador: true,
@@ -20,7 +19,7 @@ const INCLUDE_DETALLE = {
 
 type FilaAporte = {
   id: string;
-  ayudaId: string | null;
+  actividadId: string | null;
   recursoId: string;
   colaboradorId: string | null;
   cantidad: { toNumber: () => number };
@@ -41,7 +40,7 @@ type FilaAporte = {
 function mapear(fila: FilaAporte): Aporte {
   return {
     id: fila.id,
-    ayudaId: fila.ayudaId,
+    actividadId: fila.actividadId,
     recursoId: fila.recursoId,
     colaboradorId: fila.colaboradorId,
     cantidad: fila.cantidad.toNumber(),
@@ -69,11 +68,7 @@ function mapear(fila: FilaAporte): Aporte {
         }
       : null,
     medio: fila.medioDonacion
-      ? {
-          id: fila.medioDonacion.id,
-          tipo: fila.medioDonacion.tipo,
-          titular: fila.medioDonacion.titular,
-        }
+      ? { id: fila.medioDonacion.id, tipo: fila.medioDonacion.tipo, titular: fila.medioDonacion.titular }
       : null,
   };
 }
@@ -82,22 +77,17 @@ export class PrismaAporteRepository implements AporteRepository {
   async crear(datos: NuevoAporte): Promise<Aporte> {
     const fila = await prisma.aporte.create({
       data: {
-        ayudaId: datos.ayudaId,
+        actividadId: datos.actividadId,
         recursoId: datos.recursoId,
-        // Nulo cuando es un ingreso monetario externo sin colaborador (014).
         colaboradorId: datos.colaboradorId,
         cantidad: datos.cantidad,
         nota: datos.nota,
-        // Campos del ingreso monetario externo (014); Prisma aplica el default
-        // `COMPROMETIDO` / `null` cuando el flujo de colaborador (006) los omite.
         moneda: datos.moneda ?? null,
         ...(datos.estado ? { estado: datos.estado } : {}),
         registradoPorId: datos.registradoPorId ?? null,
         medioDonacionId: datos.medioDonacionId ?? null,
         referencia: datos.referencia ?? null,
-        ...(datos.recibidoEn !== undefined
-          ? { recibidoEn: datos.recibidoEn }
-          : {}),
+        ...(datos.recibidoEn !== undefined ? { recibidoEn: datos.recibidoEn } : {}),
       },
       include: INCLUDE_DETALLE,
     });
@@ -112,13 +102,13 @@ export class PrismaAporteRepository implements AporteRepository {
     return fila ? mapear(fila) : null;
   }
 
-  async listarPorAyuda(
-    ayudaId: string,
+  async listarPorActividad(
+    actividadId: string,
     filtro?: FiltroAportes,
   ): Promise<Aporte[]> {
     const filas = await prisma.aporte.findMany({
       where: {
-        ayudaId,
+        actividadId,
         ...(filtro?.estado ? { estado: filtro.estado } : {}),
       },
       orderBy: { createdAt: "desc" },
@@ -141,9 +131,9 @@ export class PrismaAporteRepository implements AporteRepository {
    * `colaborador.nombre` (sin cédula/teléfono/correo) + recurso + cantidad +
    * estado + fecha, ordenado del más reciente al más antiguo.
    */
-  async listarAportantesDeAyuda(ayudaId: string): Promise<AportanteDeAyuda[]> {
+  async listarAportantesDeActividad(actividadId: string): Promise<AportanteDeActividad[]> {
     const filas = await prisma.aporte.findMany({
-      where: { ayudaId },
+      where: { actividadId },
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -156,8 +146,6 @@ export class PrismaAporteRepository implements AporteRepository {
     });
     return filas.map((fila) => ({
       id: fila.id,
-      // Un ingreso monetario externo (014) puede no tener colaborador: se muestra
-      // como donación externa, sin exponer dato de contacto alguno.
       aportanteNombre: fila.colaborador?.nombre ?? "Donación externa",
       recursoNombre: fila.recurso.nombre,
       recursoUnidad: fila.recurso.unidad,
@@ -199,14 +187,23 @@ export class PrismaAporteRepository implements AporteRepository {
     return filas.map(mapear);
   }
 
+  async listarIngresosExternos(): Promise<Aporte[]> {
+    const filas = await prisma.aporte.findMany({
+      where: { registradoPorId: { not: null } },
+      orderBy: [{ recibidoEn: "desc" }, { createdAt: "desc" }],
+      include: INCLUDE_DETALLE,
+    });
+    return filas.map(mapear);
+  }
+
   /**
-   * Agrega recibido/prometido por recurso para una Ayuda usando `groupBy`. El
-   * índice `(ayudaId, recursoId, estado)` mantiene barata la consulta.
+   * Agrega recibido/prometido por recurso para una Actividad usando `groupBy`. El
+   * índice `(actividadId, recursoId, estado)` mantiene barata la consulta.
    */
-  async progresoPorAyuda(ayudaId: string): Promise<AgregadoPorMeta[]> {
+  async progresoPorActividad(actividadId: string): Promise<AgregadoPorMeta[]> {
     const grupos = await prisma.aporte.groupBy({
       by: ["recursoId", "estado"],
-      where: { ayudaId },
+      where: { actividadId },
       _sum: { cantidad: true },
     });
 
@@ -223,15 +220,6 @@ export class PrismaAporteRepository implements AporteRepository {
       porRecurso.set(g.recursoId, actual);
     }
     return [...porRecurso.values()];
-  }
-
-  async listarIngresosExternos(): Promise<Aporte[]> {
-    const filas = await prisma.aporte.findMany({
-      where: { registradoPorId: { not: null } },
-      orderBy: [{ recibidoEn: "desc" }, { createdAt: "desc" }],
-      include: INCLUDE_DETALLE,
-    });
-    return filas.map(mapear);
   }
 
   async recolectadoGlobalPorRecurso(): Promise<RecolectadoPorRecursoId[]> {
@@ -252,7 +240,7 @@ export class PrismaAporteRepository implements AporteRepository {
     return prisma.aporte.count({
       where: {
         ...(filtro?.estado ? { estado: filtro.estado } : {}),
-        ...(filtro?.ayudaId ? { ayudaId: filtro.ayudaId } : {}),
+        ...(filtro?.actividadId ? { actividadId: filtro.actividadId } : {}),
       },
     });
   }

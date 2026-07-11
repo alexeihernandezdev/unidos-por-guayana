@@ -30,7 +30,7 @@ export function esTransicionVerificacionValida(
 
 /**
  * Predicado de operatividad del administrador y punto único de verdad para el
- * enforcement: un `ADMIN` solo opera (crea/gestiona Ayudas, recursos, aportes…)
+ * enforcement: un `ADMIN` solo opera (crea/gestiona Actividades, recursos, aportes…)
  * cuando su cuenta está `VERIFICADO`. Un `ADMIN` en `PENDIENTE` o `RECHAZADO`
  * queda bloqueado. Ningún otro rol opera como administrador.
  */

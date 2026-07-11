@@ -1,9 +1,9 @@
 import { DateTime } from "luxon";
-import type { AportanteDeAyuda } from "@/modules/aportes/domain/AporteRepository";
+import type { AportanteDeActividad } from "@/modules/aportes/domain/AporteRepository";
 import { EstadoAporteBadge } from "./EstadoAporteBadge";
 
 type Props = {
-  aportantes: AportanteDeAyuda[];
+  aportantes: AportanteDeActividad[];
 };
 
 const celda = "px-3 py-2 text-sm align-middle";

@@ -25,6 +25,7 @@ async function crearDepsConUsuario() {
       estadoId: guaira.id,
       municipioId: vargas.id,
     },
+    categoriasAporte: ["SUMINISTRO"],
   });
   return deps;
 }

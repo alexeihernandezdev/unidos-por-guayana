@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 
-// Select de filtro para formularios GET de páginas server (recursos, ayudas,
+// Select de filtro para formularios GET de páginas server (recursos, actividades,
 // solicitudes…). Envuelve el Select de shadcn/Radix: con `name`, Radix rinde un
 // <select> nativo oculto que participa en el submit del formulario, así la
 // página server sigue leyendo searchParams sin JS adicional.

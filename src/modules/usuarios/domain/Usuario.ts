@@ -1,3 +1,4 @@
+import type { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import type { EstadoVerificacion, Rol } from "./Rol";
 
 // Entidad de dominio. `passwordHash` guarda siempre la contraseña hasheada,
@@ -20,6 +21,9 @@ export type Usuario = {
   // `parroquia` de texto libre). FKs a `Estado`/`Municipio`.
   estadoId: string | null;
   municipioId: string | null;
+  // Categorías de recurso que un COLABORADOR declara poder aportar (feature 025).
+  // Vacío para otros roles. Obligatoria (>= 1) para COLABORADOR (regla de aplicación).
+  categoriasAporte: CategoriaRecurso[];
   createdAt: Date;
   updatedAt: Date;
 };
@@ -38,4 +42,5 @@ export type NuevoUsuario = {
   telefonoEsWhatsApp?: boolean;
   estadoId?: string | null;
   municipioId?: string | null;
+  categoriasAporte?: CategoriaRecurso[];
 };

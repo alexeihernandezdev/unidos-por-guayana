@@ -225,7 +225,7 @@ export async function registrarAporteExternoAction(
         moneda: parsed.data.moneda,
         fechaRecepcion: parseFecha(parsed.data.fechaRecepcion),
         medioDonacionId: opcional(parsed.data.medioDonacionId),
-        ayudaId: opcional(parsed.data.ayudaId),
+        actividadId: opcional(parsed.data.ayudaId),
         referencia: parsed.data.referencia || null,
       },
       { id: admin.id, rol: Rol.ADMIN },

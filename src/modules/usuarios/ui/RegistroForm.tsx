@@ -3,6 +3,13 @@
 import { useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { BuscadorLugar } from "@/modules/acopio/ui/BuscadorLugar";
+import type { CoordenadasMapa } from "@/modules/acopio/ui/PuntoAcopioMapa";
+import { PuntoAcopioMapaLazy } from "@/modules/acopio/ui/PuntoAcopioMapaLazy";
+import {
+  CATEGORIAS_RECURSO,
+  CategoriaRecurso,
+} from "@/modules/recursos/domain/CategoriaRecurso";
 import type { Estado } from "@/modules/ubicacion/domain/Estado";
 import type { Municipio } from "@/modules/ubicacion/domain/Municipio";
 import { SelectorUbicacion } from "@/modules/ubicacion/ui/SelectorUbicacion";
@@ -13,6 +20,7 @@ import {
 } from "@/modules/usuarios/domain/PerfilAdmin";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { Button } from "@/shared/ui/button";
+import { CollapsibleSection } from "@/shared/ui/collapsible-section";
 import {
   Select,
   SelectContent,
@@ -34,6 +42,29 @@ export type RegistroInput = {
   rol: Rol;
   datosContacto?: DatosContacto;
   perfil?: DatosPerfilAdmin;
+  // Categorías que el COLABORADOR declara poder aportar (feature 025).
+  categoriasAporte?: string[];
+  // Primer punto de acopio del centro (feature 011): el ADMIN marca su ubicación
+  // en el mapa y sus horarios al registrarse. El contacto se hereda del perfil.
+  primerPunto?: {
+    nombre: string;
+    referencia: string;
+    horarios: string;
+    latitud: string;
+    longitud: string;
+  };
+};
+
+// Centro por defecto del mapa en el registro (Venezuela), cuando aún no hay
+// marcador. El buscador de lugares y el click en el mapa fijan la posición exacta.
+const CENTRO_VENEZUELA: CoordenadasMapa = { latitud: 7.0, longitud: -66.0 };
+
+// Etiquetas legibles de las categorías de recurso (feature 025).
+const ETIQUETA_CATEGORIA: Record<CategoriaRecurso, string> = {
+  [CategoriaRecurso.SUMINISTRO]: "Suministros (agua, alimentos, medicinas...)",
+  [CategoriaRecurso.TRANSPORTE]: "Transporte (camiones, combustible...)",
+  [CategoriaRecurso.PERSONAL]: "Personal (voluntariado)",
+  [CategoriaRecurso.MONETARIO]: "Aporte monetario",
 };
 
 type Campos = {
@@ -55,6 +86,14 @@ type Campos = {
   numeroDocumento: string;
   // WhatsApp flag del PerfilAdmin (feature 017 amplía 016).
   perfilTelefonoEsWhatsApp: boolean;
+  // Categorías de aporte del COLABORADOR (feature 025). Obligatoria (>= 1).
+  categoriasAporte: CategoriaRecurso[];
+  // Primer punto de acopio del ADMIN (feature 011). Coordenadas por mapa.
+  puntoNombre: string;
+  puntoReferencia: string;
+  puntoHorarios: string;
+  puntoLatitud: string;
+  puntoLongitud: string;
 };
 
 type Props = {
@@ -79,6 +118,8 @@ export function RegistroForm({ action, estados, municipios }: Props) {
     register,
     control,
     handleSubmit,
+    setValue,
+    getValues,
     formState: { errors },
   } = useForm<Campos>({
     defaultValues: {
@@ -88,13 +129,71 @@ export function RegistroForm({ action, estados, municipios }: Props) {
       perfilTelefonoEsWhatsApp: true,
       estadoId: "",
       municipioId: "",
+      categoriasAporte: [],
+      puntoNombre: "",
+      puntoReferencia: "",
+      puntoHorarios: "",
+      puntoLatitud: "",
+      puntoLongitud: "",
     },
   });
+
+  // Marcador del primer punto de acopio (fuente de verdad del mapa). Se refleja en
+  // los campos ocultos `puntoLatitud`/`puntoLongitud` de React Hook Form.
+  const [marcadorPunto, setMarcadorPunto] = useState<CoordenadasMapa | null>(
+    null,
+  );
+  const [vueloPunto, setVueloPunto] = useState<CoordenadasMapa | null>(null);
+
+  function fijarPunto(coordenadas: CoordenadasMapa) {
+    setMarcadorPunto(coordenadas);
+    setValue("puntoLatitud", coordenadas.latitud.toFixed(6), {
+      shouldValidate: true,
+    });
+    setValue("puntoLongitud", coordenadas.longitud.toFixed(6), {
+      shouldValidate: true,
+    });
+  }
 
   // Se sigue el rol con estado local (en vez de `watch`, que desactiva la
   // memoización del React Compiler) para mostrar los campos condicionales.
   const [rolActual, setRolActual] = useState<Rol>(Rol.COLABORADOR);
   const esAdmin = rolActual === Rol.ADMIN;
+  const esColaborador = rolActual === Rol.COLABORADOR;
+
+  // Estado de las secciones plegables. Nacen abiertas; al fallar la validación se
+  // reabre automáticamente la sección que tenga campos inválidos.
+  const [abierto, setAbierto] = useState({
+    contacto: true,
+    perfil: true,
+    categorias: true,
+  });
+  const cambiar = (clave: keyof typeof abierto) => (valor: boolean) =>
+    setAbierto((prev) => ({ ...prev, [clave]: valor }));
+
+  const onInvalid = () => {
+    setAbierto((prev) => ({
+      contacto:
+        prev.contacto ||
+        Boolean(
+          errors.cedula ||
+            errors.telefono ||
+            errors.estadoId ||
+            errors.municipioId,
+        ),
+      perfil:
+        prev.perfil ||
+        Boolean(
+          errors.nombreCuenta ||
+            errors.correo ||
+            errors.telefono ||
+            errors.numeroDocumento ||
+            errors.estadoId ||
+            errors.municipioId,
+        ),
+      categorias: prev.categorias || Boolean(errors.categoriasAporte),
+    }));
+  };
 
   const onSubmit = handleSubmit((datos) => {
     setErrorServidor(null);
@@ -130,6 +229,16 @@ export function RegistroForm({ action, estados, municipios }: Props) {
             numeroDocumento: datos.numeroDocumento,
           }
         : undefined,
+      categoriasAporte: esColaborador ? datos.categoriasAporte : undefined,
+      primerPunto: esAdmin
+        ? {
+            nombre: datos.puntoNombre,
+            referencia: datos.puntoReferencia,
+            horarios: datos.puntoHorarios,
+            latitud: datos.puntoLatitud,
+            longitud: datos.puntoLongitud,
+          }
+        : undefined,
     };
     startTransition(async () => {
       const resultado = await action(input);
@@ -142,7 +251,7 @@ export function RegistroForm({ action, estados, municipios }: Props) {
         setErrorServidor(resultado.error ?? "No se pudo completar el registro.");
       }
     });
-  });
+  }, onInvalid);
 
   return (
     <form onSubmit={onSubmit} className="flex w-full flex-col gap-5">
@@ -244,23 +353,94 @@ export function RegistroForm({ action, estados, municipios }: Props) {
         )}
       </div>
 
-      {!esAdmin && (
-        <DatosContactoFields<Campos>
-          register={register}
-          control={control}
-          errors={errors}
-          estados={estados}
-          municipios={municipios}
-        />
-      )}
+      <div className="flex flex-col gap-4">
+          {!esAdmin && (
+            <CollapsibleSection
+              title="Contacto y ubicación"
+              open={abierto.contacto}
+              onOpenChange={cambiar("contacto")}
+              invalid={Boolean(
+                errors.cedula ||
+                  errors.telefono ||
+                  errors.estadoId ||
+                  errors.municipioId,
+              )}
+            >
+              <DatosContactoFields<Campos>
+                bare
+                register={register}
+                control={control}
+                errors={errors}
+                estados={estados}
+                municipios={municipios}
+              />
+            </CollapsibleSection>
+          )}
 
-      {esAdmin && (
-        <fieldset className="flex flex-col gap-5 border-l-2 border-primary/35 bg-primary/[0.035] p-5">
-          <legend className="px-1 text-sm font-medium">
-            Datos del centro de acopio
-          </legend>
+          {esColaborador && (
+            <Controller
+              control={control}
+              name="categoriasAporte"
+              rules={{
+                validate: (v) =>
+                  (Array.isArray(v) && v.length > 0) ||
+                  "Elige al menos una categoría que podrías aportar.",
+              }}
+              render={({ field }) => (
+                <fieldset className="flex flex-col gap-3 border-l-2 border-primary/35 bg-primary/[0.035] p-5">
+                  <legend className="px-1 text-sm font-medium">
+                    ¿Qué podrías aportar?
+                  </legend>
+                  <p className="text-xs text-muted-foreground">
+                    Elige al menos una. Podrás cambiarlo luego desde tu perfil.
+                  </p>
+                  {CATEGORIAS_RECURSO.map((categoria) => {
+                    const marcada = field.value.includes(categoria);
+                    return (
+                      <label
+                        key={categoria}
+                        className="flex items-center gap-2 text-sm"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={marcada}
+                          onChange={(e) => {
+                            field.onChange(
+                              e.target.checked
+                                ? [...field.value, categoria]
+                                : field.value.filter((c) => c !== categoria),
+                            );
+                          }}
+                        />
+                        {ETIQUETA_CATEGORIA[categoria]}
+                      </label>
+                    );
+                  })}
+                  {errors.categoriasAporte && (
+                    <p className="text-sm text-destructive">
+                      {errors.categoriasAporte.message}
+                    </p>
+                  )}
+                </fieldset>
+              )}
+            />
+          )}
 
-          <div className="flex flex-col gap-1.5">
+          {esAdmin && (
+            <CollapsibleSection
+              title="Datos del administrador"
+              open={abierto.perfil}
+              onOpenChange={cambiar("perfil")}
+              invalid={Boolean(
+                errors.nombreCuenta ||
+                  errors.correo ||
+                  errors.telefono ||
+                  errors.numeroDocumento ||
+                  errors.estadoId ||
+                  errors.municipioId,
+              )}
+            >
+              <div className="flex flex-col gap-1.5">
             <label htmlFor="nombreCuenta" className="text-sm font-medium">
               Nombre de la cuenta
             </label>
@@ -380,8 +560,138 @@ export function RegistroForm({ action, estados, municipios }: Props) {
               )}
             </div>
           </div>
-        </fieldset>
-      )}
+            </CollapsibleSection>
+          )}
+
+          {esAdmin && (
+            <fieldset className="flex flex-col gap-4 rounded-lg border border-border p-4">
+              <legend className="px-1 text-sm font-medium">
+                Primer punto de acopio
+              </legend>
+              <p className="text-xs text-muted-foreground">
+                Dónde recibes la ayuda. Podrás añadir más puntos luego desde tu
+                panel. El teléfono y correo se toman de los datos del centro.
+              </p>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="puntoNombre" className="text-sm font-medium">
+                    Nombre del punto
+                  </label>
+                  <input
+                    id="puntoNombre"
+                    className={campo}
+                    placeholder="Sede centro"
+                    aria-invalid={Boolean(errors.puntoNombre)}
+                    {...register("puntoNombre", {
+                      required: esAdmin && "Indica el nombre del punto.",
+                    })}
+                  />
+                  {errors.puntoNombre && (
+                    <p className="text-sm text-destructive">
+                      {errors.puntoNombre.message}
+                    </p>
+                  )}
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label
+                    htmlFor="puntoReferencia"
+                    className="text-sm font-medium"
+                  >
+                    Referencia
+                  </label>
+                  <input
+                    id="puntoReferencia"
+                    className={campo}
+                    placeholder="Casa amarilla frente al abasto"
+                    aria-invalid={Boolean(errors.puntoReferencia)}
+                    {...register("puntoReferencia", {
+                      required:
+                        esAdmin &&
+                        "Indica una referencia para orientar a quien llega.",
+                    })}
+                  />
+                  {errors.puntoReferencia && (
+                    <p className="text-sm text-destructive">
+                      {errors.puntoReferencia.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="puntoHorarios" className="text-sm font-medium">
+                  Horarios de atención
+                </label>
+                <input
+                  id="puntoHorarios"
+                  className={campo}
+                  placeholder="Lunes a viernes de 9:00 a 17:00"
+                  aria-invalid={Boolean(errors.puntoHorarios)}
+                  {...register("puntoHorarios", {
+                    required: esAdmin && "Indica los horarios de atención.",
+                  })}
+                />
+                {errors.puntoHorarios && (
+                  <p className="text-sm text-destructive">
+                    {errors.puntoHorarios.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-medium">Ubicación en el mapa</span>
+                <BuscadorLugar
+                  onSeleccion={(lugar) => {
+                    const destino = {
+                      latitud: lugar.latitud,
+                      longitud: lugar.longitud,
+                    };
+                    fijarPunto(destino);
+                    setVueloPunto(destino);
+                    if (!getValues("puntoReferencia").trim()) {
+                      setValue("puntoReferencia", lugar.nombre, {
+                        shouldValidate: true,
+                      });
+                    }
+                  }}
+                />
+                <div className="h-64 overflow-hidden rounded-lg border">
+                  <PuntoAcopioMapaLazy
+                    centro={marcadorPunto ?? CENTRO_VENEZUELA}
+                    zoom={marcadorPunto ? 16 : 6}
+                    valor={marcadorPunto}
+                    onCambio={fijarPunto}
+                    vuelo={vueloPunto}
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {marcadorPunto ? (
+                    <span className="font-mono numeric-tnum text-xs">
+                      {marcadorPunto.latitud.toFixed(6)},{" "}
+                      {marcadorPunto.longitud.toFixed(6)}
+                    </span>
+                  ) : (
+                    "Busca tu localidad o haz click en el mapa para marcar el punto; luego puedes arrastrar el marcador."
+                  )}
+                </p>
+                <input
+                  type="hidden"
+                  {...register("puntoLatitud", {
+                    required:
+                      esAdmin && "Marca la ubicación del punto en el mapa.",
+                  })}
+                />
+                <input type="hidden" {...register("puntoLongitud")} />
+                {errors.puntoLatitud && (
+                  <p className="text-sm text-destructive">
+                    {errors.puntoLatitud.message}
+                  </p>
+                )}
+              </div>
+            </fieldset>
+          )}
+        </div>
 
       {errorServidor && (
         <p className="text-sm text-destructive" role="alert">

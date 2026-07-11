@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { EstadoBadge } from "@/modules/ayudas/ui/EstadoBadge";
-import { TipoBadge } from "@/modules/ayudas/ui/TipoBadge";
-import { formatearFecha } from "@/modules/ayudas/ui/fechas";
-import { EstadoAyuda } from "@/modules/ayudas/domain/EstadoAyuda";
+import { EstadoBadge } from "@/modules/actividades/ui/EstadoBadge";
+import { TipoBadge } from "@/modules/actividades/ui/TipoBadge";
+import { formatearFecha } from "@/modules/actividades/ui/fechas";
+import { EstadoActividad } from "@/modules/actividades/domain/EstadoActividad";
 import type { EnvioResumenPublico } from "@/modules/transparencia/application/obtener-resumen-publico";
 import { BarraProgreso } from "./BarraProgreso";
 
@@ -11,11 +11,11 @@ type Props = {
 };
 
 export function TarjetaEnvioPublico({ envio }: Props) {
-  const entregado = envio.estado === EstadoAyuda.ENTREGADO;
+  const entregado = envio.estado === EstadoActividad.ENTREGADO;
 
   return (
     <Link
-      href={`/transparencia/${envio.ayudaId}`}
+      href={`/transparencia/${envio.actividadId}`}
       className="focus-ring group flex flex-col gap-3 rounded-md border border-border bg-card px-4 py-4 transition-colors duration-150 hover:bg-muted/40 md:px-5 md:py-5"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">

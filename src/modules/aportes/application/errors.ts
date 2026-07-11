@@ -8,16 +8,16 @@ export class AporteNoEncontradoError extends Error {
   }
 }
 
-// Se lanza al intentar aportar (o cancelar) sobre una Ayuda que ya no está en
+// Se lanza al intentar aportar (o cancelar) sobre una Actividad que ya no está en
 // `RECOLECTANDO`: metas y aportes quedan congelados tras `LISTO`.
-export class AyudaNoAceptaAportesError extends Error {
+export class ActividadNoAceptaAportesError extends Error {
   constructor(mensaje: string) {
     super(mensaje);
-    this.name = "AyudaNoAceptaAportesError";
+    this.name = "ActividadNoAceptaAportesError";
   }
 }
 
-// Se lanza si el recurso del aporte no está entre las metas de la Ayuda, o si el
+// Se lanza si el recurso del aporte no está entre las metas de la Actividad, o si el
 // recurso no existe / está archivado.
 export class RecursoFueraDeMetasError extends Error {
   constructor(mensaje: string) {

@@ -4,11 +4,11 @@ import type { EstadoAporte } from "./EstadoAporte";
 // Filtros de listado.
 export type FiltroAportes = {
   estado?: EstadoAporte;
-  ayudaId?: string;
+  actividadId?: string;
 };
 
 // Agregado por meta (recibido / prometido) que la infraestructura sabe calcular
-// eficientemente con `groupBy` (índice por `(ayudaId, recursoId, estado)`).
+// eficientemente con `groupBy` (índice por `(actividadId, recursoId, estado)`).
 export type AgregadoPorMeta = {
   recursoId: string;
   recibido: number;
@@ -26,7 +26,7 @@ export type RecolectadoPorRecursoId = {
  * aportante, nunca cédula/teléfono/correo/ubicación. La infraestructura debe
  * proyectar con `select` explícito; no devolver el `Usuario` completo.
  */
-export type AportanteDeAyuda = {
+export type AportanteDeActividad = {
   id: string;
   aportanteNombre: string;
   recursoNombre: string;
@@ -41,13 +41,13 @@ export type AportanteDeAyuda = {
 export interface AporteRepository {
   crear(datos: NuevoAporte): Promise<Aporte>;
   buscarPorId(id: string): Promise<Aporte | null>;
-  listarPorAyuda(ayudaId: string, filtro?: FiltroAportes): Promise<Aporte[]>;
+  listarPorActividad(actividadId: string, filtro?: FiltroAportes): Promise<Aporte[]>;
   listarDeColaborador(colaboradorId: string): Promise<Aporte[]>;
   /**
    * Registro de aportantes de una actividad (feature 023): orden `createdAt`
    * desc, sin datos de contacto del aportante.
    */
-  listarAportantesDeAyuda(ayudaId: string): Promise<AportanteDeAyuda[]>;
+  listarAportantesDeActividad(actividadId: string): Promise<AportanteDeActividad[]>;
   /**
    * Transiciona el estado de un aporte de forma idempotente: solo cambia si el
    * estado actual coincide con `desde`. Devuelve el aporte actualizado o `null`
@@ -59,8 +59,8 @@ export interface AporteRepository {
     hacia: EstadoAporte,
   ): Promise<Aporte | null>;
   eliminar(id: string): Promise<void>;
-  /** Agregación por meta de una Ayuda (recibido/prometido por recurso). */
-  progresoPorAyuda(ayudaId: string): Promise<AgregadoPorMeta[]>;
+  /** Agregación por meta de una Actividad (recibido/prometido por recurso). */
+  progresoPorActividad(actividadId: string): Promise<AgregadoPorMeta[]>;
   /** Suma de cantidades RECIBIDO agrupada por recurso en toda la plataforma. */
   recolectadoGlobalPorRecurso(): Promise<RecolectadoPorRecursoId[]>;
   /**

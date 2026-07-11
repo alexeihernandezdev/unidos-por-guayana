@@ -35,6 +35,7 @@ async function crearColaborador(
         municipioId: vargas.id,
         ...overrides,
       },
+      categoriasAporte: ["SUMINISTRO"],
     },
   );
 }

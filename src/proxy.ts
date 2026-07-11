@@ -25,8 +25,8 @@ export default auth((req) => {
     pathname === "/mis-aportes" ||
     pathname.startsWith("/puntos-acopio") ||
     pathname.startsWith("/solicitudes") ||
-    pathname === "/ayudas" ||
-    /^\/ayudas\/[^/]+/.test(pathname);
+    pathname === "/actividades" ||
+    /^\/actividades\/[^/]+/.test(pathname);
 
   if (requiereSesion && !req.auth) {
     const urlLogin = new URL("/login", req.nextUrl.origin);

@@ -2,12 +2,20 @@
 
 import { z } from "zod";
 import {
+  CategoriasAporteVaciasError,
   CedulaYaRegistradaError,
   DatosContactoInvalidosError,
   EmailYaRegistradoError,
   PerfilAdminInvalidoError,
   RolNoAutoRegistrableError,
 } from "@/modules/usuarios/application/errors";
+import {
+  DatosPuntoAcopioInvalidosError,
+  NombrePuntoDuplicadoError,
+  UbicacionVaciaError,
+} from "@/modules/acopio/application/errors";
+import { CATEGORIAS_RECURSO } from "@/modules/recursos/domain/CategoriaRecurso";
+import { crearPuntoAcopioServicio } from "@/shared/acopio";
 import { TipoDocumento } from "@/modules/usuarios/domain/PerfilAdmin";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import {
@@ -36,6 +44,31 @@ const DatosContactoSchema = z.object({
   telefonoEsWhatsApp: z.boolean(),
   estadoId: z.string().trim().min(1, "Selecciona el estado.").max(40),
   municipioId: z.string().trim().min(1, "Selecciona el municipio.").max(40),
+});
+
+// Categorías de aporte del COLABORADOR (feature 025): al menos una de las cuatro.
+const CategoriasAporteSchema = z
+  .array(z.enum(CATEGORIAS_RECURSO as unknown as [string, ...string[]]))
+  .min(1, "Elige al menos una categoría que podrías aportar.");
+
+// Primer punto de acopio del ADMIN (feature 011). Se captura en el registro; el
+// contacto (teléfono/correo/WhatsApp) y la ubicación de catálogo se heredan del
+// perfil. Las coordenadas vienen del mapa. El rango de coordenadas y la coherencia
+// estado↔municipio los revalida el caso de uso `crearPuntoAcopio`.
+const PrimerPuntoSchema = z.object({
+  nombre: z.string().trim().min(1, "Indica el nombre del punto.").max(120),
+  referencia: z
+    .string()
+    .trim()
+    .min(1, "Indica una referencia para orientar a quien llega.")
+    .max(200),
+  horarios: z
+    .string()
+    .trim()
+    .min(1, "Indica los horarios de atención.")
+    .max(200),
+  latitud: z.string().min(1, "Marca la ubicación del punto en el mapa."),
+  longitud: z.string().min(1, "Marca la ubicación del punto en el mapa."),
 });
 
 const PerfilSchema = z.object({
@@ -76,15 +109,35 @@ export async function registrarUsuarioAction(
             "Datos de contacto no válidos.",
         };
       }
+
+      // El COLABORADOR declara sus categorías de aporte (feature 025).
+      let categoriasAporte: string[] | undefined;
+      if (rol === Rol.COLABORADOR) {
+        const categorias = CategoriasAporteSchema.safeParse(
+          input.categoriasAporte,
+        );
+        if (!categorias.success) {
+          return {
+            ok: false,
+            error:
+              categorias.error.issues[0]?.message ??
+              "Elige al menos una categoría que podrías aportar.",
+          };
+        }
+        categoriasAporte = categorias.data;
+      }
+
       await registrarNuevoUsuario({
         ...cuenta.data,
         rol,
         datosContacto: datosContacto.data,
+        categoriasAporte,
       });
       return { ok: true, rol };
     }
 
-    // Administrador: registro público con perfil de centro de acopio (016+017).
+    // Administrador: registro público con perfil de centro de acopio (016+017)
+    // y su primer punto de acopio (011).
     if (rol === Rol.ADMIN) {
       const perfil = PerfilSchema.safeParse(input.perfil);
       if (!perfil.success) {
@@ -93,7 +146,33 @@ export async function registrarUsuarioAction(
           error: perfil.error.issues[0]?.message ?? "Datos del perfil no válidos.",
         };
       }
-      await registrarAdministradorConPerfil(cuenta.data, perfil.data);
+      const punto = PrimerPuntoSchema.safeParse(input.primerPunto);
+      if (!punto.success) {
+        return {
+          ok: false,
+          error:
+            punto.error.issues[0]?.message ??
+            "Datos del punto de acopio no válidos.",
+        };
+      }
+      // Crea la cuenta + perfil y, en el mismo alta, su primer punto. El contacto
+      // y la ubicación del catálogo se heredan del perfil recién creado.
+      const admin = await registrarAdministradorConPerfil(
+        cuenta.data,
+        perfil.data,
+      );
+      await crearPuntoAcopioServicio(admin.id, {
+        nombre: punto.data.nombre,
+        referencia: punto.data.referencia,
+        horarios: punto.data.horarios,
+        latitud: punto.data.latitud,
+        longitud: punto.data.longitud,
+        telefono: perfil.data.telefono,
+        telefonoEsWhatsApp: perfil.data.telefonoEsWhatsApp,
+        correo: perfil.data.correo,
+        estadoId: perfil.data.estadoId,
+        municipioId: perfil.data.municipioId,
+      });
       return { ok: true, rol };
     }
 
@@ -113,6 +192,16 @@ export async function registrarUsuarioAction(
       return { ok: false, error: "Ese rol no está permitido en el registro." };
     }
     if (error instanceof PerfilAdminInvalidoError) {
+      return { ok: false, error: error.message };
+    }
+    if (error instanceof CategoriasAporteVaciasError) {
+      return { ok: false, error: error.message };
+    }
+    if (
+      error instanceof DatosPuntoAcopioInvalidosError ||
+      error instanceof UbicacionVaciaError ||
+      error instanceof NombrePuntoDuplicadoError
+    ) {
       return { ok: false, error: error.message };
     }
     throw error;

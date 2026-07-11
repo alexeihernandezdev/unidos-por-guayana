@@ -30,7 +30,7 @@ export function ListaEnviosPublicos({ envios }: Props) {
       ) : (
         <ul className="flex flex-col gap-3">
           {envios.map((envio) => (
-            <li key={envio.ayudaId}>
+            <li key={envio.actividadId}>
               <TarjetaEnvioPublico envio={envio} />
             </li>
           ))}

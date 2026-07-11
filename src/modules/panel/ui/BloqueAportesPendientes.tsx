@@ -24,7 +24,7 @@ export function BloqueAportesPendientes({ conteo }: Props) {
         {conteo}
       </p>
       <Link
-        href="/panel/ayudas?estado=RECOLECTANDO"
+        href="/panel/actividades?estado=RECOLECTANDO"
         className="focus-ring group inline-flex items-center gap-1 text-sm text-accent"
       >
         Revisar en actividades activas

@@ -6,35 +6,32 @@ import {
 import type { Actor } from "@/modules/aportes/application/deps";
 import {
   listarAportesDeColaborador,
-  listarAportesPorAyuda,
+  listarAportesPorActividad,
   listarAportesRecientes,
 } from "@/modules/aportes/application/listarAportes";
-import { listarAportantesDeAyuda } from "@/modules/aportes/application/listarAportantesDeAyuda";
-import { listarIngresosExternos } from "@/modules/aportes/application/listarIngresosExternos";
+import { listarAportantesDeActividad } from "@/modules/aportes/application/listarAportantesDeActividad";
 import { marcarRecibido } from "@/modules/aportes/application/marcarRecibido";
-import { progresoDeAyuda } from "@/modules/aportes/application/progresoDeAyuda";
-import {
-  registrarAporteExterno,
-  type RegistrarAporteExternoInput,
-} from "@/modules/aportes/application/registrarAporteExterno";
+import { listarIngresosExternos } from "@/modules/aportes/application/listarIngresosExternos";
+import { registrarAporteExterno, type RegistrarAporteExternoInput } from "@/modules/aportes/application/registrarAporteExterno";
+import { progresoDeActividad } from "@/modules/aportes/application/progresoDeActividad";
 import { revertirRecibido } from "@/modules/aportes/application/revertirRecibido";
 import type { Aporte, ProgresoMetaDetalle } from "@/modules/aportes/domain/Aporte";
 import type {
-  AportanteDeAyuda,
+  AportanteDeActividad,
   FiltroAportes,
 } from "@/modules/aportes/domain/AporteRepository";
 import { PrismaAporteRepository } from "@/modules/aportes/infrastructure/PrismaAporteRepository";
-import { PrismaAyudaRepository } from "@/modules/ayudas/infrastructure/PrismaAyudaRepository";
+import { PrismaActividadRepository } from "@/modules/actividades/infrastructure/PrismaActividadRepository";
 import { PrismaRecursoRepository } from "@/modules/recursos/infrastructure/PrismaRecursoRepository";
 
 // ── Composition root ────────────────────────────────────────────────────────
-// Cablea los repositorios Prisma (aportes + ayudas + recursos) con los casos de
+// Cablea los repositorios Prisma (aportes + actividades + recursos) con los casos de
 // uso puros. La presentación consume estos servicios a través de la fachada
 // `@/shared/aportes`.
 const aportes = new PrismaAporteRepository();
-const ayudas = new PrismaAyudaRepository();
+const actividades = new PrismaActividadRepository();
 const recursos = new PrismaRecursoRepository();
-const deps = { aportes, ayudas, recursos };
+const deps = { aportes, actividades, recursos };
 
 export function crearAporteServicio(input: CrearAporteInput): Promise<Aporte> {
   return crearAporte(deps, input);
@@ -55,11 +52,11 @@ export function revertirRecibidoServicio(
   return revertirRecibido(deps, id, actor);
 }
 
-export function listarAportesPorAyudaServicio(
-  ayudaId: string,
+export function listarAportesPorActividadServicio(
+  actividadId: string,
   filtro?: FiltroAportes,
 ): Promise<Aporte[]> {
-  return listarAportesPorAyuda(deps, ayudaId, filtro);
+  return listarAportesPorActividad(deps, actividadId, filtro);
 }
 
 export function listarAportesDeColaboradorServicio(
@@ -74,19 +71,17 @@ export function listarAportesRecientesServicio(
   return listarAportesRecientes(deps, limit);
 }
 
-export function listarAportantesDeAyudaServicio(
-  ayudaId: string,
-): Promise<AportanteDeAyuda[]> {
-  return listarAportantesDeAyuda(deps, ayudaId);
+export function listarAportantesDeActividadServicio(
+  actividadId: string,
+): Promise<AportanteDeActividad[]> {
+  return listarAportantesDeActividad(deps, actividadId);
 }
 
-export function progresoDeAyudaServicio(
-  ayudaId: string,
+export function progresoDeActividadServicio(
+  actividadId: string,
 ): Promise<ProgresoMetaDetalle[]> {
-  return progresoDeAyuda(deps, ayudaId);
+  return progresoDeActividad(deps, actividadId);
 }
-
-// ── Ingreso monetario externo (feature 014) ─────────────────────────────────
 
 export function registrarAporteExternoServicio(
   input: RegistrarAporteExternoInput,

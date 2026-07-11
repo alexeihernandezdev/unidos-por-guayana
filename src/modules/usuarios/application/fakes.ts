@@ -1,3 +1,4 @@
+import type { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import type { PasswordHasher } from "@/modules/usuarios/domain/PasswordHasher";
 import type { DatosContacto } from "@/modules/usuarios/domain/datosContacto";
 import type {
@@ -26,6 +27,7 @@ export class InMemoryUsuarioRepository implements UsuarioRepository {
       telefonoEsWhatsApp: datos.telefonoEsWhatsApp ?? false,
       estadoId: datos.estadoId ?? null,
       municipioId: datos.municipioId ?? null,
+      categoriasAporte: datos.categoriasAporte ?? [],
       createdAt: ahora,
       updatedAt: ahora,
       email: datos.email,
@@ -95,6 +97,23 @@ export class InMemoryUsuarioRepository implements UsuarioRepository {
       telefonoEsWhatsApp: datos.telefonoEsWhatsApp,
       estadoId: datos.estadoId,
       municipioId: datos.municipioId,
+      updatedAt: new Date(),
+    };
+    this.porId.set(id, actualizado);
+    return actualizado;
+  }
+
+  async actualizarCategoriasAporte(
+    id: string,
+    categorias: CategoriaRecurso[],
+  ): Promise<Usuario> {
+    const usuario = this.porId.get(id);
+    if (!usuario) {
+      throw new Error(`Usuario "${id}" no encontrado.`);
+    }
+    const actualizado: Usuario = {
+      ...usuario,
+      categoriasAporte: categorias,
       updatedAt: new Date(),
     };
     this.porId.set(id, actualizado);

@@ -7,6 +7,7 @@ export {
   signIn,
   signOut,
   registrarNuevoUsuario,
+  declararCategoriasServicio,
   registrarAdministradorConPerfil,
   listarAdminsPendientesGestion,
   aprobarAdminGestion,

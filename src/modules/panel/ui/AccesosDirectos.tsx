@@ -10,7 +10,7 @@ export function AccesosDirectos() {
       className="flex flex-wrap gap-2"
     >
       <Link
-        href="/panel/ayudas/nueva"
+        href="/panel/actividades/nueva"
         className={cn(buttonVariants({ variant: "default", size: "sm" }))}
       >
         <PlusIcon strokeWidth={1.5} className="size-3.5" />

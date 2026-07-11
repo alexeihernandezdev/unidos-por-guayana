@@ -15,6 +15,7 @@ import {
   ScrollTextIcon,
   UserRoundIcon,
   UserCheckIcon,
+  UsersIcon,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
@@ -35,6 +36,7 @@ const ICONOS: Record<IconoNav, LucideIcon> = {
   nuevaSolicitud: FilePlus2Icon,
   proponer: LightbulbIcon,
   aprobaciones: UserCheckIcon,
+  red: UsersIcon,
 };
 
 type Props = {

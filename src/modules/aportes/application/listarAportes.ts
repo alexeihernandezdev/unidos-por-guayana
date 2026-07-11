@@ -2,12 +2,12 @@ import type { Aporte } from "@/modules/aportes/domain/Aporte";
 import type { FiltroAportes } from "@/modules/aportes/domain/AporteRepository";
 import type { AporteDeps } from "./deps";
 
-export async function listarAportesPorAyuda(
+export async function listarAportesPorActividad(
   { aportes }: Pick<AporteDeps, "aportes">,
-  ayudaId: string,
+  actividadId: string,
   filtro?: FiltroAportes,
 ): Promise<Aporte[]> {
-  return aportes.listarPorAyuda(ayudaId, filtro);
+  return aportes.listarPorActividad(actividadId, filtro);
 }
 
 export async function listarAportesDeColaborador(

@@ -4,13 +4,13 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
   AporteNoEncontradoError,
-  AyudaNoAceptaAportesError,
+  ActividadNoAceptaAportesError,
   DatosAporteInvalidosError,
   NoAutorizadoError,
   RecursoFueraDeMetasError,
   TransicionInvalidaError,
 } from "@/modules/aportes/application/errors";
-import { AyudaNoEncontradaError } from "@/modules/ayudas/application/errors";
+import { ActividadNoEncontradaError } from "@/modules/actividades/application/errors";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import {
   cancelarAporteServicio,
@@ -40,7 +40,7 @@ function traducirError(error: unknown): Resultado | null {
   if (error instanceof DatosAporteInvalidosError) {
     return { ok: false, error: error.message };
   }
-  if (error instanceof AyudaNoAceptaAportesError) {
+  if (error instanceof ActividadNoAceptaAportesError) {
     return { ok: false, error: error.message };
   }
   if (error instanceof RecursoFueraDeMetasError) {
@@ -55,15 +55,15 @@ function traducirError(error: unknown): Resultado | null {
   if (error instanceof AporteNoEncontradoError) {
     return { ok: false, error: "El aporte ya no existe." };
   }
-  if (error instanceof AyudaNoEncontradaError) {
+  if (error instanceof ActividadNoEncontradaError) {
     return { ok: false, error: "La actividad ya no existe." };
   }
   return null;
 }
 
-/** Crea un aporte a una Ayuda. Rol requerido: COLABORADOR o ADMIN. */
+/** Crea un aporte a una Actividad. Rol requerido: COLABORADOR o ADMIN. */
 export async function crearAporteAction(
-  ayudaId: string,
+  actividadId: string,
   input: CrearAporteInputUi,
 ): Promise<Resultado> {
   const usuario = await requireRol(Rol.COLABORADOR, Rol.ADMIN);
@@ -78,14 +78,14 @@ export async function crearAporteAction(
 
   try {
     await crearAporteServicio({
-      ayudaId,
+      actividadId,
       recursoId: parsed.data.recursoId,
       colaboradorId: usuario.id,
       cantidad: parsed.data.cantidad,
       nota: parsed.data.nota ?? null,
     });
     revalidatePath("/mis-aportes");
-    revalidatePath(`/panel/ayudas/${ayudaId}`);
+    revalidatePath(`/panel/actividades/${actividadId}`);
     return { ok: true };
   } catch (error) {
     const traducido = traducirError(error);
@@ -98,7 +98,7 @@ export async function crearAporteAction(
 export async function cancelarAporteAction(formData: FormData): Promise<void> {
   const usuario = await requireRol(Rol.COLABORADOR, Rol.ADMIN);
   const id = formData.get("id");
-  const ayudaId = formData.get("ayudaId");
+  const actividadId = formData.get("actividadId");
   if (typeof id !== "string" || !id) return;
 
   try {
@@ -109,8 +109,8 @@ export async function cancelarAporteAction(formData: FormData): Promise<void> {
     if (traducirError(error) === null) throw error;
   }
   revalidatePath("/mis-aportes");
-  if (typeof ayudaId === "string" && ayudaId) {
-    revalidatePath(`/panel/ayudas/${ayudaId}`);
+  if (typeof actividadId === "string" && actividadId) {
+    revalidatePath(`/panel/actividades/${actividadId}`);
   }
 }
 
@@ -118,7 +118,7 @@ export async function cancelarAporteAction(formData: FormData): Promise<void> {
 export async function marcarRecibidoAction(formData: FormData): Promise<void> {
   const usuario = await requireAdminVerificado();
   const id = formData.get("id");
-  const ayudaId = formData.get("ayudaId");
+  const actividadId = formData.get("actividadId");
   if (typeof id !== "string" || !id) return;
 
   try {
@@ -126,8 +126,8 @@ export async function marcarRecibidoAction(formData: FormData): Promise<void> {
   } catch (error) {
     if (traducirError(error) === null) throw error;
   }
-  if (typeof ayudaId === "string" && ayudaId) {
-    revalidatePath(`/panel/ayudas/${ayudaId}`);
+  if (typeof actividadId === "string" && actividadId) {
+    revalidatePath(`/panel/actividades/${actividadId}`);
   }
 }
 
@@ -137,7 +137,7 @@ export async function revertirRecibidoAction(
 ): Promise<void> {
   const usuario = await requireAdminVerificado();
   const id = formData.get("id");
-  const ayudaId = formData.get("ayudaId");
+  const actividadId = formData.get("actividadId");
   if (typeof id !== "string" || !id) return;
 
   try {
@@ -145,7 +145,7 @@ export async function revertirRecibidoAction(
   } catch (error) {
     if (traducirError(error) === null) throw error;
   }
-  if (typeof ayudaId === "string" && ayudaId) {
-    revalidatePath(`/panel/ayudas/${ayudaId}`);
+  if (typeof actividadId === "string" && actividadId) {
+    revalidatePath(`/panel/actividades/${actividadId}`);
   }
 }

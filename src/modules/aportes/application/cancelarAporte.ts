@@ -1,25 +1,25 @@
-import { EstadoAyuda } from "@/modules/ayudas/domain/EstadoAyuda";
+import { EstadoActividad } from "@/modules/actividades/domain/EstadoActividad";
 import { puedeCancelar } from "@/modules/aportes/domain/maquinaEstados";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import type { Actor, AporteDeps } from "./deps";
 import {
   AporteNoEncontradoError,
-  AyudaNoAceptaAportesError,
+  ActividadNoAceptaAportesError,
   NoAutorizadoError,
   TransicionInvalidaError,
 } from "./errors";
-import { AyudaNoEncontradaError } from "@/modules/ayudas/application/errors";
+import { ActividadNoEncontradaError } from "@/modules/actividades/application/errors";
 
 /**
  * Cancela (elimina) un aporte. Reglas:
  * - Solo el dueño del aporte o un `ADMIN` pueden cancelarlo.
  * - Solo si el aporte sigue `COMPROMETIDO` (una vez `RECIBIDO` se revierte, no
  *   se cancela: es corrección del ADMIN).
- * - Solo si la Ayuda sigue en `RECOLECTANDO` (tras `LISTO` los aportes quedan
+ * - Solo si la Actividad sigue en `RECOLECTANDO` (tras `LISTO` los aportes quedan
  *   fijos, aunque estén COMPROMETIDOS: se consideran "no cumplidos" y no bloquean).
  */
 export async function cancelarAporte(
-  { aportes, ayudas }: Pick<AporteDeps, "aportes" | "ayudas">,
+  { aportes, actividades }: Pick<AporteDeps, "aportes" | "actividades">,
   id: string,
   actor: Actor,
 ): Promise<void> {
@@ -38,18 +38,15 @@ export async function cancelarAporte(
     );
   }
 
-  // Un aporte sin actividad (ingreso de "caja general", feature 014) nace RECIBIDO
-  // y no llega aquí; el guard mantiene la invariante y contenta al tipado.
-  if (!aporte.ayudaId) {
+  if (!aporte.actividadId) {
     throw new TransicionInvalidaError(
-      "Un aporte sin actividad asociada no se cancela por este flujo.",
+      "Un aporte general no se cancela por este flujo.",
     );
   }
-
-  const ayuda = await ayudas.buscarPorId(aporte.ayudaId);
-  if (!ayuda) throw new AyudaNoEncontradaError(aporte.ayudaId);
-  if (ayuda.estado !== EstadoAyuda.RECOLECTANDO) {
-    throw new AyudaNoAceptaAportesError(
+  const ayuda = await actividades.buscarPorId(aporte.actividadId);
+  if (!ayuda) throw new ActividadNoEncontradaError(aporte.actividadId);
+  if (ayuda.estado !== EstadoActividad.RECOLECTANDO) {
+    throw new ActividadNoAceptaAportesError(
       `La ayuda ya está en ${ayuda.estado}; los aportes quedan fijos.`,
     );
   }

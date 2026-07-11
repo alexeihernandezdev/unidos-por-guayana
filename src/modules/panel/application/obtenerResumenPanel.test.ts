@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { crearAporte } from "@/modules/aportes/application/crearAporte";
 import { InMemoryAporteRepository } from "@/modules/aportes/application/fakes";
-import { crearAyuda } from "@/modules/ayudas/application/crearAyuda";
-import { InMemoryAyudaRepository } from "@/modules/ayudas/application/fakes";
+import { crearActividad } from "@/modules/actividades/application/crearActividad";
+import { InMemoryActividadRepository } from "@/modules/actividades/application/fakes";
 import { obtenerResumenPanel } from "./obtenerResumenPanel";
 import { crearSolicitud } from "@/modules/solicitudes/application/crearSolicitud";
 import { InMemorySolicitudRepository } from "@/modules/solicitudes/application/fakes";
@@ -15,14 +15,14 @@ const OTRO_ADMIN = "admin-2";
 
 describe("obtenerResumenPanel", () => {
   let aguaId: string;
-  const ayudas = new InMemoryAyudaRepository();
+  const actividades = new InMemoryActividadRepository();
   const recursos = new InMemoryRecursoRepository();
   const aportes = new InMemoryAporteRepository();
   const solicitudes = new InMemorySolicitudRepository();
-  const deps = { ayudas, recursos, aportes, solicitudes };
+  const deps = { actividades, recursos, aportes, solicitudes };
 
   beforeEach(async () => {
-    ayudas["porId"].clear();
+    actividades["porId"].clear();
     aportes["porId"].clear();
     solicitudes["porId"].clear();
     const agua = await recursos.crear({
@@ -35,7 +35,7 @@ describe("obtenerResumenPanel", () => {
   });
 
   it("compone el resumen con prioridad y conteos del dueño", async () => {
-    const ayuda = await crearAyuda(deps, {
+    const ayuda = await crearActividad(deps, {
       adminId: ADMIN,
       titulo: "Envío principal",
       sectorDestino: "Upata",
@@ -44,7 +44,7 @@ describe("obtenerResumenPanel", () => {
       metas: [{ recursoId: aguaId, cantidadObjetivo: 100 }],
     });
     await crearAporte(deps, {
-      ayudaId: ayuda.id,
+      actividadId: ayuda.id,
       recursoId: aguaId,
       colaboradorId: "col-1",
       cantidad: 40,
@@ -70,13 +70,13 @@ describe("obtenerResumenPanel", () => {
     expect(resumen.aportesPendientesConteo).toBe(1);
     expect(resumen.solicitudesAbiertasPorUrgencia.ALTA).toBe(1);
     expect(resumen.sectoresTop[0]?.conteo).toBe(2);
-    expect(resumen.enviosPrioridad[0]?.ayudaId).toBe(ayuda.id);
+    expect(resumen.enviosPrioridad[0]?.actividadId).toBe(ayuda.id);
     expect(resumen.enviosPrioridad[0]?.solicitudesAfinesConteo).toBe(2);
     expect(resumen.progresoAgregadoRecolectando.metasBajo).toBe(1);
   });
 
   it("acota envíos y aportes pendientes al adminId (no mezcla dueños)", async () => {
-    const propia = await crearAyuda(deps, {
+    const propia = await crearActividad(deps, {
       adminId: ADMIN,
       titulo: "Mía",
       sectorDestino: "Upata",
@@ -84,7 +84,7 @@ describe("obtenerResumenPanel", () => {
       tipo: "ENVIO",
       metas: [{ recursoId: aguaId, cantidadObjetivo: 50 }],
     });
-    const ajena = await crearAyuda(deps, {
+    const ajena = await crearActividad(deps, {
       adminId: OTRO_ADMIN,
       titulo: "Ajena",
       sectorDestino: "Tumeremo",
@@ -93,13 +93,13 @@ describe("obtenerResumenPanel", () => {
       metas: [{ recursoId: aguaId, cantidadObjetivo: 50 }],
     });
     await crearAporte(deps, {
-      ayudaId: propia.id,
+      actividadId: propia.id,
       recursoId: aguaId,
       colaboradorId: "col-1",
       cantidad: 10,
     });
     await crearAporte(deps, {
-      ayudaId: ajena.id,
+      actividadId: ajena.id,
       recursoId: aguaId,
       colaboradorId: "col-2",
       cantidad: 20,
@@ -110,6 +110,6 @@ describe("obtenerResumenPanel", () => {
     expect(resumen.enviosPorEstado.RECOLECTANDO).toBe(1);
     expect(resumen.aportesPendientesConteo).toBe(1);
     expect(resumen.enviosPrioridad).toHaveLength(1);
-    expect(resumen.enviosPrioridad[0]?.ayudaId).toBe(propia.id);
+    expect(resumen.enviosPrioridad[0]?.actividadId).toBe(propia.id);
   });
 });

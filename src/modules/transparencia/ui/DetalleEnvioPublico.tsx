@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { EstadoBadge } from "@/modules/ayudas/ui/EstadoBadge";
-import { TipoBadge } from "@/modules/ayudas/ui/TipoBadge";
-import { formatearFecha } from "@/modules/ayudas/ui/fechas";
-import { EstadoAyuda } from "@/modules/ayudas/domain/EstadoAyuda";
+import { EstadoBadge } from "@/modules/actividades/ui/EstadoBadge";
+import { TipoBadge } from "@/modules/actividades/ui/TipoBadge";
+import { formatearFecha } from "@/modules/actividades/ui/fechas";
+import { EstadoActividad } from "@/modules/actividades/domain/EstadoActividad";
 import type { DetallePublico } from "@/modules/transparencia/application/obtener-detalle-publico";
 import { BarraProgreso } from "./BarraProgreso";
 
@@ -15,7 +15,7 @@ function formatearNumero(n: number): string {
 }
 
 export function DetalleEnvioPublico({ detalle }: Props) {
-  const entregado = detalle.estado === EstadoAyuda.ENTREGADO;
+  const entregado = detalle.estado === EstadoActividad.ENTREGADO;
 
   return (
     <article className="mx-auto flex max-w-4xl flex-col gap-10 px-6 py-12 md:px-8 md:py-16">

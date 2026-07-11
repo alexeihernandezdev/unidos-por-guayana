@@ -3,8 +3,8 @@ import { crearAporte } from "@/modules/aportes/application/crearAporte";
 import { contarAportesPendientes } from "@/modules/aportes/application/contarAportesPendientes";
 import { InMemoryAporteRepository } from "@/modules/aportes/application/fakes";
 import { marcarRecibido } from "@/modules/aportes/application/marcarRecibido";
-import { crearAyuda } from "@/modules/ayudas/application/crearAyuda";
-import { InMemoryAyudaRepository } from "@/modules/ayudas/application/fakes";
+import { crearActividad } from "@/modules/actividades/application/crearActividad";
+import { InMemoryActividadRepository } from "@/modules/actividades/application/fakes";
 import { InMemoryRecursoRepository } from "@/modules/recursos/application/fakes";
 import { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import { Rol } from "@/modules/usuarios/domain/Rol";
@@ -18,13 +18,13 @@ describe("contarAportesPendientes", () => {
       categoria: CategoriaRecurso.SUMINISTRO,
       descripcion: null,
     });
-    const ayudas = new InMemoryAyudaRepository();
+    const actividades = new InMemoryActividadRepository();
     const deps = {
       aportes: new InMemoryAporteRepository(),
-      ayudas,
+      actividades,
       recursos,
     };
-    const ayuda = await crearAyuda(deps, {
+    const ayuda = await crearActividad(deps, {
       adminId: "admin-1",
       titulo: "Envío",
       sectorDestino: "Upata",
@@ -33,13 +33,13 @@ describe("contarAportesPendientes", () => {
       metas: [{ recursoId: agua.id, cantidadObjetivo: 100 }],
     });
     const a1 = await crearAporte(deps, {
-      ayudaId: ayuda.id,
+      actividadId: ayuda.id,
       recursoId: agua.id,
       colaboradorId: "col-1",
       cantidad: 10,
     });
     await crearAporte(deps, {
-      ayudaId: ayuda.id,
+      actividadId: ayuda.id,
       recursoId: agua.id,
       colaboradorId: "col-2",
       cantidad: 5,

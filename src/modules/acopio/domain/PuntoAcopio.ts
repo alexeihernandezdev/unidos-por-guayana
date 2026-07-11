@@ -1,5 +1,5 @@
 // Entidad de dominio. Un `PuntoAcopio` es una ubicación física de un `ADMIN`
-// (feature 011). No declara "qué recibe": los aportes se hacen a Ayudas, no a
+// (feature 011). No declara "qué recibe": los aportes se hacen a Actividades, no a
 // puntos. `latitud`/`longitud` se guardan como strings (Prisma serializa
 // `Decimal` así) y se validan con `esCoordenadaLatitud`/`esCoordenadaLongitud`.
 export type PuntoAcopio = {

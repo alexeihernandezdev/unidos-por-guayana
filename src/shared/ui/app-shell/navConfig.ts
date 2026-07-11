@@ -15,7 +15,8 @@ export type IconoNav =
   | "donaciones"
   | "nuevaSolicitud"
   | "proponer"
-  | "aprobaciones";
+  | "aprobaciones"
+  | "red";
 
 // Ítem de navegación del panel. `exact` = activo solo con la ruta exacta.
 export type NavItem = {
@@ -39,8 +40,9 @@ const NAV_ADMIN: NavSection[] = [
     label: "Operación",
     items: [
       { label: "Panel", href: "/panel", icon: "panel", exact: true },
-      { label: "Actividades", href: "/panel/ayudas", icon: "actividades" },
+      { label: "Actividades", href: "/panel/actividades", icon: "actividades" },
       { label: "Solicitudes", href: "/panel/solicitudes", icon: "solicitudes" },
+      { label: "Mi red", href: "/panel/red", icon: "red" },
     ],
   },
   {
@@ -56,7 +58,7 @@ const NAV_ADMIN: NavSection[] = [
   {
     label: "Mi cuenta",
     items: [
-      { label: "Mi centro de acopio", href: "/panel/perfil", icon: "acopio" },
+      { label: "Datos del administrador", href: "/panel/perfil", icon: "acopio" },
       {
         label: "Puntos de acopio",
         href: "/panel/puntos-acopio",
@@ -88,7 +90,7 @@ const NAV_COLABORADOR: NavSection[] = [
   {
     label: "Operación",
     items: [
-      { label: "Actividades", href: "/ayudas", icon: "actividades", exact: true },
+      { label: "Actividades", href: "/actividades", icon: "actividades", exact: true },
       { label: "Mis aportes", href: "/mis-aportes", icon: "aportes", exact: true },
       { label: "Puntos de acopio", href: "/puntos-acopio", icon: "puntos" },
     ],
@@ -160,7 +162,7 @@ export function rutaInicioPorRol(rol: Rol): string {
     case Rol.SUPERADMIN:
       return "/superadmin/admins";
     case Rol.COLABORADOR:
-      return "/ayudas";
+      return "/actividades";
     case Rol.SOLICITANTE:
       return "/solicitudes";
   }

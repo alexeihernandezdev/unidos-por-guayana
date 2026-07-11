@@ -318,6 +318,39 @@
   }
 }
 
+/* Perfil y red de colaboración: superficies operativas compartidas. */
+.profile-surface {
+  border: 1px solid color-mix(in oklch, var(--border) 86%, var(--primary) 14%);
+  border-radius: var(--radius-xl);
+  background: color-mix(in oklch, var(--card) 96%, var(--primary) 4%);
+  padding: 1.25rem;
+}
+
+.profile-section-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.profile-section-heading h2 { font-size: 1rem; font-weight: 650; }
+.profile-section-heading p { margin-top: 0.2rem; color: var(--muted-foreground); font-size: 0.8125rem; line-height: 1.3rem; }
+.profile-icon { display: grid; width: 2.25rem; height: 2.25rem; flex: none; place-items: center; border-radius: var(--radius-md); background: color-mix(in oklch, var(--primary) 11%, transparent); color: var(--primary-ink); }
+.profile-icon svg { width: 1rem; height: 1rem; stroke-width: 1.7; }
+.profile-section-link { display: inline-flex; flex: none; align-items: center; gap: 0.45rem; border-radius: var(--radius-md); padding: 0.5rem 0.7rem; color: var(--muted-foreground); font-size: 0.8125rem; font-weight: 550; transition: background-color 160ms var(--ease-out-emil), color 160ms var(--ease-out-emil), transform 120ms var(--ease-out-emil); }
+.profile-section-link svg { width: 0.95rem; height: 0.95rem; }
+.profile-section-link:hover { background: var(--muted); color: var(--foreground); }
+.profile-section-link:active { transform: scale(0.97); }
+.profile-section-link:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.profile-choice { display: flex; min-height: 3.5rem; cursor: pointer; align-items: center; gap: 0.65rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--card); padding: 0.75rem; color: var(--muted-foreground); font-size: 0.8125rem; transition: border-color 160ms var(--ease-out-emil), background-color 160ms var(--ease-out-emil), transform 120ms var(--ease-out-emil); }
+.profile-choice svg { width: 1.05rem; height: 1.05rem; }
+.profile-choice.is-selected { border-color: color-mix(in oklch, var(--primary) 55%, var(--border)); background: color-mix(in oklch, var(--primary) 8%, var(--card)); color: var(--primary-ink); }
+.profile-choice:has(input:focus-visible) { outline: 2px solid var(--ring); outline-offset: 2px; }
+.profile-choice:active { transform: scale(0.985); }
+
+@media (min-width: 48rem) { .profile-surface { padding: 1.5rem; } }
+@media (prefers-reduced-motion: reduce) { .profile-section-link, .profile-choice { transition: none; } }
+
 /* Autenticación: panel documental compartido por login y registro. */
 .auth-shell {
   display: grid;
@@ -397,7 +430,10 @@
 
 .auth-content-inner {
   width: 100%;
-  align-self: center;
+  /* Centra verticalmente cuando sobra espacio, pero al desbordar (formularios
+     largos) los márgenes auto colapsan a 0 y el contenido queda accesible desde
+     arriba con el scroll del panel (evita que se recorte el encabezado). */
+  margin-block: auto;
 }
 
 .auth-back {

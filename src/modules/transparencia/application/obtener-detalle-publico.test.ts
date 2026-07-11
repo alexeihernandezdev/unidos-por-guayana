@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { crearAporte } from "@/modules/aportes/application/crearAporte";
 import { marcarRecibido } from "@/modules/aportes/application/marcarRecibido";
 import { InMemoryAporteRepository } from "@/modules/aportes/application/fakes";
-import { crearAyuda } from "@/modules/ayudas/application/crearAyuda";
-import { InMemoryAyudaRepository } from "@/modules/ayudas/application/fakes";
+import { crearActividad } from "@/modules/actividades/application/crearActividad";
+import { InMemoryActividadRepository } from "@/modules/actividades/application/fakes";
 import { InMemoryRecursoRepository } from "@/modules/recursos/application/fakes";
 import { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import { Rol } from "@/modules/usuarios/domain/Rol";
@@ -12,13 +12,13 @@ import { obtenerDetallePublico } from "./obtener-detalle-publico";
 
 describe("obtenerDetallePublico", () => {
   let aguaId: string;
-  const ayudas = new InMemoryAyudaRepository();
+  const actividades = new InMemoryActividadRepository();
   const recursos = new InMemoryRecursoRepository();
   const aportes = new InMemoryAporteRepository();
-  const deps = { ayudas, recursos, aportes };
+  const deps = { actividades, recursos, aportes };
 
   beforeEach(async () => {
-    ayudas["porId"].clear();
+    actividades["porId"].clear();
     aportes["porId"].clear();
     const agua = await recursos.crear({
       nombre: "Agua",
@@ -30,7 +30,7 @@ describe("obtenerDetallePublico", () => {
   });
 
   it("devuelve metas y porcentaje global sin datos personales", async () => {
-    const ayuda = await crearAyuda(deps, {
+    const ayuda = await crearActividad(deps, {
       adminId: "admin-1",
       titulo: "Detalle",
       sectorDestino: "Upata",
@@ -39,7 +39,7 @@ describe("obtenerDetallePublico", () => {
       metas: [{ recursoId: aguaId, cantidadObjetivo: 80 }],
     });
     const aporte = await crearAporte(deps, {
-      ayudaId: ayuda.id,
+      actividadId: ayuda.id,
       recursoId: aguaId,
       colaboradorId: "col-privado",
       cantidad: 40,

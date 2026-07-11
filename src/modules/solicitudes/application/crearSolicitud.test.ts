@@ -97,7 +97,7 @@ describe("crearSolicitud", () => {
         {
           sector: "   ",
           urgencia: UrgenciaSolicitud.BAJA,
-          descripcion: "Ayuda",
+          descripcion: "Actividad",
           recursos: [{ recursoId: agua.id }],
         },
         SOLICITANTE_ID,
@@ -131,7 +131,7 @@ describe("crearSolicitud", () => {
         {
           sector: "Petare",
           urgencia: UrgenciaSolicitud.BAJA,
-          descripcion: "Ayuda",
+          descripcion: "Actividad",
           recursos: [],
         },
         SOLICITANTE_ID,
@@ -148,7 +148,7 @@ describe("crearSolicitud", () => {
         {
           sector: "Petare",
           urgencia: UrgenciaSolicitud.BAJA,
-          descripcion: "Ayuda",
+          descripcion: "Actividad",
           recursos: [
             { recursoId: agua.id },
             { recursoId: agua.id },
@@ -168,7 +168,7 @@ describe("crearSolicitud", () => {
         {
           sector: "Petare",
           urgencia: UrgenciaSolicitud.BAJA,
-          descripcion: "Ayuda",
+          descripcion: "Actividad",
           recursos: [{ recursoId: agua.id, cantidadEstimada: 0 }],
         },
         SOLICITANTE_ID,
@@ -185,7 +185,7 @@ describe("crearSolicitud", () => {
         {
           sector: "Petare",
           urgencia: UrgenciaSolicitud.BAJA,
-          descripcion: "Ayuda",
+          descripcion: "Actividad",
           recursos: [{ recursoId: "no-existe" }],
         },
         SOLICITANTE_ID,
@@ -202,7 +202,7 @@ describe("crearSolicitud", () => {
         {
           sector: "Petare",
           urgencia: UrgenciaSolicitud.BAJA,
-          descripcion: "Ayuda",
+          descripcion: "Actividad",
           recursos: [{ recursoId: archivado.id }],
         },
         SOLICITANTE_ID,

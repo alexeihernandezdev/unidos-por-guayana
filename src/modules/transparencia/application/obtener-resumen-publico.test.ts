@@ -2,9 +2,9 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { crearAporte } from "@/modules/aportes/application/crearAporte";
 import { marcarRecibido } from "@/modules/aportes/application/marcarRecibido";
 import { InMemoryAporteRepository } from "@/modules/aportes/application/fakes";
-import { avanzarEstado } from "@/modules/ayudas/application/avanzarEstado";
-import { crearAyuda } from "@/modules/ayudas/application/crearAyuda";
-import { InMemoryAyudaRepository } from "@/modules/ayudas/application/fakes";
+import { avanzarEstado } from "@/modules/actividades/application/avanzarEstado";
+import { crearActividad } from "@/modules/actividades/application/crearActividad";
+import { InMemoryActividadRepository } from "@/modules/actividades/application/fakes";
 import { InMemoryRecursoRepository } from "@/modules/recursos/application/fakes";
 import { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import { Rol } from "@/modules/usuarios/domain/Rol";
@@ -16,13 +16,13 @@ import {
 describe("obtenerResumenPublico", () => {
   let aguaId: string;
   let usdId: string;
-  const ayudas = new InMemoryAyudaRepository();
+  const actividades = new InMemoryActividadRepository();
   const recursos = new InMemoryRecursoRepository();
   const aportes = new InMemoryAporteRepository();
-  const deps = { ayudas, recursos, aportes };
+  const deps = { actividades, recursos, aportes };
 
   beforeEach(async () => {
-    ayudas["porId"].clear();
+    actividades["porId"].clear();
     aportes["porId"].clear();
     recursos["porId"].clear();
     const agua = await recursos.crear({
@@ -42,7 +42,7 @@ describe("obtenerResumenPublico", () => {
   });
 
   it("compone totales, recolectado y envíos ordenados por fecha desc", async () => {
-    const antigua = await crearAyuda(deps, {
+    const antigua = await crearActividad(deps, {
       adminId: "admin-1",
       titulo: "Antigua",
       sectorDestino: "A",
@@ -53,7 +53,7 @@ describe("obtenerResumenPublico", () => {
         { recursoId: usdId, cantidadObjetivo: 500 },
       ],
     });
-    const reciente = await crearAyuda(deps, {
+    const reciente = await crearActividad(deps, {
       adminId: "admin-1",
       titulo: "Reciente",
       sectorDestino: "B",
@@ -62,14 +62,14 @@ describe("obtenerResumenPublico", () => {
       metas: [{ recursoId: aguaId, cantidadObjetivo: 50 }],
     });
     const aporte = await crearAporte(deps, {
-      ayudaId: reciente.id,
+      actividadId: reciente.id,
       recursoId: aguaId,
       colaboradorId: "col-secreto",
       cantidad: 25,
       nota: "contacto@secreto.test",
     });
     const usdAporte = await crearAporte(deps, {
-      ayudaId: antigua.id,
+      actividadId: antigua.id,
       recursoId: usdId,
       colaboradorId: "col-otro",
       cantidad: 200,
@@ -96,7 +96,7 @@ describe("obtenerResumenPublico", () => {
   });
 
   it("no incluye campos personales en el JSON del DTO", async () => {
-    await crearAyuda(deps, {
+    await crearActividad(deps, {
       adminId: "admin-1",
       titulo: "Solo cabecera",
       sectorDestino: "C",

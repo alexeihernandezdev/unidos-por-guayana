@@ -8,7 +8,7 @@ import {
 } from "@/modules/aportes/domain/reglas";
 import { esMonedaPermitida } from "@/modules/donaciones/domain/Moneda";
 import { Rol } from "@/modules/usuarios/domain/Rol";
-import { AyudaNoEncontradaError } from "@/modules/ayudas/application/errors";
+import { ActividadNoEncontradaError } from "@/modules/actividades/application/errors";
 import type { Actor, AporteDeps } from "./deps";
 import {
   MontoInvalidoError,
@@ -25,7 +25,7 @@ export type RegistrarAporteExternoInput = {
   // Todos opcionales: un ingreso puede ser anónimo (sin colaborador), de "caja
   // general" (sin ayuda) y sin medio/referencia registrados.
   medioDonacionId?: string | null;
-  ayudaId?: string | null;
+  actividadId?: string | null;
   colaboradorId?: string | null;
   referencia?: string | null;
   nota?: string | null;
@@ -47,7 +47,7 @@ export type RegistrarAporteExternoInput = {
  * `COMPROMETIDO`. `registradoPorId` guarda al ADMIN para auditoría.
  */
 export async function registrarAporteExterno(
-  { aportes, ayudas, recursos }: AporteDeps,
+  { aportes, actividades, recursos }: AporteDeps,
   input: RegistrarAporteExternoInput,
   actor: Actor,
 ): Promise<Aporte> {
@@ -76,10 +76,10 @@ export async function registrarAporteExterno(
     throw new MontoInvalidoError("La moneda no es válida.");
   }
 
-  const ayudaId = input.ayudaId ?? null;
-  if (ayudaId) {
-    const ayuda = await ayudas.buscarPorId(ayudaId);
-    if (!ayuda) throw new AyudaNoEncontradaError(ayudaId);
+  const actividadId = input.actividadId ?? null;
+  if (actividadId) {
+    const ayuda = await actividades.buscarPorId(actividadId);
+    if (!ayuda) throw new ActividadNoEncontradaError(actividadId);
     const tieneMeta = ayuda.metas.some((m) => m.recursoId === input.recursoId);
     if (!tieneMeta) {
       throw new RecursoFueraDeMetasError(
@@ -89,7 +89,7 @@ export async function registrarAporteExterno(
   }
 
   return aportes.crear({
-    ayudaId,
+    actividadId,
     recursoId: input.recursoId,
     colaboradorId: input.colaboradorId ?? null,
     cantidad: input.monto,

@@ -1,15 +1,15 @@
 import { EstadoAporte } from "@/modules/aportes/domain/EstadoAporte";
-import { progresoDeAyuda } from "@/modules/aportes/application/progresoDeAyuda";
+import { progresoDeActividad } from "@/modules/aportes/application/progresoDeActividad";
 import {
-  contarAyudasPorEstado,
+  contarActividadesPorEstado,
   contarEnviosActivos,
-} from "@/modules/ayudas/application/contarAyudasPorEstado";
-import { listarPrioridadRecolectando } from "@/modules/ayudas/application/listarPrioridadRecolectando";
-import { EstadoAyuda } from "@/modules/ayudas/domain/EstadoAyuda";
+} from "@/modules/actividades/application/contarActividadesPorEstado";
+import { listarPrioridadRecolectando } from "@/modules/actividades/application/listarPrioridadRecolectando";
+import { EstadoActividad } from "@/modules/actividades/domain/EstadoActividad";
 import { contarSolicitudesAbiertasPorSector } from "@/modules/solicitudes/application/contarSolicitudesAbiertasPorSector";
 import { contarSolicitudesPorUrgencia } from "@/modules/solicitudes/application/contarSolicitudesPorUrgencia";
 import { sectoresTop } from "@/modules/solicitudes/application/sectoresTop";
-import type { ConteosPorEstadoAyuda } from "@/modules/ayudas/application/contarAyudasPorEstado";
+import type { ConteosPorEstadoActividad } from "@/modules/actividades/application/contarActividadesPorEstado";
 import type { ConteosPorUrgencia } from "@/modules/solicitudes/application/contarSolicitudesPorUrgencia";
 import type { SectorTop } from "@/modules/solicitudes/application/sectoresTop";
 import type { PanelDeps } from "./deps";
@@ -21,7 +21,7 @@ export type ProgresoAgregadoRecolectando = {
 };
 
 export type EnvioPrioridadPanel = {
-  ayudaId: string;
+  actividadId: string;
   titulo: string;
   sectorDestino: string;
   fecha: Date;
@@ -31,7 +31,7 @@ export type EnvioPrioridadPanel = {
 
 export type ResumenPanel = {
   enviosPorEstado: Pick<
-    ConteosPorEstadoAyuda,
+    ConteosPorEstadoActividad,
     "RECOLECTANDO" | "LISTO" | "EN_TRANSITO"
   >;
   progresoAgregadoRecolectando: ProgresoAgregadoRecolectando;
@@ -45,8 +45,8 @@ async function calcularProgresoAgregadoRecolectando(
   deps: PanelDeps,
   adminId: string,
 ): Promise<ProgresoAgregadoRecolectando> {
-  const recolectando = await deps.ayudas.listar({
-    estado: EstadoAyuda.RECOLECTANDO,
+  const recolectando = await deps.actividades.listar({
+    estado: EstadoActividad.RECOLECTANDO,
     adminId,
   });
   if (recolectando.length === 0) {
@@ -55,26 +55,26 @@ async function calcularProgresoAgregadoRecolectando(
 
   let metasAlCien = 0;
   let metasBajo = 0;
-  let sumaPorcentajesAyuda = 0;
+  let sumaPorcentajesActividad = 0;
 
   for (const ayuda of recolectando) {
-    const progreso = await progresoDeAyuda(deps, ayuda.id);
+    const progreso = await progresoDeActividad(deps, ayuda.id);
     for (const meta of progreso) {
       if (meta.porcentaje >= 100) metasAlCien++;
       else metasBajo++;
     }
-    const promedioAyuda =
+    const promedioActividad =
       progreso.length === 0
         ? 0
         : progreso.reduce((acc, p) => acc + Math.min(100, p.porcentaje), 0) /
           progreso.length;
-    sumaPorcentajesAyuda += promedioAyuda;
+    sumaPorcentajesActividad += promedioActividad;
   }
 
   return {
     metasAlCien,
     metasBajo,
-    porcentajePromedio: sumaPorcentajesAyuda / recolectando.length,
+    porcentajePromedio: sumaPorcentajesActividad / recolectando.length,
   };
 }
 
@@ -83,12 +83,12 @@ async function contarAportesPendientesDelAdmin(
   deps: PanelDeps,
   adminId: string,
 ): Promise<number> {
-  const ayudas = await deps.ayudas.listar({ adminId });
+  const actividades = await deps.actividades.listar({ adminId });
   const conteos = await Promise.all(
-    ayudas.map((ayuda) =>
+    actividades.map((ayuda) =>
       deps.aportes.contar({
         estado: EstadoAporte.COMPROMETIDO,
-        ayudaId: ayuda.id,
+        actividadId: ayuda.id,
       }),
     ),
   );
@@ -113,7 +113,7 @@ export async function obtenerResumenPanel(
     sectores,
     progresoAgregadoRecolectando,
   ] = await Promise.all([
-    contarAyudasPorEstado(deps, { adminId }),
+    contarActividadesPorEstado(deps, { adminId }),
     listarPrioridadRecolectando(deps, adminId),
     contarSolicitudesPorUrgencia(deps),
     contarAportesPendientesDelAdmin(deps, adminId),
@@ -123,7 +123,7 @@ export async function obtenerResumenPanel(
 
   const enviosPrioridad = await Promise.all(
     prioridad.map(async ({ ayuda, porcentaje }) => ({
-      ayudaId: ayuda.id,
+      actividadId: ayuda.id,
       titulo: ayuda.titulo,
       sectorDestino: ayuda.sectorDestino,
       fecha: ayuda.fecha,

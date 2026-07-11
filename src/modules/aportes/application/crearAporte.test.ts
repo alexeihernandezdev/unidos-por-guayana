@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { InMemoryAyudaRepository } from "@/modules/ayudas/application/fakes";
-import { crearAyuda } from "@/modules/ayudas/application/crearAyuda";
-import { avanzarEstado } from "@/modules/ayudas/application/avanzarEstado";
-import { AyudaNoEncontradaError } from "@/modules/ayudas/application/errors";
+import { InMemoryActividadRepository } from "@/modules/actividades/application/fakes";
+import { crearActividad } from "@/modules/actividades/application/crearActividad";
+import { avanzarEstado } from "@/modules/actividades/application/avanzarEstado";
+import { ActividadNoEncontradaError } from "@/modules/actividades/application/errors";
 import { InMemoryRecursoRepository } from "@/modules/recursos/application/fakes";
 import { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import { crearAporte } from "./crearAporte";
 import type { AporteDeps } from "./deps";
 import {
-  AyudaNoAceptaAportesError,
+  ActividadNoAceptaAportesError,
   DatosAporteInvalidosError,
   RecursoFueraDeMetasError,
 } from "./errors";
@@ -31,9 +31,9 @@ async function armarContexto() {
     descripcion: null,
   });
 
-  const ayudasRepo = new InMemoryAyudaRepository();
-  const ayuda = await crearAyuda(
-    { ayudas: ayudasRepo, recursos },
+  const ayudasRepo = new InMemoryActividadRepository();
+  const ayuda = await crearActividad(
+    { actividades: ayudasRepo, recursos },
     {
       adminId: "admin-1",
       titulo: "Envío 1",
@@ -46,7 +46,7 @@ async function armarContexto() {
 
   const deps: AporteDeps = {
     aportes: new InMemoryAporteRepository(),
-    ayudas: ayudasRepo,
+    actividades: ayudasRepo,
     recursos,
   };
   return { deps, ayuda, agua, arroz };
@@ -62,7 +62,7 @@ describe("crearAporte", () => {
   it("crea el aporte en estado COMPROMETIDO", async () => {
     const { deps, ayuda, agua } = ctx;
     const aporte = await crearAporte(deps, {
-      ayudaId: ayuda.id,
+      actividadId: ayuda.id,
       recursoId: agua.id,
       colaboradorId: COLABORADOR_ID,
       cantidad: 20,
@@ -77,7 +77,7 @@ describe("crearAporte", () => {
     const { deps, ayuda, agua } = ctx;
     await expect(
       crearAporte(deps, {
-        ayudaId: ayuda.id,
+        actividadId: ayuda.id,
         recursoId: agua.id,
         colaboradorId: COLABORADOR_ID,
         cantidad: 0,
@@ -85,11 +85,11 @@ describe("crearAporte", () => {
     ).rejects.toBeInstanceOf(DatosAporteInvalidosError);
   });
 
-  it("rechaza un recurso fuera de las metas de la Ayuda", async () => {
+  it("rechaza un recurso fuera de las metas de la Actividad", async () => {
     const { deps, ayuda, arroz } = ctx;
     await expect(
       crearAporte(deps, {
-        ayudaId: ayuda.id,
+        actividadId: ayuda.id,
         recursoId: arroz.id,
         colaboradorId: COLABORADOR_ID,
         cantidad: 5,
@@ -103,7 +103,7 @@ describe("crearAporte", () => {
 
     await expect(
       crearAporte(deps, {
-        ayudaId: ayuda.id,
+        actividadId: ayuda.id,
         recursoId: agua.id,
         colaboradorId: COLABORADOR_ID,
         cantidad: 5,
@@ -111,29 +111,29 @@ describe("crearAporte", () => {
     ).rejects.toBeInstanceOf(RecursoFueraDeMetasError);
   });
 
-  it("rechaza si la Ayuda ya no está en RECOLECTANDO", async () => {
+  it("rechaza si la Actividad ya no está en RECOLECTANDO", async () => {
     const { deps, ayuda, agua } = ctx;
     await avanzarEstado(deps, ayuda.id, "admin-1"); // → LISTO
 
     await expect(
       crearAporte(deps, {
-        ayudaId: ayuda.id,
+        actividadId: ayuda.id,
         recursoId: agua.id,
         colaboradorId: COLABORADOR_ID,
         cantidad: 5,
       }),
-    ).rejects.toBeInstanceOf(AyudaNoAceptaAportesError);
+    ).rejects.toBeInstanceOf(ActividadNoAceptaAportesError);
   });
 
-  it("rechaza si la Ayuda no existe", async () => {
+  it("rechaza si la Actividad no existe", async () => {
     const { deps, agua } = ctx;
     await expect(
       crearAporte(deps, {
-        ayudaId: "no-existe",
+        actividadId: "no-existe",
         recursoId: agua.id,
         colaboradorId: COLABORADOR_ID,
         cantidad: 5,
       }),
-    ).rejects.toBeInstanceOf(AyudaNoEncontradaError);
+    ).rejects.toBeInstanceOf(ActividadNoEncontradaError);
   });
 });

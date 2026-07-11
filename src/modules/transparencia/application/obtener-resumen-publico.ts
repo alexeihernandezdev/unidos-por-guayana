@@ -1,15 +1,15 @@
-import { contarAyudasPorEstado } from "@/modules/ayudas/application/contarAyudasPorEstado";
-import { listarEnviosPublicos } from "@/modules/ayudas/application/listarEnviosPublicos";
-import { EstadoAyuda } from "@/modules/ayudas/domain/EstadoAyuda";
-import type { EstadoAyuda as EstadoAyudaType } from "@/modules/ayudas/domain/EstadoAyuda";
+import { contarActividadesPorEstado } from "@/modules/actividades/application/contarActividadesPorEstado";
+import { listarEnviosPublicos } from "@/modules/actividades/application/listarEnviosPublicos";
+import { EstadoActividad } from "@/modules/actividades/domain/EstadoActividad";
+import type { EstadoActividad as EstadoActividadType } from "@/modules/actividades/domain/EstadoActividad";
 import { recolectadoPorRecurso } from "@/modules/aportes/application/recolectadoPorRecurso";
 import { EstadoAporte } from "@/modules/aportes/domain/EstadoAporte";
 import type { AporteDeps } from "@/modules/aportes/application/deps";
-import type { AyudaDeps } from "@/modules/ayudas/application/deps";
+import type { ActividadDeps } from "@/modules/actividades/application/deps";
 import type { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 
-export type TransparenciaDeps = Pick<AyudaDeps, "ayudas"> &
-  Pick<AporteDeps, "aportes" | "ayudas" | "recursos">;
+export type TransparenciaDeps = Pick<ActividadDeps, "actividades"> &
+  Pick<AporteDeps, "aportes" | "actividades" | "recursos">;
 
 export type TotalesImpactoPublico = {
   enviosTotal: number;
@@ -25,12 +25,12 @@ export type RecolectadoRecursoResumen = {
 };
 
 export type EnvioResumenPublico = {
-  ayudaId: string;
+  actividadId: string;
   titulo: string;
   sectorDestino: string;
   fecha: Date;
-  estado: EstadoAyudaType;
-  tipo: import("@/modules/ayudas/domain/TipoActividad").TipoActividad;
+  estado: EstadoActividadType;
+  tipo: import("@/modules/actividades/domain/TipoActividad").TipoActividad;
   porcentaje: number;
 };
 
@@ -68,7 +68,7 @@ export async function obtenerResumenPublico(
 ): Promise<ResumenPublico> {
   const [conteos, recolectado, enviosConProgreso, aportesConfirmados] =
     await Promise.all([
-      contarAyudasPorEstado(deps),
+      contarActividadesPorEstado(deps),
       recolectadoPorRecurso(deps),
       listarEnviosPublicos(deps),
       deps.aportes.contar({ estado: EstadoAporte.RECIBIDO }),
@@ -79,7 +79,7 @@ export async function obtenerResumenPublico(
   const resumen: ResumenPublico = {
     totales: {
       enviosTotal,
-      enviosEntregados: conteos[EstadoAyuda.ENTREGADO],
+      enviosEntregados: conteos[EstadoActividad.ENTREGADO],
       aportesConfirmados,
     },
     recolectadoPorRecurso: recolectado.map(
@@ -91,7 +91,7 @@ export async function obtenerResumenPublico(
       }),
     ),
     envios: enviosConProgreso.map(({ ayuda, porcentaje }) => ({
-      ayudaId: ayuda.id,
+      actividadId: ayuda.id,
       titulo: ayuda.titulo,
       sectorDestino: ayuda.sectorDestino,
       fecha: ayuda.fecha,

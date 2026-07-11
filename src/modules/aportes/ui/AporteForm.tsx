@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 
-// Opción para el selector: recursos que forman parte de las metas de la Ayuda.
+// Opción para el selector: recursos que forman parte de las metas de la Actividad.
 // La unidad se muestra junto al campo de cantidad para dar contexto al colaborador.
 export type OpcionMeta = {
   recursoId: string;

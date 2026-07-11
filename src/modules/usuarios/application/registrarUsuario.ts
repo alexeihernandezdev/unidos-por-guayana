@@ -12,7 +12,13 @@ import {
 } from "@/modules/usuarios/domain/Rol";
 import type { Usuario } from "@/modules/usuarios/domain/Usuario";
 import type { UsuarioRepository } from "@/modules/usuarios/domain/UsuarioRepository";
+import type { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import {
+  categoriasNoVacias,
+  normalizarCategorias,
+} from "@/modules/afiliaciones/domain/reglas";
+import {
+  CategoriasAporteVaciasError,
   CedulaYaRegistradaError,
   DatosContactoInvalidosError,
   EmailYaRegistradoError,
@@ -38,6 +44,9 @@ export type RegistrarUsuarioInput = {
   password: string;
   rol: RolType;
   datosContacto?: DatosContacto;
+  // Categorías que el COLABORADOR declara poder aportar (feature 025). Obligatoria
+  // (>= 1) para COLABORADOR; se ignora para otros roles.
+  categoriasAporte?: readonly string[];
 };
 
 /**
@@ -99,6 +108,17 @@ export async function registrarUsuario(
     if (cedulaExistente) {
       throw new CedulaYaRegistradaError();
     }
+
+    // El COLABORADOR debe declarar al menos una categoría de aporte (feature 025).
+    // El SOLICITANTE no declara categorías (queda vacío).
+    let categoriasAporte: CategoriaRecurso[] = [];
+    if (input.rol === Rol.COLABORADOR) {
+      categoriasAporte = normalizarCategorias(input.categoriasAporte ?? []);
+      if (!categoriasNoVacias(categoriasAporte)) {
+        throw new CategoriasAporteVaciasError();
+      }
+    }
+
     return usuarios.crear({
       email,
       nombre: input.nombre.trim(),
@@ -109,6 +129,7 @@ export async function registrarUsuario(
       telefonoEsWhatsApp: validacion.valor.telefonoEsWhatsApp,
       estadoId: ubicacion.valor.estadoId,
       municipioId: ubicacion.valor.municipioId,
+      categoriasAporte,
     });
   }
 

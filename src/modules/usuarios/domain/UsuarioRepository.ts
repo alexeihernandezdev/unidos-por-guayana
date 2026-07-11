@@ -1,3 +1,4 @@
+import type { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import type { DatosContacto } from "./datosContacto";
 import type { EstadoVerificacion } from "./Rol";
 import type { NuevoUsuario, Usuario } from "./Usuario";
@@ -21,4 +22,10 @@ export interface UsuarioRepository {
   // usuario. Se usa tanto en el primer login (`/completar-perfil`) como en la
   // edición desde `/mi-perfil`.
   actualizarDatosContacto(id: string, datos: DatosContacto): Promise<Usuario>;
+  // Feature 025: reemplaza las categorías de aporte declaradas por el COLABORADOR
+  // (registro y edición desde `/mi-perfil`).
+  actualizarCategoriasAporte(
+    id: string,
+    categorias: CategoriaRecurso[],
+  ): Promise<Usuario>;
 }

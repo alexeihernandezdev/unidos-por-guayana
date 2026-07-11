@@ -58,30 +58,56 @@ model Usuario {
   estadoUbicacion    Estado?            @relation(fields: [estadoId], references: [id])
   municipioId        String?
   municipioUbicacion Municipio?         @relation(fields: [municipioId], references: [id])
+  // Categorías de recurso que un COLABORADOR declara poder aportar (feature 025).
+  // Capacidad de la persona (no varía por centro). Obligatoria (>= 1) para
+  // COLABORADOR; la regla la asegura la aplicación (una columna array no lo hace).
+  categoriasAporte   CategoriaRecurso[] @default([])
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 
   // Aportes que este usuario ha registrado como colaborador (feature 006).
-  aportes            Aporte[]      @relation("AportesColaborador")
-  // Aportes monetarios externos que este ADMIN imputó manualmente (feature 014):
-  // ingresos ya recibidos por fuera de la app, con o sin colaborador asociado.
-  aportesRegistrados Aporte[]      @relation("AportesRegistrados")
+  aportes            Aporte[] @relation("AportesColaborador")
+  aportesRegistrados Aporte[] @relation("AportesRegistrados")
   // Relación inversa: solicitudes de ayuda creadas por el solicitante (feature 007).
-  solicitudes        Solicitud[]
+  solicitudes Solicitud[]
   // Relación inversa: recursos que este usuario ha propuesto al catálogo (feature 019).
-  recursosPropuestos Recurso[]     @relation("RecursosPropuestos")
+  recursosPropuestos Recurso[] @relation("RecursosPropuestos")
   // Perfil ampliado de centro de acopio (solo cuentas ADMIN, feature 016). La
   // regla "solo ADMIN" la asegura la aplicación; Prisma no restringe por enum.
-  perfilAdmin        PerfilAdmin?
+  perfilAdmin PerfilAdmin?
   // Puntos de acopio que gestiona este ADMIN (feature 016 declara el lado admin;
   // el modelo completo lo crea la feature 011).
-  puntosAcopio       PuntoAcopio[]
-  // Actividades (Ayuda) que este ADMIN creó y gestiona (feature 022).
-  ayudas             Ayuda[]
+  puntosAcopio PuntoAcopio[]
+  // Actividades que este ADMIN creó y gestiona (feature 022; entidad renombrada
+  // de `Ayuda` a `Actividad` en la feature 024).
+  actividades Actividad[]
+  // Afiliaciones a centros de acopio (feature 025): las que este usuario tiene
+  // como COLABORADOR (`afiliaciones`) y las de su red como ADMIN (`red`).
+  afiliaciones Afiliacion[] @relation("ColaboradorAfiliaciones")
+  red          Afiliacion[] @relation("AdminRed")
 
   @@index([estadoId])
   @@index([municipioId])
   @@map("usuarios")
+}
+
+// Afiliacion (feature 025): vínculo unilateral entre un COLABORADOR y un ADMIN
+// (centro de acopio) al que elige unirse. Existir la fila = afiliado; remover =
+// borrar la fila (re-afiliarse permitido, sin estado de bloqueo). Puramente
+// informativa: no restringe a qué Actividad puede aportar el colaborador. Se borra
+// en cascada con cualquiera de los dos usuarios.
+model Afiliacion {
+  id            String   @id @default(cuid())
+  colaboradorId String
+  colaborador   Usuario  @relation("ColaboradorAfiliaciones", fields: [colaboradorId], references: [id], onDelete: Cascade)
+  adminId       String
+  admin         Usuario  @relation("AdminRed", fields: [adminId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+
+  @@unique([colaboradorId, adminId])
+  @@index([colaboradorId])
+  @@index([adminId])
+  @@map("afiliaciones")
 }
 
 // Tipo de documento de identidad de un centro de acopio (feature 016). `JURIDICO`
@@ -151,6 +177,11 @@ model PuntoAcopio {
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
+  // Actividades que se reciben o se realizan en este punto (feature 024,
+  // relación opcional). No hay cascada: al archivar/borrar un punto la actividad
+  // conserva la referencia como nula (ON DELETE SET NULL).
+  actividades Actividad[]
+
   @@unique([adminId, nombre])
   @@index([adminId])
   @@index([estadoId])
@@ -166,9 +197,9 @@ model PuntoAcopio {
 // hay CRUD; se mantiene vía seed. `Usuario` y `PerfilAdmin` referencian este
 // catálogo por `estadoId`/`municipioId` en vez de guardar texto libre.
 model Estado {
-  id              String   @id @default(cuid())
-  codigo          String   @unique
-  nombre          String
+  id     String @id @default(cuid())
+  codigo String @unique
+  nombre String
   // Coordenadas de la capital del estado (feature 011): centro inicial del mapa
   // al crear un punto de acopio. Nullable en base (el seed las llena; upsert por
   // `codigo`); el consumidor cae a un centro por defecto de Venezuela si faltan.
@@ -246,7 +277,7 @@ model Recurso {
   metas MetaRecurso[]
 
   // Aportes registrados contra este recurso (feature 006).
-  aportes            Aporte[]
+  aportes Aporte[]
   // Relación inversa: recursos necesarios en solicitudes de ayuda (feature 007).
   recursoSolicitudes RecursoSolicitud[]
 
@@ -254,77 +285,94 @@ model Recurso {
   @@map("recursos")
 }
 
-// Tipo de actividad de una Ayuda (feature 018). La entidad Ayuda es la misma para
-// las tres clases (envío / jornada / evento social): comparten ciclo de vida,
-// metas, aportes y seguimiento. Solo cambia el vocabulario visible en la UI.
-// Backfill: las Ayudas existentes se consideran `ENVIO`.
+// Tipo de actividad (feature 018). La entidad Actividad es la misma para las tres
+// clases (envío / jornada / evento social): comparten metas, aportes y seguimiento.
+// Cambia el vocabulario visible en la UI y, desde la feature 024, la secuencia de
+// estados válida (ver `EstadoActividad`). Backfill: las actividades existentes se
+// consideran `ENVIO`.
 enum TipoActividad {
   ENVIO
   JORNADA
   EVENTO_SOCIAL
 }
 
-// Ciclo de vida de una Ayuda (ver feature 005 y constitution/tech-stack.md). Avanza
-// en un solo sentido: RECOLECTANDO → LISTO → EN_TRANSITO → ENTREGADO. La máquina de
-// estados (transiciones válidas) vive como regla pura en el dominio. Sus valores
-// coinciden con el enum de dominio para mapear sin casts.
-enum EstadoAyuda {
+// Ciclo de vida de una Actividad (features 005 y 024). Un único enum en base con la
+// unión de los estados de las dos secuencias; qué transiciones son válidas lo module
+// el dominio según el `tipo` (regla pura, `maquinaEstados.ts`):
+//   ENVIO:               RECOLECTANDO → LISTO → EN_TRANSITO → ENTREGADO
+//   JORNADA/EVENTO_SOCIAL: RECOLECTANDO → LISTA → EN_CURSO → REALIZADA
+// `RECOLECTANDO` es el estado inicial compartido. Sus valores coinciden con los del
+// dominio para mapear sin casts.
+enum EstadoActividad {
   RECOLECTANDO
   LISTO
   EN_TRANSITO
   ENTREGADO
+  LISTA
+  EN_CURSO
+  REALIZADA
 }
 
-// Ayuda / Envío: la entidad central de la plataforma. Un envío concreto de ayuda
-// humanitaria hacia un sector, con una fecha de salida y un ciclo de vida. Define
+// Actividad (antes `Ayuda`, renombrada en la feature 024): la entidad central de la
+// plataforma. Según su `tipo` es un envío de ayuda humanitaria, una jornada o un
+// evento social hacia un sector, con una fecha de inicio y un ciclo de vida. Define
 // qué necesita y cuánto mediante sus `metas` (MetaRecurso). Solo la gestiona el
 // `ADMIN`. Nace en `RECOLECTANDO`; la cabecera y las metas solo se editan mientras
 // siga en ese estado (después quedan congeladas para medir el progreso).
-model Ayuda {
-  id            String        @id @default(cuid())
+model Actividad {
+  id            String          @id @default(cuid())
   // Dueño: el ADMIN que creó la actividad (feature 022). Inmutable tras el alta.
   adminId       String
-  admin         Usuario       @relation(fields: [adminId], references: [id])
+  admin         Usuario         @relation(fields: [adminId], references: [id])
   titulo        String
   sectorDestino String
+  // `fecha` es el inicio; `horaFin` (feature 024) es el fin opcional de una JORNADA
+  // o EVENTO_SOCIAL (p. ej. "de 9:00 a 13:00"). Un ENVIO no la usa.
   fecha         DateTime
-  estado        EstadoAyuda   @default(RECOLECTANDO)
-  tipo          TipoActividad @default(ENVIO)
+  horaFin       DateTime?
+  estado        EstadoActividad @default(RECOLECTANDO)
+  tipo          TipoActividad   @default(ENVIO)
   descripcion   String?
+  // Punto de acopio opcional del mismo ADMIN dueño (feature 024): dónde se recibe el
+  // aporte o dónde ocurre la jornada/evento. Nullable; ON DELETE SET NULL para no
+  // perder la actividad si el punto se elimina.
+  puntoAcopioId String?
+  puntoAcopio   PuntoAcopio?    @relation(fields: [puntoAcopioId], references: [id], onDelete: SetNull)
   metas         MetaRecurso[]
   aportes       Aporte[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
   @@index([adminId])
   @@index([tipo])
   @@index([estado])
   @@index([fecha])
-  @@map("ayudas")
+  @@index([puntoAcopioId])
+  @@map("actividades")
 }
 
-// MetaRecurso: puente entre `Ayuda` y `Recurso`. `cantidadObjetivo` es cuánto
-// necesita el envío de ese recurso, en la unidad del recurso. Se guarda como
+// MetaRecurso: puente entre `Actividad` y `Recurso`. `cantidadObjetivo` es cuánto
+// necesita la actividad de ese recurso, en la unidad del recurso. Se guarda como
 // `Decimal` por precisión y se convierte a `number` en el límite de infraestructura
-// (el dominio trabaja con números puros). Única por (ayuda, recurso): un recurso no
-// se repite en dos metas de la misma Ayuda. Se borra en cascada con su Ayuda.
+// (el dominio trabaja con números puros). Única por (actividad, recurso): un recurso
+// no se repite en dos metas de la misma Actividad. Se borra en cascada con su Actividad.
 model MetaRecurso {
-  id               String   @id @default(cuid())
-  ayudaId          String
-  ayuda            Ayuda    @relation(fields: [ayudaId], references: [id], onDelete: Cascade)
+  id               String    @id @default(cuid())
+  actividadId      String
+  actividad        Actividad @relation(fields: [actividadId], references: [id], onDelete: Cascade)
   recursoId        String
-  recurso          Recurso  @relation(fields: [recursoId], references: [id])
-  cantidadObjetivo Decimal  @db.Decimal(12, 2)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  recurso          Recurso   @relation(fields: [recursoId], references: [id])
+  cantidadObjetivo Decimal   @db.Decimal(12, 2)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
-  @@unique([ayudaId, recursoId])
+  @@unique([actividadId, recursoId])
   @@map("metas_recurso")
 }
 
-// Tipo de un medio de donación monetaria externa (feature 014). Indica por qué
-// canal se recibe el dinero (siempre por fuera de la app: no hay pasarela). Sus
-// valores coinciden con el enum de dominio para mapear sin casts.
+// Estado del Aporte (feature 006). `COMPROMETIDO` es la intención declarada por el
+// colaborador; solo cuando el ADMIN lo marca `RECIBIDO` suma al progreso de la meta.
+// Sus valores coinciden con el enum de dominio para mapear sin casts.
 enum TipoMedioDonacion {
   CUENTA_BANCARIA
   PAGO_MOVIL
@@ -335,14 +383,6 @@ enum TipoMedioDonacion {
   OTRO
 }
 
-// MedioDonacion: catálogo de canales externos por los que el proyecto invita a
-// donar dinero (feature 014). Es configuración de solo lectura para el público
-// (aparece en la transparencia, feature 009): la app solo MUESTRA el medio; el
-// pago ocurre siempre por fuera. Lo administra el ADMIN. No se borra si tiene
-// ingresos asociados: se desactiva (`activo = false`). `datos` es la instrucción
-// legible (número de cuenta, correo, alias…); `moneda` es un código acotado
-// (`USD`, `VES`, `EUR`, `USDT`…) validado en el dominio (no un enum de Prisma,
-// para no migrar al aceptar una moneda nueva).
 model MedioDonacion {
   id        String            @id @default(cuid())
   tipo      TipoMedioDonacion
@@ -354,71 +394,49 @@ model MedioDonacion {
   activo    Boolean           @default(true)
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
-
-  // Ingresos monetarios que entraron por este medio (feature 014). Un medio con
-  // aportes asociados no se borra: se desactiva.
-  aportes Aporte[]
+  aportes   Aporte[]
 
   @@index([activo, orden])
   @@map("medios_donacion")
 }
 
-// Estado del Aporte (feature 006). `COMPROMETIDO` es la intención declarada por el
-// colaborador; solo cuando el ADMIN lo marca `RECIBIDO` suma al progreso de la meta.
-// Sus valores coinciden con el enum de dominio para mapear sin casts.
 enum EstadoAporte {
   COMPROMETIDO
   RECIBIDO
 }
 
-// Aporte: registro con el que un COLABORADOR ofrece ayuda a una Ayuda concreta
+// Aporte: registro con el que un COLABORADOR ofrece ayuda a una Actividad concreta
 // contra un Recurso del catálogo. Nace en `COMPROMETIDO`; el ADMIN lo marca
 // `RECIBIDO` al confirmar la entrega (o el ingreso monetario externo). Solo los
 // `RECIBIDO` suman al progreso de la meta correspondiente (feature 009).
-// No se hace cascade desde Ayuda: una Ayuda con aportes no debería borrarse (solo
-// se elimina en `RECOLECTANDO`, y quitar los aportes en ese punto es explícito).
+// No se hace cascade desde Actividad: una Actividad con aportes no debería borrarse
+// (solo se elimina en `RECOLECTANDO`, y quitar los aportes ahí es explícito).
 model Aporte {
-  id              String         @id @default(cuid())
-  // Actividad a la que aporta (feature 006). Opcional desde la feature 014: un
-  // ingreso monetario externo puede ser una donación de "caja general" sin atarse
-  // a ninguna Ayuda (cuenta en el agregado global de dinero recibido, no en la meta
-  // de una actividad concreta). Los aportes de colaborador siempre la llevan.
-  ayudaId         String?
-  ayuda           Ayuda?         @relation(fields: [ayudaId], references: [id])
-  recursoId       String
-  recurso         Recurso        @relation(fields: [recursoId], references: [id])
-  // Colaborador que aporta (feature 006). Opcional desde la feature 014: un ingreso
-  // monetario externo imputado por el ADMIN puede no tener colaborador (donación
-  // anónima o de un tercero no registrado).
-  colaboradorId   String?
-  colaborador     Usuario?       @relation("AportesColaborador", fields: [colaboradorId], references: [id])
-  // ADMIN que imputó el aporte externo (feature 014), para auditoría. Presente
-  // cuando el aporte nace directamente en `RECIBIDO` por un ingreso ya recibido.
+  id             String       @id @default(cuid())
+  actividadId    String?
+  actividad      Actividad?   @relation(fields: [actividadId], references: [id])
+  recursoId      String
+  recurso        Recurso      @relation(fields: [recursoId], references: [id])
+  colaboradorId  String?
+  colaborador    Usuario?     @relation("AportesColaborador", fields: [colaboradorId], references: [id])
   registradoPorId String?
   registradoPor   Usuario?       @relation("AportesRegistrados", fields: [registradoPorId], references: [id])
-  // Medio de donación por el que entró el dinero (feature 014). Opcional; SetNull
-  // por defecto (un medio no se borra, se desactiva).
   medioDonacionId String?
   medioDonacion   MedioDonacion? @relation(fields: [medioDonacionId], references: [id])
-  cantidad        Decimal        @db.Decimal(12, 2)
-  // Moneda del aporte (feature 014). Obligatoria a nivel de aplicación cuando el
-  // recurso es `MONETARIO`; nula para el resto (suministros, transporte, personal).
-  moneda          String?
-  estado          EstadoAporte   @default(COMPROMETIDO)
-  nota            String?
-  // Referencia o número del ingreso externo (feature 014): nunca se expone en la
-  // transparencia pública (009); es dato interno de conciliación.
-  referencia      String?
-  recibidoEn      DateTime?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  cantidad       Decimal      @db.Decimal(12, 2)
+  moneda         String?
+  estado         EstadoAporte @default(COMPROMETIDO)
+  nota           String?
+  referencia     String?
+  recibidoEn     DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
-  @@index([ayudaId])
-  @@index([ayudaId, recursoId, estado])
+  @@index([actividadId])
+  @@index([actividadId, recursoId, estado])
   @@index([medioDonacionId])
   @@map("aportes")
 }
-
 // Urgencia de una solicitud de ayuda (feature 007). Tres niveles para priorizar sin
 // paralizar al solicitante con una escala numérica.
 enum UrgenciaSolicitud {
@@ -447,17 +465,17 @@ enum CerradaPor {
 // El ADMIN la marca `ATENDIDA` o `CERRADA`; el solicitante puede cancelarla mientras
 // esté abierta.
 model Solicitud {
-  id            String             @id @default(cuid())
+  id            String            @id @default(cuid())
   sector        String
   urgencia      UrgenciaSolicitud
   descripcion   String
-  estado        EstadoSolicitud    @default(ABIERTA)
+  estado        EstadoSolicitud   @default(ABIERTA)
   cerradaPor    CerradaPor?
   solicitanteId String
-  solicitante   Usuario            @relation(fields: [solicitanteId], references: [id])
+  solicitante   Usuario           @relation(fields: [solicitanteId], references: [id])
   recursos      RecursoSolicitud[]
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
 
   @@index([estado])
   @@index([sector])
@@ -468,14 +486,14 @@ model Solicitud {
 // opcional (el solicitante puede no saber cuánto necesita). Se guarda como `Decimal`
 // por precisión y se convierte a `number` en el límite de infraestructura.
 model RecursoSolicitud {
-  id               String    @id @default(cuid())
-  solicitudId      String
-  solicitud        Solicitud @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
-  recursoId        String
-  recurso          Recurso   @relation(fields: [recursoId], references: [id])
-  cantidadEstimada Decimal?  @db.Decimal(12, 2)
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  id                String    @id @default(cuid())
+  solicitudId       String
+  solicitud         Solicitud @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+  recursoId         String
+  recurso           Recurso   @relation(fields: [recursoId], references: [id])
+  cantidadEstimada  Decimal?  @db.Decimal(12, 2)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   @@unique([solicitudId, recursoId])
   @@map("recursos_solicitud")

@@ -1,5 +1,5 @@
 import type { Aporte } from "@/modules/aportes/domain/Aporte";
-import { formatearFecha } from "@/modules/ayudas/ui/fechas";
+import { formatearFecha } from "@/modules/actividades/ui/fechas";
 
 type Props = {
   ingresos: Aporte[];

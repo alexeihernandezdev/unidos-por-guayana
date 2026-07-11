@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { InMemoryAyudaRepository } from "@/modules/ayudas/application/fakes";
-import { crearAyuda } from "@/modules/ayudas/application/crearAyuda";
-import { avanzarEstado } from "@/modules/ayudas/application/avanzarEstado";
+import { InMemoryActividadRepository } from "@/modules/actividades/application/fakes";
+import { crearActividad } from "@/modules/actividades/application/crearActividad";
+import { avanzarEstado } from "@/modules/actividades/application/avanzarEstado";
 import { InMemoryRecursoRepository } from "@/modules/recursos/application/fakes";
 import { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import { Rol } from "@/modules/usuarios/domain/Rol";
@@ -10,7 +10,7 @@ import { crearAporte } from "./crearAporte";
 import { marcarRecibido } from "./marcarRecibido";
 import type { AporteDeps } from "./deps";
 import {
-  AyudaNoAceptaAportesError,
+  ActividadNoAceptaAportesError,
   NoAutorizadoError,
   TransicionInvalidaError,
 } from "./errors";
@@ -28,9 +28,9 @@ async function armarConAporte() {
     categoria: CategoriaRecurso.SUMINISTRO,
     descripcion: null,
   });
-  const ayudasRepo = new InMemoryAyudaRepository();
-  const ayuda = await crearAyuda(
-    { ayudas: ayudasRepo, recursos },
+  const ayudasRepo = new InMemoryActividadRepository();
+  const ayuda = await crearActividad(
+    { actividades: ayudasRepo, recursos },
     {
       adminId: "admin-1",
       titulo: "Envío",
@@ -42,11 +42,11 @@ async function armarConAporte() {
   );
   const deps: AporteDeps = {
     aportes: new InMemoryAporteRepository(),
-    ayudas: ayudasRepo,
+    actividades: ayudasRepo,
     recursos,
   };
   const aporte = await crearAporte(deps, {
-    ayudaId: ayuda.id,
+    actividadId: ayuda.id,
     recursoId: agua.id,
     colaboradorId: COL.id,
     cantidad: 10,
@@ -88,11 +88,11 @@ describe("cancelarAporte", () => {
     ).rejects.toBeInstanceOf(TransicionInvalidaError);
   });
 
-  it("no se puede cancelar si la Ayuda ya no está en RECOLECTANDO", async () => {
+  it("no se puede cancelar si la Actividad ya no está en RECOLECTANDO", async () => {
     const { deps, aporte, ayuda } = ctx;
     await avanzarEstado(deps, ayuda.id, "admin-1"); // → LISTO
     await expect(
       cancelarAporte(deps, aporte.id, COL),
-    ).rejects.toBeInstanceOf(AyudaNoAceptaAportesError);
+    ).rejects.toBeInstanceOf(ActividadNoAceptaAportesError);
   });
 });

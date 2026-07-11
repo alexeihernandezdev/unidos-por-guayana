@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatearFecha } from "@/modules/ayudas/ui/fechas";
+import { formatearFecha } from "@/modules/actividades/ui/fechas";
 import type { EnvioPrioridadPanel } from "@/modules/panel/application/obtenerResumenPanel";
 
 type Props = {
@@ -30,9 +30,9 @@ export function BloqueEnviosPrioridad({ envios }: Props) {
       ) : (
         <ul className="flex flex-col divide-y divide-border rounded-lg border border-border">
           {envios.map((envio) => (
-            <li key={envio.ayudaId}>
+            <li key={envio.actividadId}>
               <Link
-                href={`/panel/ayudas/${envio.ayudaId}`}
+                href={`/panel/actividades/${envio.actividadId}`}
                 className="focus-ring group flex flex-col gap-2 px-4 py-3 transition-colors duration-150 hover:bg-muted/40"
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-2">

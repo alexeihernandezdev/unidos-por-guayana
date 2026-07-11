@@ -19,6 +19,7 @@ import {
   registrarUsuario,
   type RegistrarUsuarioInput,
 } from "@/modules/usuarios/application/registrarUsuario";
+import { declararCategorias } from "@/modules/usuarios/application/declararCategorias";
 import { validarCredenciales } from "@/modules/usuarios/application/validarCredenciales";
 import type {
   CambiosPerfilAdmin,
@@ -52,6 +53,17 @@ export function registrarNuevoUsuario(
   input: RegistrarUsuarioInput,
 ): Promise<Usuario> {
   return registrarUsuario({ usuarios, hasher, catalogo }, input);
+}
+
+/**
+ * Reemplaza las categorías de aporte de un COLABORADOR (feature 025), desde
+ * `/mi-perfil`. Infraestructura ya inyectada; lo consume el server action.
+ */
+export function declararCategoriasServicio(
+  colaboradorId: string,
+  categorias: readonly string[],
+): Promise<Usuario> {
+  return declararCategorias({ usuarios }, colaboradorId, categorias);
 }
 
 // ── Perfil de administrador / centro de acopio (feature 016) ──────────────────

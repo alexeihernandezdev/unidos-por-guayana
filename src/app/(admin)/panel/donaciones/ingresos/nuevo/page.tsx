@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { DateTime } from "luxon";
 import { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
-import { EstadoAyuda } from "@/modules/ayudas/domain/EstadoAyuda";
+import { EstadoActividad } from "@/modules/actividades/domain/EstadoActividad";
 import { RegistroIngresoForm } from "@/modules/donaciones/ui/RegistroIngresoForm";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { requireRol } from "@/shared/auth";
-import { listarAyudasServicio } from "@/shared/ayudas";
+import { listarActividadesServicio } from "@/shared/actividades";
 import { listarMediosDonacionServicio } from "@/shared/donaciones";
 import { listarRecursosServicio } from "@/shared/recursos";
 import { registrarAporteExternoAction } from "@/app/(admin)/panel/donaciones/actions";
@@ -19,7 +19,7 @@ export default async function NuevoIngresoPage() {
       soloSeleccionables: true,
     }),
     listarMediosDonacionServicio(),
-    listarAyudasServicio({ adminId: admin.id, estado: EstadoAyuda.RECOLECTANDO }),
+    listarActividadesServicio({ adminId: admin.id, estado: EstadoActividad.RECOLECTANDO }),
   ]);
 
   const recursoIdsMonetarios = new Set(recursos.map((r) => r.id));

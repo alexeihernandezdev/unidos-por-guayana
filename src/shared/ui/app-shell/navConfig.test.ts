@@ -11,7 +11,7 @@ describe("rutaInicioPorRol", () => {
   it("aterriza a cada rol en su espacio", () => {
     expect(rutaInicioPorRol(Rol.ADMIN)).toBe("/panel");
     expect(rutaInicioPorRol(Rol.SUPERADMIN)).toBe("/superadmin/admins");
-    expect(rutaInicioPorRol(Rol.COLABORADOR)).toBe("/ayudas");
+    expect(rutaInicioPorRol(Rol.COLABORADOR)).toBe("/actividades");
     expect(rutaInicioPorRol(Rol.SOLICITANTE)).toBe("/solicitudes");
   });
 });
@@ -19,7 +19,7 @@ describe("rutaInicioPorRol", () => {
 describe("navSectionsPorRol", () => {
   it("da al COLABORADOR sus destinos (actividades, aportes, puntos, perfil)", () => {
     expect(hrefs(Rol.COLABORADOR)).toEqual([
-      "/ayudas",
+      "/actividades",
       "/mis-aportes",
       "/puntos-acopio",
       "/mi-perfil",
@@ -38,8 +38,9 @@ describe("navSectionsPorRol", () => {
   it("conserva la navegación del panel del ADMIN (008 + puntos de 011 + donaciones de 014)", () => {
     expect(hrefs(Rol.ADMIN)).toEqual([
       "/panel",
-      "/panel/ayudas",
+      "/panel/actividades",
       "/panel/solicitudes",
+      "/panel/red",
       "/panel/recursos",
       "/panel/donaciones",
       "/panel/perfil",

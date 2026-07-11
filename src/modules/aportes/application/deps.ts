@@ -1,4 +1,4 @@
-import type { AyudaRepository } from "@/modules/ayudas/domain/AyudaRepository";
+import type { ActividadRepository } from "@/modules/actividades/domain/ActividadRepository";
 import type { RecursoRepository } from "@/modules/recursos/domain/RecursoRepository";
 import type { AporteRepository } from "@/modules/aportes/domain/AporteRepository";
 import type { Rol } from "@/modules/usuarios/domain/Rol";
@@ -7,7 +7,7 @@ import type { Rol } from "@/modules/usuarios/domain/Rol";
 // porque solo recibe contratos de dominio (features 004/005/006).
 export type AporteDeps = {
   aportes: AporteRepository;
-  ayudas: AyudaRepository;
+  actividades: ActividadRepository;
   recursos: RecursoRepository;
 };
 

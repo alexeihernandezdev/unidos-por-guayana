@@ -30,6 +30,9 @@ type SembradoUsuario = {
   // La raíz de confianza se siembra ya VERIFICADO. Para los demás se omite y
   // conserva el valor por defecto del schema (PENDIENTE).
   estadoVerificacion?: "PENDIENTE" | "VERIFICADO" | "RECHAZADO";
+  // Categorías de aporte del COLABORADOR (feature 025). Backfill de ejemplo para
+  // los colaboradores sembrados (no hay guard retroactivo).
+  categoriasAporte?: ("SUMINISTRO" | "TRANSPORTE" | "PERSONAL" | "MONETARIO")[];
 };
 
 async function sembrarUsuario(
@@ -42,6 +45,7 @@ async function sembrarUsuario(
     rol,
     requerido,
     estadoVerificacion,
+    categoriasAporte,
   }: SembradoUsuario,
 ): Promise<void> {
   const emailNormalizado = email?.trim().toLowerCase();
@@ -57,10 +61,20 @@ async function sembrarUsuario(
 
   const passwordHash = await bcrypt.hash(password, 12);
   const datosEstado = estadoVerificacion ? { estadoVerificacion } : {};
+  const datosCategorias = categoriasAporte
+    ? { categoriasAporte: { set: categoriasAporte } }
+    : {};
   const usuario = await prisma.usuario.upsert({
     where: { email: emailNormalizado },
-    update: { passwordHash, nombre, rol, ...datosEstado },
-    create: { email: emailNormalizado, passwordHash, nombre, rol, ...datosEstado },
+    update: { passwordHash, nombre, rol, ...datosEstado, ...datosCategorias },
+    create: {
+      email: emailNormalizado,
+      passwordHash,
+      nombre,
+      rol,
+      ...datosEstado,
+      ...datosCategorias,
+    },
   });
   console.log(`✔ ${etiqueta} sembrado: ${usuario.email} (${usuario.rol})`);
 }
@@ -140,6 +154,8 @@ async function main() {
       nombre: process.env.COLABORADOR_NOMBRE?.trim() || "Colaborador Prueba",
       rol: "COLABORADOR",
       requerido: false,
+      // Backfill de ejemplo (feature 025): puede aportar suministros y transporte.
+      categoriasAporte: ["SUMINISTRO", "TRANSPORTE"],
     });
 
     await sembrarUsuario(prisma, {

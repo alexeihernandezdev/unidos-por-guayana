@@ -6,8 +6,8 @@ import { BloqueAportesPendientes } from "./BloqueAportesPendientes";
 import { BloqueEnviosPrioridad } from "./BloqueEnviosPrioridad";
 import { BloqueSolicitudesAbiertas } from "./BloqueSolicitudesAbiertas";
 import { TarjetaMetrica } from "./TarjetaMetrica";
-import { ESTADO_LABEL } from "@/modules/ayudas/ui/estados";
-import { EstadoAyuda } from "@/modules/ayudas/domain/EstadoAyuda";
+import { ESTADO_LABEL } from "@/modules/actividades/ui/estados";
+import { EstadoActividad } from "@/modules/actividades/domain/EstadoActividad";
 
 type Props = {
   resumen: ResumenPanel;
@@ -36,25 +36,25 @@ export function PanelResumen({ resumen }: Props) {
           Métricas del panel
         </h2>
         <TarjetaMetrica
-          etiqueta={ESTADO_LABEL[EstadoAyuda.RECOLECTANDO]}
+          etiqueta={ESTADO_LABEL[EstadoActividad.RECOLECTANDO]}
           valor={enviosPorEstado.RECOLECTANDO}
-          href="/panel/ayudas?estado=RECOLECTANDO"
+          href="/panel/actividades?estado=RECOLECTANDO"
         />
         <TarjetaMetrica
-          etiqueta={ESTADO_LABEL[EstadoAyuda.LISTO]}
+          etiqueta={ESTADO_LABEL[EstadoActividad.LISTO]}
           valor={enviosPorEstado.LISTO}
-          href="/panel/ayudas?estado=LISTO"
+          href="/panel/actividades?estado=LISTO"
         />
         <TarjetaMetrica
-          etiqueta={ESTADO_LABEL[EstadoAyuda.EN_TRANSITO]}
+          etiqueta={ESTADO_LABEL[EstadoActividad.EN_TRANSITO]}
           valor={enviosPorEstado.EN_TRANSITO}
-          href="/panel/ayudas?estado=EN_TRANSITO"
+          href="/panel/actividades?estado=EN_TRANSITO"
         />
         <TarjetaMetrica
           etiqueta="Metas al 100 %"
           valor={progresoAgregadoRecolectando.metasAlCien}
           subtitulo={`${Math.round(progresoAgregadoRecolectando.porcentajePromedio)} % promedio`}
-          href="/panel/ayudas?estado=RECOLECTANDO"
+          href="/panel/actividades?estado=RECOLECTANDO"
         />
       </section>
 
@@ -77,7 +77,7 @@ export function PanelResumen({ resumen }: Props) {
           recolección necesitan más aportes confirmados.
         </p>
         <Link
-          href="/panel/ayudas?estado=RECOLECTANDO"
+          href="/panel/actividades?estado=RECOLECTANDO"
           className="focus-ring mt-2 inline-flex items-center gap-1 text-accent hover:underline"
         >
           Ver actividades en recolección

@@ -1,7 +1,7 @@
-import { porcentajeGlobalAyuda } from "@/modules/aportes/application/porcentajeGlobalAyuda";
-import { progresoDeAyuda } from "@/modules/aportes/application/progresoDeAyuda";
-import type { EstadoAyuda } from "@/modules/ayudas/domain/EstadoAyuda";
-import type { TipoActividad } from "@/modules/ayudas/domain/TipoActividad";
+import { porcentajeGlobalActividad } from "@/modules/aportes/application/porcentajeGlobalActividad";
+import { progresoDeActividad } from "@/modules/aportes/application/progresoDeActividad";
+import type { EstadoActividad } from "@/modules/actividades/domain/EstadoActividad";
+import type { TipoActividad } from "@/modules/actividades/domain/TipoActividad";
 import {
   assertSinDatosPersonales,
   type TransparenciaDeps,
@@ -16,11 +16,11 @@ export type MetaPublica = {
 };
 
 export type DetallePublico = {
-  ayudaId: string;
+  actividadId: string;
   titulo: string;
   sectorDestino: string;
   fecha: Date;
-  estado: EstadoAyuda;
+  estado: EstadoActividad;
   tipo: TipoActividad;
   metas: MetaPublica[];
   porcentajeGlobal: number;
@@ -29,12 +29,12 @@ export type DetallePublico = {
 /** Detalle público de una actividad. `null` si no existe. */
 export async function obtenerDetallePublico(
   deps: TransparenciaDeps,
-  ayudaId: string,
+  actividadId: string,
 ): Promise<DetallePublico | null> {
-  const ayuda = await deps.ayudas.buscarPorId(ayudaId);
+  const ayuda = await deps.actividades.buscarPorId(actividadId);
   if (!ayuda) return null;
 
-  const progreso = await progresoDeAyuda(deps, ayudaId);
+  const progreso = await progresoDeActividad(deps, actividadId);
   const metas = await Promise.all(
     progreso.map(async (meta) => {
       const recurso = await deps.recursos.buscarPorId(meta.recursoId);
@@ -48,14 +48,14 @@ export async function obtenerDetallePublico(
     }),
   );
   const detalle: DetallePublico = {
-    ayudaId: ayuda.id,
+    actividadId: ayuda.id,
     titulo: ayuda.titulo,
     sectorDestino: ayuda.sectorDestino,
     fecha: ayuda.fecha,
     estado: ayuda.estado,
     tipo: ayuda.tipo,
     metas,
-    porcentajeGlobal: porcentajeGlobalAyuda(progreso),
+    porcentajeGlobal: porcentajeGlobalActividad(progreso),
   };
 
   assertSinDatosPersonales(detalle);

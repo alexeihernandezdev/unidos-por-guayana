@@ -41,6 +41,9 @@ type Props<T extends FieldValues & CamposDatosContacto> = {
   errors: FieldErrors<T>;
   estados: Estado[];
   municipios: Municipio[];
+  // Si es `true`, omite el `<fieldset>`/legend propio (cuando el contenedor ya
+  // aporta título y borde, p. ej. una sección plegable). Feature 025.
+  bare?: boolean;
 };
 
 export function DatosContactoFields<T extends FieldValues & CamposDatosContacto>({
@@ -49,6 +52,7 @@ export function DatosContactoFields<T extends FieldValues & CamposDatosContacto>
   errors,
   estados,
   municipios,
+  bare = false,
 }: Props<T>) {
   const errorFor = (
     nombre: keyof Pick<CamposDatosContacto, "cedula" | "telefono">,
@@ -58,11 +62,21 @@ export function DatosContactoFields<T extends FieldValues & CamposDatosContacto>
     return typeof e.message === "string" ? e.message : undefined;
   };
 
+  const Wrapper = bare ? "div" : "fieldset";
+
   return (
-    <fieldset className="flex flex-col gap-4 rounded-lg border border-border p-4">
-      <legend className="px-1 text-sm font-medium">
-        Contacto y ubicación
-      </legend>
+    <Wrapper
+      className={
+        bare
+          ? "flex flex-col gap-4"
+          : "flex flex-col gap-4 rounded-lg border border-border p-4"
+      }
+    >
+      {!bare && (
+        <legend className="px-1 text-sm font-medium">
+          Contacto y ubicación
+        </legend>
+      )}
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <div className="flex flex-col gap-1.5">
@@ -123,6 +137,6 @@ export function DatosContactoFields<T extends FieldValues & CamposDatosContacto>
         estados={estados}
         municipios={municipios}
       />
-    </fieldset>
+    </Wrapper>
   );
 }

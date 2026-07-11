@@ -35,6 +35,19 @@ export class CedulaYaRegistradaError extends Error {
   }
 }
 
+// ── Categorías de aporte del colaborador (feature 025) ────────────────────────
+
+// Un COLABORADOR intenta registrarse o guardar sin declarar ninguna categoría de
+// aporte válida (debe elegir al menos una de las cuatro).
+export class CategoriasAporteVaciasError extends Error {
+  constructor(
+    mensaje = "Elige al menos una categoría de recurso que podrías aportar.",
+  ) {
+    super(mensaje);
+    this.name = "CategoriasAporteVaciasError";
+  }
+}
+
 // ── Gestión de administradores por el SUPERADMIN (feature 015) ────────────────
 
 // El actor de una acción reservada al `SUPERADMIN` no lo es.

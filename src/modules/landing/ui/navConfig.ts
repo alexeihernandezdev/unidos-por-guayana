@@ -2,7 +2,7 @@ import { Rol } from "@/modules/usuarios/domain/Rol";
 
 // Elemento de navegación principal (visible en el navbar). `exact` fuerza que el
 // marcador activo solo se encienda con la ruta exacta (útil para "Panel" que
-// convive con /panel/ayudas, /panel/recursos, etc.).
+// convive con /panel/actividades, /panel/recursos, etc.).
 export type NavItem = {
   label: string;
   href: string;
@@ -26,13 +26,13 @@ export function navItemsPorRol(rol: Rol | null): NavItem[] {
     case Rol.ADMIN:
       return [
         { label: "Panel", href: "/panel", exact: true },
-        { label: "Actividades", href: "/panel/ayudas" },
+        { label: "Actividades", href: "/panel/actividades" },
         { label: "Recursos", href: "/panel/recursos" },
         { label: "Solicitudes", href: "/panel/solicitudes" },
       ];
     case Rol.COLABORADOR:
       return [
-        { label: "Actividades", href: "/ayudas", exact: true },
+        { label: "Actividades", href: "/actividades", exact: true },
         { label: "Mis aportes", href: "/mis-aportes", exact: true },
         { label: "Mi perfil", href: "/mi-perfil", exact: true },
       ];

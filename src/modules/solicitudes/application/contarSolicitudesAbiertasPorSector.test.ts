@@ -21,7 +21,7 @@ describe("contarSolicitudesAbiertasPorSector", () => {
     };
     const base = {
       urgencia: UrgenciaSolicitud.ALTA,
-      descripcion: "Ayuda",
+      descripcion: "Actividad",
       solicitanteId: "sol-1",
       recursos: [{ recursoId: agua.id, cantidadEstimada: 3 }],
     };

@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { EstadoAporte } from "@/modules/aportes/domain/EstadoAporte";
 import { EstadoAporteBadge } from "@/modules/aportes/ui/EstadoAporteBadge";
-import { formatearFecha } from "@/modules/ayudas/ui/fechas";
+import { formatearFecha } from "@/modules/actividades/ui/fechas";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarAportesDeColaboradorServicio } from "@/shared/aportes";
-import { obtenerAyudaServicio } from "@/shared/ayudas";
+import { obtenerActividadServicio } from "@/shared/actividades";
 import { requireRol } from "@/shared/auth";
 import { Button } from "@/shared/ui/button";
 import { cancelarAporteAction } from "@/app/aportes/actions";
@@ -19,18 +19,17 @@ export default async function MisAportesPage() {
   const usuario = await requireRol(Rol.COLABORADOR, Rol.ADMIN);
   const aportes = await listarAportesDeColaboradorServicio(usuario.id);
 
-  // Cargamos las cabeceras de las ayudas asociadas para poder mostrar título/fecha.
-  // Un aporte de "caja general" (feature 014) puede no tener ayuda: se omite aquí.
+  // Cargamos las cabeceras de las actividades asociadas para poder mostrar título/fecha.
   const ayudaIds = Array.from(
     new Set(
       aportes
-        .map((a) => a.ayudaId)
+        .map((a) => a.actividadId)
         .filter((id): id is string => id !== null),
     ),
   );
   const ayudasPorId = new Map(
     await Promise.all(
-      ayudaIds.map(async (id) => [id, await obtenerAyudaServicio(id)] as const),
+      ayudaIds.map(async (id) => [id, await obtenerActividadServicio(id)] as const),
     ),
   );
 
@@ -62,7 +61,9 @@ export default async function MisAportesPage() {
             </thead>
             <tbody>
               {aportes.map((a) => {
-                const ayuda = a.ayudaId ? ayudasPorId.get(a.ayudaId) : undefined;
+                const ayuda = a.actividadId
+                  ? ayudasPorId.get(a.actividadId)
+                  : null;
                 const puedeCancelar = a.estado === EstadoAporte.COMPROMETIDO;
                 return (
                   <tr
@@ -82,7 +83,7 @@ export default async function MisAportesPage() {
                           </span>
                         </div>
                       ) : (
-                        <span>{a.ayudaId ?? "Donación general"}</span>
+                        <span>{a.actividadId ?? "Aporte general"}</span>
                       )}
                     </td>
                     <td className={celda}>
@@ -103,8 +104,8 @@ export default async function MisAportesPage() {
                           <input type="hidden" name="id" value={a.id} />
                           <input
                             type="hidden"
-                            name="ayudaId"
-                            value={a.ayudaId ?? ""}
+                            name="actividadId"
+                            value={a.actividadId ?? ""}
                           />
                           <Button type="submit" variant="ghost" size="sm">
                             Cancelar
