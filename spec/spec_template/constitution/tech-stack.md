@@ -149,6 +149,12 @@ _Entidades centrales derivadas de la misión. Se documentan aquí las reglas no 
   - `.focus-ring` — anillo de foco consistente basado en `--ring` con offset y radius derivados.
   - `.underline-sweep` — subrayado que barre desde la izquierda al hover/focus. Gated por `@media (hover: hover) and (pointer: fine)`. Sustituye al crossfade de opacidad en links de navegación.
 - **Paleta:** un color de marca teal/petróleo (`--primary` = `--brand`) más un accent teal más profundo (Orinoco) sobre neutrales fríos. Ver la subsección "Sistema de color / tokens" más arriba para el uso disciplinado de cada token. No añadir nuevos colores de acento sin decisión explícita del equipo; el énfasis puntual se resuelve con peso tipográfico y jerarquía, no inventando colores.
+- **Paleta semántica de estado** (decisión de equipo · panel admin): además del teal de marca, existe un set semántico **anclado a significado**, no decorativo, para superficies operativas donde el estado debe leerse de un vistazo (dashboard, listados con progreso):
+  - **`--success` / `--success-ink`** verde (`oklch(0.58 0.13 155)` light) → completado, meta lograda al 100 %.
+  - **`--warning` / `--warning-ink`** ámbar (`oklch(0.75 0.15 75)` light) → en preparación / requiere atención pronto (p. ej. recolectando, aportes por confirmar, urgencia media).
+  - **`--primary` (teal)** → listo / disponible para el siguiente paso; **`--accent`** → en marcha / en tránsito.
+  - **`--destructive` (rojo)** → urgente (urgencia alta).
+  Las variantes `-ink` son las de **texto** (contraste AA verificado ≥ 4.5:1 sobre `--background` y sobre los washes tintados). Reglas de uso: (1) el color **acompaña** a ícono + etiqueta + número, nunca es el único portador del estado (WCAG); (2) no se inventan hues fuera de este set sin nueva decisión de equipo; (3) fuera de superficies operativas de estado, sigue rigiendo la disciplina teal de la marca. El mapa de clases vive en `src/modules/panel/ui/tonos.ts`.
 - **Radio:** `--radius: 0.625rem` (10px) es la fuente única. Usar `rounded-md/lg/xl` en función de la escala derivada (`--radius-*` en `@theme inline`). No mezclar radios ad-hoc (`rounded-[24px]`, etc.).
 - **Easing:** una sola curva compartida, `--ease-out-emil: cubic-bezier(0.23, 1, 0.32, 1)`, definida en `globals.css`. Cualquier animación de UI la usa; no proliferar variantes.
 
