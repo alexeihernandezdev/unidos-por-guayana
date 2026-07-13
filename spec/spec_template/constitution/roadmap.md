@@ -47,6 +47,10 @@ _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
 
 _Ordenado según dependencias. Cada uno se convierte en `features/NNN-…/` antes de tocar código._
 
+**Experiencia y consistencia visual**
+
+27. **027 · Modal genérico y scrollbar global** — Componente `<PanelFormModal>` (patrón de Puntos de acopio con `rounded-2xl`), scrollbar global sin flechas en `globals.css`, y migración de altas/ediciones de entidades pequeñas (recursos, medios de donación, ingreso monetario) desde subpáginas a modal sobre el listado. Actividades y solicitudes quedan fuera. Depende de 026 (componentes `Panel*`) y 011 (referencia modal).
+
 **Módulos de apoyo**
 
 25. **012 · Notificaciones** — Avisos a colaboradores sobre actividades que necesitan recursos o metas cumplidas. **Actualizada:** el disparador `NUEVA_AYUDA`/`NUEVA_ACTIVIDAD` notifica a la **red apta** del admin dueño (afiliados verificados cuya categoría coincide con la de algún recurso de la Actividad, ver 025), no a "todos los colaboradores verificados" como se especificó originalmente. Depende de 025 (se implementa después, ya con esta lógica).
