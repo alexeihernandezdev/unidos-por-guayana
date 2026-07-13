@@ -11,3 +11,8 @@ export {
   PanelSectionTabs,
   type PanelSectionTab,
 } from "./panel-section-tabs";
+export {
+  PanelFormModal,
+  PANEL_FORM_MODAL_MAX_W,
+  type PanelFormModalSize,
+} from "./panel-form-modal";

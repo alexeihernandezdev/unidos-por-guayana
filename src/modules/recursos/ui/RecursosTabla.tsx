@@ -1,4 +1,5 @@
-import Link from "next/link";
+"use client";
+
 import { Package, Ruler, Tag } from "lucide-react";
 import type { Recurso } from "@/modules/recursos/domain/Recurso";
 import { Button } from "@/shared/ui/button";
@@ -16,6 +17,7 @@ type Props = {
   // server component; los botones envían un <form> con el id del recurso.
   archivarAction: (formData: FormData) => Promise<void>;
   activarAction: (formData: FormData) => Promise<void>;
+  onEditar: (recurso: Recurso) => void;
 };
 
 // Listado de recursos como row-cards (feature 026, guía
@@ -25,6 +27,7 @@ export function RecursosTabla({
   recursos,
   archivarAction,
   activarAction,
+  onEditar,
 }: Props) {
   if (recursos.length === 0) {
     return (
@@ -60,10 +63,12 @@ export function RecursosTabla({
           ]}
           actions={
             <>
-              <Button asChild variant="ghost" size="sm">
-                <Link href={`/panel/recursos/${recurso.id}/editar`}>
-                  Editar
-                </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEditar(recurso)}
+              >
+                Editar
               </Button>
               <form action={recurso.activo ? archivarAction : activarAction}>
                 <input type="hidden" name="id" value={recurso.id} />

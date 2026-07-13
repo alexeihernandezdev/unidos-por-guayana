@@ -9,17 +9,11 @@ import { Button } from "@/shared/ui/button";
 import {
   PanelBadge,
   PanelEmptyState,
+  PanelFormModal,
   PanelList,
   PanelListRow,
   PanelListToolbar,
 } from "@/shared/ui/panel";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/ui/dialog";
 import {
   FILTRO_INICIAL,
   FiltrosPuntos,
@@ -179,64 +173,63 @@ export function PuntosAcopioGestion({
         </PanelList>
       )}
 
-      <Dialog
+      <PanelFormModal
         open={modal !== null}
         onOpenChange={(abierto) => !abierto && setModal(null)}
+        size="wide"
+        title={
+          modal?.modo === "nuevo"
+            ? "Nuevo punto de acopio"
+            : modal?.modo === "editar"
+              ? "Editar punto de acopio"
+              : ""
+        }
+        description={
+          modal?.modo === "nuevo"
+            ? "Registra una sede física donde recibes entregas."
+            : modal?.modo === "editar"
+              ? modal.punto.nombre
+              : undefined
+        }
       >
-        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
-          {modal?.modo === "nuevo" && (
-            <>
-              <DialogHeader>
-                <DialogTitle>Nuevo punto de acopio</DialogTitle>
-                <DialogDescription>
-                  Registra una sede física donde recibes entregas.
-                </DialogDescription>
-              </DialogHeader>
-              <PuntoAcopioForm
-                action={crearAction}
-                onExito={cerrarYRefrescar}
-                valoresIniciales={ubicacionInicial}
-                centroInicial={centroInicial}
-                zoomInicial={zoomInicial}
-                estados={estados}
-                municipios={municipios}
-                textoEnviar="Crear punto"
-                textoEnviando="Creando…"
-              />
-            </>
-          )}
-          {modal?.modo === "editar" && (
-            <>
-              <DialogHeader>
-                <DialogTitle>Editar punto de acopio</DialogTitle>
-                <DialogDescription>{modal.punto.nombre}</DialogDescription>
-              </DialogHeader>
-              <PuntoAcopioForm
-                action={(input) => editarAction(modal.punto.id, input)}
-                onExito={cerrarYRefrescar}
-                valoresIniciales={{
-                  nombre: modal.punto.nombre,
-                  referencia: modal.punto.referencia,
-                  horarios: modal.punto.horarios,
-                  telefono: modal.punto.telefono,
-                  telefonoEsWhatsApp: modal.punto.telefonoEsWhatsApp,
-                  correo: modal.punto.correo ?? "",
-                  estadoId: modal.punto.estadoId,
-                  municipioId: modal.punto.municipioId,
-                  latitud: modal.punto.latitud,
-                  longitud: modal.punto.longitud,
-                }}
-                centroInicial={centroInicial}
-                zoomInicial={zoomInicial}
-                estados={estados}
-                municipios={municipios}
-                textoEnviar="Guardar cambios"
-                textoEnviando="Guardando…"
-              />
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+        {modal?.modo === "nuevo" && (
+          <PuntoAcopioForm
+            action={crearAction}
+            onExito={cerrarYRefrescar}
+            valoresIniciales={ubicacionInicial}
+            centroInicial={centroInicial}
+            zoomInicial={zoomInicial}
+            estados={estados}
+            municipios={municipios}
+            textoEnviar="Crear punto"
+            textoEnviando="Creando…"
+          />
+        )}
+        {modal?.modo === "editar" && (
+          <PuntoAcopioForm
+            action={(input) => editarAction(modal.punto.id, input)}
+            onExito={cerrarYRefrescar}
+            valoresIniciales={{
+              nombre: modal.punto.nombre,
+              referencia: modal.punto.referencia,
+              horarios: modal.punto.horarios,
+              telefono: modal.punto.telefono,
+              telefonoEsWhatsApp: modal.punto.telefonoEsWhatsApp,
+              correo: modal.punto.correo ?? "",
+              estadoId: modal.punto.estadoId,
+              municipioId: modal.punto.municipioId,
+              latitud: modal.punto.latitud,
+              longitud: modal.punto.longitud,
+            }}
+            centroInicial={centroInicial}
+            zoomInicial={zoomInicial}
+            estados={estados}
+            municipios={municipios}
+            textoEnviar="Guardar cambios"
+            textoEnviando="Guardando…"
+          />
+        )}
+      </PanelFormModal>
     </>
   );
 }
