@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { MapPinned } from "lucide-react";
 import type { PuntoAcopioConUbicacion } from "@/modules/acopio/ui/PuntoAcopioCard";
 import { PuntosAcopioDirectorio } from "@/modules/acopio/ui/PuntosAcopioDirectorio";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarPuntosActivosServicio } from "@/shared/acopio";
 import { requireRol } from "@/shared/auth";
+import { PanelPage, PanelPageHeader } from "@/shared/ui/panel";
 import { cargarCatalogoUbicacion } from "@/shared/ubicacion";
 
 export const metadata: Metadata = {
@@ -37,16 +39,13 @@ export default async function PuntosAcopioDirectorioPage({
   }));
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 p-6 md:p-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Puntos de acopio
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Las sedes de la red donde puedes entregar tus aportes: mapa, horarios
-          y contacto.
-        </p>
-      </div>
+    <PanelPage>
+      <PanelPageHeader
+        icon={MapPinned}
+        eyebrow="Red operativa"
+        title="Puntos de acopio"
+        description="Las sedes de la red donde puedes entregar tus aportes: mapa, horarios y contacto."
+      />
 
       <PuntosAcopioDirectorio
         puntos={puntosVista}
@@ -54,6 +53,6 @@ export default async function PuntosAcopioDirectorioPage({
         municipios={catalogo.municipios}
         vistaInicial={vista === "mapa" ? "mapa" : "directorio"}
       />
-    </main>
+    </PanelPage>
   );
 }

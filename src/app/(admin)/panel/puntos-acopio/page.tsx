@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { MapPinned, UserRound, Warehouse } from "lucide-react";
+import {
+  PanelPage,
+  PanelPageHeader,
+  PanelSectionTabs,
+} from "@/shared/ui/panel";
 import type { PuntoAcopioConUbicacion } from "@/modules/acopio/ui/PuntoAcopioCard";
 import { PuntosAcopioGestion } from "@/modules/acopio/ui/PuntosAcopioGestion";
 import {
@@ -54,15 +58,26 @@ export default async function PuntosAcopioPage() {
     : CENTRO_VENEZUELA;
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-7 p-5 md:p-8 lg:p-10">
-      <header className="rounded-xl bg-primary-ink px-6 py-7 text-primary-foreground md:px-8">
-        <div className="flex items-start gap-4"><span className="grid size-11 shrink-0 place-items-center rounded-lg bg-white/10"><Warehouse className="size-5" aria-hidden="true" /></span><div><p className="mb-1 text-sm text-white/70">Red operativa</p><h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Puntos de acopio</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-white/75">Administra las sedes físicas donde recibes entregas, sus horarios y canales de contacto.</p></div></div>
-      </header>
+    <PanelPage>
+      <PanelPageHeader
+        icon={Warehouse}
+        eyebrow="Red operativa"
+        title="Puntos de acopio"
+        description="Administra las sedes físicas donde recibes entregas, sus horarios y canales de contacto."
+      />
 
-      <nav aria-label="Configuración administrativa" className="flex gap-2 overflow-x-auto border-b pb-3">
-        <Link href="/panel/perfil" className="profile-section-link"><UserRound />Mi perfil</Link>
-        <Link href="/panel/puntos-acopio" className="profile-section-link bg-muted text-foreground"><MapPinned />Puntos de acopio</Link>
-      </nav>
+      <PanelSectionTabs
+        ariaLabel="Configuración administrativa"
+        activo="/panel/puntos-acopio"
+        items={[
+          { href: "/panel/perfil", label: "Mi perfil", icon: UserRound },
+          {
+            href: "/panel/puntos-acopio",
+            label: "Puntos de acopio",
+            icon: MapPinned,
+          },
+        ]}
+      />
 
       <PuntosAcopioGestion
         puntos={puntosVista}
@@ -80,6 +95,6 @@ export default async function PuntosAcopioPage() {
         archivarAction={archivarPuntoAcopioAction}
         activarAction={activarPuntoAcopioAction}
       />
-    </main>
+    </PanelPage>
   );
 }

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { ShieldCheck } from "lucide-react";
 import {
   BandejaAdmins,
   type AdminPendiente,
 } from "@/modules/usuarios/ui/BandejaAdmins";
 import { Rol } from "@/modules/usuarios/domain/Rol";
+import { PanelPage, PanelPageHeader } from "@/shared/ui/panel";
 import {
   listarAdminsPendientesGestion,
   obtenerPerfilAdminGestion,
@@ -44,23 +46,19 @@ export default async function AprobacionAdminsPage() {
   );
 
   return (
-    <main className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Aprobación de administradores
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Revisa las cuentas que se registraron como administrador. Al aprobar,
-          la cuenta podrá operar como centro de acopio; al rechazar, queda
-          bloqueada.
-        </p>
-      </header>
+    <PanelPage>
+      <PanelPageHeader
+        icon={ShieldCheck}
+        eyebrow="Aprobaciones"
+        title="Aprobación de administradores"
+        description="Revisa las cuentas que se registraron como administrador. Al aprobar, la cuenta podrá operar como centro de acopio; al rechazar, queda bloqueada."
+      />
 
       <BandejaAdmins
         pendientes={pendientes}
         aprobarAction={aprobarAdminAction}
         rechazarAction={rechazarAdminAction}
       />
-    </main>
+    </PanelPage>
   );
 }

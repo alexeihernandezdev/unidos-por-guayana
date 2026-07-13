@@ -23,7 +23,7 @@ export function BloqueSolicitudesAbiertas({ conteos, sectoresTop }: Props) {
     >
       <h2
         id="titulo-solicitudes"
-        className="font-serif text-lg leading-none tracking-tight"
+        className="text-lg font-semibold leading-none tracking-tight"
       >
         Solicitudes abiertas
       </h2>

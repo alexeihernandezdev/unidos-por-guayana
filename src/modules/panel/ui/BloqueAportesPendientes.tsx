@@ -13,7 +13,7 @@ export function BloqueAportesPendientes({ conteo }: Props) {
     >
       <h2
         id="titulo-aportes-pendientes"
-        className="font-serif text-lg leading-none tracking-tight"
+        className="text-lg font-semibold leading-none tracking-tight"
       >
         Aportes por confirmar
       </h2>

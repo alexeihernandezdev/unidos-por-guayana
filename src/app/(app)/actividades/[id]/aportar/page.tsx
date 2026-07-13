@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EstadoActividad } from "@/modules/actividades/domain/EstadoActividad";
 import { ActividadNoEncontradaError } from "@/modules/actividades/application/errors";
@@ -8,6 +7,7 @@ import { formatearFecha } from "@/modules/actividades/ui/fechas";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { obtenerActividadServicio } from "@/shared/actividades";
 import { requireRol } from "@/shared/auth";
+import { PanelPage, PanelPageSubHeader } from "@/shared/ui/panel";
 import { crearAporteAction } from "@/app/aportes/actions";
 
 type Props = {
@@ -41,19 +41,22 @@ export default async function AportarPage({ params }: Props) {
   const accion = crearAporteAction.bind(null, ayuda.id);
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-6 md:p-8">
+    <PanelPage>
+      <PanelPageSubHeader
+        title={`Aportar a ${ayuda.titulo}`}
+        backHref={`/actividades/${ayuda.id}`}
+        backLabel="Volver al detalle"
+      />
+
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Aportar a {ayuda.titulo}
-          </h1>
           <EstadoBadge estado={ayuda.estado} />
         </div>
         <p className="text-sm text-muted-foreground">
           Destino: <span className="text-foreground">{ayuda.sectorDestino}</span>
           {" · "}
           Salida:{" "}
-          <span className="numeric-tnum text-foreground">
+          <span className="numeric-tnum font-mono text-foreground">
             {formatearFecha(ayuda.fecha)}
           </span>
         </p>
@@ -70,13 +73,6 @@ export default async function AportarPage({ params }: Props) {
           volverHref="/mis-aportes"
         />
       )}
-
-      <Link
-        href="/mis-aportes"
-        className="text-sm text-primary underline-offset-4 hover:underline"
-      >
-        Ver mis aportes
-      </Link>
-    </main>
+    </PanelPage>
   );
 }

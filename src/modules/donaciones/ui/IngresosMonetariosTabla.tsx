@@ -1,18 +1,20 @@
+import { CalendarDays, Coins, Hash, Landmark } from "lucide-react";
 import type { Aporte } from "@/modules/aportes/domain/Aporte";
 import { formatearFecha } from "@/modules/actividades/ui/fechas";
+import { PanelList, PanelListRow } from "@/shared/ui/panel";
 
 type Props = {
   ingresos: Aporte[];
 };
 
-const celda = "px-3 py-2 text-sm align-middle";
-
 function formatearNumero(n: number): string {
   return new Intl.NumberFormat("es-VE", { maximumFractionDigits: 2 }).format(n);
 }
 
-// Tabla de los ingresos monetarios externos ya registrados (feature 014). Es un
-// listado de solo lectura: monto, moneda, medio, fecha de recepción y referencia.
+// Ingresos monetarios externos como row-cards (feature 026, guía
+// `constitution/ui-guidelines.md §5`). Solo lectura: monto, moneda, medio,
+// fecha de recepción y referencia. El monto (dato numérico principal) va en
+// `font-mono` + `numeric-tnum`.
 export function IngresosMonetariosTabla({ ingresos }: Props) {
   if (ingresos.length === 0) {
     return (
@@ -23,44 +25,41 @@ export function IngresosMonetariosTabla({ ingresos }: Props) {
   }
 
   return (
-    <div className="w-full overflow-x-auto">
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="border-b border-border text-left text-xs font-medium tracking-wide text-muted-foreground uppercase">
-            <th className={celda}>Monto</th>
-            <th className={celda}>Moneda</th>
-            <th className={celda}>Medio</th>
-            <th className={celda}>Recibido</th>
-            <th className={celda}>Referencia</th>
-          </tr>
-        </thead>
-        <tbody>
-          {ingresos.map((ingreso) => (
-            <tr
-              key={ingreso.id}
-              className="border-b border-border/60 last:border-0"
-            >
-              <td className={`${celda} numeric-tnum font-medium`}>
-                {formatearNumero(ingreso.cantidad)}
-              </td>
-              <td className={`${celda} numeric-tnum`}>
-                {ingreso.moneda ?? ""}
-              </td>
-              <td className={celda}>
-                {ingreso.medio?.titular ?? (
-                  <span className="text-muted-foreground">Sin especificar</span>
-                )}
-              </td>
-              <td className={`${celda} numeric-tnum`}>
-                {ingreso.recibidoEn ? formatearFecha(ingreso.recibidoEn) : ""}
-              </td>
-              <td className={`${celda} text-muted-foreground`}>
-                {ingreso.referencia ?? ""}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <PanelList>
+      {ingresos.map((ingreso) => (
+        <PanelListRow
+          key={ingreso.id}
+          icon={Coins}
+          title={
+            <span className="numeric-tnum font-mono">
+              {formatearNumero(ingreso.cantidad)} {ingreso.moneda ?? ""}
+            </span>
+          }
+          meta={[
+            {
+              icon: Landmark,
+              texto: ingreso.medio?.titular ?? "Sin especificar",
+              label: "Medio",
+            },
+            {
+              icon: CalendarDays,
+              label: "Recibido",
+              texto: ingreso.recibidoEn ? (
+                <span className="numeric-tnum font-mono">
+                  {formatearFecha(ingreso.recibidoEn)}
+                </span>
+              ) : (
+                "—"
+              ),
+            },
+            {
+              icon: Hash,
+              texto: ingreso.referencia || "—",
+              label: "Referencia",
+            },
+          ]}
+        />
+      ))}
+    </PanelList>
   );
 }

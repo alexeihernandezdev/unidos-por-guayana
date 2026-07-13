@@ -127,6 +127,12 @@ _Entidades centrales derivadas de la misión. Se documentan aquí las reglas no 
 
 ## Estilo visual
 
+> **Layout de página del espacio logeado:** el marco de página (contenedor, encabezados,
+> listados y tipografía de página) vive en `constitution/ui-guidelines.md` y se materializa en
+> los componentes de `src/shared/ui/panel/`. No reescribir a mano `mx-auto flex … max-w-… p-…
+> gap-…` ni encabezados/listados en los `page.tsx`: consumir esos componentes. Esta sección fija
+> los tokens (color, tipografía, motion); la guía fija cómo se componen en una página.
+
 ### Tokens y fundamentos
 
 - **Sistema de color / tokens:** Tailwind v4 con tokens en `globals.css` expuestos vía `@theme inline`. **Modo claro por defecto**, no se activa dark mode automáticamente por `prefers-color-scheme` del OS: los tokens dark están definidos pero gated bajo `:root[data-theme="dark"]` / `.dark` para un toggle explícito futuro. `<html>` fija `style={{ colorScheme: "light" }}` para que los controles nativos (scrollbars, form widgets) también respeten el modo claro. La paleta está **anclada al lugar** (no es monocromo neutral):

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SolicitudNoEncontradaError } from "@/modules/solicitudes/application/errors";
 import type { Solicitud } from "@/modules/solicitudes/domain/Solicitud";
@@ -8,6 +7,7 @@ import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarRecursosServicio } from "@/shared/recursos";
 import { obtenerSolicitudServicio } from "@/shared/solicitudes";
 import { requireRol } from "@/shared/auth";
+import { PanelPage, PanelPageSubHeader } from "@/shared/ui/panel";
 import { editarSolicitudAction } from "@/app/(app)/solicitudes/actions";
 
 type Props = {
@@ -45,15 +45,13 @@ export default async function EditarSolicitudPage({ params }: Props) {
     editarSolicitudAction(id, input);
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 p-6 md:p-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Editar solicitud
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Sector: {solicitud.sector}
-        </p>
-      </div>
+    <PanelPage>
+      <PanelPageSubHeader
+        title="Editar solicitud"
+        description={`Sector: ${solicitud.sector}`}
+        backHref={`/solicitudes/${id}`}
+        backLabel="Volver al detalle"
+      />
 
       <SolicitudForm
         action={editar}
@@ -71,13 +69,6 @@ export default async function EditarSolicitudPage({ params }: Props) {
         textoEnviando="Guardando…"
         rutaExito={`/solicitudes/${id}`}
       />
-
-      <Link
-        href={`/solicitudes/${id}`}
-        className="text-sm text-primary underline-offset-4 hover:underline"
-      >
-        Volver al detalle
-      </Link>
-    </main>
+    </PanelPage>
   );
 }

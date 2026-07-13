@@ -14,6 +14,7 @@ import {
 import { requireRol } from "@/shared/auth";
 import { obtenerActividadServicio } from "@/shared/actividades";
 import { Button } from "@/shared/ui/button";
+import { PanelPage, PanelPageSubHeader } from "@/shared/ui/panel";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -44,34 +45,36 @@ export default async function ActividadDetallePublicoPage({ params }: Props) {
   const aceptaAportes = ayuda.estado === EstadoActividad.RECOLECTANDO;
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 p-6 md:p-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {ayuda.titulo}
-            </h1>
-            <EstadoBadge estado={ayuda.estado} />
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Destino:{" "}
-            <span className="text-foreground">{ayuda.sectorDestino}</span>
-            {" · "}
-            Salida:{" "}
-            <span className="numeric-tnum text-foreground">
-              {formatearFecha(ayuda.fecha)}
-            </span>
-          </p>
-          {ayuda.descripcion && (
-            <p className="max-w-[65ch] text-sm text-foreground/80 [text-wrap:pretty]">
-              {ayuda.descripcion}
-            </p>
-          )}
+    <PanelPage>
+      <PanelPageSubHeader
+        title={ayuda.titulo}
+        backHref="/actividades"
+        backLabel="Volver a las actividades abiertas"
+        actions={
+          aceptaAportes && (
+            <Button asChild>
+              <Link href={`/actividades/${ayuda.id}/aportar`}>Aportar</Link>
+            </Button>
+          )
+        }
+      />
+
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap items-center gap-3">
+          <EstadoBadge estado={ayuda.estado} />
         </div>
-        {aceptaAportes && (
-          <Button asChild>
-            <Link href={`/actividades/${ayuda.id}/aportar`}>Aportar</Link>
-          </Button>
+        <p className="text-sm text-muted-foreground">
+          Destino: <span className="text-foreground">{ayuda.sectorDestino}</span>
+          {" · "}
+          Salida:{" "}
+          <span className="numeric-tnum font-mono text-foreground">
+            {formatearFecha(ayuda.fecha)}
+          </span>
+        </p>
+        {ayuda.descripcion && (
+          <p className="max-w-[65ch] text-sm text-foreground/80 [text-wrap:pretty]">
+            {ayuda.descripcion}
+          </p>
         )}
       </div>
 
@@ -101,13 +104,6 @@ export default async function ActividadDetallePublicoPage({ params }: Props) {
           </p>
         )}
       </section>
-
-      <Link
-        href="/actividades"
-        className="text-sm text-primary underline-offset-4 hover:underline"
-      >
-        Volver a las actividades abiertas
-      </Link>
-    </main>
+    </PanelPage>
   );
 }

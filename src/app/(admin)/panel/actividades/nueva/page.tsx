@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   TipoActividad,
   esTipoActividad,
@@ -9,6 +8,7 @@ import { listarPuntosDeAdminServicio } from "@/shared/acopio";
 import { contarAptosPorCategoriaServicio } from "@/shared/afiliaciones";
 import { listarRecursosServicio } from "@/shared/recursos";
 import { requireRol } from "@/shared/auth";
+import { PanelPage, PanelPageSubHeader } from "@/shared/ui/panel";
 import { crearActividadAction } from "../actions";
 
 type Props = {
@@ -31,16 +31,13 @@ export default async function NuevaActividadPage({ searchParams }: Props) {
   const conteos = await contarAptosPorCategoriaServicio(sesion.id);
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 p-6 md:p-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Crear actividad
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Elige el tipo de actividad, define el destino, la fecha y las metas de
-          recursos.
-        </p>
-      </div>
+    <PanelPage>
+      <PanelPageSubHeader
+        title="Crear actividad"
+        description="Elige el tipo de actividad, define el destino, la fecha y las metas de recursos."
+        backHref="/panel/actividades"
+        backLabel="Volver a las actividades"
+      />
 
       <ActividadForm
         action={crearActividadAction}
@@ -57,13 +54,6 @@ export default async function NuevaActividadPage({ searchParams }: Props) {
         textoEnviar="Crear actividad"
         textoEnviando="Creando…"
       />
-
-      <Link
-        href="/panel/actividades"
-        className="text-sm text-primary underline-offset-4 hover:underline"
-      >
-        Volver a las actividades
-      </Link>
-    </main>
+    </PanelPage>
   );
 }

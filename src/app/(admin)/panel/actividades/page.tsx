@@ -14,8 +14,10 @@ import { etiquetaTipo } from "@/modules/actividades/ui/tipos";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarActividadesServicio } from "@/shared/actividades";
 import { requireRol } from "@/shared/auth";
+import { Truck } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { FiltroSelect } from "@/shared/ui/filtro-select";
+import { PanelPage, PanelPageHeader } from "@/shared/ui/panel";
 import { eliminarActividadAction } from "./actions";
 
 type Props = {
@@ -34,20 +36,18 @@ export default async function ActividadesPage({ searchParams }: Props) {
   const actividades = await listarActividadesServicio(filtro);
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 p-6 md:p-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Actividades de ayuda
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Planifica y sigue cada actividad: envíos, jornadas y eventos sociales.
-          </p>
-        </div>
-        <Button asChild>
-          <Link href="/panel/actividades/nueva">Nueva actividad</Link>
-        </Button>
-      </div>
+    <PanelPage>
+      <PanelPageHeader
+        icon={Truck}
+        eyebrow="Operación"
+        title="Actividades de ayuda"
+        description="Planifica y sigue cada actividad: envíos, jornadas y eventos sociales."
+        actions={
+          <Button asChild>
+            <Link href="/panel/actividades/nueva">Nueva actividad</Link>
+          </Button>
+        }
+      />
 
       <form
         method="get"
@@ -91,6 +91,6 @@ export default async function ActividadesPage({ searchParams }: Props) {
       </form>
 
       <ActividadesTabla actividades={actividades} eliminarAction={eliminarActividadAction} />
-    </main>
+    </PanelPage>
   );
 }

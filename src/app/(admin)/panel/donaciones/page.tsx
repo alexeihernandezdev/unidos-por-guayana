@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HandCoins } from "lucide-react";
 import { IngresosMonetariosTabla } from "@/modules/donaciones/ui/IngresosMonetariosTabla";
 import { MediosDonacionTabla } from "@/modules/donaciones/ui/MediosDonacionTabla";
 import { Rol } from "@/modules/usuarios/domain/Rol";
@@ -6,6 +7,7 @@ import { listarIngresosExternosServicio } from "@/shared/aportes";
 import { requireRol } from "@/shared/auth";
 import { listarMediosDonacionServicio } from "@/shared/donaciones";
 import { Button } from "@/shared/ui/button";
+import { PanelPage, PanelPageHeader } from "@/shared/ui/panel";
 import {
   activarMedioDonacionAction,
   desactivarMedioDonacionAction,
@@ -20,16 +22,13 @@ export default async function DonacionesPage() {
   ]);
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-10 p-6 md:p-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Donaciones monetarias
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Muestra al público cómo donar dinero y registra los montos ya recibidos
-          por fuera. La aplicación no procesa ningún pago.
-        </p>
-      </div>
+    <PanelPage>
+      <PanelPageHeader
+        icon={HandCoins}
+        eyebrow="Transparencia"
+        title="Donaciones monetarias"
+        description="Muestra al público cómo donar dinero y registra los montos ya recibidos por fuera. La aplicación no procesa ningún pago."
+      />
 
       <section className="flex flex-col gap-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
@@ -71,6 +70,6 @@ export default async function DonacionesPage() {
         </div>
         <IngresosMonetariosTabla ingresos={ingresos} />
       </section>
-    </main>
+    </PanelPage>
   );
 }

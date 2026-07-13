@@ -7,6 +7,13 @@ import type { Estado } from "@/modules/ubicacion/domain/Estado";
 import type { Municipio } from "@/modules/ubicacion/domain/Municipio";
 import { Button } from "@/shared/ui/button";
 import {
+  PanelBadge,
+  PanelEmptyState,
+  PanelList,
+  PanelListRow,
+  PanelListToolbar,
+} from "@/shared/ui/panel";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -80,19 +87,20 @@ export function PuntosAcopioGestion({
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border bg-card p-4">
-        <p className="text-sm text-muted-foreground">
-          {puntos.length === 0
+      <PanelListToolbar
+        resumen={
+          puntos.length === 0
             ? "Aún no tienes puntos registrados."
             : visibles.length === puntos.length
               ? `${puntos.length} ${puntos.length === 1 ? "punto" : "puntos"} en total.`
-              : `${visibles.length} de ${puntos.length} puntos.`}
-        </p>
+              : `${visibles.length} de ${puntos.length} puntos.`
+        }
+      >
         <Button onClick={() => setModal({ modo: "nuevo" })}>
           <Plus strokeWidth={1.5} aria-hidden="true" />
           Nuevo punto
         </Button>
-      </div>
+      </PanelListToolbar>
 
       {puntos.length > 0 && (
         <FiltrosPuntos
@@ -105,47 +113,48 @@ export function PuntosAcopioGestion({
       )}
 
       {puntos.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 border-t border-border py-16 text-center">
-          <span className="flex size-12 items-center justify-center rounded-lg bg-muted">
-            <Warehouse
-              strokeWidth={1.5}
-              className="size-6 text-muted-foreground"
-              aria-hidden="true"
-            />
-          </span>
-          <div className="flex flex-col gap-1">
-            <p className="font-medium">Registra tu primera sede</p>
-            <p className="max-w-[38ch] text-sm text-muted-foreground">
-              Los colaboradores verán dónde entregar sus aportes, con mapa,
-              horarios y contacto.
-            </p>
-          </div>
-          <Button onClick={() => setModal({ modo: "nuevo" })} variant="outline">
-            <Plus strokeWidth={1.5} aria-hidden="true" />
-            Nuevo punto
-          </Button>
-        </div>
+        <PanelEmptyState
+          icon={Warehouse}
+          title="Registra tu primera sede"
+          description="Los colaboradores verán dónde entregar sus aportes, con mapa, horarios y contacto."
+          action={
+            <Button
+              onClick={() => setModal({ modo: "nuevo" })}
+              variant="outline"
+            >
+              <Plus strokeWidth={1.5} aria-hidden="true" />
+              Nuevo punto
+            </Button>
+          }
+        />
       ) : visibles.length === 0 ? (
         <p className="border-t border-border py-12 text-center text-sm text-muted-foreground">
           Ningún punto coincide con los filtros.
         </p>
       ) : (
-        <div className="divide-y overflow-hidden rounded-lg border bg-card">
+        <PanelList>
           {visibles.map((punto) => (
-            <article key={punto.id} className="flex flex-col gap-4 p-4 transition-colors duration-150 hover:bg-muted/30 md:flex-row md:items-center md:justify-between">
-              <div className="flex min-w-0 items-start gap-3">
-                <span className="profile-icon size-10"><Warehouse aria-hidden="true" /></span>
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2"><h2 className="font-semibold">{punto.nombre}</h2><span className={punto.activo ? "rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary-ink" : "rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"}>{punto.activo ? "Activo" : "Archivado"}</span></div>
-                  <p className="mt-0.5 text-sm text-muted-foreground">{punto.referencia}</p>
-                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                    <span className="inline-flex items-center gap-1"><MapPin className="size-3.5" />{punto.municipioNombre}, {punto.estadoNombre}</span>
-                    <span className="inline-flex items-center gap-1"><Clock3 className="size-3.5" />{punto.horarios}</span>
-                    <span className="inline-flex items-center gap-1"><Phone className="size-3.5" />{punto.telefono}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex shrink-0 gap-2 md:justify-end">
+            <PanelListRow
+              key={punto.id}
+              icon={Warehouse}
+              title={punto.nombre}
+              badge={
+                <PanelBadge tone={punto.activo ? "active" : "neutral"}>
+                  {punto.activo ? "Activo" : "Archivado"}
+                </PanelBadge>
+              }
+              secondary={punto.referencia}
+              meta={[
+                {
+                  icon: MapPin,
+                  texto: `${punto.municipioNombre}, ${punto.estadoNombre}`,
+                  label: "Ubicación",
+                },
+                { icon: Clock3, texto: punto.horarios, label: "Horarios" },
+                { icon: Phone, texto: punto.telefono, label: "Teléfono" },
+              ]}
+              actions={
+                <>
                   <Button
                     variant="outline"
                     size="sm"
@@ -163,10 +172,11 @@ export function PuntosAcopioGestion({
                       {punto.activo ? "Archivar" : "Activar"}
                     </Button>
                   </form>
-              </div>
-            </article>
+                </>
+              }
+            />
           ))}
-        </div>
+        </PanelList>
       )}
 
       <Dialog

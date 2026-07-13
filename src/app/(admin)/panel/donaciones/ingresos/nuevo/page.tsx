@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { DateTime } from "luxon";
 import { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import { EstadoActividad } from "@/modules/actividades/domain/EstadoActividad";
@@ -8,6 +7,7 @@ import { requireRol } from "@/shared/auth";
 import { listarActividadesServicio } from "@/shared/actividades";
 import { listarMediosDonacionServicio } from "@/shared/donaciones";
 import { listarRecursosServicio } from "@/shared/recursos";
+import { PanelPage, PanelPageSubHeader } from "@/shared/ui/panel";
 import { registrarAporteExternoAction } from "@/app/(admin)/panel/donaciones/actions";
 
 export default async function NuevoIngresoPage() {
@@ -32,16 +32,13 @@ export default async function NuevoIngresoPage() {
   const fechaHoy = DateTime.now().toFormat("yyyy-MM-dd");
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 p-6 md:p-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Registrar ingreso monetario
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Deja constancia de un monto ya recibido por fuera de la aplicación. Esto
-          no procesa ningún pago: solo registra dinero que ya entró.
-        </p>
-      </div>
+    <PanelPage>
+      <PanelPageSubHeader
+        title="Registrar ingreso monetario"
+        description="Deja constancia de un monto ya recibido por fuera de la aplicación. Esto no procesa ningún pago: solo registra dinero que ya entró."
+        backHref="/panel/donaciones"
+        backLabel="Volver a donaciones"
+      />
 
       <RegistroIngresoForm
         action={registrarAporteExternoAction}
@@ -58,13 +55,6 @@ export default async function NuevoIngresoPage() {
         ayudas={ayudasConMetaMonetaria}
         fechaHoy={fechaHoy}
       />
-
-      <Link
-        href="/panel/donaciones"
-        className="text-sm text-primary underline-offset-4 hover:underline"
-      >
-        Volver a donaciones
-      </Link>
-    </main>
+    </PanelPage>
   );
 }

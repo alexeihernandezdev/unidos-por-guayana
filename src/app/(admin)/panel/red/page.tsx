@@ -7,9 +7,11 @@ import { CATEGORIA_LABEL_CORTA } from "@/modules/afiliaciones/ui/categorias";
 import { RedTabla } from "@/modules/afiliaciones/ui/RedTabla";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarMiRedServicio } from "@/shared/afiliaciones";
+import { Users } from "lucide-react";
 import { requireRol } from "@/shared/auth";
 import { Button } from "@/shared/ui/button";
 import { FiltroSelect } from "@/shared/ui/filtro-select";
+import { PanelPage, PanelPageHeader } from "@/shared/ui/panel";
 import { removerDeRedAction } from "./actions";
 
 type Props = {
@@ -25,14 +27,13 @@ export default async function RedPage({ searchParams }: Props) {
   const miembros = await listarMiRedServicio(sesion.id, filtro);
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 p-6 md:p-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Mi red</h1>
-        <p className="text-sm text-muted-foreground">
-          Colaboradores afiliados a tu centro de acopio. Úsalo para saber a quién
-          convocar según lo que puede aportar cada uno.
-        </p>
-      </div>
+    <PanelPage>
+      <PanelPageHeader
+        icon={Users}
+        eyebrow="Red operativa"
+        title="Mi red"
+        description="Colaboradores afiliados a tu centro de acopio. Úsalo para saber a quién convocar según lo que puede aportar cada uno."
+      />
 
       <form
         method="get"
@@ -59,6 +60,6 @@ export default async function RedPage({ searchParams }: Props) {
       </form>
 
       <RedTabla miembros={miembros} removerAction={removerDeRedAction} />
-    </main>
+    </PanelPage>
   );
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Package } from "lucide-react";
 import {
   CATEGORIAS_RECURSO,
   esCategoriaRecurso,
@@ -11,6 +12,7 @@ import { listarRecursosServicio } from "@/shared/recursos";
 import { requireRol } from "@/shared/auth";
 import { Button } from "@/shared/ui/button";
 import { FiltroSelect } from "@/shared/ui/filtro-select";
+import { PanelPage, PanelPageHeader } from "@/shared/ui/panel";
 import { activarRecursoAction, archivarRecursoAction } from "./actions";
 
 type Props = {
@@ -29,25 +31,23 @@ export default async function RecursosPage({ searchParams }: Props) {
   const recursos = await listarRecursosServicio(filtro);
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 p-6 md:p-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Catálogo de recursos
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Lista maestra de lo que se puede aportar o necesitar.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button asChild variant="outline">
-            <Link href="/panel/recursos/propuestas">Ver propuestas</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/panel/recursos/nuevo">Nuevo recurso</Link>
-          </Button>
-        </div>
-      </div>
+    <PanelPage>
+      <PanelPageHeader
+        icon={Package}
+        eyebrow="Catálogo"
+        title="Catálogo de recursos"
+        description="Lista maestra de lo que se puede aportar o necesitar."
+        actions={
+          <>
+            <Button asChild variant="outline">
+              <Link href="/panel/recursos/propuestas">Ver propuestas</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/panel/recursos/nuevo">Nuevo recurso</Link>
+            </Button>
+          </>
+        }
+      />
 
       <form
         method="get"
@@ -92,6 +92,6 @@ export default async function RecursosPage({ searchParams }: Props) {
         archivarAction={archivarRecursoAction}
         activarAction={activarRecursoAction}
       />
-    </main>
+    </PanelPage>
   );
 }

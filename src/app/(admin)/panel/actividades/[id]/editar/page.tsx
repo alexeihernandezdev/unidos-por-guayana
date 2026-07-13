@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import {
   ActividadNoPerteneceAlAdminError,
@@ -15,6 +14,7 @@ import { obtenerActividadServicio } from "@/shared/actividades";
 import { listarPuntosDeAdminServicio } from "@/shared/acopio";
 import { listarRecursosServicio } from "@/shared/recursos";
 import { requireRol } from "@/shared/auth";
+import { PanelPage, PanelPageSubHeader } from "@/shared/ui/panel";
 import {
   editarCabeceraAction,
   guardarMetaAction,
@@ -67,13 +67,13 @@ export default async function EditarActividadPage({ params }: Props) {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 p-6 md:p-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Editar actividad</h1>
-        <p className="text-sm text-muted-foreground">
-          Ajusta la cabecera y las metas mientras la actividad está en Recolectando.
-        </p>
-      </div>
+    <PanelPage>
+      <PanelPageSubHeader
+        title="Editar actividad"
+        description="Ajusta la cabecera y las metas mientras la actividad está en Recolectando."
+        backHref={`/panel/actividades/${ayuda.id}`}
+        backLabel="Volver al detalle"
+      />
 
       <section className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold">Cabecera</h2>
@@ -105,13 +105,6 @@ export default async function EditarActividadPage({ params }: Props) {
           quitarAction={quitarMetaAction}
         />
       </section>
-
-      <Link
-        href={`/panel/actividades/${ayuda.id}`}
-        className="text-sm text-primary underline-offset-4 hover:underline"
-      >
-        Volver al detalle
-      </Link>
-    </main>
+    </PanelPage>
   );
 }

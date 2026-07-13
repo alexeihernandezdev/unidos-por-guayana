@@ -35,6 +35,8 @@ _Features completadas, en orden de implementación._
 
 23. **014 · Donaciones monetarias externas** — Mostrar medios externos para donar dinero (cuenta bancaria, PayPal, Zelle…) y permitir al `ADMIN` registrar manualmente montos recibidos por fuera (recursos `MONETARIO`) para reflejarlos en la transparencia. La app no procesa el pago.
 
+24. **026 · Guía de diseño y layout consistente** — Extrae el patrón visual de "Puntos de acopio"/"Mi perfil" a una **guía de diseño** en la constitución (`constitution/ui-guidelines.md`, referenciada desde `tech-stack.md § Estilo visual`) y a **componentes compartidos** en `src/shared/ui/panel/` (`<PanelPage>`, `<PanelPageHeader>`, `<PanelPageSubHeader>`, `<PanelList>`, `<PanelListRow>`, `<PanelListToolbar>`, `<PanelEmptyState>`, `<PanelBadge>`, `<PanelSectionTabs>`). Normaliza **todo el espacio logeado** (`(admin)`, `/superadmin`, `(app)`): índices con banner, subpáginas con encabezado ligero, todos los listados convertidos de `<table>` a **row-cards** (Recursos, Actividades, Solicitudes, Aportes, Aportantes, Propuestas, Medios/Ingresos de donación, Red, ProgresoMetas y las tablas inline de solicitudes/mis-aportes), tipografía por familia (títulos sans, números mono + `numeric-tnum`), mismo padding/ancho (`p-5 md:p-8 lg:p-10` + `gap-7`) y un solo `<main>` por documento. El dashboard `/panel` sustituye `DispatchStrip` por el banner. No toca dominio, datos, permisos ni páginas públicas. _Depende de 021 (shell), 011 y 016 (patrón de referencia)._
+
 ## Siguiente 🔜
 
 _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._

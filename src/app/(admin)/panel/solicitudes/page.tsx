@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Inbox } from "lucide-react";
 import {
   esEstadoSolicitud,
   ESTADOS_SOLICITUD,
@@ -16,6 +16,7 @@ import { listarSolicitudesServicio } from "@/shared/solicitudes";
 import { requireRol } from "@/shared/auth";
 import { Button } from "@/shared/ui/button";
 import { FiltroSelect } from "@/shared/ui/filtro-select";
+import { PanelPage, PanelPageHeader } from "@/shared/ui/panel";
 
 type Props = {
   searchParams: Promise<{
@@ -41,15 +42,13 @@ export default async function SolicitudesAdminPage({ searchParams }: Props) {
   const solicitudes = await listarSolicitudesServicio(filtro);
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 p-6 md:p-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Solicitudes de ayuda
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Peticiones del terreno: sector, urgencia y recursos necesarios.
-        </p>
-      </div>
+    <PanelPage>
+      <PanelPageHeader
+        icon={Inbox}
+        eyebrow="Operación"
+        title="Solicitudes de ayuda"
+        description="Peticiones del terreno: sector, urgencia y recursos necesarios."
+      />
 
       <form
         method="get"
@@ -110,13 +109,6 @@ export default async function SolicitudesAdminPage({ searchParams }: Props) {
         baseRuta="/panel/solicitudes"
         mostrarSolicitante
       />
-
-      <Link
-        href="/panel"
-        className="text-sm text-primary underline-offset-4 hover:underline"
-      >
-        Volver al panel
-      </Link>
-    </main>
+    </PanelPage>
   );
 }

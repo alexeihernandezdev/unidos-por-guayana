@@ -15,7 +15,7 @@ export function BloqueEnviosPrioridad({ envios }: Props) {
       <div className="flex items-baseline justify-between gap-3">
         <h2
           id="titulo-prioridad"
-          className="font-serif text-lg leading-none tracking-tight"
+          className="text-lg font-semibold leading-none tracking-tight"
         >
           Qué actividad sale primero
         </h2>
@@ -36,7 +36,7 @@ export function BloqueEnviosPrioridad({ envios }: Props) {
                 className="focus-ring group flex flex-col gap-2 px-4 py-3 transition-colors duration-150 hover:bg-muted/40"
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <span className="font-serif text-base text-foreground">
+                  <span className="text-base font-medium text-foreground">
                     {envio.titulo}
                   </span>
                   <span className="numeric-tnum font-mono text-xs text-foreground/70">

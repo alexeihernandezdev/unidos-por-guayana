@@ -24,7 +24,7 @@ export default async function SuperadminLayout({
       homeHref={rutaInicioPorRol(Rol.SUPERADMIN)}
       ariaLabel="Panel del superadministrador"
     >
-      <div className="mx-auto w-full max-w-3xl flex-1 px-6 py-10">{children}</div>
+      {children}
     </AppShell>
   );
 }

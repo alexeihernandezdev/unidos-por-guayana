@@ -16,18 +16,10 @@ type Props = {
 export function PanelResumen({ resumen }: Props) {
   const { enviosPorEstado, progresoAgregadoRecolectando } = resumen;
 
+  // El encabezado (banner) y el padding/ancho los provee la página vía
+  // `<PanelPage>` + `<PanelPageHeader>` (feature 026). Aquí solo el cuerpo.
   return (
-    <div className="flex flex-col gap-8 p-6 md:p-8">
-      <header className="flex flex-col gap-1">
-        <h1 className="font-serif text-3xl leading-tight tracking-tight text-foreground">
-          Sala de despacho
-        </h1>
-        <p className="max-w-[65ch] text-sm text-foreground/70">
-          Estado agregado de actividades, solicitudes y aportes. Priorizado por lo que
-          probablemente necesita tu atención en los próximos minutos.
-        </p>
-      </header>
-
+    <div className="flex flex-col gap-8">
       <section
         aria-labelledby="titulo-metricas"
         className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"

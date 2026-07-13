@@ -1,6 +1,5 @@
-import { ArrowLeft, Clock, Mail, MapPin, Phone } from "lucide-react";
+import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PuntoAcopioMapaLazy } from "@/modules/acopio/ui/PuntoAcopioMapaLazy";
 import { urlMaps, urlWhatsApp } from "@/modules/acopio/ui/PuntoAcopioCard";
@@ -9,6 +8,7 @@ import { Rol } from "@/modules/usuarios/domain/Rol";
 import { verPuntoAcopioActivoServicio } from "@/shared/acopio";
 import { requireRol } from "@/shared/auth";
 import { Button } from "@/shared/ui/button";
+import { PanelPage, PanelPageSubHeader } from "@/shared/ui/panel";
 import { cargarCatalogoUbicacion } from "@/shared/ubicacion";
 
 export const metadata: Metadata = {
@@ -42,21 +42,13 @@ export default async function DetallePuntoAcopioPage({ params }: Props) {
   };
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 p-6 md:p-8">
-      <Link
-        href="/puntos-acopio"
-        className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft strokeWidth={1.5} className="size-4" aria-hidden="true" />
-        Todos los puntos
-      </Link>
-
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {punto.nombre}
-        </h1>
-        <p className="text-sm text-muted-foreground">{punto.referencia}</p>
-      </div>
+    <PanelPage>
+      <PanelPageSubHeader
+        title={punto.nombre}
+        description={punto.referencia}
+        backHref="/puntos-acopio"
+        backLabel="Todos los puntos"
+      />
 
       <div className="h-80 overflow-hidden rounded-lg border md:h-96">
         <PuntoAcopioMapaLazy centro={coordenadas} zoom={16} valor={coordenadas} />
@@ -141,6 +133,6 @@ export default async function DetallePuntoAcopioPage({ params }: Props) {
           </div>
         </div>
       </div>
-    </main>
+    </PanelPage>
   );
 }

@@ -21,6 +21,7 @@ import {
 } from "@/shared/aportes";
 import { requireRol } from "@/shared/auth";
 import { Button } from "@/shared/ui/button";
+import { PanelPage, PanelPageSubHeader } from "@/shared/ui/panel";
 import { avanzarEstadoAction } from "../actions";
 import {
   cancelarAporteAction,
@@ -58,35 +59,38 @@ export default async function ActividadDetallePage({ params }: Props) {
   ]);
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 p-6 md:p-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {ayuda.titulo}
-            </h1>
-            <TipoBadge tipo={ayuda.tipo} />
-            <EstadoBadge estado={ayuda.estado} />
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {etiquetaTipo(ayuda.tipo)} · Destino:{" "}
-            <span className="text-foreground">{ayuda.sectorDestino}</span>
-            {" · "}
-            Fecha:{" "}
-            <span className="numeric-tnum text-foreground">
-              {formatearFecha(ayuda.fecha)}
-            </span>
-          </p>
-          {ayuda.descripcion && (
-            <p className="max-w-[65ch] text-sm text-foreground/80 [text-wrap:pretty]">
-              {ayuda.descripcion}
-            </p>
-          )}
+    <PanelPage>
+      <PanelPageSubHeader
+        title={ayuda.titulo}
+        backHref="/panel/actividades"
+        backLabel="Volver a las actividades"
+        actions={
+          editable && (
+            <Button asChild variant="outline">
+              <Link href={`/panel/actividades/${ayuda.id}/editar`}>Editar</Link>
+            </Button>
+          )
+        }
+      />
+
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap items-center gap-3">
+          <TipoBadge tipo={ayuda.tipo} />
+          <EstadoBadge estado={ayuda.estado} />
         </div>
-        {editable && (
-          <Button asChild variant="outline">
-            <Link href={`/panel/actividades/${ayuda.id}/editar`}>Editar</Link>
-          </Button>
+        <p className="text-sm text-muted-foreground">
+          {etiquetaTipo(ayuda.tipo)} · Destino:{" "}
+          <span className="text-foreground">{ayuda.sectorDestino}</span>
+          {" · "}
+          Fecha:{" "}
+          <span className="numeric-tnum font-mono text-foreground">
+            {formatearFecha(ayuda.fecha)}
+          </span>
+        </p>
+        {ayuda.descripcion && (
+          <p className="max-w-[65ch] text-sm text-foreground/80 [text-wrap:pretty]">
+            {ayuda.descripcion}
+          </p>
         )}
       </div>
 
@@ -118,13 +122,6 @@ export default async function ActividadDetallePage({ params }: Props) {
           avanzarAction={avanzarEstadoAction}
         />
       </section>
-
-      <Link
-        href="/panel/actividades"
-        className="text-sm text-primary underline-offset-4 hover:underline"
-      >
-        Volver a las actividades
-      </Link>
-    </main>
+    </PanelPage>
   );
 }

@@ -5,6 +5,7 @@ import { Rol } from "@/modules/usuarios/domain/Rol";
 import { DatosContactoForm } from "@/modules/usuarios/ui/DatosContactoForm";
 import { listarCentrosDisponiblesServicio } from "@/shared/afiliaciones";
 import { buscarUsuarioPorId, requireRol } from "@/shared/auth";
+import { PanelPage, PanelPageHeader } from "@/shared/ui/panel";
 import { cargarCatalogoUbicacion } from "@/shared/ubicacion";
 import { guardarDatosContactoAction } from "@/app/completar-perfil/actions";
 import {
@@ -28,25 +29,17 @@ export default async function MiPerfilPage() {
     : [];
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 p-5 md:p-8 lg:p-10">
-      <header className="overflow-hidden rounded-xl bg-primary-ink px-6 py-7 text-primary-foreground md:px-8">
-        <div className="flex max-w-3xl items-start gap-4">
-          <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-white/10">
-            <UserRound className="size-5" strokeWidth={1.7} aria-hidden="true" />
-          </span>
-          <div>
-            <p className="mb-1 text-sm text-white/70">
-              {esColaborador ? "Perfil de colaborador" : "Información personal"}
-            </p>
-            <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Mi perfil</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/75">
-              {esColaborador
-                ? "Administra cómo pueden contactarte, qué puedes aportar y los centros con los que colaboras."
-                : "Mantén tus datos de contacto y ubicación actualizados para coordinar la ayuda."}
-            </p>
-          </div>
-        </div>
-      </header>
+    <PanelPage>
+      <PanelPageHeader
+        icon={UserRound}
+        eyebrow={esColaborador ? "Perfil de colaborador" : "Información personal"}
+        title="Mi perfil"
+        description={
+          esColaborador
+            ? "Administra cómo pueden contactarte, qué puedes aportar y los centros con los que colaboras."
+            : "Mantén tus datos de contacto y ubicación actualizados para coordinar la ayuda."
+        }
+      />
 
       {esColaborador && (
         <nav aria-label="Secciones del perfil" className="flex gap-2 overflow-x-auto border-b pb-3">
@@ -103,6 +96,6 @@ export default async function MiPerfilPage() {
           />
         </section>
       </div>
-    </main>
+    </PanelPage>
   );
 }
