@@ -31,7 +31,9 @@ export function ProgresoMetas({ progreso }: Props) {
 
   return (
     <PanelList>
-      {progreso.map((meta) => (
+      {progreso.map((meta) => {
+        const completa = meta.porcentaje >= 100;
+        return (
         <PanelListRow
           key={meta.recursoId}
           icon={Target}
@@ -43,11 +45,13 @@ export function ProgresoMetas({ progreso }: Props) {
                 aria-hidden
               >
                 <span
-                  className="block h-full bg-accent"
+                  className={`block h-full rounded-full ${completa ? "bg-primary" : "bg-accent"}`}
                   style={{ width: `${porcentajeBarra(meta.porcentaje)}%` }}
                 />
               </span>
-              <span className="numeric-tnum font-mono text-xs text-muted-foreground">
+              <span
+                className={`numeric-tnum font-mono text-xs ${completa ? "font-medium text-primary-ink" : "text-muted-foreground"}`}
+              >
                 {formatearNumero(meta.porcentaje)}%
               </span>
             </span>
@@ -82,7 +86,8 @@ export function ProgresoMetas({ progreso }: Props) {
             },
           ]}
         />
-      ))}
+        );
+      })}
     </PanelList>
   );
 }

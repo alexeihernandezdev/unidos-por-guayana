@@ -8,7 +8,9 @@ import {
   listarCentrosDisponibles,
   listarDestinatariosConvocatoria,
   listarMiRed,
+  listarRedAptaPorCategoria,
   type CentroConAfiliacion,
+  type RedAptaPorCategoria,
 } from "@/modules/afiliaciones/application/consultarRed";
 import type { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import type {
@@ -59,6 +61,12 @@ export function contarAptosPorCategoriaServicio(
   adminId: string,
 ): Promise<ConteoPorCategoria> {
   return contarAptosPorCategoria(deps, adminId);
+}
+
+export function listarRedAptaPorCategoriaServicio(
+  adminId: string,
+): Promise<RedAptaPorCategoria> {
+  return listarRedAptaPorCategoria(deps, adminId);
 }
 
 export function listarCentrosDisponiblesServicio(

@@ -7,10 +7,15 @@ export {
   removerDeRedServicio,
   listarMiRedServicio,
   contarAptosPorCategoriaServicio,
+  listarRedAptaPorCategoriaServicio,
   listarCentrosDisponiblesServicio,
   listarDestinatariosConvocatoriaServicio,
 } from "@/lib/afiliaciones";
-export type { CentroConAfiliacion } from "@/modules/afiliaciones/application/consultarRed";
+export type {
+  CentroConAfiliacion,
+  MiembroRedApto,
+  RedAptaPorCategoria,
+} from "@/modules/afiliaciones/application/consultarRed";
 export type {
   Afiliacion,
   CentroDisponible,

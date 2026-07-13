@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { InMemoryRecursoRepository } from "@/modules/recursos/application/fakes";
 import { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
+import { InMemoryPuntoAcopioRepository } from "@/modules/acopio/application/fakes";
 import { avanzarEstado } from "./avanzarEstado";
 import { crearActividad } from "./crearActividad";
 import type { ActividadDeps } from "./deps";
@@ -89,5 +90,42 @@ describe("editarCabecera", () => {
     await expect(
       editarCabecera(deps, ayuda.id, OTRO_ADMIN, { titulo: "Hack" }),
     ).rejects.toBeInstanceOf(ActividadNoPerteneceAlAdminError);
+  });
+
+  it("reemplaza el conjunto de centros de acopio (feature 026)", async () => {
+    const { deps, ayuda } = ctx;
+    const puntos = new InMemoryPuntoAcopioRepository();
+    const nuevoPunto = async (nombre: string) =>
+      puntos.crear({
+        adminId: ADMIN,
+        nombre,
+        referencia: "ref",
+        latitud: "10.5",
+        longitud: "-66.9",
+        horarios: "L-V 8-16",
+        telefono: "04140000000",
+        telefonoEsWhatsApp: true,
+        correo: null,
+        estadoId: "estado-1",
+        municipioId: "municipio-1",
+      });
+    const uno = await nuevoPunto("Galpón");
+    const dos = await nuevoPunto("Sede norte");
+
+    const conUno = await editarCabecera(
+      { ...deps, puntos },
+      ayuda.id,
+      ADMIN,
+      { puntosAcopioIds: [uno.id] },
+    );
+    expect(conUno.puntosAcopio.map((p) => p.id)).toEqual([uno.id]);
+
+    const conDos = await editarCabecera(
+      { ...deps, puntos },
+      ayuda.id,
+      ADMIN,
+      { puntosAcopioIds: [dos.id] },
+    );
+    expect(conDos.puntosAcopio.map((p) => p.id)).toEqual([dos.id]);
   });
 });

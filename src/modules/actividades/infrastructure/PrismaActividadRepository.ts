@@ -5,6 +5,7 @@ import type {
   MetaRecurso,
   NuevaActividad,
   NuevaMeta,
+  PuntoAcopioDeActividad,
 } from "@/modules/actividades/domain/Actividad";
 import type { EstadoActividad } from "@/modules/actividades/domain/EstadoActividad";
 import type { TipoActividad } from "@/modules/actividades/domain/TipoActividad";
@@ -13,12 +14,17 @@ import type {
   FiltroActividades,
 } from "@/modules/actividades/domain/ActividadRepository";
 
-// Se incluyen las metas con el recurso asociado para poder mostrar nombre/unidad en
-// el detalle. Se ordenan por nombre del recurso para una lectura estable.
-const INCLUDE_METAS = {
+// Se incluyen las metas con su recurso (para nombre/unidad) y los puntos de acopio
+// asignados con su punto (para el bloque "Dónde entregar", feature 026). Ordenados
+// por nombre para una lectura estable.
+const INCLUDE_DETALLE = {
   metas: {
     include: { recurso: true },
     orderBy: { recurso: { nombre: "asc" } },
+  },
+  puntosAcopio: {
+    include: { puntoAcopio: true },
+    orderBy: { puntoAcopio: { nombre: "asc" } },
   },
 } as const;
 
@@ -32,6 +38,15 @@ type FilaMeta = {
   recurso: { id: string; nombre: string; unidad: string } | null;
 };
 
+type FilaPuntoAsignado = {
+  puntoAcopio: {
+    id: string;
+    nombre: string;
+    referencia: string;
+    horarios: string;
+  };
+};
+
 type FilaActividad = {
   id: string;
   adminId: string;
@@ -42,11 +57,20 @@ type FilaActividad = {
   estado: EstadoActividad;
   tipo: TipoActividad;
   descripcion: string | null;
-  puntoAcopioId: string | null;
+  puntosAcopio: FilaPuntoAsignado[];
   metas: FilaMeta[];
   createdAt: Date;
   updatedAt: Date;
 };
+
+function mapearPunto(fila: FilaPuntoAsignado): PuntoAcopioDeActividad {
+  return {
+    id: fila.puntoAcopio.id,
+    nombre: fila.puntoAcopio.nombre,
+    referencia: fila.puntoAcopio.referencia,
+    horarios: fila.puntoAcopio.horarios,
+  };
+}
 
 // Convierte el `Decimal` de Prisma a `number`: el dominio trabaja con números puros
 // (ver decisión en spec/plan de la feature 005).
@@ -76,7 +100,7 @@ function mapearActividad(fila: FilaActividad): Actividad {
     estado: fila.estado,
     tipo: fila.tipo,
     descripcion: fila.descripcion,
-    puntoAcopioId: fila.puntoAcopioId,
+    puntosAcopio: fila.puntosAcopio.map(mapearPunto),
     metas: fila.metas.map(mapearMeta),
     createdAt: fila.createdAt,
     updatedAt: fila.updatedAt,
@@ -97,7 +121,11 @@ export class PrismaActividadRepository implements ActividadRepository {
         horaFin: datos.horaFin,
         tipo: datos.tipo,
         descripcion: datos.descripcion,
-        puntoAcopioId: datos.puntoAcopioId,
+        puntosAcopio: {
+          create: datos.puntosAcopioIds.map((puntoAcopioId) => ({
+            puntoAcopioId,
+          })),
+        },
         metas: {
           create: datos.metas.map((m) => ({
             recursoId: m.recursoId,
@@ -105,7 +133,7 @@ export class PrismaActividadRepository implements ActividadRepository {
           })),
         },
       },
-      include: INCLUDE_METAS,
+      include: INCLUDE_DETALLE,
     });
     return mapearActividad(fila);
   }
@@ -118,7 +146,7 @@ export class PrismaActividadRepository implements ActividadRepository {
         ...(filtro?.adminId ? { adminId: filtro.adminId } : {}),
       },
       orderBy: { fecha: "desc" },
-      include: INCLUDE_METAS,
+      include: INCLUDE_DETALLE,
     });
     return filas.map(mapearActividad);
   }
@@ -126,16 +154,31 @@ export class PrismaActividadRepository implements ActividadRepository {
   async buscarPorId(id: string): Promise<Actividad | null> {
     const fila = await prisma.actividad.findUnique({
       where: { id },
-      include: INCLUDE_METAS,
+      include: INCLUDE_DETALLE,
     });
     return fila ? mapearActividad(fila) : null;
   }
 
   async actualizarCabecera(id: string, cambios: CambiosActividad): Promise<Actividad> {
+    // `puntosAcopioIds` no es un campo escalar: cuando viene, reemplaza el conjunto
+    // de la tabla puente (borra las filas actuales y crea las nuevas, feature 026).
+    const { puntosAcopioIds, ...escalares } = cambios;
     const fila = await prisma.actividad.update({
       where: { id },
-      data: cambios,
-      include: INCLUDE_METAS,
+      data: {
+        ...escalares,
+        ...(puntosAcopioIds !== undefined
+          ? {
+              puntosAcopio: {
+                deleteMany: {},
+                create: puntosAcopioIds.map((puntoAcopioId) => ({
+                  puntoAcopioId,
+                })),
+              },
+            }
+          : {}),
+      },
+      include: INCLUDE_DETALLE,
     });
     return mapearActividad(fila);
   }
@@ -164,7 +207,7 @@ export class PrismaActividadRepository implements ActividadRepository {
     const fila = await prisma.actividad.update({
       where: { id },
       data: { estado },
-      include: INCLUDE_METAS,
+      include: INCLUDE_DETALLE,
     });
     return mapearActividad(fila);
   }

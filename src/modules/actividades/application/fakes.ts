@@ -42,7 +42,12 @@ export class InMemoryActividadRepository implements ActividadRepository {
       estado: Estados.RECOLECTANDO,
       tipo: datos.tipo,
       descripcion: datos.descripcion,
-      puntoAcopioId: datos.puntoAcopioId,
+      puntosAcopio: datos.puntosAcopioIds.map((id) => ({
+        id,
+        nombre: "",
+        referencia: "",
+        horarios: "",
+      })),
       metas: datos.metas.map((m) => this.nuevaMeta(m)),
       createdAt: ahora,
       updatedAt: ahora,
@@ -72,9 +77,21 @@ export class InMemoryActividadRepository implements ActividadRepository {
 
   async actualizarCabecera(id: string, cambios: CambiosActividad): Promise<Actividad> {
     const actual = this.requerir(id);
+    // `puntosAcopioIds` (si viene) reemplaza el conjunto; el resto son escalares.
+    const { puntosAcopioIds, ...escalares } = cambios;
     const actualizado: Actividad = {
       ...actual,
-      ...cambios,
+      ...escalares,
+      ...(puntosAcopioIds !== undefined
+        ? {
+            puntosAcopio: puntosAcopioIds.map((idPunto) => ({
+              id: idPunto,
+              nombre: "",
+              referencia: "",
+              horarios: "",
+            })),
+          }
+        : {}),
       updatedAt: new Date(),
     };
     this.porId.set(id, actualizado);
@@ -127,6 +144,10 @@ export class InMemoryActividadRepository implements ActividadRepository {
 
   // Clona para que los tests no muten el estado interno por referencia.
   private clonar(ayuda: Actividad): Actividad {
-    return { ...ayuda, metas: ayuda.metas.map((m) => ({ ...m })) };
+    return {
+      ...ayuda,
+      metas: ayuda.metas.map((m) => ({ ...m })),
+      puntosAcopio: ayuda.puntosAcopio.map((p) => ({ ...p })),
+    };
   }
 }

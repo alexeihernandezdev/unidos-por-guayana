@@ -88,7 +88,7 @@ export default async function EditarActividadPage({ params }: Props) {
             horaFin: ayuda.horaFin ? horaParaInput(ayuda.horaFin) : "",
             tipo: ayuda.tipo,
             descripcion: ayuda.descripcion ?? "",
-            puntoAcopioId: ayuda.puntoAcopioId ?? "",
+            puntosAcopioIds: ayuda.puntosAcopio.map((p) => p.id),
           }}
           textoEnviar="Guardar cambios"
           textoEnviando="Guardando…"

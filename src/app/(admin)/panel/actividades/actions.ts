@@ -53,8 +53,9 @@ const CabeceraSchema = z.object({
   fecha: FechaSchema,
   horaFin: HoraSchema,
   descripcion: z.string().trim().max(1000).optional().or(z.literal("")),
-  // Id del punto de acopio propio o "" (ninguno). La propiedad la valida el caso de uso.
-  puntoAcopioId: z.string().optional().or(z.literal("")),
+  // Ids de los centros de acopio propios (0..N, feature 026). La propiedad y la
+  // deduplicación las valida el caso de uso.
+  puntosAcopioIds: z.array(z.string()).optional(),
 });
 
 const TipoSchema = z.enum(TIPOS_ACTIVIDAD as unknown as [string, ...string[]], {
@@ -73,7 +74,7 @@ export type ActividadInput = {
   horaFin: string;
   tipo: string;
   descripcion: string;
-  puntoAcopioId: string;
+  puntosAcopioIds: string[];
   metas: { recursoId: string; cantidadObjetivo: number }[];
 };
 
@@ -134,7 +135,7 @@ export async function crearActividadAction(input: ActividadInput): Promise<Resul
       horaFin: parseHoraFin(parsed.data.fecha, parsed.data.horaFin),
       tipo: parsed.data.tipo as (typeof TIPOS_ACTIVIDAD)[number],
       descripcion: parsed.data.descripcion ?? null,
-      puntoAcopioId: parsed.data.puntoAcopioId || null,
+      puntosAcopioIds: parsed.data.puntosAcopioIds ?? [],
       metas: parsed.data.metas,
     });
     revalidatePath(RUTA_LISTADO);
@@ -167,7 +168,7 @@ export async function editarCabeceraAction(
       fecha: parseFecha(parsed.data.fecha),
       horaFin: parseHoraFin(parsed.data.fecha, parsed.data.horaFin),
       descripcion: parsed.data.descripcion ?? null,
-      puntoAcopioId: parsed.data.puntoAcopioId || null,
+      puntosAcopioIds: parsed.data.puntosAcopioIds ?? [],
     });
     revalidatePath(RUTA_LISTADO);
     revalidatePath(`${RUTA_LISTADO}/${id}`);

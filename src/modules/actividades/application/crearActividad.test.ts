@@ -270,10 +270,11 @@ describe("crearActividad", () => {
     expect(jornada.horaFin).toEqual(new Date("2026-09-01T13:00:00.000Z"));
   });
 
-  it("asocia un puntoAcopioId del propio admin", async () => {
+  it("asocia varios puntos de acopio propios (feature 026)", async () => {
     const { deps, agua } = ctx;
     const puntos = new InMemoryPuntoAcopioRepository();
-    const punto = await crearPunto(puntos, "admin-1", "Galpón central");
+    const uno = await crearPunto(puntos, "admin-1", "Galpón central");
+    const dos = await crearPunto(puntos, "admin-1", "Sede norte");
 
     const actividad = await crearActividad(
       { ...deps, puntos },
@@ -283,17 +284,62 @@ describe("crearActividad", () => {
         sectorDestino: "Upata",
         fecha: new Date(),
         tipo: "ENVIO",
-        puntoAcopioId: punto.id,
+        puntosAcopioIds: [uno.id, dos.id],
         metas: [{ recursoId: agua.id, cantidadObjetivo: 10 }],
       },
     );
 
-    expect(actividad.puntoAcopioId).toBe(punto.id);
+    expect(actividad.puntosAcopio.map((p) => p.id).sort()).toEqual(
+      [uno.id, dos.id].sort(),
+    );
   });
 
-  it("rechaza un puntoAcopioId de otro admin", async () => {
+  it("deduplica ids de punto repetidos (feature 026)", async () => {
     const { deps, agua } = ctx;
     const puntos = new InMemoryPuntoAcopioRepository();
+    const uno = await crearPunto(puntos, "admin-1", "Galpón central");
+
+    const actividad = await crearActividad(
+      { ...deps, puntos },
+      {
+        adminId: "admin-1",
+        titulo: "Envío a Upata",
+        sectorDestino: "Upata",
+        fecha: new Date(),
+        tipo: "ENVIO",
+        puntosAcopioIds: [uno.id, uno.id],
+        metas: [{ recursoId: agua.id, cantidadObjetivo: 10 }],
+      },
+    );
+
+    expect(actividad.puntosAcopio).toHaveLength(1);
+    expect(actividad.puntosAcopio[0]!.id).toBe(uno.id);
+  });
+
+  it("permite crear sin centros de acopio (feature 026)", async () => {
+    const { deps, agua } = ctx;
+    const puntos = new InMemoryPuntoAcopioRepository();
+
+    const actividad = await crearActividad(
+      { ...deps, puntos },
+      {
+        adminId: "admin-1",
+        titulo: "Actividad informativa",
+        sectorDestino: "Upata",
+        fecha: new Date(),
+        tipo: "ENVIO",
+        puntosAcopioIds: [],
+        metas: [{ recursoId: agua.id, cantidadObjetivo: 10 }],
+      },
+    );
+
+    expect(actividad.puntosAcopio).toEqual([]);
+  });
+
+  it("rechaza si algún punto es de otro admin (feature 026)", async () => {
+    const { deps, agua } = ctx;
+    const puntos = new InMemoryPuntoAcopioRepository();
+    const propio = await crearPunto(puntos, "admin-1", "Galpón central");
     const ajeno = await crearPunto(puntos, "admin-2", "Punto ajeno");
 
     await expect(
@@ -305,7 +351,7 @@ describe("crearActividad", () => {
           sectorDestino: "Upata",
           fecha: new Date(),
           tipo: "ENVIO",
-          puntoAcopioId: ajeno.id,
+          puntosAcopioIds: [propio.id, ajeno.id],
           metas: [{ recursoId: agua.id, cantidadObjetivo: 10 }],
         },
       ),

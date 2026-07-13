@@ -28,6 +28,22 @@ export function hayRecursosRepetidos(recursoIds: readonly string[]): boolean {
   return new Set(recursoIds).size !== recursoIds.length;
 }
 
+/**
+ * Normaliza una lista de ids de puntos de acopio (feature 026): recorta cada id,
+ * descarta vacíos y elimina duplicados conservando el primer orden de aparición.
+ */
+export function dedupeIds(ids: readonly string[]): string[] {
+  const vistos = new Set<string>();
+  const resultado: string[] = [];
+  for (const bruto of ids) {
+    const id = bruto.trim();
+    if (!id || vistos.has(id)) continue;
+    vistos.add(id);
+    resultado.push(id);
+  }
+  return resultado;
+}
+
 // Descripción opcional: recorta y convierte "" en null para no guardar vacíos.
 export function normalizarDescripcion(
   descripcion?: string | null,
