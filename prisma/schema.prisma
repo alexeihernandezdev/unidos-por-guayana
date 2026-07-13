@@ -177,10 +177,10 @@ model PuntoAcopio {
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
-  // Actividades que se reciben o se realizan en este punto (feature 024,
-  // relación opcional). No hay cascada: al archivar/borrar un punto la actividad
-  // conserva la referencia como nula (ON DELETE SET NULL).
-  actividades Actividad[]
+  // Actividades que se reciben o se realizan en este punto. Desde la feature 026 la
+  // relación es muchos a muchos a través de la tabla puente `ActividadPuntoAcopio`
+  // (una actividad puede asignar varios puntos). Cascada al archivar/borrar el punto.
+  actividades ActividadPuntoAcopio[]
 
   @@unique([adminId, nombre])
   @@index([adminId])
@@ -333,11 +333,10 @@ model Actividad {
   estado        EstadoActividad @default(RECOLECTANDO)
   tipo          TipoActividad   @default(ENVIO)
   descripcion   String?
-  // Punto de acopio opcional del mismo ADMIN dueño (feature 024): dónde se recibe el
-  // aporte o dónde ocurre la jornada/evento. Nullable; ON DELETE SET NULL para no
-  // perder la actividad si el punto se elimina.
-  puntoAcopioId String?
-  puntoAcopio   PuntoAcopio?    @relation(fields: [puntoAcopioId], references: [id], onDelete: SetNull)
+  // Puntos de acopio del mismo ADMIN dueño donde se recibe el aporte o se realiza la
+  // actividad. Desde la feature 026 son varios (0..N) a través de la tabla puente
+  // `ActividadPuntoAcopio` (antes era un `puntoAcopioId` único opcional de la 024).
+  puntosAcopio  ActividadPuntoAcopio[]
   metas         MetaRecurso[]
   aportes       Aporte[]
   createdAt     DateTime        @default(now())
@@ -347,8 +346,25 @@ model Actividad {
   @@index([tipo])
   @@index([estado])
   @@index([fecha])
-  @@index([puntoAcopioId])
   @@map("actividades")
+}
+
+// Puente Actividad <-> PuntoAcopio (feature 026): a qué centros de acopio del ADMIN
+// dueño se asigna una actividad, para que el colaborador sepa dónde entregar. Sin
+// estado (existir la fila = asignado). Única por (actividad, punto); se borra en
+// cascada con cualquiera de los dos lados.
+model ActividadPuntoAcopio {
+  id            String      @id @default(cuid())
+  actividadId   String
+  actividad     Actividad   @relation(fields: [actividadId], references: [id], onDelete: Cascade)
+  puntoAcopioId String
+  puntoAcopio   PuntoAcopio @relation(fields: [puntoAcopioId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+
+  @@unique([actividadId, puntoAcopioId])
+  @@index([actividadId])
+  @@index([puntoAcopioId])
+  @@map("actividad_punto_acopio")
 }
 
 // MetaRecurso: puente entre `Actividad` y `Recurso`. `cantidadObjetivo` es cuánto

@@ -22,10 +22,20 @@ export type MetaRecurso = {
   recurso: RecursoDeMeta | null;
 };
 
+// Punto de acopio asignado a una actividad (feature 026). Datos mínimos para el
+// bloque "Dónde entregar" del detalle; el modelo completo del punto vive en el
+// módulo `acopio` (feature 011). Se enriquece al leer con detalle.
+export type PuntoAcopioDeActividad = {
+  id: string;
+  nombre: string;
+  referencia: string;
+  horarios: string;
+};
+
 // Actividad: la entidad central (antes `Ayuda`). Nace en `RECOLECTANDO` y avanza por
 // la máquina de estados de su `tipo` (ver `maquinaEstados.ts`). `adminId` es el dueño
-// (ADMIN que la creó); inmutable tras el alta (feature 022). `horaFin` y
-// `puntoAcopioId` son opcionales (feature 024).
+// (ADMIN que la creó); inmutable tras el alta (feature 022). `horaFin` es opcional
+// (feature 024). `puntosAcopio` son los centros asignados (0..N, feature 026).
 export type Actividad = {
   id: string;
   adminId: string;
@@ -36,7 +46,7 @@ export type Actividad = {
   estado: EstadoActividad;
   tipo: TipoActividad;
   descripcion: string | null;
-  puntoAcopioId: string | null;
+  puntosAcopio: PuntoAcopioDeActividad[];
   metas: MetaRecurso[];
   createdAt: Date;
   updatedAt: Date;
@@ -51,7 +61,8 @@ export type NuevaMeta = {
 // Datos para dar de alta una Actividad con sus metas iniciales. `estado` no se pide:
 // nace en `RECOLECTANDO` por defecto (ver schema). `tipo` sí se pide: lo elige el
 // ADMIN al iniciar el alta (feature 018) y es inmutable después. `adminId` es el
-// dueño (feature 022). `horaFin` y `puntoAcopioId` son opcionales (feature 024).
+// dueño (feature 022). `horaFin` es opcional (feature 024). `puntosAcopioIds` son los
+// ids de los centros asignados (0..N, feature 026; el caso de uso los valida).
 export type NuevaActividad = {
   adminId: string;
   titulo: string;
@@ -60,18 +71,20 @@ export type NuevaActividad = {
   horaFin: Date | null;
   tipo: TipoActividad;
   descripcion: string | null;
-  puntoAcopioId: string | null;
+  puntosAcopioIds: string[];
   metas: NuevaMeta[];
 };
 
 // Cambios aplicables a la cabecera de una Actividad (solo en `RECOLECTANDO`). Todos
 // opcionales: se actualiza solo lo que venga. El `estado` se mueve por la máquina de
 // estados (caso de uso `avanzarEstado`), no por aquí.
+// `puntosAcopioIds`, si viene, reemplaza el conjunto completo de centros asignados
+// (feature 026); ausente = no se tocan.
 export type CambiosActividad = Partial<{
   titulo: string;
   sectorDestino: string;
   fecha: Date;
   horaFin: Date | null;
   descripcion: string | null;
-  puntoAcopioId: string | null;
+  puntosAcopioIds: string[];
 }>;

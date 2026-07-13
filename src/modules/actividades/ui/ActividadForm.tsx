@@ -1,15 +1,28 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import type { ReactNode } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import {
+  CalendarClock,
+  ChevronDown,
+  Package,
+  Plus,
+  Trash2,
+  Users,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import {
   TIPOS_ACTIVIDAD,
   TipoActividad,
 } from "@/modules/actividades/domain/TipoActividad";
 import type { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
+import type { MiembroRedApto } from "@/modules/afiliaciones/application/consultarRed";
+import { RedAptaLista } from "@/modules/afiliaciones/ui/RedAptaLista";
+import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
+import { Checkbox } from "@/shared/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -49,13 +62,27 @@ export type ActividadFormValores = {
   // cabecera es inmutable y el form omite el campo.
   tipo: TipoActividad;
   descripcion: string;
-  // Punto de acopio opcional del propio ADMIN (feature 024). "" = ninguno.
-  puntoAcopioId: string;
+  // Puntos de acopio propios asignados (0..N, feature 026). Vacío = ninguno.
+  puntosAcopioIds: string[];
   metas: MetaValor[];
 };
 
-// Valor centinela para "sin punto de acopio" en el Select (no admite value="").
-const SIN_PUNTO = "__ninguno__";
+// Presentación del selector de tipo (feature 026): icono y micro-descripción por
+// cada tipo. La etiqueta la da `etiquetaTipo` (único punto de verdad, tipos.ts).
+const TIPO_INFO: Record<TipoActividad, { icono: LucideIcon; descripcion: string }> = {
+  [TipoActividad.ENVIO]: {
+    icono: Package,
+    descripcion: "Recolectas recursos y los llevas a un sector.",
+  },
+  [TipoActividad.JORNADA]: {
+    icono: CalendarClock,
+    descripcion: "Actividad en sitio, con fecha y hora de fin.",
+  },
+  [TipoActividad.EVENTO_SOCIAL]: {
+    icono: Users,
+    descripcion: "Encuentro comunitario en un punto.",
+  },
+};
 
 type Props = {
   // El server action se recibe como prop desde la página (server component), así el
@@ -72,6 +99,9 @@ type Props = {
   // Conteo de colaboradores VERIFICADOS de la red del admin por categoría de
   // recurso (feature 025). Se muestra al elegir el recurso de una meta.
   conteosPorCategoria?: Record<CategoriaRecurso, number>;
+  // Red del admin agrupada por categoría (feature 026): al pulsar "+ info" en una
+  // meta se despliega la lista de aptos de la categoría del recurso.
+  redPorCategoria?: Partial<Record<CategoriaRecurso, MiembroRedApto[]>>;
   // Si es `true`, incluye la lista dinámica de metas (alta). Si es `false`, solo
   // edita la cabecera.
   conMetas?: boolean;
@@ -81,7 +111,43 @@ type Props = {
 };
 
 const campo =
-  "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive";
+  "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors ease-[var(--ease-out-emil)] focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive";
+
+// Fila de sección en dos paneles: la etiqueta y su pista a la izquierda, los campos
+// a la derecha. En pantallas anchas aprovecha el espacio horizontal (grid 1:3) en
+// vez de apilar todo en una columna (feature 026).
+function Seccion({
+  titulo,
+  pista,
+  primera,
+  children,
+}: {
+  titulo: string;
+  pista?: string;
+  primera?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <section
+      className={cn(
+        "grid gap-x-10 gap-y-4 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)]",
+        !primera && "border-t border-border pt-8",
+      )}
+    >
+      <div className="flex flex-col gap-1">
+        <h2 className="text-sm font-semibold tracking-tight text-foreground">
+          {titulo}
+        </h2>
+        {pista && (
+          <p className="max-w-[38ch] text-xs text-muted-foreground [text-wrap:pretty]">
+            {pista}
+          </p>
+        )}
+      </div>
+      <div className="flex flex-col gap-4">{children}</div>
+    </section>
+  );
+}
 
 function hoyISO(): string {
   return new Date().toISOString().slice(0, 10);
@@ -92,6 +158,7 @@ export function ActividadForm({
   recursos,
   puntosAcopio = [],
   conteosPorCategoria,
+  redPorCategoria,
   conMetas = false,
   valoresIniciales,
   textoEnviar,
@@ -100,6 +167,8 @@ export function ActividadForm({
   const router = useRouter();
   const [pendiente, startTransition] = useTransition();
   const [errorServidor, setErrorServidor] = useState<string | null>(null);
+  // Índices de meta cuya lista "+ info" de red está desplegada.
+  const [redAbierta, setRedAbierta] = useState<Set<number>>(new Set());
 
   const {
     register,
@@ -114,7 +183,7 @@ export function ActividadForm({
       horaFin: valoresIniciales?.horaFin ?? "",
       tipo: valoresIniciales?.tipo ?? TipoActividad.ENVIO,
       descripcion: valoresIniciales?.descripcion ?? "",
-      puntoAcopioId: valoresIniciales?.puntoAcopioId ?? "",
+      puntosAcopioIds: valoresIniciales?.puntosAcopioIds ?? [],
       metas:
         valoresIniciales?.metas ??
         (conMetas && recursos[0]
@@ -146,165 +215,230 @@ export function ActividadForm({
   });
 
   return (
-    <form onSubmit={onSubmit} className="flex w-full max-w-2xl flex-col gap-4">
+    <form onSubmit={onSubmit} className="flex w-full flex-col gap-8">
       {conMetas && (
-        <div className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium">Tipo de actividad</span>
+        <fieldset className="flex flex-col gap-3">
+          <legend className="mb-3 text-sm font-semibold tracking-tight text-foreground">
+            Tipo de actividad
+          </legend>
           <Controller
             control={control}
             name="tipo"
             rules={{ required: "Elige el tipo de actividad." }}
             render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger
-                  aria-label="Tipo de actividad"
-                  aria-invalid={Boolean(errors.tipo)}
-                  className="w-full"
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIPOS_ACTIVIDAD.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {etiquetaTipo(t)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div
+                role="radiogroup"
+                aria-label="Tipo de actividad"
+                className="grid gap-3 sm:grid-cols-3"
+              >
+                {TIPOS_ACTIVIDAD.map((t) => {
+                  const seleccionado = field.value === t;
+                  const { icono: Icono, descripcion } = TIPO_INFO[t];
+                  return (
+                    <button
+                      type="button"
+                      key={t}
+                      role="radio"
+                      aria-checked={seleccionado}
+                      onClick={() => field.onChange(t)}
+                      className={cn(
+                        "focus-ring flex flex-col gap-2.5 rounded-lg border p-4 text-left",
+                        "transition-[color,background-color,border-color,box-shadow,transform] duration-200 ease-[var(--ease-out-emil)]",
+                        "active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100",
+                        seleccionado
+                          ? "border-primary/60 bg-primary/5 ring-1 ring-primary/30"
+                          : "border-border hover:border-foreground/25 hover:bg-muted/40",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "flex size-9 items-center justify-center rounded-md border transition-colors duration-200 ease-[var(--ease-out-emil)]",
+                          seleccionado
+                            ? "border-primary/40 bg-primary/10 text-primary-ink"
+                            : "border-border bg-muted text-foreground/70",
+                        )}
+                      >
+                        <Icono className="size-4" strokeWidth={1.5} aria-hidden />
+                      </span>
+                      <span className="flex flex-col gap-0.5">
+                        <span className="text-sm font-medium text-foreground">
+                          {etiquetaTipo(t)}
+                        </span>
+                        <span className="text-xs text-muted-foreground [text-wrap:pretty]">
+                          {descripcion}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             )}
           />
-        </div>
+          {errors.tipo && (
+            <p className="text-sm text-destructive">{errors.tipo.message}</p>
+          )}
+        </fieldset>
       )}
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="titulo" className="text-sm font-medium">
-          Título
-        </label>
-        <input
-          id="titulo"
-          className={campo}
-          placeholder="Envío a Upata, agua y alimentos"
-          aria-invalid={Boolean(errors.titulo)}
-          {...register("titulo", {
-            required: "Indica un título para la actividad.",
-            setValueAs: (v: string) => v.trim(),
-          })}
-        />
-        {errors.titulo && (
-          <p className="text-sm text-destructive">{errors.titulo.message}</p>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-4 sm:flex-row">
-        <div className="flex flex-1 flex-col gap-1.5">
-          <label htmlFor="sectorDestino" className="text-sm font-medium">
-            Sector de destino
-          </label>
-          <input
-            id="sectorDestino"
-            className={campo}
-            placeholder="Upata, San Félix…"
-            aria-invalid={Boolean(errors.sectorDestino)}
-            {...register("sectorDestino", {
-              required: "Indica el sector de destino.",
-              setValueAs: (v: string) => v.trim(),
-            })}
-          />
-          {errors.sectorDestino && (
-            <p className="text-sm text-destructive">
-              {errors.sectorDestino.message}
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="fecha" className="text-sm font-medium">
-            Fecha de inicio
-          </label>
-          <input
-            id="fecha"
-            type="date"
-            className={campo}
-            aria-invalid={Boolean(errors.fecha)}
-            {...register("fecha", { required: "Indica la fecha de inicio." })}
-          />
-          {errors.fecha && (
-            <p className="text-sm text-destructive">{errors.fecha.message}</p>
-          )}
-        </div>
-
-        {muestraHoraFin && (
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="horaFin" className="text-sm font-medium">
-              Hora de fin{" "}
-              <span className="text-muted-foreground">(opcional)</span>
+      <Seccion
+        titulo="Detalles"
+        pista="Qué es, a dónde va y cuándo."
+        primera={!conMetas}
+      >
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
+            <label
+              htmlFor="titulo"
+              className="text-sm font-medium text-foreground"
+            >
+              Título
             </label>
             <input
-              id="horaFin"
-              type="time"
+              id="titulo"
               className={campo}
-              {...register("horaFin")}
+              placeholder="Envío a Upata, agua y alimentos"
+              aria-invalid={Boolean(errors.titulo)}
+              {...register("titulo", {
+                required: "Indica un título para la actividad.",
+                setValueAs: (v: string) => v.trim(),
+              })}
+            />
+            {errors.titulo && (
+              <p className="text-sm text-destructive">{errors.titulo.message}</p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="sectorDestino"
+              className="text-sm font-medium text-foreground"
+            >
+              Sector de destino
+            </label>
+            <input
+              id="sectorDestino"
+              className={campo}
+              placeholder="Upata, San Félix…"
+              aria-invalid={Boolean(errors.sectorDestino)}
+              {...register("sectorDestino", {
+                required: "Indica el sector de destino.",
+                setValueAs: (v: string) => v.trim(),
+              })}
+            />
+            {errors.sectorDestino && (
+              <p className="text-sm text-destructive">
+                {errors.sectorDestino.message}
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="fecha" className="text-sm font-medium text-foreground">
+              Fecha de inicio
+            </label>
+            <input
+              id="fecha"
+              type="date"
+              className={`${campo} numeric-tnum`}
+              aria-invalid={Boolean(errors.fecha)}
+              {...register("fecha", { required: "Indica la fecha de inicio." })}
+            />
+            {errors.fecha && (
+              <p className="text-sm text-destructive">{errors.fecha.message}</p>
+            )}
+          </div>
+
+          {muestraHoraFin && (
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="horaFin"
+                className="text-sm font-medium text-foreground"
+              >
+                Hora de fin{" "}
+                <span className="font-normal text-muted-foreground">
+                  (opcional)
+                </span>
+              </label>
+              <input
+                id="horaFin"
+                type="time"
+                className={`${campo} numeric-tnum`}
+                {...register("horaFin")}
+              />
+            </div>
+          )}
+
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
+            <label
+              htmlFor="descripcion"
+              className="text-sm font-medium text-foreground"
+            >
+              Descripción{" "}
+              <span className="font-normal text-muted-foreground">(opcional)</span>
+            </label>
+            <textarea
+              id="descripcion"
+              rows={3}
+              className={campo}
+              {...register("descripcion")}
             />
           </div>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="descripcion" className="text-sm font-medium">
-          Descripción <span className="text-muted-foreground">(opcional)</span>
-        </label>
-        <textarea
-          id="descripcion"
-          rows={3}
-          className={campo}
-          {...register("descripcion")}
-        />
-      </div>
+        </div>
+      </Seccion>
 
       {puntosAcopio.length > 0 && (
-        <div className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium">
-            Punto de acopio{" "}
-            <span className="text-muted-foreground">(opcional)</span>
-          </span>
+        <Seccion
+          titulo="Centros de acopio"
+          pista="Dónde se recibe el aporte o se realiza. El colaborador los verá para saber a dónde llevarlo. Opcional, solo tus puntos activos."
+        >
           <Controller
             control={control}
-            name="puntoAcopioId"
-            render={({ field }) => (
-              <Select
-                value={field.value === "" ? SIN_PUNTO : field.value}
-                onValueChange={(v) =>
-                  field.onChange(v === SIN_PUNTO ? "" : v)
-                }
-              >
-                <SelectTrigger aria-label="Punto de acopio" className="w-full">
-                  <SelectValue placeholder="Sin punto de acopio" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={SIN_PUNTO}>Sin punto de acopio</SelectItem>
-                  {puntosAcopio.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.nombre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            name="puntosAcopioIds"
+            render={({ field }) => {
+              const seleccion = field.value ?? [];
+              const alternar = (id: string, marcado: boolean) => {
+                field.onChange(
+                  marcado
+                    ? [...seleccion, id]
+                    : seleccion.filter((x) => x !== id),
+                );
+              };
+              return (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {puntosAcopio.map((p) => {
+                    const marcado = seleccion.includes(p.id);
+                    return (
+                      <label
+                        key={p.id}
+                        className={cn(
+                          "flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2.5 text-sm",
+                          "transition-colors duration-200 ease-[var(--ease-out-emil)]",
+                          marcado
+                            ? "border-primary/50 bg-primary/5"
+                            : "border-border hover:border-foreground/25 hover:bg-muted/40",
+                        )}
+                      >
+                        <Checkbox
+                          checked={marcado}
+                          onCheckedChange={(v) => alternar(p.id, v === true)}
+                          aria-label={p.nombre}
+                        />
+                        <span className="text-foreground">{p.nombre}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              );
+            }}
           />
-          <p className="text-sm text-muted-foreground">
-            Dónde se recibe el aporte o se realiza la actividad. Solo tus puntos
-            activos.
-          </p>
-        </div>
+        </Seccion>
       )}
 
       {conMetas && (
-        <fieldset className="flex flex-col gap-3 border-t border-border pt-4">
-          <legend className="text-sm font-medium">Crear recurso</legend>
-          <p className="text-sm text-muted-foreground">
-            Qué necesita la actividad y cuánto, con los recursos activos del catálogo.
-          </p>
-
+        <Seccion
+          titulo="Qué se necesita"
+          pista="Los recursos y cuánto, con el catálogo activo. Puedes ver quién de tu red puede aportar cada uno."
+        >
           {sinRecursos ? (
             <p className="text-sm text-destructive">
               No hay recursos activos en el catálogo. Crea alguno antes de definir
@@ -316,9 +450,9 @@ export function ActividadForm({
                 {fields.map((field, index) => (
                   <li
                     key={field.id}
-                    className="flex flex-wrap items-end gap-3 sm:flex-nowrap"
+                    className="grid grid-cols-1 gap-3 rounded-lg border border-border p-3 sm:grid-cols-[minmax(0,1fr)_8rem_auto] sm:items-start"
                   >
-                    <div className="flex min-w-40 flex-1 flex-col gap-1.5">
+                    <div className="flex min-w-0 flex-col gap-1.5">
                       <span className="text-xs font-medium text-muted-foreground">
                         Recurso
                       </span>
@@ -334,6 +468,17 @@ export function ActividadForm({
                             recursoSel && conteosPorCategoria
                               ? conteosPorCategoria[recursoSel.categoria]
                               : undefined;
+                          const miembros = recursoSel
+                            ? (redPorCategoria?.[recursoSel.categoria] ?? [])
+                            : [];
+                          const abierto = redAbierta.has(index);
+                          const alternarInfo = () =>
+                            setRedAbierta((prev) => {
+                              const siguiente = new Set(prev);
+                              if (siguiente.has(index)) siguiente.delete(index);
+                              else siguiente.add(index);
+                              return siguiente;
+                            });
                           return (
                             <>
                               <Select
@@ -358,11 +503,41 @@ export function ActividadForm({
                                 </SelectContent>
                               </Select>
                               {aptos !== undefined && (
-                                <span className="text-xs text-muted-foreground">
-                                  {aptos === 0
-                                    ? "Nadie de tu red declaró poder aportar esto todavía."
-                                    : `${aptos} de tu red ${aptos === 1 ? "puede" : "pueden"} aportar esto.`}
-                                </span>
+                                <div className="flex flex-col gap-1.5">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span className="text-xs text-muted-foreground">
+                                      {aptos === 0
+                                        ? "Nadie de tu red declaró poder aportar esto todavía."
+                                        : `${aptos} de tu red ${aptos === 1 ? "puede" : "pueden"} aportar esto.`}
+                                    </span>
+                                    {miembros.length > 0 && (
+                                      <button
+                                        type="button"
+                                        onClick={alternarInfo}
+                                        aria-expanded={abierto}
+                                        className="focus-ring inline-flex items-center gap-1 rounded-md text-xs font-medium text-accent"
+                                      >
+                                        <Users
+                                          className="size-3.5"
+                                          strokeWidth={1.5}
+                                          aria-hidden
+                                        />
+                                        {abierto ? "Ocultar" : "+ info"}
+                                        <ChevronDown
+                                          className={cn(
+                                            "size-3.5 transition-transform duration-200 ease-[var(--ease-out-emil)] motion-reduce:transition-none",
+                                            abierto && "rotate-180",
+                                          )}
+                                          strokeWidth={1.5}
+                                          aria-hidden
+                                        />
+                                      </button>
+                                    )}
+                                  </div>
+                                  {abierto && miembros.length > 0 && (
+                                    <RedAptaLista miembros={miembros} />
+                                  )}
+                                </div>
                               )}
                             </>
                           );
@@ -370,7 +545,7 @@ export function ActividadForm({
                       />
                     </div>
 
-                    <div className="flex w-32 flex-col gap-1.5">
+                    <div className="flex flex-col gap-1.5">
                       <label
                         htmlFor={`meta-cantidad-${index}`}
                         className="text-xs font-medium text-muted-foreground"
@@ -401,6 +576,7 @@ export function ActividadForm({
                       aria-label="Quitar meta"
                       onClick={() => remove(index)}
                       disabled={fields.length <= 1}
+                      className="justify-self-end sm:mt-6"
                     >
                       <Trash2 strokeWidth={1.5} />
                     </Button>
@@ -420,23 +596,29 @@ export function ActividadForm({
                     })
                   }
                 >
+                  <Plus strokeWidth={1.5} />
                   Añadir recurso
                 </Button>
               </div>
             </>
           )}
-        </fieldset>
+        </Seccion>
       )}
 
       {errorServidor && (
-        <p className="text-sm text-destructive" role="alert">
+        <p
+          className="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+          role="alert"
+        >
           {errorServidor}
         </p>
       )}
 
-      <Button type="submit" disabled={pendiente || sinRecursos}>
-        {pendiente ? textoEnviandoDinamico : textoEnviarDinamico}
-      </Button>
+      <div className="flex border-t border-border pt-6">
+        <Button type="submit" disabled={pendiente || sinRecursos}>
+          {pendiente ? textoEnviandoDinamico : textoEnviarDinamico}
+        </Button>
+      </div>
     </form>
   );
 }

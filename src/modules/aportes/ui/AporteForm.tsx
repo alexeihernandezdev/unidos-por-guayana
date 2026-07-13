@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/shared/ui/button";
 import {
   Select,
@@ -84,9 +85,9 @@ export function AporteForm({ action, opciones, volverHref }: Props) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex w-full max-w-lg flex-col gap-4">
+    <form onSubmit={onSubmit} className="flex w-full max-w-lg flex-col gap-5">
       <div className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium">Recurso</span>
+        <span className="text-sm font-medium text-foreground">Recurso</span>
         <Controller
           control={control}
           name="recursoId"
@@ -116,8 +117,11 @@ export function AporteForm({ action, opciones, volverHref }: Props) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="cantidad" className="text-sm font-medium">
-          Cantidad {unidad ? `(${unidad})` : ""}
+        <label htmlFor="cantidad" className="text-sm font-medium text-foreground">
+          Cantidad{" "}
+          {unidad && (
+            <span className="font-normal text-muted-foreground">({unidad})</span>
+          )}
         </label>
         <input
           id="cantidad"
@@ -125,7 +129,7 @@ export function AporteForm({ action, opciones, volverHref }: Props) {
           inputMode="decimal"
           step="0.01"
           min="0.01"
-          className={campo}
+          className={`${campo} numeric-tnum`}
           aria-invalid={Boolean(errors.cantidad)}
           {...register("cantidad", {
             required: "Indica una cantidad.",
@@ -140,28 +144,34 @@ export function AporteForm({ action, opciones, volverHref }: Props) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="nota" className="text-sm font-medium">
-          Nota (opcional)
+        <label htmlFor="nota" className="text-sm font-medium text-foreground">
+          Nota <span className="font-normal text-muted-foreground">(opcional)</span>
         </label>
         <textarea
           id="nota"
           rows={3}
           maxLength={500}
           className={campo}
-          placeholder="Ej.: lo llevo el sábado al punto de acopio."
+          placeholder="Ej.: lo llevo el sábado al centro de acopio."
           {...register("nota")}
         />
       </div>
 
       {errorServidor && (
-        <p className="text-sm text-destructive" role="alert">
+        <p
+          className="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+          role="alert"
+        >
           {errorServidor}
         </p>
       )}
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 pt-1">
         <Button type="submit" disabled={pendiente}>
           {pendiente ? "Enviando…" : "Registrar aporte"}
+        </Button>
+        <Button asChild variant="ghost" type="button">
+          <Link href={volverHref}>Cancelar</Link>
         </Button>
       </div>
     </form>

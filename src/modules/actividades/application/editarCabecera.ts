@@ -9,7 +9,7 @@ import {
 import {
   type ActividadDeps,
   assertEsDueño,
-  validarPuntoAcopio,
+  validarPuntosAcopio,
 } from "./deps";
 import { ActividadNoEditableError, ActividadNoEncontradaError } from "./errors";
 import { DatosActividadInvalidosError } from "./errors";
@@ -20,7 +20,8 @@ export type EditarCabeceraInput = {
   fecha?: Date;
   horaFin?: Date | null;
   descripcion?: string | null;
-  puntoAcopioId?: string | null;
+  // Si viene, reemplaza el conjunto de centros asignados (0..N, feature 026).
+  puntosAcopioIds?: string[];
 };
 
 /**
@@ -78,11 +79,12 @@ export async function editarCabecera(
     cambios.descripcion = normalizarDescripcion(input.descripcion);
   }
 
-  if (input.puntoAcopioId !== undefined) {
-    if (input.puntoAcopioId) {
-      await validarPuntoAcopio(puntos, input.puntoAcopioId, adminId);
-    }
-    cambios.puntoAcopioId = input.puntoAcopioId;
+  if (input.puntosAcopioIds !== undefined) {
+    cambios.puntosAcopioIds = await validarPuntosAcopio(
+      puntos,
+      input.puntosAcopioIds,
+      adminId,
+    );
   }
 
   return actividades.actualizarCabecera(id, cambios);

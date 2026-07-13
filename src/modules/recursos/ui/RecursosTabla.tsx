@@ -12,7 +12,8 @@ type Props = {
   activarAction: (formData: FormData) => Promise<void>;
 };
 
-const celda = "px-3 py-2 text-sm align-middle";
+const celda = "px-3 py-3 text-sm align-middle";
+const encabezado = "px-3 pb-2 text-xs font-medium text-muted-foreground";
 
 export function RecursosTabla({
   recursos,
@@ -31,13 +32,13 @@ export function RecursosTabla({
     <div className="w-full overflow-x-auto">
       <table className="w-full border-collapse">
         <thead>
-          <tr className="border-b border-border text-left text-xs font-medium tracking-wide text-muted-foreground uppercase">
-            <th className={celda}>Nombre</th>
-            <th className={celda}>Unidad</th>
-            <th className={celda}>Categoría</th>
-            <th className={celda}>Aprobación</th>
-            <th className={celda}>Estado</th>
-            <th className={`${celda} text-right`}>Acciones</th>
+          <tr className="border-b border-border text-left">
+            <th className={encabezado}>Nombre</th>
+            <th className={encabezado}>Unidad</th>
+            <th className={encabezado}>Categoría</th>
+            <th className={encabezado}>Aprobación</th>
+            <th className={encabezado}>Estado</th>
+            <th className={`${encabezado} text-right`}>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -47,9 +48,11 @@ export function RecursosTabla({
               className="border-b border-border/60 last:border-0"
             >
               <td className={celda}>
-                <span className="font-medium">{recurso.nombre}</span>
+                <span className="font-medium text-foreground">
+                  {recurso.nombre}
+                </span>
                 {recurso.descripcion && (
-                  <span className="block text-xs text-muted-foreground">
+                  <span className="block text-xs text-muted-foreground [text-wrap:pretty]">
                     {recurso.descripcion}
                   </span>
                 )}

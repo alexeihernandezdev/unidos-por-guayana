@@ -12,7 +12,8 @@ type Props = {
   cancelarAporteAction: (formData: FormData) => Promise<void>;
 };
 
-const celda = "px-3 py-2 text-sm align-middle";
+const celda = "px-3 py-3 text-sm align-middle";
+const encabezado = "px-3 pb-2 text-xs font-medium text-muted-foreground";
 
 function formatearNumero(n: number): string {
   return new Intl.NumberFormat("es-VE", { maximumFractionDigits: 2 }).format(n);
@@ -36,13 +37,13 @@ export function AportesTabla({
     <div className="w-full overflow-x-auto">
       <table className="w-full border-collapse">
         <thead>
-          <tr className="border-b border-border text-left text-xs font-medium tracking-wide text-muted-foreground uppercase">
-            <th className={celda}>Colaborador</th>
-            <th className={celda}>Recurso</th>
-            <th className={celda}>Cantidad</th>
-            <th className={celda}>Nota</th>
-            <th className={celda}>Estado</th>
-            <th className={celda}>Acciones</th>
+          <tr className="border-b border-border text-left">
+            <th className={encabezado}>Colaborador</th>
+            <th className={encabezado}>Recurso</th>
+            <th className={`${encabezado} text-right`}>Cantidad</th>
+            <th className={encabezado}>Nota</th>
+            <th className={encabezado}>Estado</th>
+            <th className={encabezado}>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -53,7 +54,7 @@ export function AportesTabla({
             >
               <td className={celda}>
                 <div className="flex flex-col gap-0.5">
-                  <span className="font-medium">
+                  <span className="font-medium text-foreground">
                     {a.colaborador?.nombre ?? "(colaborador)"}
                   </span>
                   <span className="text-xs text-muted-foreground">
@@ -61,9 +62,14 @@ export function AportesTabla({
                   </span>
                 </div>
               </td>
-              <td className={celda}>{a.recurso?.nombre ?? "(recurso)"}</td>
-              <td className={`${celda} numeric-tnum`}>
-                {formatearNumero(a.cantidad)} {a.recurso?.unidad ?? ""}
+              <td className={`${celda} text-foreground`}>
+                {a.recurso?.nombre ?? "(recurso)"}
+              </td>
+              <td className={`${celda} numeric-tnum text-right`}>
+                {formatearNumero(a.cantidad)}{" "}
+                <span className="text-muted-foreground">
+                  {a.recurso?.unidad ?? ""}
+                </span>
               </td>
               <td className={`${celda} text-muted-foreground`}>
                 {a.nota ?? ""}

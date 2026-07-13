@@ -11,12 +11,12 @@ import { PrismaClient } from "../src/generated/prisma/client";
 // (adminId, nombre) del punto.
 //
 // Cuentas: admin1@test.com … admin5@test.com y colaborador1@test.com,
-// todas con contraseña 12345678.
+// todas con contraseña 123.
 //
 // Ejecutar con: `pnpm db:seed:dev` (requiere el catálogo de ubicación ya
 // sembrado: `pnpm db:seed` primero).
 
-const PASSWORD = "12345678";
+const PASSWORD = "123";
 
 type SemillaPunto = {
   nombre: string;

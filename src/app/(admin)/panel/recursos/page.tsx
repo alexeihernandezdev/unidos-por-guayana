@@ -29,10 +29,10 @@ export default async function RecursosPage({ searchParams }: Props) {
   const recursos = await listarRecursosServicio(filtro);
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 p-6 md:p-8">
+    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 p-6 md:p-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">
+        <div className="flex flex-col gap-1.5">
+          <h1 className="font-serif text-3xl font-semibold tracking-tight md:text-4xl">
             Catálogo de recursos
           </h1>
           <p className="text-sm text-muted-foreground">

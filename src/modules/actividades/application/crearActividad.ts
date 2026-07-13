@@ -10,7 +10,7 @@ import {
   type TipoActividad,
   esTipoActividad,
 } from "@/modules/actividades/domain/TipoActividad";
-import { type ActividadDeps, validarMeta, validarPuntoAcopio } from "./deps";
+import { type ActividadDeps, validarMeta, validarPuntosAcopio } from "./deps";
 import { DatosActividadInvalidosError } from "./errors";
 
 export type CrearActividadInput = {
@@ -22,7 +22,8 @@ export type CrearActividadInput = {
   horaFin?: Date | null;
   tipo: TipoActividad;
   descripcion?: string | null;
-  puntoAcopioId?: string | null;
+  // Ids de los centros de acopio propios donde se recibe/realiza (0..N, feature 026).
+  puntosAcopioIds?: string[];
   metas: { recursoId: string; cantidadObjetivo: number }[];
 };
 
@@ -73,10 +74,11 @@ export async function crearActividad(
     await validarMeta(recursos, meta.recursoId, meta.cantidadObjetivo);
   }
 
-  const puntoAcopioId = input.puntoAcopioId ?? null;
-  if (puntoAcopioId) {
-    await validarPuntoAcopio(puntos, puntoAcopioId, adminId);
-  }
+  const puntosAcopioIds = await validarPuntosAcopio(
+    puntos,
+    input.puntosAcopioIds ?? [],
+    adminId,
+  );
 
   return actividades.crear({
     adminId,
@@ -86,7 +88,7 @@ export async function crearActividad(
     horaFin: input.horaFin ?? null,
     tipo: input.tipo,
     descripcion: normalizarDescripcion(input.descripcion),
-    puntoAcopioId,
+    puntosAcopioIds,
     metas: input.metas.map((m) => ({
       recursoId: m.recursoId,
       cantidadObjetivo: m.cantidadObjetivo,

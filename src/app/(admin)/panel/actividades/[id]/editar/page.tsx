@@ -67,9 +67,11 @@ export default async function EditarActividadPage({ params }: Props) {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 p-6 md:p-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Editar actividad</h1>
+    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 p-6 md:p-8">
+      <div className="flex flex-col gap-1.5">
+        <h1 className="font-serif text-3xl font-semibold tracking-tight md:text-4xl">
+          Editar actividad
+        </h1>
         <p className="text-sm text-muted-foreground">
           Ajusta la cabecera y las metas mientras la actividad está en Recolectando.
         </p>
@@ -88,7 +90,7 @@ export default async function EditarActividadPage({ params }: Props) {
             horaFin: ayuda.horaFin ? horaParaInput(ayuda.horaFin) : "",
             tipo: ayuda.tipo,
             descripcion: ayuda.descripcion ?? "",
-            puntoAcopioId: ayuda.puntoAcopioId ?? "",
+            puntosAcopioIds: ayuda.puntosAcopio.map((p) => p.id),
           }}
           textoEnviar="Guardar cambios"
           textoEnviando="Guardando…"

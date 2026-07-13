@@ -1,5 +1,5 @@
 import type { Actividad } from "@/modules/actividades/domain/Actividad";
-import { esDueño } from "@/modules/actividades/domain/reglas";
+import { dedupeIds, esDueño } from "@/modules/actividades/domain/reglas";
 import type { RecursoRepository } from "@/modules/recursos/domain/RecursoRepository";
 import type { ActividadRepository } from "@/modules/actividades/domain/ActividadRepository";
 import { esCantidadObjetivoValida } from "@/modules/actividades/domain/reglas";
@@ -75,6 +75,24 @@ export async function validarPuntoAcopio(
       "El punto de acopio no pertenece a este administrador.",
     );
   }
+}
+
+/**
+ * Valida un conjunto de puntos de acopio (feature 026): deduplica los ids y valida
+ * cada uno (existe, activo y propio del `adminId` dueño). Devuelve la lista limpia
+ * (sin repetidos ni vacíos) lista para persistir. Un array vacío es válido: una
+ * actividad puede no tener centros asignados.
+ */
+export async function validarPuntosAcopio(
+  puntos: PuntoAcopioRepository | undefined,
+  ids: readonly string[],
+  adminId: string,
+): Promise<string[]> {
+  const limpios = dedupeIds(ids);
+  for (const id of limpios) {
+    await validarPuntoAcopio(puntos, id, adminId);
+  }
+  return limpios;
 }
 
 /**

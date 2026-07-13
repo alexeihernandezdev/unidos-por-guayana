@@ -6,7 +6,8 @@ type Props = {
   aportantes: AportanteDeActividad[];
 };
 
-const celda = "px-3 py-2 text-sm align-middle";
+const celda = "px-3 py-3 text-sm align-middle";
+const encabezado = "px-3 pb-2 text-xs font-medium text-muted-foreground";
 
 function formatearNumero(n: number): string {
   return new Intl.NumberFormat("es-VE", { maximumFractionDigits: 2 }).format(n);
@@ -35,12 +36,12 @@ export function AportantesTabla({ aportantes }: Props) {
     <div className="w-full overflow-x-auto">
       <table className="w-full border-collapse">
         <thead>
-          <tr className="border-b border-border text-left text-xs font-medium tracking-wide text-muted-foreground uppercase">
-            <th className={celda}>Aportante</th>
-            <th className={celda}>Recurso</th>
-            <th className={celda}>Cantidad</th>
-            <th className={celda}>Estado</th>
-            <th className={celda}>Fecha</th>
+          <tr className="border-b border-border text-left">
+            <th className={encabezado}>Aportante</th>
+            <th className={encabezado}>Recurso</th>
+            <th className={`${encabezado} text-right`}>Cantidad</th>
+            <th className={encabezado}>Estado</th>
+            <th className={`${encabezado} text-right`}>Fecha</th>
           </tr>
         </thead>
         <tbody>
@@ -49,15 +50,18 @@ export function AportantesTabla({ aportantes }: Props) {
               key={a.id}
               className="border-b border-border/60 last:border-0"
             >
-              <td className={`${celda} font-medium`}>{a.aportanteNombre}</td>
-              <td className={celda}>{a.recursoNombre}</td>
-              <td className={`${celda} numeric-tnum`}>
-                {formatearNumero(a.cantidad)} {a.recursoUnidad}
+              <td className={`${celda} font-medium text-foreground`}>
+                {a.aportanteNombre}
+              </td>
+              <td className={`${celda} text-foreground`}>{a.recursoNombre}</td>
+              <td className={`${celda} numeric-tnum text-right`}>
+                {formatearNumero(a.cantidad)}{" "}
+                <span className="text-muted-foreground">{a.recursoUnidad}</span>
               </td>
               <td className={celda}>
                 <EstadoAporteBadge estado={a.estado} />
               </td>
-              <td className={`${celda} numeric-tnum text-muted-foreground`}>
+              <td className={`${celda} numeric-tnum text-right text-muted-foreground`}>
                 {formatearFecha(a.fecha)}
               </td>
             </tr>
