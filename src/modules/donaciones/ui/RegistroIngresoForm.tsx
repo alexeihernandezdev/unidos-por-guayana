@@ -36,6 +36,7 @@ type Props = {
   action: (
     input: RegistroIngresoFormValores,
   ) => Promise<{ ok: boolean; error?: string }>;
+  onExito?: () => void;
   recursos: OpcionRecurso[];
   medios: OpcionMedio[];
   ayudas: OpcionAyuda[];
@@ -47,6 +48,7 @@ const campo =
 
 export function RegistroIngresoForm({
   action,
+  onExito,
   recursos,
   medios,
   ayudas,
@@ -77,7 +79,11 @@ export function RegistroIngresoForm({
     startTransition(async () => {
       const resultado = await action(datos);
       if (resultado.ok) {
-        router.push("/panel/donaciones");
+        if (onExito) {
+          onExito();
+        } else {
+          router.push("/panel/donaciones");
+        }
       } else {
         setErrorServidor(resultado.error ?? "No se pudo registrar el ingreso.");
       }

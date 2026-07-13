@@ -1,4 +1,5 @@
-import Link from "next/link";
+"use client";
+
 import { Coins, Landmark } from "lucide-react";
 import type { MedioDonacion } from "@/modules/donaciones/domain/MedioDonacion";
 import { Button } from "@/shared/ui/button";
@@ -7,10 +8,9 @@ import { TipoMedioBadge } from "./TipoMedioBadge";
 
 type Props = {
   medios: MedioDonacion[];
-  // Server actions (basadas en FormData) recibidas desde la página. La tabla es un
-  // server component; los botones envían un <form> con el id del medio.
   activarAction: (formData: FormData) => Promise<void>;
   desactivarAction: (formData: FormData) => Promise<void>;
+  onEditar: (medio: MedioDonacion) => void;
 };
 
 // Medios de donación como row-cards (feature 026, guía
@@ -20,6 +20,7 @@ export function MediosDonacionTabla({
   medios,
   activarAction,
   desactivarAction,
+  onEditar,
 }: Props) {
   if (medios.length === 0) {
     return (
@@ -56,10 +57,12 @@ export function MediosDonacionTabla({
           ]}
           actions={
             <>
-              <Button asChild variant="ghost" size="sm">
-                <Link href={`/panel/donaciones/${medio.id}/editar`}>
-                  Editar
-                </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEditar(medio)}
+              >
+                Editar
               </Button>
               <form action={medio.activo ? desactivarAction : activarAction}>
                 <input type="hidden" name="id" value={medio.id} />

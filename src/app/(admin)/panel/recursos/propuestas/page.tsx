@@ -1,10 +1,11 @@
-import { PropuestasTabla } from "@/modules/recursos/ui/PropuestasTabla";
+import { PropuestasGestion } from "@/modules/recursos/ui/PropuestasGestion";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarPropuestasServicio } from "@/shared/recursos";
 import { requireRol } from "@/shared/auth";
 import { PanelPage, PanelPageSubHeader } from "@/shared/ui/panel";
 import {
   aprobarPropuestaAction,
+  editarRecursoAction,
   rechazarPropuestaAction,
 } from "../actions";
 
@@ -22,8 +23,9 @@ export default async function PropuestasRecursosPage() {
         backLabel="Volver al catálogo"
       />
 
-      <PropuestasTabla
+      <PropuestasGestion
         propuestas={propuestas}
+        editarAction={editarRecursoAction}
         aprobarAction={aprobarPropuestaAction}
         rechazarAction={rechazarPropuestaAction}
       />

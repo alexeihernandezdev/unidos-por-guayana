@@ -127,12 +127,46 @@ Los listados se presentan como **lista de row-cards**, no como `<table>`. Anatom
 - **Accesibilidad:** los antiguos `<th>` pasan a labels de metadato o `aria-label`; se conserva
   el orden lógico para lectores de pantalla.
 
-## 6. Reglas
+## 6. Modal de formulario — `<PanelFormModal>`
+
+Para **altas y ediciones de entidades pequeñas** (≤ 8 campos, sin bloques dinámicos extensos),
+el patrón canónico es **modal sobre el listado**, no subpágina con `<PanelPageSubHeader>`.
+
+```
+<PanelFormModal open onOpenChange title description? size? >
+  <Formulario onExito={cerrarYRefrescar} … />
+</PanelFormModal>
+```
+
+- **Componente:** `src/shared/ui/panel/panel-form-modal.tsx` (`"use client"`).
+- **Bordes:** `rounded-2xl` (más redondeado que el `DialogContent` base `rounded-lg`).
+- **Scroll interno:** `max-h-[90dvh] overflow-y-auto` en el contenido del modal.
+- **Tamaños:** `default` (`sm:max-w-lg`) para formularios cortos; `wide` (`sm:max-w-2xl`) para
+  casos con más ancho (p. ej. Puntos de acopio con mapa).
+- **Éxito al guardar:** el formulario llama `onExito?.()`; el gestor cierra el modal y ejecuta
+  `router.refresh()`. No navegar a otra ruta tras guardar en contexto modal.
+- **Entidades en modal:** recursos, medios de donación, ingreso monetario externo, puntos de
+  acopio.
+- **Entidades en subpágina:** actividades, solicitudes, aportes, onboarding, perfil.
+
+## 7. Scrollbar global
+
+El estilo de scrollbar vive **solo** en `src/app/globals.css` (bloque `html { scrollbar-* }` y
+`html::-webkit-scrollbar*`). No duplicar por componente.
+
+- **Alcance:** todo el documento (espacio logeado y páginas públicas).
+- **Sin flechas:** `::-webkit-scrollbar-button { display: none }` en WebKit; Firefox usa
+  `scrollbar-width: thin` (sin flechas).
+- **Thumb:** fino, `border-radius: 9999px`, color derivado de `--muted-foreground` con
+  `color-mix`.
+- En macOS Safari el scrollbar puede ocultarse hasta hacer scroll; es comportamiento esperado.
+
+## 8. Reglas
 
 - **Un solo `<main>` por documento** (lo provee `AppShell`). Ninguna página anida otro `<main>`;
   usa `<PanelPage>` (un `<div>`).
 - **Índice de sección → banner** (`<PanelPageHeader>`); **detalle/formulario → ligero**
-  (`<PanelPageSubHeader>`).
+  (`<PanelPageSubHeader>`) solo para entidades que **no** usan modal.
 - **Listados → row-cards** (`<PanelList>` / `<PanelListRow>`), no `<table>`. Excepción posible:
   `ProgresoMetas`, que es un display de progreso, no un listado tabular.
 - **No reescribir a mano** `mx-auto flex w-full max-w-… p-… gap-…` en un `page.tsx`: usar

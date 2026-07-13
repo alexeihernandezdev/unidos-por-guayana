@@ -1,4 +1,5 @@
-import Link from "next/link";
+"use client";
+
 import { CalendarDays, Package, Ruler, Tag } from "lucide-react";
 import { DateTime } from "luxon";
 import type { Recurso } from "@/modules/recursos/domain/Recurso";
@@ -10,6 +11,7 @@ type Props = {
   propuestas: Recurso[];
   aprobarAction: (formData: FormData) => Promise<void>;
   rechazarAction: (formData: FormData) => Promise<void>;
+  onAjustar: (recurso: Recurso) => void;
 };
 
 function formatearFecha(fecha: Date): string {
@@ -25,6 +27,7 @@ export function PropuestasTabla({
   propuestas,
   aprobarAction,
   rechazarAction,
+  onAjustar,
 }: Props) {
   if (propuestas.length === 0) {
     return (
@@ -61,10 +64,12 @@ export function PropuestasTabla({
           ]}
           actions={
             <>
-              <Button asChild variant="ghost" size="sm">
-                <Link href={`/panel/recursos/${recurso.id}/editar`}>
-                  Ajustar
-                </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onAjustar(recurso)}
+              >
+                Ajustar
               </Button>
               <form action={aprobarAction}>
                 <input type="hidden" name="id" value={recurso.id} />

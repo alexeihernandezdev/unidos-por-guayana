@@ -17,7 +17,7 @@ export function AccesosDirectos() {
         Nueva ayuda
       </Link>
       <Link
-        href="/panel/recursos/nuevo"
+        href="/panel/recursos"
         className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
       >
         <PlusIcon strokeWidth={1.5} className="size-3.5" />

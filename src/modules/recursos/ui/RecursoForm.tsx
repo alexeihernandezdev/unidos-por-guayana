@@ -28,6 +28,7 @@ type Props = {
   action: (
     input: RecursoFormValores,
   ) => Promise<{ ok: boolean; error?: string }>;
+  onExito?: () => void;
   valoresIniciales?: Partial<RecursoFormValores>;
   textoEnviar: string;
   textoEnviando: string;
@@ -40,6 +41,7 @@ const CATEGORIAS = Object.values(CategoriaRecurso);
 
 export function RecursoForm({
   action,
+  onExito,
   valoresIniciales,
   textoEnviar,
   textoEnviando,
@@ -66,7 +68,11 @@ export function RecursoForm({
     startTransition(async () => {
       const resultado = await action(datos);
       if (resultado.ok) {
-        router.push("/panel/recursos");
+        if (onExito) {
+          onExito();
+        } else {
+          router.push("/panel/recursos");
+        }
       } else {
         setErrorServidor(resultado.error ?? "No se pudo guardar el recurso.");
       }

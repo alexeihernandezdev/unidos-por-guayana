@@ -33,6 +33,7 @@ type Props = {
   action: (
     input: MedioDonacionFormValores,
   ) => Promise<{ ok: boolean; error?: string }>;
+  onExito?: () => void;
   valoresIniciales?: Partial<MedioDonacionFormValores>;
   textoEnviar: string;
   textoEnviando: string;
@@ -43,6 +44,7 @@ const campo =
 
 export function MedioDonacionForm({
   action,
+  onExito,
   valoresIniciales,
   textoEnviar,
   textoEnviando,
@@ -71,7 +73,11 @@ export function MedioDonacionForm({
     startTransition(async () => {
       const resultado = await action(datos);
       if (resultado.ok) {
-        router.push("/panel/donaciones");
+        if (onExito) {
+          onExito();
+        } else {
+          router.push("/panel/donaciones");
+        }
       } else {
         setErrorServidor(resultado.error ?? "No se pudo guardar el medio.");
       }
