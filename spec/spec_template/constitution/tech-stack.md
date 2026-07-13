@@ -130,11 +130,11 @@ _Entidades centrales derivadas de la misión. Se documentan aquí las reglas no 
 ### Tokens y fundamentos
 
 - **Sistema de color / tokens:** Tailwind v4 con tokens en `globals.css` expuestos vía `@theme inline`. **Modo claro por defecto**, no se activa dark mode automáticamente por `prefers-color-scheme` del OS: los tokens dark están definidos pero gated bajo `:root[data-theme="dark"]` / `.dark` para un toggle explícito futuro. `<html>` fija `style={{ colorScheme: "light" }}` para que los controles nativos (scrollbars, form widgets) también respeten el modo claro. La paleta está **anclada al lugar** (no es monocromo neutral):
-  - **`--primary`** ocre cálido (`oklch(0.72 0.14 75)`), color del sol y de la tierra rica en hierro de La Guaira. Se usa como **fondo** en CTAs primarios y en trazos de identidad (p. ej. la línea bajo el nombre en el `SiteHeader`). Nunca como texto sobre fondo claro.
-  - **`--primary-ink`** (`oklch(0.44 0.12 60)` light, `oklch(0.82 0.10 75)` dark) es la variante oscura del ocre pensada para **texto** que necesita contraste WCAG AA sobre `--background`. Usar en marcadores numéricos ("01/02/03"), fechas destacadas y otros microtextos con carga de identidad.
-  - **`--accent`** teal profundo (`oklch(0.42 0.06 200)` light, `oklch(0.62 0.09 200)` dark), color del Orinoco. Es la **capa de soporte**: rings de foco (`--ring` apunta al accent), separadores decorativos (p. ej. los `·` en la fecha del hero), color de hover para links de navegación.
-  - **`--background` / `--foreground`** son off-white cálido tintado hacia la hue de marca (75) y near-black cálido (hue 60). No son pure white/black.
-  - **Disciplina de uso:** cada acento aparece en 2-3 momentos, no como sprinkle. Ocre = identidad ("marca"). Teal = interacción/soporte. Todo lo demás en neutrales.
+  - **`--primary`** teal/petróleo profundo (`oklch(0.47 0.108 194)` light, `oklch(0.72 0.12 192)` dark), color del agua y de la marca. Es la identidad: se usa como **fondo** en CTAs primarios, insignias, chips y trazos de identidad. El token de marca **`--brand`** comparte el mismo teal (`oklch(0.47 0.108 194)`).
+  - **`--primary-ink`** (`oklch(0.38 0.10 194)` light, `oklch(0.85 0.09 192)` dark) es la variante del teal pensada para **texto** que necesita contraste WCAG AA sobre `--background`. Usar en marcadores numéricos, fechas destacadas y otros microtextos con carga de identidad.
+  - **`--accent`** teal más profundo (`oklch(0.42 0.06 200)` light, `oklch(0.62 0.09 200)` dark), hacia el petróleo del Orinoco. Es la **capa de soporte**: separadores decorativos (p. ej. los `·` en la fecha del hero) y color de hover para links de navegación. Nota: `--ring` apunta al accent solo en **dark**; en **light** el ring es un gris neutro (`oklch(0.708 0 0)`).
+  - **`--background` / `--foreground`** son off-white tintado hacia la hue de marca (200) y near-black frío (hue 260). No son pure white/black.
+  - **Disciplina de uso:** el teal es a la vez identidad e interacción; aparece en momentos puntuales (CTAs, insignias, foco, hover), no como sprinkle. Todo lo demás en neutrales fríos.
 - **Tipografías:** tres familias como techo, cargadas vía `next/font/google` en `src/app/layout.tsx`:
   - **`EB Garamond`** — serif de display para headings y momentos editoriales (variable `--font-serif`, alias Tailwind `font-serif`). Elegida por gravitas civil y por su encaje con la tradición tipográfica en español; evita clichés de AI slop (Fraunces / Instrument Serif están vetadas).
   - **`Geist Sans`** — cuerpo de texto y UI (variable `--font-geist-sans`, alias `font-sans`).
@@ -142,7 +142,7 @@ _Entidades centrales derivadas de la misión. Se documentan aquí las reglas no 
 - **Refinamientos disponibles** en `globals.css`:
   - `.focus-ring` — anillo de foco consistente basado en `--ring` con offset y radius derivados.
   - `.underline-sweep` — subrayado que barre desde la izquierda al hover/focus. Gated por `@media (hover: hover) and (pointer: fine)`. Sustituye al crossfade de opacidad en links de navegación.
-- **Paleta:** dos acentos comprometidos (ocre + teal) sobre neutrales cálidos. Ver la subsección "Sistema de color / tokens" más arriba para el uso disciplinado de cada token. No añadir nuevos colores de acento sin decisión explícita del equipo; el énfasis puntual se resuelve con peso tipográfico y jerarquía, no inventando colores.
+- **Paleta:** un color de marca teal/petróleo (`--primary` = `--brand`) más un accent teal más profundo (Orinoco) sobre neutrales fríos. Ver la subsección "Sistema de color / tokens" más arriba para el uso disciplinado de cada token. No añadir nuevos colores de acento sin decisión explícita del equipo; el énfasis puntual se resuelve con peso tipográfico y jerarquía, no inventando colores.
 - **Radio:** `--radius: 0.625rem` (10px) es la fuente única. Usar `rounded-md/lg/xl` en función de la escala derivada (`--radius-*` en `@theme inline`). No mezclar radios ad-hoc (`rounded-[24px]`, etc.).
 - **Easing:** una sola curva compartida, `--ease-out-emil: cubic-bezier(0.23, 1, 0.32, 1)`, definida en `globals.css`. Cualquier animación de UI la usa; no proliferar variantes.
 
@@ -164,12 +164,12 @@ _Entidades centrales derivadas de la misión. Se documentan aquí las reglas no 
 
 ### Restricciones duras de diseño
 
-- **Prohibido em-dash (`—`) y en-dash (`–`) en todo texto visible al usuario.** Headlines, subheads, botones, metadata, alt, footer. Ni siquiera "con moderación". Usar coma, dos puntos, punto y coma, punto o paréntesis.
+- **Prohibido em-dash (`—`) y en-dash (`–`) en todo texto visible al usuario.** Headlines, subheads, botones, metadata, alt, footer. Ni siquiera "con moderación". Usar coma, dos puntos, punto y coma, punto o paréntesis. **Única excepción:** el guion largo `—` como marcador de dato vacío en tablas y campos ("sin dato"), donde funciona como símbolo, no como texto.
 - **Prohibido eyebrow uppercase-tracked** ("SOBRE", "PROCESO", "PRINCIPIOS") sobre cada sección. Cliché de AI slop.
 - **Prohibida numeración de secciones tipo `01 / 02 / 03`** como scaffolding decorativo. Solo cuando la sección **es** una secuencia real (p. ej. "Tres formas de participar" en la landing) y el orden aporta información.
-- **Prohibido `transition: all`.** Especificar propiedades (`transition-transform`, `transition-colors`, etc.).
+- **Prohibido `transition: all`.** Especificar propiedades (`transition-transform`, `transition-colors`, etc.). **Excepción heredada:** el primitivo Shadcn `src/shared/ui/button.tsx` conserva el `transition-all` de la librería; no replicar ese patrón en código propio.
 - **Prohibido `scale(0)` en animaciones de entrada.** Nada aparece de la nada; empezar en `scale(0.95)` + `opacity: 0`.
-- **Prohibido `ease-in` en animaciones de UI.** Siempre `ease-out` (o custom `--ease-out-emil`).
+- **Prohibido `ease-in` en animaciones de UI.** Siempre `ease-out` (o custom `--ease-out-emil`). **Excepción:** el drift ambiental de fondo (`ambient-drift` en `body::before`) usa `ease-in-out` por ser un movimiento atmosférico lento y en bucle, no una interacción de UI.
 - **Prohibido animar `top`/`left`/`width`/`height`.** Solo `transform` y `opacity` para llegar a GPU.
 - **Prohibido `<span>` con textos placeholder tipo logos de marcas inventadas o "Jane Doe" avatars.** Si se necesita placeholder de marca, generar un mark real o dejar hueco.
 - **Prohibido gradient-text** (`background-clip: text`), side-stripe borders decorativos, glassmorphism como default.
@@ -187,7 +187,7 @@ _Entidades centrales derivadas de la misión. Se documentan aquí las reglas no 
 
 - **Iconos:** `lucide-react` es la librería única del proyecto (instalada en la feature 003). Todos los iconos con `strokeWidth={1.5}` para consistencia. Nada de SVG a mano ni de mezclar con otras familias.
 - **Imágenes:** `next/image` cuando la fuente sea local o esté configurada en `next.config.ts`. Placeholders remotos (Picsum) llevan `unoptimized` y comentario `TODO` claro con la ruta de reemplazo.
-- **Sin ilustraciones "sketchy" hechas a mano** (paths crudos, `feTurbulence`, doodles). Si no hay activo real, dejar hueco marcado con `TODO`.
+- **Sin ilustraciones "sketchy" hechas a mano** (paths crudos, `feTurbulence`, doodles). Si no hay activo real, dejar hueco marcado con `TODO`. **Excepción:** el grano de papel `.editorial-grain` usa un `feTurbulence` fijo de baja opacidad (≈0.035) como **textura** de fondo, no como ilustración.
 
 ### Accesibilidad
 

@@ -1,8 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Tokens de diseño (paleta "Unidos por la Guaira": ocre + teal anclados al lugar).
-   Modo claro/oscuro con prefers-color-scheme (ver tech-stack.md → Estilo visual). */
+/* Tokens de diseño (paleta "Unidos por la Guaira": teal/petróleo anclado al lugar).
+   Modo claro por defecto; dark es opt-in vía [data-theme="dark"] / .dark, NO por
+   prefers-color-scheme del OS (ver tech-stack.md → Estilo visual). */
 :root {
   --radius: 0.625rem;
   /* Fondo muy claro con un leve tinte hacia el teal/petróleo de marca. Evita el
