@@ -61,18 +61,18 @@ export async function validarPuntoAcopio(
 ): Promise<void> {
   if (!puntos) {
     throw new PuntoAcopioInvalidoError(
-      "No se puede validar el punto de acopio indicado.",
+      "No se puede validar el centro de acopio indicado.",
     );
   }
   const punto = await puntos.buscarPorId(puntoAcopioId);
   if (!punto || !punto.activo) {
     throw new PuntoAcopioInvalidoError(
-      "El punto de acopio indicado no existe o está archivado.",
+      "El centro de acopio indicado no existe o está archivado.",
     );
   }
   if (punto.adminId !== adminId) {
     throw new PuntoAcopioInvalidoError(
-      "El punto de acopio no pertenece a este administrador.",
+      "El centro de acopio no pertenece a este administrador.",
     );
   }
 }

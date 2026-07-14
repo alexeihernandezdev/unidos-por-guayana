@@ -84,15 +84,15 @@ export function PuntosAcopioGestion({
       <PanelListToolbar
         resumen={
           puntos.length === 0
-            ? "Aún no tienes puntos registrados."
+            ? "Aún no tienes centros registrados."
             : visibles.length === puntos.length
-              ? `${puntos.length} ${puntos.length === 1 ? "punto" : "puntos"} en total.`
-              : `${visibles.length} de ${puntos.length} puntos.`
+              ? `${puntos.length} ${puntos.length === 1 ? "centro" : "centros"} en total.`
+              : `${visibles.length} de ${puntos.length} centros.`
         }
       >
         <Button onClick={() => setModal({ modo: "nuevo" })}>
           <Plus strokeWidth={1.5} aria-hidden="true" />
-          Nuevo punto
+          Nuevo centro
         </Button>
       </PanelListToolbar>
 
@@ -117,13 +117,13 @@ export function PuntosAcopioGestion({
               variant="outline"
             >
               <Plus strokeWidth={1.5} aria-hidden="true" />
-              Nuevo punto
+              Nuevo centro
             </Button>
           }
         />
       ) : visibles.length === 0 ? (
         <p className="border-t border-border py-12 text-center text-sm text-muted-foreground">
-          Ningún punto coincide con los filtros.
+          Ningún centro coincide con los filtros.
         </p>
       ) : (
         <PanelList>
@@ -179,9 +179,9 @@ export function PuntosAcopioGestion({
         size="wide"
         title={
           modal?.modo === "nuevo"
-            ? "Nuevo punto de acopio"
+            ? "Nuevo centro de acopio"
             : modal?.modo === "editar"
-              ? "Editar punto de acopio"
+              ? "Editar centro de acopio"
               : ""
         }
         description={
@@ -201,7 +201,7 @@ export function PuntosAcopioGestion({
             zoomInicial={zoomInicial}
             estados={estados}
             municipios={municipios}
-            textoEnviar="Crear punto"
+            textoEnviar="Crear centro"
             textoEnviando="Creando…"
           />
         )}

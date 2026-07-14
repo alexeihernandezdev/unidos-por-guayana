@@ -178,7 +178,7 @@ export function GestionAfiliaciones({
                       strokeWidth={1.5}
                       className={`transition-transform duration-150 ${abierto ? "rotate-180" : ""}`}
                     />
-                    {abierto ? "Ocultar" : "Ver"} puntos de acopio (
+                    {abierto ? "Ocultar" : "Ver"} centros de acopio (
                     {centro.puntos.length})
                   </button>
                   {abierto && (

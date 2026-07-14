@@ -58,7 +58,7 @@ export async function editarPuntoAcopio(
   if (input.nombre !== undefined) {
     const v = normalizar(input.nombre);
     if (!esTextoNoVacio(v)) {
-      throw new DatosPuntoAcopioInvalidosError("Indica el nombre del punto.");
+      throw new DatosPuntoAcopioInvalidosError("Indica el nombre del centro.");
     }
     cambios.nombre = v;
   }
@@ -84,7 +84,7 @@ export async function editarPuntoAcopio(
     const v = normalizar(input.telefono);
     if (!esTextoNoVacio(v)) {
       throw new DatosPuntoAcopioInvalidosError(
-        "Indica un teléfono de contacto del punto.",
+        "Indica un teléfono de contacto del centro.",
       );
     }
     cambios.telefono = v;

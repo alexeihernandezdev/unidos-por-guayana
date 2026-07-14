@@ -56,7 +56,7 @@ const CategoriasAporteSchema = z
 // perfil. Las coordenadas vienen del mapa. El rango de coordenadas y la coherencia
 // estado↔municipio los revalida el caso de uso `crearPuntoAcopio`.
 const PrimerPuntoSchema = z.object({
-  nombre: z.string().trim().min(1, "Indica el nombre del punto.").max(120),
+  nombre: z.string().trim().min(1, "Indica el nombre del centro.").max(120),
   referencia: z
     .string()
     .trim()
@@ -67,8 +67,8 @@ const PrimerPuntoSchema = z.object({
     .trim()
     .min(1, "Indica los horarios de atención.")
     .max(200),
-  latitud: z.string().min(1, "Marca la ubicación del punto en el mapa."),
-  longitud: z.string().min(1, "Marca la ubicación del punto en el mapa."),
+  latitud: z.string().min(1, "Marca la ubicación del centro en el mapa."),
+  longitud: z.string().min(1, "Marca la ubicación del centro en el mapa."),
 });
 
 const PerfilSchema = z.object({
@@ -152,7 +152,7 @@ export async function registrarUsuarioAction(
           ok: false,
           error:
             punto.error.issues[0]?.message ??
-            "Datos del punto de acopio no válidos.",
+            "Datos del centro de acopio no válidos.",
         };
       }
       // Crea la cuenta + perfil y, en el mismo alta, su primer punto. El contacto

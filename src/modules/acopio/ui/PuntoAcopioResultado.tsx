@@ -44,7 +44,7 @@ export function PuntoAcopioResultado({
             strokeWidth={1.3}
             aria-hidden
           />
-          <span className="sr-only">Fotografía del punto pendiente</span>
+          <span className="sr-only">Fotografía del centro pendiente</span>
         </div>
       )}
 

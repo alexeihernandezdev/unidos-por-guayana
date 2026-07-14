@@ -69,7 +69,7 @@ export function PuntosAcopioDirectorio({
           />
         </span>
         <p className="max-w-[42ch] text-sm text-muted-foreground">
-          Aún no hay puntos de acopio publicados. Vuelve pronto: los centros de
+          Aún no hay centros de acopio publicados. Vuelve pronto: los centros de
           la red están registrando sus sedes.
         </p>
       </div>
@@ -82,7 +82,7 @@ export function PuntosAcopioDirectorio({
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div
             role="tablist"
-            aria-label="Vista de puntos de acopio"
+            aria-label="Vista de centros de acopio"
             className="inline-flex w-fit rounded-md bg-muted p-1"
           >
             <button
@@ -114,7 +114,7 @@ export function PuntosAcopioDirectorio({
           </div>
           <p className="text-sm text-muted-foreground" aria-live="polite">
             <span className="font-medium text-foreground">{visibles.length}</span>{" "}
-            {visibles.length === 1 ? "punto disponible" : "puntos disponibles"}
+            {visibles.length === 1 ? "centro disponible" : "centros disponibles"}
           </p>
         </div>
 
@@ -135,7 +135,7 @@ export function PuntosAcopioDirectorio({
             <ListFilter className="size-5" strokeWidth={1.5} aria-hidden />
           </span>
           <div>
-            <p className="text-sm font-medium">No encontramos puntos con esos filtros</p>
+            <p className="text-sm font-medium">No encontramos centros con esos filtros</p>
             <p className="mt-1 text-sm text-muted-foreground">Prueba otra ubicación o limpia la búsqueda.</p>
           </div>
           <Button variant="outline" size="sm" onClick={() => setFiltro(FILTRO_INICIAL)}>
@@ -163,7 +163,7 @@ export function PuntosAcopioDirectorio({
           </div>
           <aside className="flex min-h-0 max-h-[26rem] flex-col overflow-hidden border-t border-border bg-background lg:h-full lg:max-h-none lg:border-t-0 lg:border-l">
             <div className="shrink-0 border-b border-border/70 px-4 py-3">
-              <h2 className="text-sm font-semibold">Puntos en esta zona</h2>
+              <h2 className="text-sm font-semibold">Centros en esta zona</h2>
               <p className="mt-0.5 text-xs text-muted-foreground">Selecciona uno para centrar el mapa.</p>
             </div>
             <div className="flex min-h-0 gap-3 overflow-x-auto p-3 lg:flex-1 lg:flex-col lg:overflow-x-hidden lg:overflow-y-auto lg:overscroll-contain lg:[scrollbar-gutter:stable]">

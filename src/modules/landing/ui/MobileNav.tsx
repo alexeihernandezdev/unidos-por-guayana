@@ -56,7 +56,7 @@ export function MobileNav({ items, slotAuth }: Props) {
         aria-expanded={open}
         aria-controls="site-mobile-nav"
         aria-label={open ? "Cerrar menú" : "Abrir menú"}
-        className="focus-ring -mr-2 inline-flex size-10 items-center justify-center rounded-md text-foreground/80 transition-colors duration-150 hover:text-accent"
+        className="focus-ring -mr-2 inline-flex size-10 items-center justify-center rounded-full bg-background/15 text-foreground/80 shadow-[inset_0_1px_0_rgb(255_255_255/0.28)] backdrop-blur-sm transition-colors duration-150 hover:bg-background/45 hover:text-accent"
       >
         {open ? (
           <X strokeWidth={1.5} className="size-5" />
@@ -83,8 +83,8 @@ export function MobileNav({ items, slotAuth }: Props) {
         aria-modal="true"
         aria-hidden={!open}
         className={cn(
-          "fixed inset-x-0 top-16 z-30 origin-top border-b border-border bg-background",
-          "shadow-[0_12px_24px_-16px_rgba(0,0,0,0.15)]",
+          "liquid-glass-surface liquid-glass-panel fixed inset-x-0 top-16 z-30 origin-top overflow-hidden",
+          "shadow-[0_20px_48px_-22px_rgba(0,0,0,0.35)]",
           "transition-transform duration-200 [transition-timing-function:var(--ease-out-emil)]",
           "motion-reduce:transition-none",
           open
@@ -93,7 +93,7 @@ export function MobileNav({ items, slotAuth }: Props) {
         )}
         style={{ transitionProperty: "transform, opacity" }}
       >
-        <div className="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-6 md:px-8">
+        <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-1 px-6 py-6 md:px-8">
           {items.length === 0 ? (
             <p className="py-2 text-sm text-muted-foreground">
               Sin secciones adicionales para tu rol.

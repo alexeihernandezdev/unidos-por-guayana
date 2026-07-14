@@ -123,7 +123,7 @@ export function PuntoAcopioForm({
       if (resultado.ok) {
         onExito();
       } else {
-        setErrorServidor(resultado.error ?? "No se pudo guardar el punto.");
+        setErrorServidor(resultado.error ?? "No se pudo guardar el centro.");
       }
     });
   });
@@ -135,13 +135,13 @@ export function PuntoAcopioForm({
         <TituloBloque icono={Warehouse}>Identidad</TituloBloque>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="pa-nombre">Nombre del punto</Label>
+            <Label htmlFor="pa-nombre">Nombre del centro</Label>
             <Input
               id="pa-nombre"
               placeholder="Sede centro"
               aria-invalid={Boolean(errors.nombre)}
               {...register("nombre", {
-                required: "Indica el nombre del punto.",
+                required: "Indica el nombre del centro.",
                 setValueAs: (v: string) => v.trim(),
               })}
             />
@@ -215,7 +215,7 @@ export function PuntoAcopioForm({
           <input
             type="hidden"
             {...register("latitud", {
-              required: "Marca la ubicación del punto en el mapa.",
+              required: "Marca la ubicación del centro en el mapa.",
             })}
           />
           <input type="hidden" {...register("longitud")} />
@@ -249,7 +249,7 @@ export function PuntoAcopioForm({
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="pa-telefono">
               <Phone strokeWidth={1.5} className="size-3.5" aria-hidden="true" />
-              Teléfono del punto
+              Teléfono del centro
             </Label>
             <Input
               id="pa-telefono"
@@ -257,7 +257,7 @@ export function PuntoAcopioForm({
               placeholder="0412 0000000"
               aria-invalid={Boolean(errors.telefono)}
               {...register("telefono", {
-                required: "Indica un teléfono de contacto del punto.",
+                required: "Indica un teléfono de contacto del centro.",
                 setValueAs: (v: string) => v.trim(),
               })}
             />
@@ -278,7 +278,7 @@ export function PuntoAcopioForm({
             <Input
               id="pa-correo"
               type="email"
-              placeholder="punto@ejemplo.org"
+              placeholder="centro@ejemplo.org"
               {...register("correo", { setValueAs: (v: string) => v.trim() })}
             />
           </div>

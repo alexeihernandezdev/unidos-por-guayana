@@ -60,7 +60,7 @@ const NAV_ADMIN: NavSection[] = [
     items: [
       { label: "Datos del administrador", href: "/panel/perfil", icon: "acopio" },
       {
-        label: "Puntos de acopio",
+        label: "Centros de Acopio",
         href: "/panel/puntos-acopio",
         icon: "puntos",
       },
@@ -92,7 +92,7 @@ const NAV_COLABORADOR: NavSection[] = [
     items: [
       { label: "Actividades", href: "/actividades", icon: "actividades", exact: true },
       { label: "Mis aportes", href: "/mis-aportes", icon: "aportes", exact: true },
-      { label: "Puntos de acopio", href: "/puntos-acopio", icon: "puntos" },
+      { label: "Centros de Acopio", href: "/puntos-acopio", icon: "puntos" },
     ],
   },
   {

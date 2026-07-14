@@ -24,7 +24,7 @@ import {
 import { cargarCatalogoUbicacion } from "@/shared/ubicacion";
 
 export const metadata: Metadata = {
-  title: "Puntos de acopio",
+  title: "Centros de Acopio",
 };
 
 // Centro de Venezuela: fallback del mapa cuando el admin no tiene ubicación en
@@ -62,7 +62,7 @@ export default async function PuntosAcopioPage() {
       <PanelPageHeader
         icon={Warehouse}
         eyebrow="Red operativa"
-        title="Puntos de acopio"
+        title="Centros de Acopio"
         description="Administra las sedes físicas donde recibes entregas, sus horarios y canales de contacto."
       />
 
@@ -73,7 +73,7 @@ export default async function PuntosAcopioPage() {
           { href: "/panel/perfil", label: "Mi perfil", icon: UserRound },
           {
             href: "/panel/puntos-acopio",
-            label: "Puntos de acopio",
+            label: "Centros de Acopio",
             icon: MapPinned,
           },
         ]}

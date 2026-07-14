@@ -389,7 +389,7 @@ export function ActividadForm({
       {puntosAcopio.length > 0 && (
         <Seccion
           titulo="Centros de acopio"
-          pista="Dónde se recibe el aporte o se realiza. El colaborador los verá para saber a dónde llevarlo. Opcional, solo tus puntos activos."
+          pista="Dónde se recibe el aporte o se realiza. El colaborador los verá para saber a dónde llevarlo. Opcional, solo tus centros activos."
         >
           <Controller
             control={control}

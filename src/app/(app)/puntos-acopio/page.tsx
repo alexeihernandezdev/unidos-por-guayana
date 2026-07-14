@@ -9,7 +9,7 @@ import { PanelPage, PanelPageHeader } from "@/shared/ui/panel";
 import { cargarCatalogoUbicacion } from "@/shared/ubicacion";
 
 export const metadata: Metadata = {
-  title: "Puntos de acopio",
+  title: "Centros de Acopio",
 };
 
 // Directorio de la red para el colaborador (feature 011): dónde entregar lo
@@ -43,7 +43,7 @@ export default async function PuntosAcopioDirectorioPage({
       <PanelPageHeader
         icon={MapPinned}
         eyebrow="Red operativa"
-        title="Puntos de acopio"
+        title="Centros de Acopio"
         description="Las sedes de la red donde puedes entregar tus aportes: mapa, horarios y contacto."
       />
 

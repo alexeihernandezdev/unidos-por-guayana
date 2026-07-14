@@ -12,7 +12,7 @@ import { PanelPage, PanelPageSubHeader } from "@/shared/ui/panel";
 import { cargarCatalogoUbicacion } from "@/shared/ubicacion";
 
 export const metadata: Metadata = {
-  title: "Punto de acopio",
+  title: "Centro de Acopio",
 };
 
 type Props = {
@@ -47,7 +47,7 @@ export default async function DetallePuntoAcopioPage({ params }: Props) {
         title={punto.nombre}
         description={punto.referencia}
         backHref="/puntos-acopio"
-        backLabel="Todos los puntos"
+        backLabel="Todos los centros"
       />
 
       <div className="h-80 overflow-hidden rounded-lg border md:h-96">
