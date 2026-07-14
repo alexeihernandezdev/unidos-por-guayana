@@ -49,8 +49,9 @@ export default async function RootLayout({
   // La ruta actual llega vía el header `x-pathname` que setea `src/proxy.ts`.
   const usuario = await getUsuarioActual();
   const pathname = (await headers()).get("x-pathname") ?? "";
+  const esLanding = pathname === "/";
   const esPaginaPublica =
-    pathname === "/" || pathname.startsWith("/transparencia");
+    esLanding || pathname.startsWith("/transparencia");
 
   return (
     <html
@@ -58,11 +59,28 @@ export default async function RootLayout({
       style={{ colorScheme: "light" }}
       className={`${geistSans.variable} ${geistMono.variable} ${ebGaramond.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+      <body
+        className="min-h-full flex flex-col"
+        // Altura del header que ESTE layout monta sobre la página (SiteHeader
+        // h-16 para visitantes, VolverAlPanelHeader h-14 con sesión, 0 en
+        // rutas con shell propio). En la landing pública el SiteHeader se
+        // superpone al hero, por eso no resta altura; con sesión, la banda de
+        // regreso sí permanece dentro del flujo.
+        style={{
+          ["--altura-header" as string]: !usuario
+            ? esLanding
+              ? "0rem"
+              : "4rem"
+            : esPaginaPublica
+              ? "3.5rem"
+              : "0rem",
+        }}
+        suppressHydrationWarning
+      >
         <Providers>
           {!usuario && (
             <PublicHeaderVisibility>
-              <SiteHeader />
+              <SiteHeader superpuesto={esLanding} />
             </PublicHeaderVisibility>
           )}
           {usuario && esPaginaPublica && (

@@ -14,12 +14,15 @@ import { navItemsPorRol } from "./navConfig";
  * `navConfig.ts`). Es un server component: lee la sesión sin exponerla al
  * cliente y delega la interactividad del menú móvil a `MobileNav`.
  *
- * Identidad: wordmark serif con una línea ocre continua debajo, tal como pide
- * tech-stack.md § "Estilo visual / Sistema de color / tokens" ("trazos de
- * identidad, línea bajo el nombre en el SiteHeader"). Ocre = marca; teal =
- * interacción; neutrales para todo lo demás.
+ * Identidad: wordmark serif con una línea ocre continua sobre una superficie
+ * liquid-glass estratificada. El vidrio se resuelve en CSS para conservar este
+ * componente en servidor y mantener un fallback opaco sin backdrop-filter.
  */
-export async function SiteHeader() {
+export async function SiteHeader({
+  superpuesto = false,
+}: {
+  superpuesto?: boolean;
+}) {
   const usuario = await getUsuarioActual();
   const items = navItemsPorRol(usuario?.rol ?? null);
 
@@ -43,32 +46,48 @@ export async function SiteHeader() {
     </div>
   ) : (
     <div className="flex items-center gap-2 sm:gap-3">
-      <Button asChild variant="ghost" size="sm" className="focus-ring">
+      <Button
+        asChild
+        variant="ghost"
+        size="sm"
+        className="focus-ring rounded-full bg-background/20 shadow-[inset_0_1px_0_rgb(255_255_255/0.28)] backdrop-blur-sm hover:bg-background/45"
+      >
         <Link href="/login">Iniciar sesión</Link>
       </Button>
-      <Button asChild size="sm" className="focus-ring">
+      <Button
+        asChild
+        size="sm"
+        className="focus-ring rounded-full shadow-[inset_0_1px_0_rgb(255_255_255/0.32),0_5px_16px_-8px_var(--primary)]"
+      >
         <Link href="/registro">Crear cuenta</Link>
       </Button>
     </div>
   );
 
   return (
-    <header className="sticky top-0 z-40 h-16 border-b border-border bg-background/85 backdrop-blur-md">
-      <div className="mx-auto flex h-full max-w-6xl items-center gap-6 px-6 md:gap-10 md:px-8">
+    <header
+      className={
+        "liquid-glass-surface sticky top-0 z-40 h-16 " +
+        (superpuesto ? "-mb-16" : "")
+      }
+    >
+      <div className="relative z-10 mx-auto flex h-full max-w-6xl items-center gap-6 px-6 md:gap-10 md:px-8">
         {/* Wordmark: serif italic + serif semibold con línea ocre continua. */}
         <Link
           href="/"
           className="focus-ring inline-flex shrink-0 items-center gap-3 leading-none"
           aria-label="Unidos por la Guaira, ir al inicio"
         >
-          <Image
-            src="/logo-mark.svg"
-            alt=""
-            width={28}
-            height={28}
-            priority
-            className="h-7 w-7 shrink-0"
-          />
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-background/15 shadow-[inset_0_1px_0_rgb(255_255_255/0.3),0_5px_18px_-12px_var(--foreground)] backdrop-blur-sm">
+            <Image
+              src="/logo-mark.svg"
+              alt=""
+              width={24}
+              height={24}
+              priority
+              className="size-6"
+            />
+          </span>
           <span className="relative pb-[3px] font-serif text-base leading-none tracking-tight text-foreground">
             <span className="italic text-foreground/60">Unidos por</span>{" "}
             <span className="font-semibold">la Guaira</span>

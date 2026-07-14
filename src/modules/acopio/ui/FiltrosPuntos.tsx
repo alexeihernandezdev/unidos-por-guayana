@@ -113,7 +113,7 @@ export function FiltrosPuntos({
             value={valor.texto}
             onChange={(e) => onCambio({ ...valor, texto: e.target.value })}
             placeholder="Buscar por nombre, referencia o municipio…"
-            aria-label="Buscar puntos de acopio"
+            aria-label="Buscar centros de acopio"
             className="pl-9"
           />
         </div>
@@ -169,7 +169,7 @@ export function FiltrosPuntos({
         {conEstadoActivo && (
           <div
             role="group"
-            aria-label="Filtrar por estado del punto"
+            aria-label="Filtrar por estado del centro"
             className="inline-flex rounded-md border bg-muted p-0.5"
           >
             {OPCIONES_ACTIVO.map((opcion) => (

@@ -1,6 +1,12 @@
 export { PanelResumen } from "./PanelResumen";
 export { TarjetaMetrica } from "./TarjetaMetrica";
+export { TarjetaPanel } from "./TarjetaPanel";
+export { TarjetaDestacada } from "./TarjetaDestacada";
 export { BloqueEnviosPrioridad } from "./BloqueEnviosPrioridad";
+export { BloqueUltimasActividades } from "./BloqueUltimasActividades";
 export { BloqueSolicitudesAbiertas } from "./BloqueSolicitudesAbiertas";
 export { BloqueAportesPendientes } from "./BloqueAportesPendientes";
 export { AccesosDirectos } from "./AccesosDirectos";
+export { GraficoTiposDonut } from "./GraficoTiposDonut";
+export { GraficoTendenciaBarras } from "./GraficoTendenciaBarras";
+export { GraficoSectoresBarras } from "./GraficoSectoresBarras";

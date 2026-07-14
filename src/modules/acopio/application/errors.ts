@@ -3,7 +3,7 @@
 
 export class PuntoAcopioNoEncontradoError extends Error {
   constructor(id: string) {
-    super(`No existe un punto de acopio con el id "${id}".`);
+    super(`No existe un centro de acopio con el id "${id}".`);
     this.name = "PuntoAcopioNoEncontradoError";
   }
 }
@@ -11,7 +11,7 @@ export class PuntoAcopioNoEncontradoError extends Error {
 // Enforcement por propiedad: un ADMIN intenta operar sobre un punto ajeno.
 export class PuntoAcopioAjenoError extends Error {
   constructor() {
-    super("No puedes operar sobre un punto de acopio que no es tuyo.");
+    super("No puedes operar sobre un centro de acopio que no es tuyo.");
     this.name = "PuntoAcopioAjenoError";
   }
 }
@@ -29,7 +29,7 @@ export class DatosPuntoAcopioInvalidosError extends Error {
 export class UbicacionVaciaError extends Error {
   constructor() {
     super(
-      "Selecciona el estado y el municipio del punto (o completa tu perfil).",
+      "Selecciona el estado y el municipio del centro (o completa tu perfil).",
     );
     this.name = "UbicacionVaciaError";
   }
@@ -38,7 +38,7 @@ export class UbicacionVaciaError extends Error {
 // Nombre duplicado dentro del mismo admin (`@@unique([adminId, nombre])`).
 export class NombrePuntoDuplicadoError extends Error {
   constructor(nombre: string) {
-    super(`Ya tienes un punto de acopio llamado "${nombre}".`);
+    super(`Ya tienes un centro de acopio llamado "${nombre}".`);
     this.name = "NombrePuntoDuplicadoError";
   }
 }

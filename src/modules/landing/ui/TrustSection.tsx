@@ -18,7 +18,7 @@ const featured: Principle = {
 const supporting: Principle[] = [
   {
     title: "Cada aporte se rastrea",
-    body: "Del punto de acopio hasta la entrega, con evidencia. Los envíos avanzan por estados registrados uno por uno.",
+    body: "Del centro de acopio hasta la entrega, con evidencia. Los envíos avanzan por estados registrados uno por uno.",
     imagen: "/assets/help4.avif",
     alt: "Cadena de custodia de un envío humanitario.",
   },

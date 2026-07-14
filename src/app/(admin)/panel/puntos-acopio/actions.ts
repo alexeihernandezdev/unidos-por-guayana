@@ -32,18 +32,18 @@ const coordenada = (min: number, max: number, mensaje: string) =>
     }, mensaje);
 
 const PuntoAcopioSchema = z.object({
-  nombre: z.string().trim().min(1, "Indica el nombre del punto.").max(120),
+  nombre: z.string().trim().min(1, "Indica el nombre del centro.").max(120),
   referencia: z
     .string()
     .trim()
-    .min(1, "Indica una referencia del punto.")
+    .min(1, "Indica una referencia del centro.")
     .max(240),
   horarios: z
     .string()
     .trim()
     .min(1, "Indica los horarios de atención.")
     .max(240),
-  telefono: z.string().trim().min(1, "Indica un teléfono del punto.").max(40),
+  telefono: z.string().trim().min(1, "Indica un teléfono del centro.").max(40),
   telefonoEsWhatsApp: z.boolean(),
   correo: z.email("El correo no es válido.").max(160).or(z.literal("")),
   estadoId: z.string().trim().min(1, "Selecciona el estado."),
@@ -65,10 +65,10 @@ function traducirError(error: unknown): Resultado | null {
     return { ok: false, error: error.message };
   }
   if (error instanceof PuntoAcopioAjenoError) {
-    return { ok: false, error: "Ese punto de acopio no es tuyo." };
+    return { ok: false, error: "Ese centro de acopio no es tuyo." };
   }
   if (error instanceof PuntoAcopioNoEncontradoError) {
-    return { ok: false, error: "El punto de acopio ya no existe." };
+    return { ok: false, error: "El centro de acopio ya no existe." };
   }
   // Unicidad (adminId, nombre) que el caso de uso fía a la base (P2002).
   if (
@@ -77,7 +77,7 @@ function traducirError(error: unknown): Resultado | null {
     "code" in error &&
     (error as { code?: string }).code === "P2002"
   ) {
-    return { ok: false, error: "Ya tienes un punto con ese nombre." };
+    return { ok: false, error: "Ya tienes un centro con ese nombre." };
   }
   return null;
 }

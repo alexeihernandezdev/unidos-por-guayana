@@ -1,5 +1,8 @@
 export { SiteHeader } from "./SiteHeader";
 export { HeroSection } from "./HeroSection";
+export { HeroParallaxSection } from "./HeroParallaxSection";
+export { RolesSection } from "./RolesSection";
+export { SmoothScroll } from "./SmoothScroll";
 export { ActiveShipmentsSection } from "./ActiveShipmentsSection";
 export { HowItWorksSection } from "./HowItWorksSection";
 export { NumbersSection } from "./NumbersSection";

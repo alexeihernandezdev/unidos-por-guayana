@@ -566,17 +566,17 @@ export function RegistroForm({ action, estados, municipios }: Props) {
           {esAdmin && (
             <fieldset className="flex flex-col gap-4 rounded-lg border border-border p-4">
               <legend className="px-1 text-sm font-medium">
-                Primer punto de acopio
+                Primer centro de acopio
               </legend>
               <p className="text-xs text-muted-foreground">
-                Dónde recibes la ayuda. Podrás añadir más puntos luego desde tu
+                Dónde recibes la ayuda. Podrás añadir más centros luego desde tu
                 panel. El teléfono y correo se toman de los datos del centro.
               </p>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="puntoNombre" className="text-sm font-medium">
-                    Nombre del punto
+                    Nombre del centro
                   </label>
                   <input
                     id="puntoNombre"
@@ -584,7 +584,7 @@ export function RegistroForm({ action, estados, municipios }: Props) {
                     placeholder="Sede centro"
                     aria-invalid={Boolean(errors.puntoNombre)}
                     {...register("puntoNombre", {
-                      required: esAdmin && "Indica el nombre del punto.",
+                      required: esAdmin && "Indica el nombre del centro.",
                     })}
                   />
                   {errors.puntoNombre && (
@@ -672,14 +672,14 @@ export function RegistroForm({ action, estados, municipios }: Props) {
                       {marcadorPunto.longitud.toFixed(6)}
                     </span>
                   ) : (
-                    "Busca tu localidad o haz click en el mapa para marcar el punto; luego puedes arrastrar el marcador."
+                    "Busca tu localidad o haz click en el mapa para marcar la ubicación; luego puedes arrastrar el marcador."
                   )}
                 </p>
                 <input
                   type="hidden"
                   {...register("puntoLatitud", {
                     required:
-                      esAdmin && "Marca la ubicación del punto en el mapa.",
+                      esAdmin && "Marca la ubicación del centro en el mapa.",
                   })}
                 />
                 <input type="hidden" {...register("puntoLongitud")} />

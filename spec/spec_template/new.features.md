@@ -18,3 +18,11 @@
 ## usabilidad:
 
 Si no hay recursos; poner link desde actividad que manda a recursos
+
+## Nuevos puntos ultima reunion
+
+1. Cambiar texto a "La ayuda llega mas lejos cuando cada persona encuentra como acercarse"
+2. Cambiar "Punto de acopio a centro de acopio"
+3. Filtrar centros de acopio por cuentas
+4. Crear seeders par perfiles profesionales
+5. Hay un boton blanco en recursos

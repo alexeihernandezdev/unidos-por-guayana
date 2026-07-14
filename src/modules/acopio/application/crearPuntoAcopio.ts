@@ -57,7 +57,7 @@ export async function crearPuntoAcopio(
   const correo = input.correo?.trim() ? input.correo.trim() : null;
 
   if (!esTextoNoVacio(nombre)) {
-    throw new DatosPuntoAcopioInvalidosError("Indica el nombre del punto.");
+    throw new DatosPuntoAcopioInvalidosError("Indica el nombre del centro.");
   }
   if (!esTextoNoVacio(referencia)) {
     throw new DatosPuntoAcopioInvalidosError(
@@ -69,7 +69,7 @@ export async function crearPuntoAcopio(
   }
   if (!esTextoNoVacio(telefono)) {
     throw new DatosPuntoAcopioInvalidosError(
-      "Indica un teléfono de contacto del punto.",
+      "Indica un teléfono de contacto del centro.",
     );
   }
   if (!esCoordenadaLatitud(input.latitud)) {

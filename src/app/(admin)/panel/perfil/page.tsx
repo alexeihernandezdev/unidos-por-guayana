@@ -52,7 +52,7 @@ export default async function PerfilAdminPage() {
           { href: "/panel/perfil", label: "Mi perfil", icon: UserRound },
           {
             href: "/panel/puntos-acopio",
-            label: "Puntos de acopio",
+            label: "Centros de Acopio",
             icon: MapPinned,
           },
         ]}

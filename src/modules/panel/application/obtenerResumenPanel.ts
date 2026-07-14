@@ -12,6 +12,8 @@ import { sectoresTop } from "@/modules/solicitudes/application/sectoresTop";
 import type { ConteosPorEstadoActividad } from "@/modules/actividades/application/contarActividadesPorEstado";
 import type { ConteosPorUrgencia } from "@/modules/solicitudes/application/contarSolicitudesPorUrgencia";
 import type { SectorTop } from "@/modules/solicitudes/application/sectoresTop";
+import { calcularEstadisticasActividades } from "./estadisticasActividades";
+import type { EstadisticasActividades } from "./estadisticasActividades";
 import type { PanelDeps } from "./deps";
 
 export type ProgresoAgregadoRecolectando = {
@@ -34,12 +36,28 @@ export type ResumenPanel = {
     ConteosPorEstadoActividad,
     "RECOLECTANDO" | "LISTO" | "EN_TRANSITO"
   >;
+  /** Actividades activas de cualquier tipo (todas menos ENTREGADO/REALIZADA). */
+  actividadesActivas: number;
   progresoAgregadoRecolectando: ProgresoAgregadoRecolectando;
   solicitudesAbiertasPorUrgencia: ConteosPorUrgencia;
   aportesPendientesConteo: number;
   sectoresTop: SectorTop[];
   enviosPrioridad: EnvioPrioridadPanel[];
+  /** Métricas de los tres tipos de actividad (donut, tendencia, feed). */
+  estadisticas: EstadisticasActividades;
 };
+
+// Estados terminales: la actividad ya cumplió su ciclo y no necesita atención.
+const ESTADOS_TERMINALES: EstadoActividad[] = [
+  EstadoActividad.ENTREGADO,
+  EstadoActividad.REALIZADA,
+];
+
+function contarActivas(conteos: ConteosPorEstadoActividad): number {
+  return (Object.keys(conteos) as EstadoActividad[])
+    .filter((estado) => !ESTADOS_TERMINALES.includes(estado))
+    .reduce((acc, estado) => acc + conteos[estado], 0);
+}
 
 async function calcularProgresoAgregadoRecolectando(
   deps: PanelDeps,
@@ -104,8 +122,10 @@ async function contarAportesPendientesDelAdmin(
 export async function obtenerResumenPanel(
   deps: PanelDeps,
   adminId: string,
+  ahora: Date = new Date(),
 ): Promise<ResumenPanel> {
   const [
+    actividadesDelAdmin,
     conteosTotales,
     prioridad,
     solicitudesAbiertasPorUrgencia,
@@ -113,6 +133,7 @@ export async function obtenerResumenPanel(
     sectores,
     progresoAgregadoRecolectando,
   ] = await Promise.all([
+    deps.actividades.listar({ adminId }),
     contarActividadesPorEstado(deps, { adminId }),
     listarPrioridadRecolectando(deps, adminId),
     contarSolicitudesPorUrgencia(deps),
@@ -120,6 +141,11 @@ export async function obtenerResumenPanel(
     sectoresTop(deps),
     calcularProgresoAgregadoRecolectando(deps, adminId),
   ]);
+
+  const estadisticas = calcularEstadisticasActividades(
+    actividadesDelAdmin,
+    ahora,
+  );
 
   const enviosPrioridad = await Promise.all(
     prioridad.map(async ({ ayuda, porcentaje }) => ({
@@ -137,10 +163,12 @@ export async function obtenerResumenPanel(
 
   return {
     enviosPorEstado: contarEnviosActivos(conteosTotales),
+    actividadesActivas: contarActivas(conteosTotales),
     progresoAgregadoRecolectando,
     solicitudesAbiertasPorUrgencia,
     aportesPendientesConteo,
     sectoresTop: sectores,
     enviosPrioridad,
+    estadisticas,
   };
 }
