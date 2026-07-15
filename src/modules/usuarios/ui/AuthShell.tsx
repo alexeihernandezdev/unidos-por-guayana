@@ -43,7 +43,7 @@ export function AuthShell({
 
         <div className="auth-visual-copy" data-auth-rise>
           <blockquote>
-            La ayuda llega más lejos cuando cada persona encuentra cómo sumarse.
+            La ayuda llega más lejos cuando cada persona encuentra cómo acercarse.
           </blockquote>
           <div className="auth-location">
             <span aria-hidden />
