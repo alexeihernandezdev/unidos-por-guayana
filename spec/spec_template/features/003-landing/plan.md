@@ -79,6 +79,9 @@ comportamiento según sesión → metadatos → responsive/tema → validación*
 - **Tailwind v4** con los tokens de `globals.css` (`--background`, `--foreground`); no reintroducir
   `tailwind.config`.
 - Diseño **móvil primero**, con layout que escale a escritorio (flex/grid).
+- Contener el overflow horizontal en el límite de la landing, no de forma global en `html`/`body`,
+  para que las capas con parallax o desplazamientos de entrada no amplíen el área desplazable del
+  documento. Mantener intactos el scroll vertical, el encuadre del hero y la navegación superpuesta.
 - Respetar **modo claro/oscuro** (`prefers-color-scheme`) sin hardcodear colores fuera de los tokens.
 - Optimizar activos (imágenes en `public/`, `next/image` si aplica) para conexión limitada.
 
@@ -101,7 +104,8 @@ comportamiento según sesión → metadatos → responsive/tema → validación*
 2. Comprobar las CTAs: "Quiero colaborar" → registro (`COLABORADOR`), "Necesito ayuda" → registro
    (`SOLICITANTE`), "Iniciar sesión" → `/login`.
 3. Con sesión activa, la landing ofrece acceso al área del usuario en lugar de registro/login.
-4. Verificar **responsive** (móvil/escritorio) y **modo claro/oscuro**.
+4. Verificar **responsive** (320, 390, 768 px y escritorio) y **modo claro/oscuro**. En cada ancho,
+   confirmar que `document.documentElement.scrollWidth === document.documentElement.clientWidth`.
 5. Revisar el `<head>`: metadatos, canonical, **Open Graph**/**Twitter** y el `<script>` **JSON-LD**;
    comprobar `/robots.txt` y `/sitemap.xml`, y que el documento sea `lang="es"`.
 6. `pnpm build`: confirmar que `/` figura como **`○` (Static)**, no `ƒ` (Dynamic).

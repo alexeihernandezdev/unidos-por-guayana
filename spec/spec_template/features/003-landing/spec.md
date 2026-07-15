@@ -107,6 +107,9 @@ primera impresión de seriedad y transparencia sobre la que se apoya la captaci�
       CTAs de registro/login.
 - [ ] La página es **responsive** (usable en móvil) y respeta el **modo claro/oscuro** con los
       tokens de Tailwind existentes.
+- [ ] En anchos de viewport de **320 px en adelante**, la landing no genera desplazamiento
+      horizontal: `document.documentElement.scrollWidth` no supera su `clientWidth`. Las capas
+      animadas del hero y las secciones conservan su recorte visual sin ensanchar el documento.
 - [ ] La ruta `/` se **prerenderiza como estática**: en la salida de `pnpm build` aparece como `○`
       (Static), **no** como `ƒ` (Dynamic). `page.tsx` no usa `cookies`/`headers`/`auth`.
 - [ ] La página define **metadatos** (título, descripción, `metadataBase`, canonical) y etiquetas

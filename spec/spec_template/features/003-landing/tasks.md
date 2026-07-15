@@ -87,3 +87,12 @@
 - [x] Verificar que `DOC/features/003-landing.md` refleja lo entregado.
 - [x] Mover `003 · Landing` a **Hecho ✅** en `constitution/roadmap.md` y promover
       `004 · Catálogo de recursos` a **Siguiente 🔜**.
+
+## 10. Mantenimiento responsive
+
+- [ ] Identificar la capa animada que amplía el ancho desplazable de `/` en móvil.
+- [ ] Contener el overflow horizontal dentro de la landing sin bloquear el scroll vertical ni
+      modificar el parallax, el encuadre del hero o el comportamiento de overlays globales.
+- [ ] Verificar en 320, 390, 768 px y escritorio que `scrollWidth === clientWidth` y que no existe
+      desplazamiento lateral mediante gesto táctil.
+- [ ] Ejecutar lint, comprobación de tipos y build.
