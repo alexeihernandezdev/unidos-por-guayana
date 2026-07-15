@@ -23,6 +23,8 @@ import { RedAptaLista } from "@/modules/afiliaciones/ui/RedAptaLista";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import { Checkbox } from "@/shared/ui/checkbox";
+import { Input } from "@/shared/ui/input";
+import { Textarea } from "@/shared/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -80,7 +82,7 @@ const TIPO_INFO: Record<TipoActividad, { icono: LucideIcon; descripcion: string 
   },
   [TipoActividad.EVENTO_SOCIAL]: {
     icono: Users,
-    descripcion: "Encuentro comunitario en un punto.",
+    descripcion: "Encuentro comunitario en un lugar acordado.",
   },
 };
 
@@ -109,9 +111,6 @@ type Props = {
   textoEnviar: string;
   textoEnviando: string;
 };
-
-const campo =
-  "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors ease-[var(--ease-out-emil)] focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive";
 
 // Fila de sección en dos paneles: la etiqueta y su pista a la izquierda, los campos
 // a la derecha. En pantallas anchas aprovecha el espacio horizontal (grid 1:3) en
@@ -293,9 +292,8 @@ export function ActividadForm({
             >
               Título
             </label>
-            <input
+            <Input
               id="titulo"
-              className={campo}
               placeholder="Envío a Upata, agua y alimentos"
               aria-invalid={Boolean(errors.titulo)}
               {...register("titulo", {
@@ -315,9 +313,8 @@ export function ActividadForm({
             >
               Sector de destino
             </label>
-            <input
+            <Input
               id="sectorDestino"
-              className={campo}
               placeholder="Upata, San Félix…"
               aria-invalid={Boolean(errors.sectorDestino)}
               {...register("sectorDestino", {
@@ -336,10 +333,10 @@ export function ActividadForm({
             <label htmlFor="fecha" className="text-sm font-medium text-foreground">
               Fecha de inicio
             </label>
-            <input
+            <Input
               id="fecha"
               type="date"
-              className={`${campo} numeric-tnum`}
+              className="numeric-tnum"
               aria-invalid={Boolean(errors.fecha)}
               {...register("fecha", { required: "Indica la fecha de inicio." })}
             />
@@ -359,10 +356,10 @@ export function ActividadForm({
                   (opcional)
                 </span>
               </label>
-              <input
+              <Input
                 id="horaFin"
                 type="time"
-                className={`${campo} numeric-tnum`}
+                className="numeric-tnum"
                 {...register("horaFin")}
               />
             </div>
@@ -376,10 +373,9 @@ export function ActividadForm({
               Descripción{" "}
               <span className="font-normal text-muted-foreground">(opcional)</span>
             </label>
-            <textarea
+            <Textarea
               id="descripcion"
               rows={3}
-              className={campo}
               {...register("descripcion")}
             />
           </div>
@@ -552,12 +548,12 @@ export function ActividadForm({
                       >
                         Objetivo
                       </label>
-                      <input
+                      <Input
                         id={`meta-cantidad-${index}`}
                         type="number"
                         min="0"
                         step="0.01"
-                        className={`${campo} numeric-tnum`}
+                        className="numeric-tnum"
                         aria-invalid={Boolean(errors.metas?.[index]?.cantidadObjetivo)}
                         {...register(`metas.${index}.cantidadObjetivo`, {
                           required: "Indica la cantidad.",

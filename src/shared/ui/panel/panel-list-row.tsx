@@ -24,6 +24,12 @@ type Props = {
   meta?: PanelListMeta[];
   /** Acciones a la derecha (Editar / Archivar…). */
   actions?: React.ReactNode;
+  /**
+   * Bloque expandido a ancho completo bajo la fila (feature 028): datos
+   * adicionales tipo `<dl>` (p. ej. la bandeja del superadmin). Separado por
+   * hairline; no participa del layout semitabular de la fila.
+   */
+  detail?: React.ReactNode;
   className?: string;
 };
 
@@ -34,46 +40,54 @@ export function PanelListRow({
   secondary,
   meta,
   actions,
+  detail,
   className,
 }: Props) {
   return (
     <article
       className={cn(
-        "flex flex-col gap-4 p-4 transition-colors duration-150 hover:bg-muted/30 md:flex-row md:items-center md:justify-between",
+        "flex flex-col gap-4 p-4 transition-colors duration-150 hover:bg-muted/40",
         className,
       )}
     >
-      <div className="flex min-w-0 items-start gap-3">
-        <span className="profile-icon size-10">
-          <Icon aria-hidden="true" />
-        </span>
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="font-semibold">{title}</h2>
-            {badge}
-          </div>
-          {secondary != null && (
-            <p className="mt-0.5 text-sm text-muted-foreground">{secondary}</p>
-          )}
-          {meta && meta.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-              {meta.map(({ icon: MetaIcon, texto, label }, i) => (
-                <span key={i} className="inline-flex items-center gap-1">
-                  <MetaIcon
-                    className="size-3.5"
-                    strokeWidth={1.5}
-                    aria-hidden="true"
-                  />
-                  {label && <span className="sr-only">{label}: </span>}
-                  {texto}
-                </span>
-              ))}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex min-w-0 items-start gap-3">
+          <span className="profile-icon size-10">
+            <Icon aria-hidden="true" />
+          </span>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="font-semibold">{title}</h2>
+              {badge}
             </div>
-          )}
+            {secondary != null && (
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                {secondary}
+              </p>
+            )}
+            {meta && meta.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                {meta.map(({ icon: MetaIcon, texto, label }, i) => (
+                  <span key={i} className="inline-flex items-center gap-1">
+                    <MetaIcon
+                      className="size-3.5"
+                      strokeWidth={1.5}
+                      aria-hidden="true"
+                    />
+                    {label && <span className="sr-only">{label}: </span>}
+                    {texto}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
+        {actions && (
+          <div className="flex shrink-0 gap-2 md:justify-end">{actions}</div>
+        )}
       </div>
-      {actions && (
-        <div className="flex shrink-0 gap-2 md:justify-end">{actions}</div>
+      {detail != null && (
+        <div className="border-t border-border/70 pt-3">{detail}</div>
       )}
     </article>
   );

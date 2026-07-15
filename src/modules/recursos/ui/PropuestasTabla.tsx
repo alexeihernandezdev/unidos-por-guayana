@@ -4,7 +4,7 @@ import { CalendarDays, Package, Ruler, Tag } from "lucide-react";
 import { DateTime } from "luxon";
 import type { Recurso } from "@/modules/recursos/domain/Recurso";
 import { Button } from "@/shared/ui/button";
-import { PanelList, PanelListRow } from "@/shared/ui/panel";
+import { PanelEmptyState, PanelList, PanelListRow } from "@/shared/ui/panel";
 import { CATEGORIA_LABEL } from "./categorias";
 
 type Props = {
@@ -31,9 +31,12 @@ export function PropuestasTabla({
 }: Props) {
   if (propuestas.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
-        No hay propuestas pendientes de revisión.
-      </p>
+      <PanelEmptyState
+        bordered={false}
+        icon={Package}
+        title="Sin propuestas pendientes"
+        description="Cuando un solicitante proponga un recurso nuevo, aparecerá aquí para revisarlo."
+      />
     );
   }
 
@@ -79,7 +82,12 @@ export function PropuestasTabla({
               </form>
               <form action={rechazarAction}>
                 <input type="hidden" name="id" value={recurso.id} />
-                <Button type="submit" variant="outline" size="sm">
+                <Button
+                  type="submit"
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                >
                   Rechazar
                 </Button>
               </form>

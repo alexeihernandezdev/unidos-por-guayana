@@ -27,7 +27,10 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <SmoothScroll>
-      <main className="flex-1">
+      {/* Las capas de Motion pueden sobrepasar su caja durante la entrada.
+          Esta frontera evita que ese paint amplíe el ancho desplazable del
+          documento sin convertir el eje horizontal en un scroll container. */}
+      <main className="w-full min-w-0 max-w-full flex-1 overflow-x-clip">
         <HeroParallaxSection />
         <RolesSection />
         <ActiveShipmentsSection />

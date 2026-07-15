@@ -11,7 +11,11 @@ import {
 } from "@/modules/recursos/ui/RecursoForm";
 import { RecursosTabla } from "@/modules/recursos/ui/RecursosTabla";
 import { Button } from "@/shared/ui/button";
-import { PanelFormModal, PanelPageHeader } from "@/shared/ui/panel";
+import {
+  PANEL_HEADER_ACTION,
+  PanelFormModal,
+  PanelPageHeader,
+} from "@/shared/ui/panel";
 
 type Resultado = { ok: boolean; error?: string };
 
@@ -57,10 +61,13 @@ export function RecursosGestion({
         description="Lista maestra de lo que se puede aportar o necesitar."
         actions={
           <>
-            <Button asChild variant="outline">
+            <Button asChild className={PANEL_HEADER_ACTION.secondary}>
               <Link href="/panel/recursos/propuestas">Ver propuestas</Link>
             </Button>
-            <Button onClick={() => setModal({ modo: "nuevo" })}>
+            <Button
+              className={PANEL_HEADER_ACTION.primary}
+              onClick={() => setModal({ modo: "nuevo" })}
+            >
               <Plus strokeWidth={1.5} aria-hidden="true" />
               Nuevo recurso
             </Button>

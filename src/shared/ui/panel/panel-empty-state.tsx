@@ -10,7 +10,11 @@ type Props = {
   title: string;
   description?: string;
   action?: React.ReactNode;
-  /** Con borde superior cuando va dentro de un contenedor de listado. */
+  /**
+   * `true` (default): borde superior, para ir dentro de un contenedor de
+   * listado. `false`: contenedor propio con borde dashed (feature 028), para
+   * cuando el listado vacío no rinde su card.
+   */
   bordered?: boolean;
   className?: string;
 };
@@ -27,7 +31,9 @@ export function PanelEmptyState({
     <div
       className={cn(
         "flex flex-col items-center gap-3 py-16 text-center",
-        bordered && "border-t border-border",
+        bordered
+          ? "border-t border-border"
+          : "rounded-lg border border-dashed border-border px-6",
         className,
       )}
     >

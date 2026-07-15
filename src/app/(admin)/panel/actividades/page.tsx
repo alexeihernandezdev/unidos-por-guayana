@@ -14,10 +14,16 @@ import { etiquetaTipo } from "@/modules/actividades/ui/tipos";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarActividadesServicio } from "@/shared/actividades";
 import { requireRol } from "@/shared/auth";
-import { Truck } from "lucide-react";
+import { ListFilter, Plus, Truck } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { FiltroSelect } from "@/shared/ui/filtro-select";
-import { PanelPage, PanelPageHeader } from "@/shared/ui/panel";
+import {
+  PANEL_HEADER_ACTION,
+  PanelFilters,
+  PanelFiltersField,
+  PanelPage,
+  PanelPageHeader,
+} from "@/shared/ui/panel";
 import { eliminarActividadAction } from "./actions";
 
 type Props = {
@@ -43,22 +49,41 @@ export default async function ActividadesPage({ searchParams }: Props) {
         title="Actividades de ayuda"
         description="Planifica y sigue cada actividad: envíos, jornadas y eventos sociales."
         actions={
-          <Button asChild>
-            <Link href="/panel/actividades/nueva">Nueva actividad</Link>
+          <Button asChild className={PANEL_HEADER_ACTION.primary}>
+            <Link href="/panel/actividades/nueva">
+              <Plus strokeWidth={1.5} />
+              Nueva actividad
+            </Link>
           </Button>
         }
       />
 
-      <form
-        method="get"
-        className="flex flex-wrap items-end gap-3 border-t border-border pt-4"
+      <PanelFilters
+        activos={[filtro.tipo, filtro.estado].filter(Boolean).length}
+        limpiarHref="/panel/actividades"
+        submitLabel="Filtrar"
+        className="gap-3 rounded-xl border-border/70 bg-card/95 p-3 shadow-xs"
       >
-        <div className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium">Tipo</span>
+        <div className="mr-auto flex min-w-full items-center gap-3 px-1 sm:min-w-56">
+          <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary-ink">
+            <ListFilter className="size-4" strokeWidth={1.5} aria-hidden />
+          </span>
+          <div>
+            <p className="text-sm font-semibold text-foreground">
+              Explorar actividades
+            </p>
+            <p className="font-mono text-xs text-muted-foreground numeric-tnum">
+              {actividades.length} {actividades.length === 1 ? "resultado" : "resultados"}
+            </p>
+          </div>
+        </div>
+
+        <PanelFiltersField label="Tipo">
           <FiltroSelect
             name="tipo"
             ariaLabel="Filtrar por tipo"
             defaultValue={filtro.tipo ?? "todos"}
+            className="min-w-40 bg-background"
             opciones={[
               { value: "todos", label: "Todos" },
               ...TIPOS_ACTIVIDAD.map((t) => ({
@@ -67,14 +92,14 @@ export default async function ActividadesPage({ searchParams }: Props) {
               })),
             ]}
           />
-        </div>
+        </PanelFiltersField>
 
-        <div className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium">Estado</span>
+        <PanelFiltersField label="Estado">
           <FiltroSelect
             name="estado"
             ariaLabel="Filtrar por estado"
             defaultValue={filtro.estado ?? "todos"}
+            className="min-w-40 bg-background"
             opciones={[
               { value: "todos", label: "Todos" },
               ...ESTADOS_ACTIVIDAD.map((e) => ({
@@ -83,14 +108,14 @@ export default async function ActividadesPage({ searchParams }: Props) {
               })),
             ]}
           />
-        </div>
+        </PanelFiltersField>
+      </PanelFilters>
 
-        <Button type="submit" variant="outline">
-          Filtrar
-        </Button>
-      </form>
-
-      <ActividadesTabla actividades={actividades} eliminarAction={eliminarActividadAction} />
+      <ActividadesTabla
+        key={`${filtro.tipo ?? "todos"}:${filtro.estado ?? "todos"}`}
+        actividades={actividades}
+        eliminarAction={eliminarActividadAction}
+      />
     </PanelPage>
   );
 }

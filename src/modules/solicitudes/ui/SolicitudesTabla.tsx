@@ -3,7 +3,7 @@ import { CalendarDays, Inbox, Package } from "lucide-react";
 import type { Solicitud } from "@/modules/solicitudes/domain/Solicitud";
 import { esEditable } from "@/modules/solicitudes/domain/maquinaEstados";
 import { Button } from "@/shared/ui/button";
-import { PanelList, PanelListRow } from "@/shared/ui/panel";
+import { PanelEmptyState, PanelList, PanelListRow } from "@/shared/ui/panel";
 import { EstadoSolicitudBadge } from "./EstadoSolicitudBadge";
 import { UrgenciaBadge } from "./UrgenciaBadge";
 import { formatearFechaCreacion } from "./fechas";
@@ -24,9 +24,12 @@ export function SolicitudesTabla({
 }: Props) {
   if (solicitudes.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
-        No hay solicitudes que coincidan con el filtro.
-      </p>
+      <PanelEmptyState
+        bordered={false}
+        icon={Inbox}
+        title="Sin solicitudes"
+        description="No hay solicitudes que coincidan con el filtro."
+      />
     );
   }
 
@@ -39,7 +42,7 @@ export function SolicitudesTabla({
           title={
             <Link
               href={`${baseRuta}/${solicitud.id}`}
-              className="text-primary underline-offset-4 hover:underline"
+              className="text-foreground underline-offset-4 transition-colors duration-150 hover:text-primary-ink hover:underline"
             >
               {solicitud.sector}
             </Link>

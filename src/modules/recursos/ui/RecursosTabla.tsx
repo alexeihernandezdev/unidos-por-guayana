@@ -5,6 +5,7 @@ import type { Recurso } from "@/modules/recursos/domain/Recurso";
 import { Button } from "@/shared/ui/button";
 import {
   PanelBadge,
+  PanelEmptyState,
   PanelList,
   PanelListRow,
 } from "@/shared/ui/panel";
@@ -31,9 +32,12 @@ export function RecursosTabla({
 }: Props) {
   if (recursos.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
-        No hay recursos que coincidan con el filtro.
-      </p>
+      <PanelEmptyState
+        bordered={false}
+        icon={Package}
+        title="Sin recursos"
+        description="No hay recursos que coincidan con el filtro. Crea uno nuevo con el botón del encabezado."
+      />
     );
   }
 

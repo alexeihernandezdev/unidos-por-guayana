@@ -15,16 +15,19 @@ export const ESTADO_LABEL: Record<EstadoActividad, string> = {
   [EstadoActividad.REALIZADA]: "Realizada",
 };
 
-// Clases del badge por estado. Se apoyan en los tokens de marca (ocre = primary,
-// teal = accent) y en neutrales; sin inventar colores nuevos (ver tech-stack.md).
-// Los estados equivalentes por posición comparten estilo (preparación, listo, en
-// marcha, terminado).
+// Clases del badge por estado (feature 028). Usan la paleta semántica de
+// `tech-stack.md § Estilo visual`: ámbar = en preparación (recolectando),
+// teal = listo para el siguiente paso, accent = en marcha, verde = completado.
+// El color acompaña a la etiqueta, nunca es el único portador del estado.
 export const ESTADO_BADGE: Record<EstadoActividad, string> = {
-  [EstadoActividad.RECOLECTANDO]: "border-border bg-muted text-foreground/80",
+  [EstadoActividad.RECOLECTANDO]:
+    "border-warning/40 bg-warning/15 text-warning-ink",
   [EstadoActividad.LISTO]: "border-primary/40 bg-primary/10 text-primary-ink",
   [EstadoActividad.EN_TRANSITO]: "border-accent/40 bg-accent/10 text-accent",
-  [EstadoActividad.ENTREGADO]: "border-foreground/25 bg-foreground/5 text-foreground",
+  [EstadoActividad.ENTREGADO]:
+    "border-success/40 bg-success/15 text-success-ink",
   [EstadoActividad.LISTA]: "border-primary/40 bg-primary/10 text-primary-ink",
   [EstadoActividad.EN_CURSO]: "border-accent/40 bg-accent/10 text-accent",
-  [EstadoActividad.REALIZADA]: "border-foreground/25 bg-foreground/5 text-foreground",
+  [EstadoActividad.REALIZADA]:
+    "border-success/40 bg-success/15 text-success-ink",
 };

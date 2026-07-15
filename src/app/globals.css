@@ -319,6 +319,10 @@
   body {
     @apply bg-background text-foreground;
     position: relative;
+    /* El gradiente ambiental usa overscan (inset: -8%) y transforms para no
+       descubrir bordes al animarse. `clip` impide que esa capa fija amplíe el
+       ancho desplazable sin crear un scroll container como haría `hidden`. */
+    overflow-x: clip;
   }
 
   /* Ambient gradient: se pinta en un pseudo-elemento fijo detrás del contenido

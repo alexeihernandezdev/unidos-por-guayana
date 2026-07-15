@@ -5,6 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
 import {
   Select,
   SelectContent,
@@ -12,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/select";
+import { Textarea } from "@/shared/ui/textarea";
 import { CATEGORIA_LABEL } from "./categorias";
 
 export type RecursoFormValores = {
@@ -33,9 +35,6 @@ type Props = {
   textoEnviar: string;
   textoEnviando: string;
 };
-
-const campo =
-  "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive";
 
 const CATEGORIAS = Object.values(CategoriaRecurso);
 
@@ -85,9 +84,8 @@ export function RecursoForm({
         <label htmlFor="nombre" className="text-sm font-medium">
           Nombre
         </label>
-        <input
+        <Input
           id="nombre"
-          className={campo}
           aria-invalid={Boolean(errors.nombre)}
           {...register("nombre", {
             required: "Indica el nombre del recurso.",
@@ -104,9 +102,8 @@ export function RecursoForm({
         <label htmlFor="unidad" className="text-sm font-medium">
           Unidad de medida
         </label>
-        <input
+        <Input
           id="unidad"
-          className={campo}
           placeholder="litros, cajas, personas, USD…"
           aria-invalid={Boolean(errors.unidad)}
           {...register("unidad", {
@@ -146,10 +143,9 @@ export function RecursoForm({
         <label htmlFor="descripcion" className="text-sm font-medium">
           Descripción <span className="text-muted-foreground">(opcional)</span>
         </label>
-        <textarea
+        <Textarea
           id="descripcion"
           rows={3}
-          className={campo}
           {...register("descripcion")}
         />
       </div>

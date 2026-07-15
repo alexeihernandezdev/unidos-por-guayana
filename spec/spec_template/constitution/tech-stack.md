@@ -142,7 +142,7 @@ _Entidades centrales derivadas de la misión. Se documentan aquí las reglas no 
   - **`--background` / `--foreground`** son off-white tintado hacia la hue de marca (200) y near-black frío (hue 260). No son pure white/black.
   - **Disciplina de uso:** el teal es a la vez identidad e interacción; aparece en momentos puntuales (CTAs, insignias, foco, hover), no como sprinkle. Todo lo demás en neutrales fríos.
 - **Tipografías:** tres familias como techo, cargadas vía `next/font/google` en `src/app/layout.tsx`:
-  - **`EB Garamond`** — serif de display para headings y momentos editoriales (variable `--font-serif`, alias Tailwind `font-serif`). Elegida por gravitas civil y por su encaje con la tradición tipográfica en español; evita clichés de AI slop (Fraunces / Instrument Serif están vetadas).
+  - **`EB Garamond`** — serif de display para headings y momentos editoriales (variable `--font-serif`, alias Tailwind `font-serif`). Elegida por gravitas civil y por su encaje con la tradición tipográfica en español; evita clichés de AI slop (Fraunces / Instrument Serif están vetadas; Playfair Display y Bodoni Moda se probaron para el hero en jul 2026 y se descartaron por lo mismo). El hero de la landing usa esta misma familia con el tratamiento display del h2 de "Operación en curso": `font-medium leading-[0.88] tracking-[-0.035em]`.
   - **`Geist Sans`** — cuerpo de texto y UI (variable `--font-geist-sans`, alias `font-sans`).
   - **`Geist Mono`** — solo para labels numéricos, códigos, contadores (variable `--font-geist-mono`, alias `font-mono`). Cuando se muestren números tabulares aplicar clase `numeric-tnum` (`font-feature-settings: 'tnum', 'lnum'`); para números en cuerpo editorial usar `numeric-oldstyle`.
 - **Refinamientos disponibles** en `globals.css`:
@@ -164,7 +164,7 @@ _Entidades centrales derivadas de la misión. Se documentan aquí las reglas no 
 - **Body en `text-foreground` o `text-foreground/80`.** `text-muted-foreground` solo para labels pequeños, notas o metadatos, nunca para el cuerpo principal (WCAG AA).
 - **Ancho de línea:** `max-w-[65ch]` en párrafos. Headings con `[text-wrap:balance]`, cuerpos con `[text-wrap:pretty]`.
 - **Sin ALL-CAPS en cuerpos.** Reservado a etiquetas cortas (≤4 palabras). Los "eyebrows" uppercase-tracked (etiquetas pequeñas sobre cada heading) están **prohibidos como scaffolding**; usar máximo uno por cada 3 secciones, con criterio.
-- **Cap tipográfico:** hero máximo `text-6xl` (60px) en desktop; `md:text-5xl`/`md:text-4xl` para headings de sección. No superar `clamp(..., 6rem)` en ningún display.
+- **Cap tipográfico:** los displays serif de la landing (hero y headings de sección tipo "Operación en curso") pueden llegar al techo absoluto `clamp(..., 6rem)` (96px); cualquier otro hero máximo `text-6xl` (60px) en desktop; `md:text-5xl`/`md:text-4xl` para headings de sección del resto de la app.
 
 ### Espaciado y layout
 

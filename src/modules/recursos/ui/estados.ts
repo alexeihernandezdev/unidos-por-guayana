@@ -9,6 +9,8 @@ export const ESTADO_APROBACION_LABEL: Record<EstadoAprobacionRecurso, string> =
     [EstadoAprobacionRecurso.RECHAZADO]: "Rechazado",
   };
 
+// Paleta semántica de `tech-stack.md § Estilo visual` (feature 028): ámbar =
+// requiere atención (propuesto, pendiente de revisión), teal = disponible.
 export const ESTADO_APROBACION_BADGE: Record<
   EstadoAprobacionRecurso,
   string
@@ -16,7 +18,7 @@ export const ESTADO_APROBACION_BADGE: Record<
   [EstadoAprobacionRecurso.APROBADO]:
     "border-primary/40 bg-primary/10 text-primary-ink",
   [EstadoAprobacionRecurso.PROPUESTO]:
-    "border-accent/40 bg-accent/10 text-accent",
+    "border-warning/40 bg-warning/15 text-warning-ink",
   [EstadoAprobacionRecurso.RECHAZADO]:
     "border-destructive/40 bg-destructive/10 text-destructive",
 };

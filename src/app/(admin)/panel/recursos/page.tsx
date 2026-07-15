@@ -8,9 +8,12 @@ import { RecursosGestion } from "@/modules/recursos/ui/RecursosGestion";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarRecursosServicio } from "@/shared/recursos";
 import { requireRol } from "@/shared/auth";
-import { Button } from "@/shared/ui/button";
 import { FiltroSelect } from "@/shared/ui/filtro-select";
-import { PanelPage } from "@/shared/ui/panel";
+import {
+  PanelFilters,
+  PanelFiltersField,
+  PanelPage,
+} from "@/shared/ui/panel";
 import {
   activarRecursoAction,
   archivarRecursoAction,
@@ -34,12 +37,13 @@ export default async function RecursosPage({ searchParams }: Props) {
   const recursos = await listarRecursosServicio(filtro);
 
   const filtros = (
-    <form
-      method="get"
-      className="flex flex-wrap items-end gap-3 border-t border-border pt-4"
+    <PanelFilters
+      activos={
+        [filtro.categoria, filtro.soloActivos].filter(Boolean).length
+      }
+      limpiarHref="/panel/recursos"
     >
-      <div className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium">Categoría</span>
+      <PanelFiltersField label="Categoría">
         <FiltroSelect
           name="categoria"
           ariaLabel="Filtrar por categoría"
@@ -52,10 +56,9 @@ export default async function RecursosPage({ searchParams }: Props) {
             })),
           ]}
         />
-      </div>
+      </PanelFiltersField>
 
-      <div className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium">Estado</span>
+      <PanelFiltersField label="Estado">
         <FiltroSelect
           name="estado"
           ariaLabel="Filtrar por estado"
@@ -65,12 +68,8 @@ export default async function RecursosPage({ searchParams }: Props) {
             { value: "activos", label: "Solo activos" },
           ]}
         />
-      </div>
-
-      <Button type="submit" variant="outline">
-        Filtrar
-      </Button>
-    </form>
+      </PanelFiltersField>
+    </PanelFilters>
   );
 
   return (

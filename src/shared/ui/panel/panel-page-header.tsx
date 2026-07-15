@@ -14,6 +14,17 @@ type Props = {
   actions?: React.ReactNode;
 };
 
+// Estilos de acción sobre el banner (feature 028). El botón primario teal es
+// ilegible sobre `bg-primary-ink`; sobre el banner la acción principal invierte
+// a blanco y la secundaria usa un wash translúcido con hairline. Se aplican como
+// `className` sobre `<Button>` (tailwind-merge resuelve los conflictos).
+export const PANEL_HEADER_ACTION = {
+  primary:
+    "bg-white text-primary-ink hover:bg-white/90 focus-visible:ring-white/40",
+  secondary:
+    "border border-white/15 bg-white/10 text-primary-foreground hover:bg-white/20 focus-visible:ring-white/40",
+} as const;
+
 export function PanelPageHeader({
   icon: Icon,
   eyebrow,
@@ -22,10 +33,22 @@ export function PanelPageHeader({
   actions,
 }: Props) {
   return (
-    <header className="rounded-xl bg-primary-ink px-6 py-7 text-primary-foreground md:px-8">
+    <header className="relative isolate overflow-hidden rounded-xl bg-primary-ink px-6 py-7 text-primary-foreground md:px-8">
+      {/* Capa de profundidad: wash radial dentro del hue del token (superficie,
+          no gradient-text) + icono fantasma, misma familia visual que las
+          tarjetas del dashboard. Decorativos, fuera del árbol accesible. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_150%_at_0%_0%,color-mix(in_oklch,var(--primary)_45%,transparent),transparent_62%)]"
+      />
+      <Icon
+        aria-hidden="true"
+        strokeWidth={1}
+        className="pointer-events-none absolute -bottom-9 -right-7 hidden size-44 text-white/[0.07] lg:block"
+      />
       <div
         className={cn(
-          "flex items-start gap-4",
+          "relative flex items-start gap-4",
           actions && "md:items-center md:justify-between",
         )}
       >

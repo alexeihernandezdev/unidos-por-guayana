@@ -1,9 +1,13 @@
 // Componentes de marco de página del espacio logeado (feature 026).
 // Guía: `constitution/ui-guidelines.md`.
 export { PanelPage } from "./panel-page";
-export { PanelPageHeader } from "./panel-page-header";
+export {
+  PanelPageHeader,
+  PANEL_HEADER_ACTION,
+} from "./panel-page-header";
 export { PanelPageSubHeader } from "./panel-page-sub-header";
 export { PanelList, PanelListToolbar } from "./panel-list";
+export { PanelFilters, PanelFiltersField } from "./panel-filters";
 export { PanelListRow, type PanelListMeta } from "./panel-list-row";
 export { PanelBadge, type PanelBadgeTone } from "./panel-badge";
 export { PanelEmptyState } from "./panel-empty-state";

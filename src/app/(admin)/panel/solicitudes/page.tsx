@@ -14,9 +14,14 @@ import { URGENCIA_LABEL } from "@/modules/solicitudes/ui/urgencias";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarSolicitudesServicio } from "@/shared/solicitudes";
 import { requireRol } from "@/shared/auth";
-import { Button } from "@/shared/ui/button";
 import { FiltroSelect } from "@/shared/ui/filtro-select";
-import { PanelPage, PanelPageHeader } from "@/shared/ui/panel";
+import { Input } from "@/shared/ui/input";
+import {
+  PanelFilters,
+  PanelFiltersField,
+  PanelPage,
+  PanelPageHeader,
+} from "@/shared/ui/panel";
 
 type Props = {
   searchParams: Promise<{
@@ -25,9 +30,6 @@ type Props = {
     estado?: string;
   }>;
 };
-
-const campo =
-  "rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 export default async function SolicitudesAdminPage({ searchParams }: Props) {
   await requireRol(Rol.ADMIN);
@@ -50,25 +52,23 @@ export default async function SolicitudesAdminPage({ searchParams }: Props) {
         description="Peticiones del terreno: sector, urgencia y recursos necesarios."
       />
 
-      <form
-        method="get"
-        className="flex flex-wrap items-end gap-3 border-t border-border pt-4"
+      <PanelFilters
+        activos={
+          [filtro.sector, filtro.urgencia, filtro.estado].filter(Boolean).length
+        }
+        limpiarHref="/panel/solicitudes"
       >
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="sector" className="text-sm font-medium">
-            Sector
-          </label>
-          <input
+        <PanelFiltersField label="Sector" htmlFor="sector">
+          <Input
             id="sector"
             name="sector"
             defaultValue={filtro.sector ?? ""}
             placeholder="Petare, Upata…"
-            className={campo}
+            className="w-48"
           />
-        </div>
+        </PanelFiltersField>
 
-        <div className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium">Urgencia</span>
+        <PanelFiltersField label="Urgencia">
           <FiltroSelect
             name="urgencia"
             ariaLabel="Filtrar por urgencia"
@@ -81,10 +81,9 @@ export default async function SolicitudesAdminPage({ searchParams }: Props) {
               })),
             ]}
           />
-        </div>
+        </PanelFiltersField>
 
-        <div className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium">Estado</span>
+        <PanelFiltersField label="Estado">
           <FiltroSelect
             name="estado"
             ariaLabel="Filtrar por estado"
@@ -97,12 +96,8 @@ export default async function SolicitudesAdminPage({ searchParams }: Props) {
               })),
             ]}
           />
-        </div>
-
-        <Button type="submit" variant="outline">
-          Filtrar
-        </Button>
-      </form>
+        </PanelFiltersField>
+      </PanelFilters>
 
       <SolicitudesTabla
         solicitudes={solicitudes}

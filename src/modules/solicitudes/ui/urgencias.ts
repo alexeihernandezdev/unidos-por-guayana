@@ -6,8 +6,11 @@ export const URGENCIA_LABEL: Record<UrgenciaSolicitud, string> = {
   [UrgenciaSolicitud.ALTA]: "Alta",
 };
 
+// Paleta semántica de `tech-stack.md § Estilo visual` (feature 028): urgencia
+// media = ámbar (requiere atención pronto), alta = rojo (urgente). El color
+// acompaña a la etiqueta, nunca la sustituye.
 export const URGENCIA_BADGE: Record<UrgenciaSolicitud, string> = {
   [UrgenciaSolicitud.BAJA]: "border-border bg-muted text-foreground/80",
-  [UrgenciaSolicitud.MEDIA]: "border-primary/40 bg-primary/10 text-primary-ink",
+  [UrgenciaSolicitud.MEDIA]: "border-warning/40 bg-warning/15 text-warning-ink",
   [UrgenciaSolicitud.ALTA]: "border-destructive/40 bg-destructive/10 text-destructive",
 };

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import type { MetaRecurso } from "@/modules/actividades/domain/Actividad";
 import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
 import {
   Select,
   SelectContent,
@@ -28,9 +29,6 @@ type Props = {
   ) => Promise<Resultado>;
   quitarAction: (actividadId: string, recursoId: string) => Promise<Resultado>;
 };
-
-const campo =
-  "rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 // Editor de metas para una Actividad en RECOLECTANDO: añade, cambia el objetivo o quita
 // metas, cada operación contra el servidor (upsert/quitar) y refrescando la vista.
@@ -92,11 +90,12 @@ export function MetasEditor({
                   Objetivo en {meta.recurso?.unidad ?? "unidades"}
                 </p>
               </div>
-              <input
+              <Input
                 type="number"
                 min="0"
                 step="0.01"
-                className={`${campo} numeric-tnum w-32`}
+                className="numeric-tnum w-32"
+                aria-label={`Objetivo de ${meta.recurso?.nombre ?? "recurso"}`}
                 value={cantidades[meta.recursoId] ?? meta.cantidadObjetivo}
                 onChange={(e) =>
                   setCantidades((prev) => ({
@@ -169,12 +168,12 @@ export function MetasEditor({
           <label htmlFor="nueva-meta-cantidad" className="text-xs font-medium">
             Objetivo
           </label>
-          <input
+          <Input
             id="nueva-meta-cantidad"
             type="number"
             min="0"
             step="0.01"
-            className={`${campo} numeric-tnum`}
+            className="numeric-tnum"
             value={nuevaCantidad}
             onChange={(e) => setNuevaCantidad(e.target.valueAsNumber)}
           />
