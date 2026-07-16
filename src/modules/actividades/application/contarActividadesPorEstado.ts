@@ -4,6 +4,7 @@ import {
   ESTADOS_ACTIVIDAD,
 } from "@/modules/actividades/domain/EstadoActividad";
 import type { ActividadDeps } from "./deps";
+import type { FiltroActividades } from "@/modules/actividades/domain/ActividadRepository";
 
 export type ConteosPorEstadoActividad = Record<EstadoActividad, number>;
 
@@ -26,7 +27,7 @@ function conteosVacios(): ConteosPorEstadoActividad {
  */
 export async function contarActividadesPorEstado(
   { actividades }: Pick<ActividadDeps, "actividades">,
-  filtro?: { adminId?: string },
+  filtro?: FiltroActividades,
 ): Promise<ConteosPorEstadoActividad> {
   const todas = await actividades.listar(filtro);
   const conteos = conteosVacios();

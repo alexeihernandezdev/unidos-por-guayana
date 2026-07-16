@@ -14,6 +14,11 @@ export type FiltroActividades = {
   estado?: EstadoActividad;
   tipo?: TipoActividad;
   adminId?: string;
+  /** Actividades vinculadas al centro indicado (relación muchos-a-muchos). */
+  puntoAcopioId?: string;
+  /** Límites inclusivos sobre la fecha operativa de la actividad, en UTC. */
+  fechaDesde?: Date;
+  fechaHasta?: Date;
 };
 
 // Contrato de persistencia de actividades. La implementación concreta (Prisma) vive

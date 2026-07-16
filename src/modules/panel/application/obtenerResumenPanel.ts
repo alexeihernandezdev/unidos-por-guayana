@@ -16,6 +16,12 @@ import { calcularEstadisticasActividades } from "./estadisticasActividades";
 import type { EstadisticasActividades } from "./estadisticasActividades";
 import type { PanelDeps } from "./deps";
 
+export type FiltroPanel = {
+  puntoAcopioId?: string;
+  fechaDesde?: Date;
+  fechaHasta?: Date;
+};
+
 export type ProgresoAgregadoRecolectando = {
   metasAlCien: number;
   metasBajo: number;
@@ -62,8 +68,10 @@ function contarActivas(conteos: ConteosPorEstadoActividad): number {
 async function calcularProgresoAgregadoRecolectando(
   deps: PanelDeps,
   adminId: string,
+  filtro: FiltroPanel,
 ): Promise<ProgresoAgregadoRecolectando> {
   const recolectando = await deps.actividades.listar({
+    ...filtro,
     estado: EstadoActividad.RECOLECTANDO,
     adminId,
   });
@@ -100,8 +108,9 @@ async function calcularProgresoAgregadoRecolectando(
 async function contarAportesPendientesDelAdmin(
   deps: PanelDeps,
   adminId: string,
+  filtro: FiltroPanel,
 ): Promise<number> {
-  const actividades = await deps.actividades.listar({ adminId });
+  const actividades = await deps.actividades.listar({ adminId, ...filtro });
   const conteos = await Promise.all(
     actividades.map((ayuda) =>
       deps.aportes.contar({
@@ -123,6 +132,7 @@ export async function obtenerResumenPanel(
   deps: PanelDeps,
   adminId: string,
   ahora: Date = new Date(),
+  filtro: FiltroPanel = {},
 ): Promise<ResumenPanel> {
   const [
     actividadesDelAdmin,
@@ -133,13 +143,13 @@ export async function obtenerResumenPanel(
     sectores,
     progresoAgregadoRecolectando,
   ] = await Promise.all([
-    deps.actividades.listar({ adminId }),
-    contarActividadesPorEstado(deps, { adminId }),
-    listarPrioridadRecolectando(deps, adminId),
+    deps.actividades.listar({ adminId, ...filtro }),
+    contarActividadesPorEstado(deps, { adminId, ...filtro }),
+    listarPrioridadRecolectando(deps, adminId, filtro),
     contarSolicitudesPorUrgencia(deps),
-    contarAportesPendientesDelAdmin(deps, adminId),
+    contarAportesPendientesDelAdmin(deps, adminId, filtro),
     sectoresTop(deps),
-    calcularProgresoAgregadoRecolectando(deps, adminId),
+    calcularProgresoAgregadoRecolectando(deps, adminId, filtro),
   ]);
 
   const estadisticas = calcularEstadisticasActividades(

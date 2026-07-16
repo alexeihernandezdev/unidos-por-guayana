@@ -4,6 +4,7 @@ import type { AporteDeps } from "@/modules/aportes/application/deps";
 import type { Actividad } from "@/modules/actividades/domain/Actividad";
 import { EstadoActividad } from "@/modules/actividades/domain/EstadoActividad";
 import type { ActividadDeps } from "./deps";
+import type { FiltroActividades } from "@/modules/actividades/domain/ActividadRepository";
 
 export type EnvioPrioridad = {
   ayuda: Actividad;
@@ -20,8 +21,13 @@ type Deps = Pick<ActividadDeps, "actividades"> & Pick<AporteDeps, "aportes" | "a
 export async function listarPrioridadRecolectando(
   deps: Deps,
   adminId?: string,
+  filtro?: Pick<
+    FiltroActividades,
+    "puntoAcopioId" | "fechaDesde" | "fechaHasta"
+  >,
 ): Promise<EnvioPrioridad[]> {
   const recolectando = await deps.actividades.listar({
+    ...filtro,
     estado: EstadoActividad.RECOLECTANDO,
     ...(adminId ? { adminId } : {}),
   });

@@ -144,6 +144,17 @@ export class PrismaActividadRepository implements ActividadRepository {
         ...(filtro?.estado ? { estado: filtro.estado } : {}),
         ...(filtro?.tipo ? { tipo: filtro.tipo } : {}),
         ...(filtro?.adminId ? { adminId: filtro.adminId } : {}),
+        ...(filtro?.puntoAcopioId
+          ? { puntosAcopio: { some: { puntoAcopioId: filtro.puntoAcopioId } } }
+          : {}),
+        ...(filtro?.fechaDesde || filtro?.fechaHasta
+          ? {
+              fecha: {
+                ...(filtro.fechaDesde ? { gte: filtro.fechaDesde } : {}),
+                ...(filtro.fechaHasta ? { lte: filtro.fechaHasta } : {}),
+              },
+            }
+          : {}),
       },
       orderBy: { fecha: "desc" },
       include: INCLUDE_DETALLE,

@@ -1,15 +1,32 @@
 import { Gauge } from "lucide-react";
 import { DateTime } from "luxon";
-import { PanelResumen } from "@/modules/panel/ui";
+import { normalizarFiltrosPanel } from "@/modules/panel/application/normalizarFiltrosPanel";
+import { PanelDashboardFilters, PanelResumen } from "@/modules/panel/ui";
 import { Rol } from "@/modules/usuarios/domain/Rol";
+import { listarPuntosDeAdminServicio } from "@/shared/acopio";
 import { requireRol } from "@/shared/auth";
 import { obtenerResumenPanelServicio } from "@/shared/panel";
 import { PanelPage, PanelPageHeader } from "@/shared/ui/panel";
 
-export default async function DashboardPage() {
-  const sesion = await requireRol(Rol.ADMIN);
+type Props = {
+  searchParams: Promise<{
+    centro?: string | string[];
+    desde?: string | string[];
+    hasta?: string | string[];
+  }>;
+};
 
-  const resumen = await obtenerResumenPanelServicio(sesion.id);
+export default async function DashboardPage({ searchParams }: Props) {
+  const sesion = await requireRol(Rol.ADMIN);
+  const [query, centros] = await Promise.all([
+    searchParams,
+    listarPuntosDeAdminServicio(sesion.id),
+  ]);
+  const filtros = normalizarFiltrosPanel(
+    query,
+    centros.map((centro) => centro.id),
+  );
+  const resumen = await obtenerResumenPanelServicio(sesion.id, filtros.filtro);
 
   const partes: string[] = [];
   if (resumen.enviosPorEstado.RECOLECTANDO > 0) {
@@ -52,7 +69,17 @@ export default async function DashboardPage() {
         </p>
       )}
 
-      <PanelResumen resumen={resumen} />
+      <PanelDashboardFilters
+        centros={centros.map(({ id, nombre, activo }) => ({
+          id,
+          nombre: activo ? nombre : `${nombre} · Archivado`,
+        }))}
+        centroSeleccionado={filtros.centro}
+        desde={filtros.desde}
+        hasta={filtros.hasta}
+      />
+
+      <PanelResumen resumen={resumen} filtradoPorFecha={Boolean(filtros.desde)} />
     </PanelPage>
   );
 }

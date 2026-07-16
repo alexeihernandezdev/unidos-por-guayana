@@ -67,6 +67,17 @@ export class InMemoryActividadRepository implements ActividadRepository {
     if (filtro?.adminId) {
       actividades = actividades.filter((a) => a.adminId === filtro.adminId);
     }
+    if (filtro?.puntoAcopioId) {
+      actividades = actividades.filter((a) =>
+        a.puntosAcopio.some((p) => p.id === filtro.puntoAcopioId),
+      );
+    }
+    if (filtro?.fechaDesde) {
+      actividades = actividades.filter((a) => a.fecha >= filtro.fechaDesde!);
+    }
+    if (filtro?.fechaHasta) {
+      actividades = actividades.filter((a) => a.fecha <= filtro.fechaHasta!);
+    }
     return actividades.map((a) => this.clonar(a));
   }
 

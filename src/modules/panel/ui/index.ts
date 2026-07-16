@@ -1,4 +1,5 @@
 export { PanelResumen } from "./PanelResumen";
+export { PanelDashboardFilters } from "./PanelDashboardFilters";
 export { TarjetaMetrica } from "./TarjetaMetrica";
 export { TarjetaPanel } from "./TarjetaPanel";
 export { TarjetaDestacada } from "./TarjetaDestacada";

@@ -26,6 +26,7 @@ import { TarjetaPanel } from "./TarjetaPanel";
 
 type Props = {
   resumen: ResumenPanel;
+  filtradoPorFecha?: boolean;
 };
 
 // Variación mensual de actividades registradas (último mes vs. el previo). Devuelve
@@ -38,10 +39,12 @@ function calcularDeltaMensual(resumen: ResumenPanel): number | null {
   return Math.round(((actual - previo) / previo) * 100);
 }
 
-export function PanelResumen({ resumen }: Props) {
+export function PanelResumen({ resumen, filtradoPorFecha = false }: Props) {
   const { estadisticas, progresoAgregadoRecolectando } = resumen;
-  const mesActual = estadisticas.serieMensual.at(-1)?.total ?? 0;
-  const deltaMensual = calcularDeltaMensual(resumen);
+  const mesActual = filtradoPorFecha
+    ? estadisticas.totalActividades
+    : (estadisticas.serieMensual.at(-1)?.total ?? 0);
+  const deltaMensual = filtradoPorFecha ? null : calcularDeltaMensual(resumen);
   const urgentes = resumen.solicitudesAbiertasPorUrgencia.ALTA;
   const serieTotales = estadisticas.serieMensual.map((p) => p.total);
   const aportesPendientes = resumen.aportesPendientesConteo;
@@ -61,11 +64,15 @@ export function PanelResumen({ resumen }: Props) {
         <TarjetaDestacada
           valor={mesActual}
           etiqueta={
-            mesActual === 1
-              ? "actividad registrada este mes"
-              : "actividades registradas este mes"
+            filtradoPorFecha
+              ? mesActual === 1
+                ? "actividad en el período"
+                : "actividades en el período"
+              : mesActual === 1
+                ? "actividad registrada este mes"
+                : "actividades registradas este mes"
           }
-          etiquetaPill="Este mes"
+          etiquetaPill={filtradoPorFecha ? "Período" : "Este mes"}
           deltaPct={deltaMensual}
           serie={serieTotales}
           href="/panel/actividades"
