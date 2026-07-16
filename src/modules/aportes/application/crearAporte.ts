@@ -18,6 +18,9 @@ export type CrearAporteInput = {
   colaboradorId: string;
   cantidad: number;
   nota?: string | null;
+  // El colaborador puede pedir que su aporte sea anónimo hacia el público (023/009);
+  // el ADMIN dueño sigue viendo su identidad en el panel (feature 029).
+  esAnonimo?: boolean;
 };
 
 /**
@@ -69,5 +72,6 @@ export async function crearAporte(
     colaboradorId: input.colaboradorId,
     cantidad: input.cantidad,
     nota: normalizarNota(input.nota),
+    esAnonimo: input.esAnonimo ?? false,
   });
 }

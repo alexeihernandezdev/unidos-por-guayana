@@ -1,5 +1,6 @@
 export * from "./SolicitudForm";
 export * from "./SolicitudesTabla";
+export * from "./SolicitudesAdminGrid";
 export * from "./EstadoSolicitudBadge";
 export * from "./UrgenciaBadge";
 export * from "./SolicitudAcciones";

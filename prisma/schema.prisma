@@ -442,6 +442,11 @@ model Aporte {
   cantidad       Decimal      @db.Decimal(12, 2)
   moneda         String?
   estado         EstadoAporte @default(COMPROMETIDO)
+  // Marca de anonimato en superficies compartidas (feature 029). Cuando es `true`,
+  // el registro de aportantes (023) y la transparencia (009) muestran "Anónimo" en
+  // vez del nombre; el ADMIN dueño conserva la identidad en su panel para verificar.
+  // Una donación directa imputada por el ADMIN (sin colaborador) nace en `true`.
+  esAnonimo      Boolean      @default(false)
   nota           String?
   referencia     String?
   recibidoEn     DateTime?

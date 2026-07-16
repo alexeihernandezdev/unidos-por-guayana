@@ -9,6 +9,7 @@ import type {
   FiltroAportes,
   RecolectadoPorRecursoId,
 } from "@/modules/aportes/domain/AporteRepository";
+import { nombrePublicoAportante } from "@/modules/aportes/domain/reglas";
 
 // Incluye recurso y colaborador para las vistas (tabla admin, "mis aportes").
 const INCLUDE_DETALLE = {
@@ -25,6 +26,7 @@ type FilaAporte = {
   cantidad: { toNumber: () => number };
   moneda: string | null;
   estado: EstadoAporte;
+  esAnonimo: boolean;
   nota: string | null;
   registradoPorId: string | null;
   medioDonacionId: string | null;
@@ -46,6 +48,7 @@ function mapear(fila: FilaAporte): Aporte {
     cantidad: fila.cantidad.toNumber(),
     moneda: fila.moneda,
     estado: fila.estado,
+    esAnonimo: fila.esAnonimo,
     nota: fila.nota,
     registradoPorId: fila.registradoPorId,
     medioDonacionId: fila.medioDonacionId,
@@ -75,6 +78,14 @@ function mapear(fila: FilaAporte): Aporte {
 
 export class PrismaAporteRepository implements AporteRepository {
   async crear(datos: NuevoAporte): Promise<Aporte> {
+    // Un aporte que nace `RECIBIDO` sin fecha explícita se estampa con "ahora"
+    // (donación directa, feature 029); el flujo monetario (014) pasa su fecha.
+    const recibidoEn =
+      datos.recibidoEn !== undefined
+        ? datos.recibidoEn
+        : datos.estado === Estados.RECIBIDO
+          ? new Date()
+          : null;
     const fila = await prisma.aporte.create({
       data: {
         actividadId: datos.actividadId,
@@ -82,12 +93,13 @@ export class PrismaAporteRepository implements AporteRepository {
         colaboradorId: datos.colaboradorId,
         cantidad: datos.cantidad,
         nota: datos.nota,
+        esAnonimo: datos.esAnonimo ?? false,
         moneda: datos.moneda ?? null,
         ...(datos.estado ? { estado: datos.estado } : {}),
         registradoPorId: datos.registradoPorId ?? null,
         medioDonacionId: datos.medioDonacionId ?? null,
         referencia: datos.referencia ?? null,
-        ...(datos.recibidoEn !== undefined ? { recibidoEn: datos.recibidoEn } : {}),
+        recibidoEn,
       },
       include: INCLUDE_DETALLE,
     });
@@ -139,6 +151,7 @@ export class PrismaAporteRepository implements AporteRepository {
         id: true,
         cantidad: true,
         estado: true,
+        esAnonimo: true,
         createdAt: true,
         colaborador: { select: { nombre: true } },
         recurso: { select: { nombre: true, unidad: true } },
@@ -146,7 +159,12 @@ export class PrismaAporteRepository implements AporteRepository {
     });
     return filas.map((fila) => ({
       id: fila.id,
-      aportanteNombre: fila.colaborador?.nombre ?? "Donación externa",
+      // Privacidad como invariante (feature 029): si es anónimo o no hay
+      // colaborador, nunca se devuelve el nombre real, solo "Anónimo".
+      aportanteNombre: nombrePublicoAportante(
+        fila.esAnonimo,
+        fila.colaborador?.nombre ?? null,
+      ),
       recursoNombre: fila.recurso.nombre,
       recursoUnidad: fila.recurso.unidad,
       cantidad: fila.cantidad.toNumber(),

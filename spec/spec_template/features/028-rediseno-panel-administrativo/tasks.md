@@ -15,7 +15,8 @@
 ## 2. Secciones
 
 - [ ] Actividades: índice (filtros, vacío, acciones), nueva/editar (`ActividadForm` sin `campo`), detalle.
-- [ ] Solicitudes: índice (filtros con `Input` compartido), detalle (`SolicitudAcciones`).
+- [x] Solicitudes: índice con grid de fichas de terreno, vista rápida operativa, entrada
+  escalonada y «Cargar más»; filtros con `Input` compartido; detalle (`SolicitudAcciones`).
 - [ ] Recursos: gestión + tabla + propuestas; acciones de banner legibles (bug «botón blanco»).
 - [ ] Donaciones: encabezados de sección, listados, modales, montos `numeric-tnum`.
 - [ ] Mi red: chips de categoría tokenizados, filtros, vacío.

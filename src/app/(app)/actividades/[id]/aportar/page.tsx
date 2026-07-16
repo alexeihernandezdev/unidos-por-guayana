@@ -46,6 +46,7 @@ export default async function AportarPage({ params }: Props) {
   return (
     <PanelPage>
       <PanelPageSubHeader
+        animated
         title={`Aportar a ${actividad.titulo}`}
         backHref={`/actividades/${actividad.id}`}
         backLabel="Volver a la actividad"
@@ -87,7 +88,7 @@ export default async function AportarPage({ params }: Props) {
         </section>
 
         <aside className="flex flex-col gap-4 lg:sticky lg:top-8 lg:self-start">
-          <div className="flex flex-col gap-3 rounded-lg border border-border p-4">
+          <div className="card-lift flex flex-col gap-3 rounded-lg border border-border p-4">
             <h2 className="text-sm font-semibold tracking-tight">Detalles</h2>
             <dl className="flex flex-col gap-2.5 text-sm">
               <div className="flex items-center justify-between gap-3">
@@ -114,7 +115,7 @@ export default async function AportarPage({ params }: Props) {
           </div>
 
           {actividad.puntosAcopio.length > 0 && (
-            <div className="flex flex-col gap-3 rounded-lg border border-border p-4">
+            <div className="card-lift flex flex-col gap-3 rounded-lg border border-border p-4">
               <div className="flex flex-col gap-0.5">
                 <h2 className="text-sm font-semibold tracking-tight">
                   Dónde entregar

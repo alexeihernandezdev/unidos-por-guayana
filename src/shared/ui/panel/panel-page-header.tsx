@@ -12,6 +12,12 @@ type Props = {
   title: string;
   description?: string;
   actions?: React.ReactNode;
+  /**
+   * Entrada "rise" del banner al montar (clase `.panel-rise`, gated por
+   * `prefers-reduced-motion`). Opt-in; por defecto no anima para no cambiar el
+   * comportamiento del panel admin.
+   */
+  animated?: boolean;
 };
 
 // Estilos de acción sobre el banner (feature 028). El botón primario teal es
@@ -31,9 +37,15 @@ export function PanelPageHeader({
   title,
   description,
   actions,
+  animated = false,
 }: Props) {
   return (
-    <header className="relative isolate overflow-hidden rounded-xl bg-primary-ink px-6 py-7 text-primary-foreground md:px-8">
+    <header
+      className={cn(
+        "relative isolate overflow-hidden rounded-xl bg-primary-ink px-6 py-7 text-primary-foreground md:px-8",
+        animated && "panel-rise",
+      )}
+    >
       {/* Capa de profundidad: wash radial dentro del hue del token (superficie,
           no gradient-text) + icono fantasma, misma familia visual que las
           tarjetas del dashboard. Decorativos, fuera del árbol accesible. */}

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   CalendarDays,
   HandHeart,
@@ -15,8 +16,10 @@ import { obtenerActividadServicio } from "@/shared/actividades";
 import { requireRol } from "@/shared/auth";
 import { Button } from "@/shared/ui/button";
 import {
+  PanelEmptyState,
   PanelList,
   PanelListRow,
+  PanelListToolbar,
   PanelPage,
   PanelPageHeader,
 } from "@/shared/ui/panel";
@@ -44,9 +47,15 @@ export default async function MisAportesPage() {
     ),
   );
 
+  const recibidos = aportes.filter(
+    (a) => a.estado === EstadoAporte.RECIBIDO,
+  ).length;
+  const comprometidos = aportes.length - recibidos;
+
   return (
     <PanelPage>
       <PanelPageHeader
+        animated
         icon={HandHeart}
         eyebrow="Colabora"
         title="Mis aportes"
@@ -54,11 +63,48 @@ export default async function MisAportesPage() {
       />
 
       {aportes.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Aún no has registrado ningún aporte.
-        </p>
+        <PanelEmptyState
+          bordered={false}
+          icon={HandHeart}
+          title="Aún no has registrado ningún aporte"
+          description="Cuando aportes a una actividad, la verás aquí con su estado. Empieza por una recolección abierta."
+          action={
+            <Button asChild size="sm">
+              <Link href="/actividades">Ver actividades abiertas</Link>
+            </Button>
+          }
+        />
       ) : (
-        <PanelList>
+        <>
+        <PanelListToolbar
+          resumen={
+            <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <span className="numeric-tnum font-mono font-medium text-foreground">
+                {aportes.length}
+              </span>
+              {aportes.length === 1 ? "aporte" : "aportes"}
+              <span aria-hidden className="text-border">
+                ·
+              </span>
+              <span className="numeric-tnum font-mono font-medium text-primary-ink">
+                {recibidos}
+              </span>
+              recibidos
+              <span aria-hidden className="text-border">
+                ·
+              </span>
+              <span className="numeric-tnum font-mono font-medium text-foreground">
+                {comprometidos}
+              </span>
+              por confirmar
+            </span>
+          }
+        >
+          <Button asChild variant="outline" size="sm">
+            <Link href="/actividades">Aportar a otra actividad</Link>
+          </Button>
+        </PanelListToolbar>
+        <PanelList animated>
           {aportes.map((a) => {
             const ayuda = a.actividadId ? ayudasPorId.get(a.actividadId) : null;
             const puedeCancelar = a.estado === EstadoAporte.COMPROMETIDO;
@@ -124,6 +170,7 @@ export default async function MisAportesPage() {
             );
           })}
         </PanelList>
+        </>
       )}
     </PanelPage>
   );

@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -44,17 +45,24 @@ export default async function DetallePuntoAcopioPage({ params }: Props) {
   return (
     <PanelPage>
       <PanelPageSubHeader
+        animated
         title={punto.nombre}
         description={punto.referencia}
         backHref="/puntos-acopio"
         backLabel="Todos los centros"
       />
 
-      <div className="h-80 overflow-hidden rounded-lg border md:h-96">
+      <div
+        className="panel-rise h-80 overflow-hidden rounded-lg border md:h-96"
+        style={{ "--rise-delay": "60ms" } as CSSProperties}
+      >
         <PuntoAcopioMapaLazy centro={coordenadas} zoom={16} valor={coordenadas} />
       </div>
 
-      <div className="grid gap-6 border-t border-border pt-6 md:grid-cols-2">
+      <div
+        className="panel-rise grid gap-6 border-t border-border pt-6 md:grid-cols-2"
+        style={{ "--rise-delay": "140ms" } as CSSProperties}
+      >
         <ul className="flex flex-col gap-2.5 text-sm">
           <li className="flex items-center gap-2">
             <MapPin

@@ -57,6 +57,12 @@ Casos particulares:
 - **Recursos**: revisar acciones del banner («Ver propuestas» + «Nuevo recurso») con los nuevos estilos; resolver el «botón blanco» del pendiente.
 - **Red**: chips de categoría con `PanelBadge` o clases token (`bg-primary/10 text-primary-ink`).
 - **Superadmin**: `BandejaAdmins` → `PanelList` + `PanelListRow` con `detail` para el `<dl>` del perfil; vacío con `PanelEmptyState`.
+- **Solicitudes**: componente cliente específico para administración con grid responsive,
+  fichas de terreno centradas en el sector y vista rápida Radix. Mantener la obtención de
+  datos y filtros en el Server Component. Pasar las Server Actions autenticadas como props,
+  derivar la solicitud seleccionada por `id` para reflejar el refresco del servidor y revelar
+  resultados en bloques de 12. Reutilizar `motion/react` con `LazyMotion`, límite de 300 ms y
+  `useReducedMotion`.
 - **Perfil / Centros de acopio**: son la referencia visual; solo alinear filtros/toolbar si divergen y nomenclatura.
 
 ## 3. Validación

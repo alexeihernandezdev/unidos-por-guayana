@@ -16,6 +16,7 @@ import {
   cancelarAporteServicio,
   crearAporteServicio,
   marcarRecibidoServicio,
+  registrarAporteDirectoServicio,
   revertirRecibidoServicio,
 } from "@/shared/aportes";
 import { requireAdminVerificado, requireRol } from "@/shared/auth";
@@ -26,9 +27,25 @@ const CrearAporteSchema = z.object({
   recursoId: z.string().min(1, "Elige un recurso."),
   cantidad: z.number().positive("La cantidad debe ser mayor que cero."),
   nota: z.string().trim().max(500).optional().or(z.literal("")),
+  esAnonimo: z.boolean().optional(),
 });
 
 export type CrearAporteInputUi = {
+  recursoId: string;
+  cantidad: number;
+  nota: string;
+  esAnonimo: boolean;
+};
+
+// Donación directa registrada por el ADMIN dueño (feature 029). Sin colaborador ni
+// anonimato explícito en el formulario: el caso de uso la crea anónima siempre.
+const DonacionDirectaSchema = z.object({
+  recursoId: z.string().min(1, "Elige un recurso."),
+  cantidad: z.number().positive("La cantidad debe ser mayor que cero."),
+  nota: z.string().trim().max(500).optional().or(z.literal("")),
+});
+
+export type DonacionDirectaInputUi = {
   recursoId: string;
   cantidad: number;
   nota: string;
@@ -83,9 +100,49 @@ export async function crearAporteAction(
       colaboradorId: usuario.id,
       cantidad: parsed.data.cantidad,
       nota: parsed.data.nota ?? null,
+      esAnonimo: parsed.data.esAnonimo ?? false,
     });
     revalidatePath("/mis-aportes");
     revalidatePath(`/panel/actividades/${actividadId}`);
+    return { ok: true };
+  } catch (error) {
+    const traducido = traducirError(error);
+    if (traducido) return traducido;
+    throw error;
+  }
+}
+
+/**
+ * Registra una donación directa (anónima) en una actividad. Solo el ADMIN dueño; el
+ * caso de uso verifica la propiedad y crea el aporte en RECIBIDO (feature 029).
+ */
+export async function registrarAporteDirectoAction(
+  actividadId: string,
+  input: DonacionDirectaInputUi,
+): Promise<Resultado> {
+  const usuario = await requireAdminVerificado();
+
+  const parsed = DonacionDirectaSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Datos no válidos.",
+    };
+  }
+
+  try {
+    await registrarAporteDirectoServicio(
+      {
+        actividadId,
+        recursoId: parsed.data.recursoId,
+        cantidad: parsed.data.cantidad,
+        nota: parsed.data.nota ?? null,
+      },
+      { id: usuario.id, rol: usuario.rol },
+    );
+    revalidatePath(`/panel/actividades/${actividadId}`);
+    revalidatePath(`/actividades/${actividadId}`);
+    revalidatePath("/transparencia");
     return { ok: true };
   } catch (error) {
     const traducido = traducirError(error);

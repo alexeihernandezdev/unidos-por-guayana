@@ -6,12 +6,14 @@ import {
   ActividadNoEncontradaError,
 } from "@/modules/actividades/application/errors";
 import type { Actividad } from "@/modules/actividades/domain/Actividad";
+import { EstadoActividad } from "@/modules/actividades/domain/EstadoActividad";
 import { esEditable } from "@/modules/actividades/domain/maquinaEstados";
 import { AvanzarEstadoBoton } from "@/modules/actividades/ui/AvanzarEstadoBoton";
 import { EstadoBadge } from "@/modules/actividades/ui/EstadoBadge";
 import { TipoBadge } from "@/modules/actividades/ui/TipoBadge";
 import { formatearFecha, formatearHora } from "@/modules/actividades/ui/fechas";
 import { AportesTabla } from "@/modules/aportes/ui/AportesTabla";
+import { DonacionDirectaForm } from "@/modules/aportes/ui/DonacionDirectaForm";
 import { ProgresoMetas } from "@/modules/aportes/ui/ProgresoMetas";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { obtenerActividadServicio } from "@/shared/actividades";
@@ -26,6 +28,7 @@ import { avanzarEstadoAction } from "../actions";
 import {
   cancelarAporteAction,
   marcarRecibidoAction,
+  registrarAporteDirectoAction,
   revertirRecibidoAction,
 } from "@/app/aportes/actions";
 
@@ -53,10 +56,25 @@ export default async function ActividadDetallePage({ params }: Props) {
   const { id } = await params;
   const actividad = await cargarActividad(id, sesion.id);
   const editable = esEditable(actividad.estado);
+  const aceptaAportes = actividad.estado === EstadoActividad.RECOLECTANDO;
   const [progreso, aportes] = await Promise.all([
     progresoDeActividadServicio(actividad.id),
     listarAportesPorActividadServicio(actividad.id),
   ]);
+
+  // Recursos de las metas sobre los que se puede imputar una donación directa.
+  const opcionesDonacion = actividad.metas
+    .filter((m) => m.recurso !== null)
+    .map((m) => ({
+      recursoId: m.recursoId,
+      nombre: m.recurso!.nombre,
+      unidad: m.recurso!.unidad,
+    }));
+
+  const registrarDonacionDirecta = registrarAporteDirectoAction.bind(
+    null,
+    actividad.id,
+  );
 
   return (
     <PanelPage>
@@ -96,6 +114,27 @@ export default async function ActividadDetallePage({ params }: Props) {
             </h2>
             <ProgresoMetas progreso={progreso} />
           </section>
+
+          {aceptaAportes && (
+            <section className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <h2 className="text-lg font-semibold tracking-tight">
+                  Donación directa
+                </h2>
+                <p className="max-w-[60ch] text-sm text-muted-foreground [text-wrap:pretty]">
+                  Registra una donación que alguien entregó sin tener cuenta.
+                  Queda como aporte anónimo recibido y suma al progreso; no se
+                  atribuye a tu nombre en los reportes.
+                </p>
+              </div>
+              <div className="rounded-lg border border-border bg-card p-4">
+                <DonacionDirectaForm
+                  action={registrarDonacionDirecta}
+                  opciones={opcionesDonacion}
+                />
+              </div>
+            </section>
+          )}
 
           <section className="flex flex-col gap-4">
             <h2 className="text-lg font-semibold tracking-tight">Aportes</h2>

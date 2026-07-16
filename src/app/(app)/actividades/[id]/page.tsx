@@ -50,6 +50,7 @@ export default async function ActividadDetallePublicoPage({ params }: Props) {
   return (
     <PanelPage>
       <PanelPageSubHeader
+        animated
         title={actividad.titulo}
         backHref="/actividades"
         backLabel="Volver a las actividades abiertas"
@@ -113,7 +114,7 @@ export default async function ActividadDetallePublicoPage({ params }: Props) {
         </div>
 
         <aside className="flex flex-col gap-4 lg:sticky lg:top-8 lg:self-start">
-          <div className="flex flex-col gap-3 rounded-lg border border-border p-4">
+          <div className="card-lift flex flex-col gap-3 rounded-lg border border-border p-4">
             <h2 className="text-sm font-semibold tracking-tight">Detalles</h2>
             <dl className="flex flex-col gap-2.5 text-sm">
               <div className="flex items-center justify-between gap-3">
@@ -140,7 +141,7 @@ export default async function ActividadDetallePublicoPage({ params }: Props) {
           </div>
 
           {actividad.puntosAcopio.length > 0 && (
-            <div className="flex flex-col gap-3 rounded-lg border border-border p-4">
+            <div className="card-lift flex flex-col gap-3 rounded-lg border border-border p-4">
               <div className="flex flex-col gap-0.5">
                 <h2 className="text-sm font-semibold tracking-tight">
                   Dónde entregar

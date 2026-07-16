@@ -1,7 +1,9 @@
 "use client";
 
 import { useTransition } from "react";
+import { LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useFormStatus } from "react-dom";
 import type { EstadoSolicitud } from "@/modules/solicitudes/domain/EstadoSolicitud";
 import { esEditable, puedeCerrar, puedeMarcarAtendida } from "@/modules/solicitudes/domain/maquinaEstados";
 import { Button } from "@/shared/ui/button";
@@ -14,6 +16,25 @@ type Props = {
   marcarAtendidaAction?: (formData: FormData) => Promise<void>;
   cerrarAction?: (formData: FormData) => Promise<void>;
 };
+
+function BotonAccionAdmin({
+  children,
+  variant,
+}: {
+  children: React.ReactNode;
+  variant: "default" | "outline";
+}) {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button type="submit" variant={variant} disabled={pending} className="h-11">
+      {pending ? (
+        <LoaderCircle className="animate-spin" strokeWidth={1.5} aria-hidden />
+      ) : null}
+      {pending ? "Guardando" : children}
+    </Button>
+  );
+}
 
 export function SolicitudAcciones({
   solicitudId,
@@ -64,17 +85,13 @@ export function SolicitudAcciones({
       {puedeMarcarAtendida(estado) && marcarAtendidaAction && (
         <form action={marcarAtendidaAction}>
           <input type="hidden" name="id" value={solicitudId} />
-          <Button type="submit" variant="default">
-            Marcar atendida
-          </Button>
+          <BotonAccionAdmin variant="default">Marcar atendida</BotonAccionAdmin>
         </form>
       )}
       {puedeCerrar(estado) && cerrarAction && (
         <form action={cerrarAction}>
           <input type="hidden" name="id" value={solicitudId} />
-          <Button type="submit" variant="outline">
-            Cerrar
-          </Button>
+          <BotonAccionAdmin variant="outline">Cerrar</BotonAccionAdmin>
         </form>
       )}
     </div>

@@ -8,7 +8,7 @@ import {
   URGENCIAS_SOLICITUD,
 } from "@/modules/solicitudes/domain/UrgenciaSolicitud";
 import type { FiltroSolicitudes } from "@/modules/solicitudes/domain/SolicitudRepository";
-import { SolicitudesTabla } from "@/modules/solicitudes/ui/SolicitudesTabla";
+import { SolicitudesAdminGrid } from "@/modules/solicitudes/ui/SolicitudesAdminGrid";
 import { ESTADO_LABEL } from "@/modules/solicitudes/ui/estados";
 import { URGENCIA_LABEL } from "@/modules/solicitudes/ui/urgencias";
 import { Rol } from "@/modules/usuarios/domain/Rol";
@@ -22,6 +22,7 @@ import {
   PanelPage,
   PanelPageHeader,
 } from "@/shared/ui/panel";
+import { cerrarSolicitudAction, marcarAtendidaAction } from "./actions";
 
 type Props = {
   searchParams: Promise<{
@@ -99,10 +100,11 @@ export default async function SolicitudesAdminPage({ searchParams }: Props) {
         </PanelFiltersField>
       </PanelFilters>
 
-      <SolicitudesTabla
+      <SolicitudesAdminGrid
         solicitudes={solicitudes}
         baseRuta="/panel/solicitudes"
-        mostrarSolicitante
+        marcarAtendidaAction={marcarAtendidaAction}
+        cerrarAction={cerrarSolicitudAction}
       />
     </PanelPage>
   );

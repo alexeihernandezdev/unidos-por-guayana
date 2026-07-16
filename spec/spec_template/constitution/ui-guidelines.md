@@ -127,6 +127,21 @@ Los listados se presentan como **lista de row-cards**, no como `<table>`. Anatom
 - **Accesibilidad:** los antiguos `<th>` pasan a labels de metadato o `aria-label`; se conserva
   el orden lógico para lectores de pantalla.
 
+### 5.1 Bandeja territorial de solicitudes administrativas
+
+`/panel/solicitudes` es la excepción operativa al patrón de row-cards: usa un grid de
+**fichas de terreno** porque el administrador necesita comparar sectores y necesidades, no
+leer columnas semitabulares.
+
+- El sector es el título dominante; urgencia siempre combina señal semántica, icono y texto.
+- La ficha resume descripción, hasta tres recursos, fecha y estado. Toda la superficie abre
+  una vista rápida accesible; el detalle completo conserva su URL.
+- La vista rápida permite ejecutar las transiciones de estado existentes con feedback
+  pendiente. No replica reglas de dominio en el cliente.
+- Grid: 1 columna móvil, 2 desde `sm`, 3 desde `xl`, 4 desde `2xl`.
+- Se muestran 12 resultados inicialmente y «Cargar más» revela el siguiente bloque.
+- Entrada con `transform` y `opacity` de hasta 300 ms; `prefers-reduced-motion` obligatorio.
+
 ## 6. Modal de formulario — `<PanelFormModal>`
 
 Para **altas y ediciones de entidades pequeñas** (≤ 8 campos, sin bloques dinámicos extensos),
@@ -161,14 +176,36 @@ El estilo de scrollbar vive **solo** en `src/app/globals.css` (bloque `html { sc
   `color-mix`.
 - En macOS Safari el scrollbar puede ocultarse hasta hacer scroll; es comportamiento esperado.
 
+## 7.1 Motion de entrada (opt-in)
+
+Capa de animación reutilizable del espacio logeado (introducida al pulir las vistas del
+colaborador). Firma: **rise "de agua que reposa"** (translateY + micro-escala `0.985→1`) sobre
+`--ease-out-emil`, `<=300ms`, solo `transform`/`opacity`, gated por `prefers-reduced-motion`. Vive en
+`globals.css`; **no** se reescribe por página.
+
+- **`animated` en `<PanelPageHeader>` / `<PanelPageSubHeader>`** → entrada `.panel-rise` del encabezado.
+  Opt-in (default `false`) para no cambiar el panel admin.
+- **`animated` en `<PanelList>`** → añade `.panel-stagger`: las filas entran en cascada (delays
+  escalonados, cap tras la 6.a). Úsalo en listados del colaborador.
+- **`.panel-rise` + `style={{ "--rise-delay": "Nms" }}`** → entrada de una sección suelta con retardo
+  (p. ej. secciones de `/mi-perfil`, mapa/info de un detalle).
+- **`.panel-meter-fill` + `style={{ "--meter": fraccion }}`** → barra que se llena con `scaleX` (nunca
+  `width`); estado base estático para `reduced-motion`. Lo usa `ProgresoMetas`.
+- **`.card-lift`** → hover-lift sutil (translateY + sombra teal), solo `@media (hover: hover)`. Para
+  tarjetas sueltas (aside de detalle/aporte). No usar en filas dentro de `divide-y`.
+- **Fill-mode `backwards`** en `.panel-rise`/`.panel-stagger` (no `both`): evita que el `transform` del
+  fill congele el hover-lift de tarjetas que ya animan su propio `transform`.
+- **`<Button>`** trae `active:scale-[0.97]` (feedback de press, `motion-reduce` lo desactiva).
+
 ## 8. Reglas
 
 - **Un solo `<main>` por documento** (lo provee `AppShell`). Ninguna página anida otro `<main>`;
   usa `<PanelPage>` (un `<div>`).
 - **Índice de sección → banner** (`<PanelPageHeader>`); **detalle/formulario → ligero**
   (`<PanelPageSubHeader>`) solo para entidades que **no** usan modal.
-- **Listados → row-cards** (`<PanelList>` / `<PanelListRow>`), no `<table>`. Excepción posible:
-  `ProgresoMetas`, que es un display de progreso, no un listado tabular.
+- **Listados → row-cards** (`<PanelList>` / `<PanelListRow>`), no `<table>`. Excepciones:
+  `ProgresoMetas`, que es un display de progreso, y la bandeja territorial de solicitudes
+  administrativas definida en §5.1.
 - **No reescribir a mano** `mx-auto flex w-full max-w-… p-… gap-…` en un `page.tsx`: usar
   `<PanelPage>`.
 - Respetar los límites duros de `tech-stack.md § Estilo visual` (sin `transition: all` en código

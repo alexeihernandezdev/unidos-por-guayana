@@ -33,7 +33,7 @@ export function AportantesTabla({ aportantes }: Props) {
   }
 
   return (
-    <PanelList>
+    <PanelList animated>
       {aportantes.map((a) => (
         <PanelListRow
           key={a.id}

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { crearAyuda } from "@/modules/ayudas/application/crearAyuda";
-import { InMemoryAyudaRepository } from "@/modules/ayudas/application/fakes";
+import { crearActividad } from "@/modules/actividades/application/crearActividad";
+import { InMemoryActividadRepository } from "@/modules/actividades/application/fakes";
 import { InMemoryRecursoRepository } from "@/modules/recursos/application/fakes";
 import { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import { EstadoAporte } from "@/modules/aportes/domain/EstadoAporte";
@@ -33,13 +33,13 @@ async function armar() {
     categoria: CategoriaRecurso.SUMINISTRO,
     descripcion: null,
   });
-  const ayudas = new InMemoryAyudaRepository();
+  const actividades = new InMemoryActividadRepository();
   const deps: AporteDeps = {
     aportes: new InMemoryAporteRepository(),
-    ayudas,
+    actividades,
     recursos,
   };
-  return { deps, ayudas, recursos, usdId: usd.id, aguaId: agua.id };
+  return { deps, actividades, recursos, usdId: usd.id, aguaId: agua.id };
 }
 
 describe("registrarAporteExterno", () => {
@@ -93,9 +93,9 @@ describe("registrarAporteExterno", () => {
     expect(aporte.referencia).toBe("OP-12345");
   });
 
-  it("ata el aporte a una ayuda con meta monetaria y suma a su progreso", async () => {
+  it("ata el aporte a una actividad con meta monetaria y suma a su progreso", async () => {
     const { deps, usdId } = ctx;
-    const ayuda = await crearAyuda(deps, {
+    const actividad = await crearActividad(deps, {
       adminId: ADMIN.id,
       titulo: "Jornada médica",
       sectorDestino: "Maiquetía",
@@ -110,19 +110,19 @@ describe("registrarAporteExterno", () => {
         monto: 120,
         moneda: "USD",
         fechaRecepcion: FECHA,
-        ayudaId: ayuda.id,
+        actividadId: actividad.id,
       },
       ADMIN,
     );
-    expect(aporte.ayudaId).toBe(ayuda.id);
-    const progreso = await deps.aportes.progresoPorAyuda(ayuda.id);
+    expect(aporte.actividadId).toBe(actividad.id);
+    const progreso = await deps.aportes.progresoPorActividad(actividad.id);
     const meta = progreso.find((p) => p.recursoId === usdId);
     expect(meta?.recibido).toBe(120);
   });
 
-  it("rechaza si la ayuda no tiene meta para ese recurso", async () => {
+  it("rechaza si la actividad no tiene meta para ese recurso", async () => {
     const { deps, usdId, aguaId } = ctx;
-    const ayuda = await crearAyuda(deps, {
+    const actividad = await crearActividad(deps, {
       adminId: ADMIN.id,
       titulo: "Envío de agua",
       sectorDestino: "Maiquetía",
@@ -138,7 +138,7 @@ describe("registrarAporteExterno", () => {
           monto: 10,
           moneda: "USD",
           fechaRecepcion: FECHA,
-          ayudaId: ayuda.id,
+          actividadId: actividad.id,
         },
         ADMIN,
       ),

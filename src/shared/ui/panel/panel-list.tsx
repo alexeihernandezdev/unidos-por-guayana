@@ -36,13 +36,20 @@ export function PanelListToolbar({
 type ListProps = {
   children: React.ReactNode;
   className?: string;
+  /**
+   * Entrada en cascada de las filas al montar (clase `.panel-stagger`, gated por
+   * `prefers-reduced-motion`). Opt-in; por defecto no anima para no cambiar el
+   * comportamiento existente del panel admin.
+   */
+  animated?: boolean;
 };
 
-export function PanelList({ children, className }: ListProps) {
+export function PanelList({ children, className, animated = false }: ListProps) {
   return (
     <div
       className={cn(
         "divide-y overflow-hidden rounded-lg border bg-card",
+        animated && "panel-stagger",
         className,
       )}
     >

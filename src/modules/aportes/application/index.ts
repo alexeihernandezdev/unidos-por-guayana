@@ -7,5 +7,6 @@ export * from "./revertirRecibido";
 export * from "./listarAportes";
 export * from "./listarIngresosExternos";
 export * from "./registrarAporteExterno";
+export * from "./registrarAporteDirecto";
 export * from "./listarAportantesDeActividad";
 export * from "./progresoDeActividad";

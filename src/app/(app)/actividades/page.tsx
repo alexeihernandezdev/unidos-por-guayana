@@ -8,6 +8,7 @@ import { listarActividadesServicio } from "@/shared/actividades";
 import { requireRol } from "@/shared/auth";
 import { Button } from "@/shared/ui/button";
 import {
+  PanelEmptyState,
   PanelList,
   PanelListRow,
   PanelPage,
@@ -27,6 +28,7 @@ export default async function ActividadesPublicasPage() {
   return (
     <PanelPage>
       <PanelPageHeader
+        animated
         icon={Truck}
         eyebrow="Colabora"
         title="Actividades abiertas"
@@ -39,11 +41,19 @@ export default async function ActividadesPublicasPage() {
       />
 
       {actividades.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Ahora mismo no hay actividades recolectando. Vuelve más tarde.
-        </p>
+        <PanelEmptyState
+          bordered={false}
+          icon={Truck}
+          title="No hay actividades recolectando ahora mismo"
+          description="Cuando un centro abra una recolección, aparecerá aquí para que puedas aportar. Vuelve pronto."
+          action={
+            <Button asChild variant="outline" size="sm">
+              <Link href="/mis-aportes">Ver mis aportes</Link>
+            </Button>
+          }
+        />
       ) : (
-        <PanelList>
+        <PanelList animated>
           {actividades.map((ayuda) => (
             <PanelListRow
               key={ayuda.id}

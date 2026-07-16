@@ -262,6 +262,97 @@
   }
 }
 
+/* Espacio logeado (colaborador): entrada "de agua que reposa". Rise decelerado
+   con micro-escala; en cascada para listas y con relleno de barras via scaleX.
+   Solo transform/opacity, <=300ms, ease-out; gated por reduced-motion (ver
+   constitution/tech-stack.md § Motion). Opt-in por clase, no afecta al admin. */
+.panel-meter-fill {
+  transform-origin: left center;
+  transform: scaleX(var(--meter, 1));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes panel-rise {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 12px, 0) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+  }
+
+  /* `backwards` (no `both`): aplica el estado inicial durante el delay, pero al
+     terminar libera `transform`/`opacity` a los estilos base. Clave para que el
+     hover-lift de tarjetas con transform propio no quede congelado por el fill. */
+  .panel-rise {
+    animation: panel-rise 300ms var(--ease-out-emil) backwards;
+    animation-delay: var(--rise-delay, 0ms);
+  }
+
+  /* Cascada: cada hijo directo entra escalonado. Cap tras el 6.o paso para que
+     listas largas no arrastren; a partir del 7.o entran juntos. */
+  .panel-stagger > * {
+    animation: panel-rise 300ms var(--ease-out-emil) backwards;
+  }
+  .panel-stagger > *:nth-child(1) {
+    animation-delay: 40ms;
+  }
+  .panel-stagger > *:nth-child(2) {
+    animation-delay: 85ms;
+  }
+  .panel-stagger > *:nth-child(3) {
+    animation-delay: 130ms;
+  }
+  .panel-stagger > *:nth-child(4) {
+    animation-delay: 175ms;
+  }
+  .panel-stagger > *:nth-child(5) {
+    animation-delay: 220ms;
+  }
+  .panel-stagger > *:nth-child(6) {
+    animation-delay: 265ms;
+  }
+  .panel-stagger > *:nth-child(n + 7) {
+    animation-delay: 300ms;
+  }
+
+  /* Barra de meta: se llena al montar. Anima scaleX (GPU), nunca width. */
+  @keyframes panel-meter {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(var(--meter, 1));
+    }
+  }
+  .panel-meter-fill {
+    animation: panel-meter 300ms var(--ease-out-emil) both;
+    animation-delay: var(--rise-delay, 120ms);
+  }
+}
+
+/* Hover-lift de tarjetas: elevacion sutil, solo puntero fino. Transform + sombra
+   (sin layout). El wash usa el teal de marca para anclar la identidad. */
+@media (hover: hover) and (pointer: fine) {
+  .card-lift {
+    transition:
+      transform 180ms var(--ease-out-emil),
+      box-shadow 180ms var(--ease-out-emil);
+  }
+  .card-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -12px color-mix(in oklch, var(--primary) 24%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-lift {
+    transition: none;
+  }
+}
+
 /* Grano editorial fijo: da textura de papel sin costar frames en scroll.
    Se monta una sola vez en <body> como pseudo-elemento pointer-events-none. */
 .editorial-grain {

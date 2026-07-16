@@ -39,6 +39,11 @@ El rediseño trabaja en tres capas:
 - **Formularios consumen los primitivos compartidos** (`Input`, `Label`) en lugar de la constante `campo`; los selects de filtro siguen en `FiltroSelect`.
 - **Eliminar es acción destructiva**: se presenta con énfasis semántico (texto `destructive`), separada de Ver/Editar.
 - **Sin dependencias npm nuevas. Sin migraciones Prisma. Sin cambios de rutas ni server actions.**
+- **Solicitudes adopta una bandeja territorial en grid.** El índice administrativo sustituye
+  sus row-cards por fichas centradas en el sector. Cada ficha abre una vista rápida con el
+  manifiesto de recursos y las acciones de estado existentes; el detalle completo conserva
+  su ruta. El listado muestra 12 fichas inicialmente y revela bloques adicionales mediante
+  «Cargar más», con entrada escalonada y soporte para movimiento reducido.
 
 ## Alcance
 
@@ -46,6 +51,8 @@ El rediseño trabaja en tres capas:
 
 - Refinamiento de `panel-page-header.tsx`, `panel-badge.tsx`, `panel-list-row.tsx`, `panel-empty-state.tsx`; nuevo `panel-filters.tsx`; exportes del barril.
 - Adopción en las 8 secciones listadas (filtros, empty states, badges, acciones, formularios).
+- Grid administrativo de solicitudes, vista rápida operativa y carga progresiva en bloques
+  de 12, sin alterar la lista del espacio solicitante.
 - Migración de `BandejaAdmins` a `PanelList`/`PanelListRow` (+ `detail`).
 - Nomenclatura «Centro de Acopio» en literales visibles de las pantallas tocadas.
 - Actualización de `constitution/ui-guidelines.md` (filtros §nuevo, acciones sobre banner, `detail`).
@@ -62,6 +69,10 @@ El rediseño trabaja en tres capas:
 
 - Ninguna página admin escribe filtros, empty states ni badges a mano: todo sale de `src/shared/ui/panel/`.
 - Las acciones sobre el banner son legibles (contraste AA) en todas las secciones.
+- El índice `/panel/solicitudes` presenta fichas responsive centradas en el sector; abrir una
+  ficha permite marcarla atendida o cerrarla sin navegar al detalle.
+- La entrada y carga progresiva solo animan `transform` y `opacity`, respetan
+  `prefers-reduced-motion` y mantienen controles de al menos 44 px.
 - No queda `bg-amber-*` ni la constante `campo` duplicada en las pantallas del alcance.
 - No queda «punto de acopio» visible en las pantallas del alcance.
 - `npm run lint` y `npm run build` pasan.

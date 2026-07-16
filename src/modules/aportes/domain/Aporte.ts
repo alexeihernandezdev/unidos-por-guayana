@@ -33,6 +33,9 @@ export type Aporte = {
   cantidad: number;
   moneda: string | null;
   estado: EstadoAporte;
+  // Anónimo en superficies compartidas (feature 029): oculta el nombre en el
+  // registro de aportantes (023) y la transparencia (009); el ADMIN dueño sí lo ve.
+  esAnonimo: boolean;
   nota: string | null;
   registradoPorId: string | null;
   medioDonacionId: string | null;
@@ -53,6 +56,7 @@ export type NuevoAporte = {
   colaboradorId: string | null;
   cantidad: number;
   nota: string | null;
+  esAnonimo?: boolean;
   moneda?: string | null;
   estado?: EstadoAporte;
   registradoPorId?: string | null;

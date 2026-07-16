@@ -12,5 +12,6 @@ export {
   listarAportantesDeActividadServicio,
   progresoDeActividadServicio,
   registrarAporteExternoServicio,
+  registrarAporteDirectoServicio,
   listarIngresosExternosServicio,
 } from "@/lib/aportes";

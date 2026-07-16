@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { HeartHandshake, MapPin, ShieldCheck, UserRound } from "lucide-react";
 import { CategoriasEditor } from "@/modules/afiliaciones/ui/CategoriasEditor";
 import { GestionAfiliaciones } from "@/modules/afiliaciones/ui/GestionAfiliaciones";
@@ -31,6 +32,7 @@ export default async function MiPerfilPage() {
   return (
     <PanelPage>
       <PanelPageHeader
+        animated
         icon={UserRound}
         eyebrow={esColaborador ? "Perfil de colaborador" : "Información personal"}
         title="Mi perfil"
@@ -52,7 +54,11 @@ export default async function MiPerfilPage() {
       <div className={esColaborador ? "grid items-start gap-8 lg:grid-cols-[minmax(0,1.45fr)_minmax(20rem,0.75fr)]" : "max-w-2xl"}>
         <div className="flex min-w-0 flex-col gap-8">
         {esColaborador && (
-          <section id="centros" className="profile-surface scroll-mt-6">
+          <section
+            id="centros"
+            className="panel-rise profile-surface scroll-mt-6"
+            style={{ "--rise-delay": "40ms" } as CSSProperties}
+          >
             <div className="profile-section-heading">
               <span className="profile-icon"><MapPin aria-hidden="true" /></span>
               <div>
@@ -65,7 +71,11 @@ export default async function MiPerfilPage() {
         )}
 
         {esColaborador && (
-          <section id="aportes" className="profile-surface scroll-mt-6">
+          <section
+            id="aportes"
+            className="panel-rise profile-surface scroll-mt-6"
+            style={{ "--rise-delay": "90ms" } as CSSProperties}
+          >
             <div className="profile-section-heading">
               <span className="profile-icon"><HeartHandshake aria-hidden="true" /></span>
               <div><h2>Cómo puedo ayudar</h2><p>Selecciona las capacidades por las que pueden convocarte.</p></div>
@@ -75,7 +85,11 @@ export default async function MiPerfilPage() {
         )}
         </div>
 
-        <section id="datos" className="profile-surface scroll-mt-6 lg:sticky lg:top-8">
+        <section
+          id="datos"
+          className="panel-rise profile-surface scroll-mt-6 lg:sticky lg:top-8"
+          style={{ "--rise-delay": "120ms" } as CSSProperties}
+        >
           <div className="profile-section-heading">
             <span className="profile-icon"><ShieldCheck aria-hidden="true" /></span>
             <div><h2>Datos personales</h2><p>Información privada usada para coordinar contigo.</p></div>

@@ -29,6 +29,25 @@ export function esNotaValida(nota: string | null): boolean {
   return nota === null || nota.length <= MAX_LONGITUD_NOTA;
 }
 
+// ── Anonimato del aportante (feature 029) ────────────────────────────────────
+
+// Etiqueta que sustituye al nombre en superficies compartidas (registro de
+// aportantes 023, transparencia 009) cuando el aporte es anónimo.
+export const ETIQUETA_ANONIMO = "Anónimo";
+
+/**
+ * Nombre a mostrar en superficies compartidas. Oculta la identidad (devuelve
+ * `ETIQUETA_ANONIMO`) cuando el aporte es anónimo o no tiene colaborador (donación
+ * directa imputada por el ADMIN). La verdad de la privacidad vive aquí, no en la UI.
+ */
+export function nombrePublicoAportante(
+  esAnonimo: boolean,
+  nombreColaborador: string | null,
+): string {
+  if (esAnonimo || !nombreColaborador) return ETIQUETA_ANONIMO;
+  return nombreColaborador;
+}
+
 // ── Ingreso monetario externo (feature 014) ─────────────────────────────────
 
 /** ¿La categoría del recurso corresponde a un aporte monetario? */

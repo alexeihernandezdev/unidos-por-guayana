@@ -13,6 +13,7 @@ import { listarAportantesDeActividad } from "@/modules/aportes/application/lista
 import { marcarRecibido } from "@/modules/aportes/application/marcarRecibido";
 import { listarIngresosExternos } from "@/modules/aportes/application/listarIngresosExternos";
 import { registrarAporteExterno, type RegistrarAporteExternoInput } from "@/modules/aportes/application/registrarAporteExterno";
+import { registrarAporteDirecto, type RegistrarAporteDirectoInput } from "@/modules/aportes/application/registrarAporteDirecto";
 import { progresoDeActividad } from "@/modules/aportes/application/progresoDeActividad";
 import { revertirRecibido } from "@/modules/aportes/application/revertirRecibido";
 import type { Aporte, ProgresoMetaDetalle } from "@/modules/aportes/domain/Aporte";
@@ -88,6 +89,13 @@ export function registrarAporteExternoServicio(
   actor: Actor,
 ): Promise<Aporte> {
   return registrarAporteExterno(deps, input, actor);
+}
+
+export function registrarAporteDirectoServicio(
+  input: RegistrarAporteDirectoInput,
+  actor: Actor,
+): Promise<Aporte> {
+  return registrarAporteDirecto(deps, input, actor);
 }
 
 export function listarIngresosExternosServicio(): Promise<Aporte[]> {

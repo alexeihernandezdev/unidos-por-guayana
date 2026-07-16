@@ -1,4 +1,4 @@
-import { Hash, Package, StickyNote, UserRound } from "lucide-react";
+import { EyeOff, Hash, Package, StickyNote, UserRound } from "lucide-react";
 import type { Aporte } from "@/modules/aportes/domain/Aporte";
 import { EstadoAporte } from "@/modules/aportes/domain/EstadoAporte";
 import { Button } from "@/shared/ui/button";
@@ -41,7 +41,7 @@ export function AportesTabla({
         <PanelListRow
           key={a.id}
           icon={UserRound}
-          title={a.colaborador?.nombre ?? "(colaborador)"}
+          title={a.colaborador?.nombre ?? "Donación directa"}
           badge={<EstadoAporteBadge estado={a.estado} />}
           secondary={a.colaborador?.email || undefined}
           meta={[
@@ -59,6 +59,17 @@ export function AportesTabla({
                 </span>
               ),
             },
+            // El anonimato solo afecta a las superficies compartidas; aquí (panel
+            // del dueño) se ve el nombre real, con un aviso de que es anónimo fuera.
+            ...(a.esAnonimo
+              ? [
+                  {
+                    icon: EyeOff,
+                    texto: "Anónimo en público",
+                    label: "Visibilidad",
+                  },
+                ]
+              : []),
             ...(a.nota
               ? [{ icon: StickyNote, texto: a.nota, label: "Nota" }]
               : []),

@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Target, TrendingUp } from "lucide-react";
 import type { ProgresoMetaDetalle } from "@/modules/aportes/domain/Aporte";
 import { PanelList, PanelListRow } from "@/shared/ui/panel";
@@ -30,7 +31,7 @@ export function ProgresoMetas({ progreso }: Props) {
   }
 
   return (
-    <PanelList>
+    <PanelList animated>
       {progreso.map((meta) => {
         const completa = meta.porcentaje >= 100;
         return (
@@ -41,12 +42,16 @@ export function ProgresoMetas({ progreso }: Props) {
           secondary={
             <span className="flex items-center gap-2">
               <span
-                className="h-2 w-32 overflow-hidden rounded-md bg-muted"
+                className="h-2 w-32 overflow-hidden rounded-full bg-muted"
                 aria-hidden
               >
                 <span
-                  className={`block h-full rounded-full ${completa ? "bg-primary" : "bg-accent"}`}
-                  style={{ width: `${porcentajeBarra(meta.porcentaje)}%` }}
+                  className={`panel-meter-fill block h-full w-full rounded-full ${completa ? "bg-primary" : "bg-accent"}`}
+                  style={
+                    {
+                      "--meter": porcentajeBarra(meta.porcentaje) / 100,
+                    } as CSSProperties
+                  }
                 />
               </span>
               <span

@@ -144,7 +144,10 @@ export function PuntosAcopioDirectorio({
           </Button>
         </div>
       ) : vista === "directorio" ? (
-        <div role="tabpanel" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div
+          role="tabpanel"
+          className="panel-stagger grid gap-3 sm:grid-cols-2 xl:grid-cols-3"
+        >
           {visibles.map((punto) => (
             <PuntoAcopioResultado key={punto.id} punto={punto} />
           ))}

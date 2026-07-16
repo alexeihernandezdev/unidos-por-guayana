@@ -1,5 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/shared/lib/utils";
 
 // Encabezado ligero de las subpáginas del espacio logeado (detalle, nuevo,
 // editar, aportar, proponer-recurso). Feature 026, guía
@@ -12,6 +13,8 @@ type Props = {
   backLabel?: string;
   description?: string;
   actions?: React.ReactNode;
+  /** Entrada "rise" al montar (clase `.panel-rise`, gated por reduced-motion). */
+  animated?: boolean;
 };
 
 export function PanelPageSubHeader({
@@ -20,9 +23,10 @@ export function PanelPageSubHeader({
   backLabel = "Volver",
   description,
   actions,
+  animated = false,
 }: Props) {
   return (
-    <header className="flex flex-col gap-2">
+    <header className={cn("flex flex-col gap-2", animated && "panel-rise")}>
       {backHref && (
         <Link
           href={backHref}

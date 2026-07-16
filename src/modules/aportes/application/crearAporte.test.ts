@@ -73,6 +73,26 @@ describe("crearAporte", () => {
     expect(aporte.nota).toBe("lo llevo el sábado");
   });
 
+  it("propaga esAnonimo al aporte creado", async () => {
+    const { deps, ayuda, agua } = ctx;
+    const anonimo = await crearAporte(deps, {
+      actividadId: ayuda.id,
+      recursoId: agua.id,
+      colaboradorId: COLABORADOR_ID,
+      cantidad: 3,
+      esAnonimo: true,
+    });
+    expect(anonimo.esAnonimo).toBe(true);
+
+    const normal = await crearAporte(deps, {
+      actividadId: ayuda.id,
+      recursoId: agua.id,
+      colaboradorId: COLABORADOR_ID,
+      cantidad: 4,
+    });
+    expect(normal.esAnonimo).toBe(false);
+  });
+
   it("rechaza cantidad no positiva", async () => {
     const { deps, ayuda, agua } = ctx;
     await expect(

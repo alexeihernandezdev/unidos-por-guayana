@@ -3,9 +3,7 @@
 import { useState, useTransition } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Button } from "@/shared/ui/button";
-import { Checkbox } from "@/shared/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -13,49 +11,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/select";
+import type { OpcionMeta } from "./AporteForm";
 
-// Opción para el selector: recursos que forman parte de las metas de la Actividad.
-// La unidad se muestra junto al campo de cantidad para dar contexto al colaborador.
-export type OpcionMeta = {
-  recursoId: string;
-  nombre: string;
-  unidad: string;
-};
-
-export type AporteFormValores = {
+// Registro de una donación directa (feature 029) por el ADMIN dueño: una persona
+// donó a la actividad sin cuenta y el organizador la imputa. Queda como "Anónimo".
+export type DonacionDirectaValores = {
   recursoId: string;
   cantidad: number;
   nota: string;
-  esAnonimo: boolean;
 };
 
 type Props = {
   action: (
-    input: AporteFormValores,
+    input: DonacionDirectaValores,
   ) => Promise<{ ok: boolean; error?: string }>;
   opciones: OpcionMeta[];
-  volverHref: string;
 };
 
 const campo =
   "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive";
 
-export function AporteForm({ action, opciones, volverHref }: Props) {
+export function DonacionDirectaForm({ action, opciones }: Props) {
   const router = useRouter();
   const [pendiente, startTransition] = useTransition();
   const [errorServidor, setErrorServidor] = useState<string | null>(null);
+  const [exito, setExito] = useState(false);
 
   const {
     register,
     control,
     handleSubmit,
+    reset,
     formState: { errors },
-  } = useForm<AporteFormValores>({
+  } = useForm<DonacionDirectaValores>({
     defaultValues: {
       recursoId: opciones[0]?.recursoId ?? "",
       cantidad: 1,
       nota: "",
-      esAnonimo: false,
     },
   });
 
@@ -64,18 +56,21 @@ export function AporteForm({ action, opciones, volverHref }: Props) {
 
   const onSubmit = handleSubmit((valores) => {
     setErrorServidor(null);
+    setExito(false);
     startTransition(async () => {
       const resultado = await action({
         recursoId: valores.recursoId,
         cantidad: Number(valores.cantidad),
         nota: valores.nota,
-        esAnonimo: valores.esAnonimo,
       });
       if (!resultado.ok) {
-        setErrorServidor(resultado.error ?? "No se pudo registrar el aporte.");
+        setErrorServidor(
+          resultado.error ?? "No se pudo registrar la donación.",
+        );
         return;
       }
-      router.push(volverHref);
+      reset({ recursoId: valores.recursoId, cantidad: 1, nota: "" });
+      setExito(true);
       router.refresh();
     });
   });
@@ -83,13 +78,13 @@ export function AporteForm({ action, opciones, volverHref }: Props) {
   if (opciones.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        Esta actividad no tiene metas disponibles para aportar.
+        Añade al menos una meta de recurso para poder registrar donaciones.
       </p>
     );
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex w-full max-w-lg flex-col gap-5">
+    <form onSubmit={onSubmit} className="flex w-full flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <span className="text-sm font-medium text-foreground">Recurso</span>
         <Controller
@@ -121,14 +116,17 @@ export function AporteForm({ action, opciones, volverHref }: Props) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="cantidad" className="text-sm font-medium text-foreground">
+        <label
+          htmlFor="donacion-cantidad"
+          className="text-sm font-medium text-foreground"
+        >
           Cantidad{" "}
           {unidad && (
             <span className="font-normal text-muted-foreground">({unidad})</span>
           )}
         </label>
         <input
-          id="cantidad"
+          id="donacion-cantidad"
           type="number"
           inputMode="decimal"
           step="0.01"
@@ -139,7 +137,8 @@ export function AporteForm({ action, opciones, volverHref }: Props) {
             required: "Indica una cantidad.",
             valueAsNumber: true,
             validate: (v) =>
-              (Number.isFinite(v) && v > 0) || "La cantidad debe ser mayor que cero.",
+              (Number.isFinite(v) && v > 0) ||
+              "La cantidad debe ser mayor que cero.",
           })}
         />
         {errors.cantidad && (
@@ -148,41 +147,21 @@ export function AporteForm({ action, opciones, volverHref }: Props) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="nota" className="text-sm font-medium text-foreground">
-          Nota <span className="font-normal text-muted-foreground">(opcional)</span>
+        <label
+          htmlFor="donacion-nota"
+          className="text-sm font-medium text-foreground"
+        >
+          Nota{" "}
+          <span className="font-normal text-muted-foreground">(opcional)</span>
         </label>
         <textarea
-          id="nota"
-          rows={3}
+          id="donacion-nota"
+          rows={2}
           maxLength={500}
           className={campo}
-          placeholder="Ej.: lo llevo el sábado al centro de acopio."
+          placeholder="Referencia interna del donante, si quieres dejar constancia."
           {...register("nota")}
         />
-      </div>
-
-      <div className="flex items-start gap-3 rounded-md border border-border bg-muted/30 p-3 transition-colors duration-200 has-[button[data-state=checked]]:border-primary/50 has-[button[data-state=checked]]:bg-primary/5">
-        <Controller
-          control={control}
-          name="esAnonimo"
-          render={({ field }) => (
-            <Checkbox
-              id="esAnonimo"
-              checked={field.value}
-              onCheckedChange={(valor) => field.onChange(valor === true)}
-              className="mt-0.5"
-            />
-          )}
-        />
-        <label htmlFor="esAnonimo" className="flex flex-col gap-0.5">
-          <span className="text-sm font-medium text-foreground">
-            Aportar de forma anónima
-          </span>
-          <span className="text-xs text-muted-foreground [text-wrap:pretty]">
-            Tu nombre no será visible para otras personas ni en la transparencia
-            pública. El organizador sí lo verá para poder verificar tu aporte.
-          </span>
-        </label>
       </div>
 
       {errorServidor && (
@@ -193,13 +172,15 @@ export function AporteForm({ action, opciones, volverHref }: Props) {
           {errorServidor}
         </p>
       )}
+      {exito && (
+        <p className="rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+          Donación directa registrada como recibida.
+        </p>
+      )}
 
       <div className="flex items-center gap-3 pt-1">
-        <Button type="submit" disabled={pendiente}>
-          {pendiente ? "Enviando…" : "Registrar aporte"}
-        </Button>
-        <Button asChild variant="ghost" type="button">
-          <Link href={volverHref}>Cancelar</Link>
+        <Button type="submit" size="sm" disabled={pendiente}>
+          {pendiente ? "Registrando…" : "Registrar donación"}
         </Button>
       </div>
     </form>

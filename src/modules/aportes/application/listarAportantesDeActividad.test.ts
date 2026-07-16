@@ -17,6 +17,7 @@ function aporteBase(
     cantidad: 10,
     moneda: null,
     estado: EstadoAporte.COMPROMETIDO,
+    esAnonimo: false,
     nota: null,
     registradoPorId: null,
     medioDonacionId: null,
@@ -111,5 +112,47 @@ describe("listarAportantesDeActividad", () => {
     const aportes = new InMemoryAporteRepository();
     const lista = await listarAportantesDeActividad({ aportes }, AYUDA_ID);
     expect(lista).toEqual([]);
+  });
+
+  it("muestra 'Anónimo' y no filtra el nombre real cuando el aporte es anónimo", async () => {
+    const aportes = new InMemoryAporteRepository();
+    aportes.seed(
+      aporteBase({
+        id: "anon",
+        createdAt: new Date("2026-07-05T10:00:00Z"),
+        esAnonimo: true,
+        colaborador: {
+          id: "col-9",
+          nombre: "María Secreta",
+          email: "maria@ejemplo.com",
+        },
+      }),
+    );
+
+    const lista = await listarAportantesDeActividad({ aportes }, AYUDA_ID);
+
+    expect(lista).toHaveLength(1);
+    expect(lista[0].aportanteNombre).toBe("Anónimo");
+    // El nombre real no debe aparecer en ningún valor del DTO.
+    expect(JSON.stringify(lista[0])).not.toContain("María Secreta");
+  });
+
+  it("muestra 'Anónimo' para una donación directa sin colaborador", async () => {
+    const aportes = new InMemoryAporteRepository();
+    aportes.seed(
+      aporteBase({
+        id: "directa",
+        createdAt: new Date("2026-07-06T10:00:00Z"),
+        estado: EstadoAporte.RECIBIDO,
+        esAnonimo: true,
+        colaboradorId: null,
+        colaborador: null,
+        registradoPorId: "admin-1",
+      }),
+    );
+
+    const lista = await listarAportantesDeActividad({ aportes }, AYUDA_ID);
+
+    expect(lista[0].aportanteNombre).toBe("Anónimo");
   });
 });

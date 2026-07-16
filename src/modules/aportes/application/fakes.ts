@@ -11,6 +11,7 @@ import type {
   FiltroAportes,
   RecolectadoPorRecursoId,
 } from "@/modules/aportes/domain/AporteRepository";
+import { nombrePublicoAportante } from "@/modules/aportes/domain/reglas";
 
 // Doble en memoria para los tests de casos de uso. No toca la base ni Prisma.
 export class InMemoryAporteRepository implements AporteRepository {
@@ -30,6 +31,7 @@ export class InMemoryAporteRepository implements AporteRepository {
       cantidad: datos.cantidad,
       moneda: datos.moneda ?? null,
       estado,
+      esAnonimo: datos.esAnonimo ?? false,
       nota: datos.nota,
       registradoPorId: datos.registradoPorId ?? null,
       medioDonacionId: datos.medioDonacionId ?? null,
@@ -80,7 +82,10 @@ export class InMemoryAporteRepository implements AporteRepository {
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .map((a) => ({
         id: a.id,
-        aportanteNombre: a.colaborador?.nombre ?? "(aportante)",
+        aportanteNombre: nombrePublicoAportante(
+          a.esAnonimo,
+          a.colaborador?.nombre ?? null,
+        ),
         recursoNombre: a.recurso?.nombre ?? "(recurso)",
         recursoUnidad: a.recurso?.unidad ?? "",
         cantidad: a.cantidad,

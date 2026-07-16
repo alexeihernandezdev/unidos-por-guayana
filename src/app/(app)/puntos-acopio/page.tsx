@@ -41,6 +41,7 @@ export default async function PuntosAcopioDirectorioPage({
   return (
     <PanelPage>
       <PanelPageHeader
+        animated
         icon={MapPinned}
         eyebrow="Red operativa"
         title="Centros de Acopio"
