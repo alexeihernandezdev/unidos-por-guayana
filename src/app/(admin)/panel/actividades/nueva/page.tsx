@@ -4,6 +4,7 @@ import {
 } from "@/modules/actividades/domain/TipoActividad";
 import { ActividadForm } from "@/modules/actividades/ui/ActividadForm";
 import { Rol } from "@/modules/usuarios/domain/Rol";
+import { listarNecesidadesPendientesServicio } from "@/shared/atenciones";
 import { listarPuntosDeAdminServicio } from "@/shared/acopio";
 import {
   contarAptosPorCategoriaServicio,
@@ -32,9 +33,11 @@ export default async function NuevaActividadPage({ searchParams }: Props) {
   const puntos = await listarPuntosDeAdminServicio(sesion.id, { activo: true });
   // Conteo de aptos por categoría de la red del admin (feature 025) y la lista
   // agrupada para el botón "+ info" (feature 026).
-  const [conteos, redPorCategoria] = await Promise.all([
+  const [conteos, redPorCategoria, necesidades] = await Promise.all([
     contarAptosPorCategoriaServicio(sesion.id),
     listarRedAptaPorCategoriaServicio(sesion.id),
+    // Necesidades pendientes para el sidebar arrastrable (feature 030).
+    listarNecesidadesPendientesServicio(),
   ]);
 
   return (
@@ -57,6 +60,7 @@ export default async function NuevaActividadPage({ searchParams }: Props) {
         puntosAcopio={puntos.map((p) => ({ id: p.id, nombre: p.nombre }))}
         conteosPorCategoria={conteos}
         redPorCategoria={redPorCategoria}
+        necesidades={necesidades}
         conMetas
         valoresIniciales={{ tipo: tipoInicial }}
         textoEnviar="Crear actividad"

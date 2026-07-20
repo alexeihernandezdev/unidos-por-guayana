@@ -15,7 +15,12 @@ import type {
 
 const INCLUDE_RECURSOS = {
   recursos: {
-    include: { recurso: true },
+    include: {
+      recurso: true,
+      // Atención que cubre este recurso (feature 030), con la actividad destino para
+      // el badge "Atendido por actividad X".
+      atencion: { include: { metaRecurso: { include: { actividad: true } } } },
+    },
     orderBy: { recurso: { nombre: "asc" } },
   },
 } as const;
@@ -25,6 +30,9 @@ type FilaRecurso = {
   recursoId: string;
   cantidadEstimada: { toNumber: () => number } | null;
   recurso: { id: string; nombre: string; unidad: string } | null;
+  atencion: {
+    metaRecurso: { actividad: { id: string; titulo: string } };
+  } | null;
 };
 
 type FilaSolicitud = {
@@ -52,6 +60,12 @@ function mapearRecurso(fila: FilaRecurso): RecursoSolicitud {
           id: fila.recurso.id,
           nombre: fila.recurso.nombre,
           unidad: fila.recurso.unidad,
+        }
+      : null,
+    atencion: fila.atencion
+      ? {
+          actividadId: fila.atencion.metaRecurso.actividad.id,
+          actividadTitulo: fila.atencion.metaRecurso.actividad.titulo,
         }
       : null,
   };

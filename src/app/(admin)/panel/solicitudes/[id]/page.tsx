@@ -3,6 +3,7 @@ import { Hash, Package } from "lucide-react";
 import { SolicitudNoEncontradaError } from "@/modules/solicitudes/application/errors";
 import type { Solicitud } from "@/modules/solicitudes/domain/Solicitud";
 import { EstadoSolicitudBadge } from "@/modules/solicitudes/ui/EstadoSolicitudBadge";
+import { NecesidadAtendidaBadge } from "@/modules/solicitudes/ui/NecesidadAtendidaBadge";
 import { UrgenciaBadge } from "@/modules/solicitudes/ui/UrgenciaBadge";
 import { SolicitudAcciones } from "@/modules/solicitudes/ui/SolicitudAcciones";
 import { formatearFechaCreacion } from "@/modules/solicitudes/ui/fechas";
@@ -73,6 +74,14 @@ export default async function SolicitudAdminDetallePage({ params }: Props) {
                 key={recurso.id}
                 icon={Package}
                 title={recurso.recurso?.nombre ?? "Recurso"}
+                badge={
+                  recurso.atencion ? (
+                    <NecesidadAtendidaBadge
+                      atencion={recurso.atencion}
+                      basePath="/panel/actividades"
+                    />
+                  ) : undefined
+                }
                 meta={[
                   {
                     icon: Hash,

@@ -27,6 +27,7 @@ export class InMemoryActividadRepository implements ActividadRepository {
       recursoId: meta.recursoId,
       cantidadObjetivo: meta.cantidadObjetivo,
       recurso: null,
+      atenciones: [],
     };
   }
 

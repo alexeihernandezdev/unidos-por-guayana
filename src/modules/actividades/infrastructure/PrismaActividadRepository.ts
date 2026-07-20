@@ -19,7 +19,19 @@ import type {
 // por nombre para una lectura estable.
 const INCLUDE_DETALLE = {
   metas: {
-    include: { recurso: true },
+    include: {
+      recurso: true,
+      // Necesidades de solicitud que atiende cada meta (feature 030), con datos planos
+      // de la solicitud/solicitante para listarlas dentro de la meta en edición.
+      atenciones: {
+        include: {
+          recursoSolicitud: {
+            include: { solicitud: { include: { solicitante: true } } },
+          },
+        },
+        orderBy: { createdAt: "asc" },
+      },
+    },
     orderBy: { recurso: { nombre: "asc" } },
   },
   puntosAcopio: {
@@ -31,11 +43,22 @@ const INCLUDE_DETALLE = {
 // Fila de Prisma tal como la devuelve el `include` de arriba. Se tipa de forma
 // estructural para mapearla a la entidad de dominio sin acoplarse a los tipos
 // generados (que evolucionan con el schema).
+type FilaAtencion = {
+  id: string;
+  recursoSolicitudId: string;
+  recursoSolicitud: {
+    solicitudId: string;
+    cantidadEstimada: { toNumber: () => number } | null;
+    solicitud: { sector: string; solicitante: { nombre: string } };
+  };
+};
+
 type FilaMeta = {
   id: string;
   recursoId: string;
   cantidadObjetivo: { toNumber: () => number };
   recurso: { id: string; nombre: string; unidad: string } | null;
+  atenciones: FilaAtencion[];
 };
 
 type FilaPuntoAsignado = {
@@ -86,6 +109,16 @@ function mapearMeta(fila: FilaMeta): MetaRecurso {
           unidad: fila.recurso.unidad,
         }
       : null,
+    atenciones: fila.atenciones.map((a) => ({
+      atencionId: a.id,
+      recursoSolicitudId: a.recursoSolicitudId,
+      solicitudId: a.recursoSolicitud.solicitudId,
+      sector: a.recursoSolicitud.solicitud.sector,
+      solicitanteNombre: a.recursoSolicitud.solicitud.solicitante.nombre,
+      cantidadEstimada: a.recursoSolicitud.cantidadEstimada
+        ? a.recursoSolicitud.cantidadEstimada.toNumber()
+        : null,
+    })),
   };
 }
 

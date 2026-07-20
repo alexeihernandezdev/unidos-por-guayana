@@ -1,9 +1,19 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import type { ReactNode } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import {
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
 import {
   CalendarClock,
   ChevronDown,
@@ -11,16 +21,24 @@ import {
   Plus,
   Trash2,
   Users,
+  X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
   TIPOS_ACTIVIDAD,
   TipoActividad,
 } from "@/modules/actividades/domain/TipoActividad";
+import type { NecesidadPendiente } from "@/modules/atenciones/domain/Atencion";
 import type { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import type { MiembroRedApto } from "@/modules/afiliaciones/application/consultarRed";
 import { RedAptaLista } from "@/modules/afiliaciones/ui/RedAptaLista";
 import { cn } from "@/shared/lib/utils";
+import {
+  METAS_DROPPABLE_ID,
+  MetasDropZone,
+} from "./necesidades/MetasDropZone";
+import { NecesidadCard } from "./necesidades/NecesidadCard";
+import { NecesidadesSidebar } from "./necesidades/NecesidadesSidebar";
 import { Button } from "@/shared/ui/button";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { Input } from "@/shared/ui/input";
@@ -67,6 +85,9 @@ export type ActividadFormValores = {
   // Puntos de acopio propios asignados (0..N, feature 026). Vacío = ninguno.
   puntosAcopioIds: string[];
   metas: MetaValor[];
+  // Necesidades (recursoSolicitudId) arrastradas desde el sidebar para atenderlas con
+  // esta actividad (feature 030). Se rellena al enviar desde el estado de vínculos.
+  recursoSolicitudIds?: string[];
 };
 
 // Presentación del selector de tipo (feature 026): icono y micro-descripción por
@@ -107,6 +128,9 @@ type Props = {
   // Si es `true`, incluye la lista dinámica de metas (alta). Si es `false`, solo
   // edita la cabecera.
   conMetas?: boolean;
+  // Necesidades pendientes para el sidebar arrastrable (feature 030). Si viene y hay
+  // metas, "Qué se necesita" pasa a layout de dos columnas con drag-and-drop.
+  necesidades?: NecesidadPendiente[];
   valoresIniciales?: Partial<ActividadFormValores>;
   textoEnviar: string;
   textoEnviando: string;
@@ -159,6 +183,7 @@ export function ActividadForm({
   conteosPorCategoria,
   redPorCategoria,
   conMetas = false,
+  necesidades,
   valoresIniciales,
   textoEnviar,
   textoEnviando,
@@ -168,6 +193,13 @@ export function ActividadForm({
   const [errorServidor, setErrorServidor] = useState<string | null>(null);
   // Índices de meta cuya lista "+ info" de red está desplegada.
   const [redAbierta, setRedAbierta] = useState<Set<number>>(new Set());
+  // Necesidades arrastradas y aún no persistidas (alta), por recursoSolicitudId.
+  const [vinculadas, setVinculadas] = useState<Map<string, NecesidadPendiente>>(
+    new Map(),
+  );
+  // Necesidad que se está arrastrando (para el fantasma del DragOverlay).
+  const [necesidadActiva, setNecesidadActiva] =
+    useState<NecesidadPendiente | null>(null);
 
   const {
     register,
@@ -195,6 +227,94 @@ export function ActividadForm({
   // La hora de fin solo aplica a jornadas y eventos sociales (feature 024).
   const tipoActual = useWatch({ control, name: "tipo" });
   const muestraHoraFin = tipoActual !== TipoActividad.ENVIO;
+
+  // ── Drag-and-drop de necesidades (feature 030) ──────────────────────────────
+  const usarDnd = conMetas && Boolean(necesidades);
+  const metasWatch = useWatch({ control, name: "metas" });
+  const metasActuales = useMemo(
+    () => (metasWatch ?? []) as MetaValor[],
+    [metasWatch],
+  );
+  const recursoIdsEnActividad = useMemo(
+    () => new Set(metasActuales.map((m) => m.recursoId).filter(Boolean)),
+    [metasActuales],
+  );
+  const ocultarIds = useMemo(
+    () => new Set(vinculadas.keys()),
+    [vinculadas],
+  );
+  // Necesidades vinculadas agrupadas por recurso, para listarlas dentro de su meta.
+  const vinculadasPorRecurso = useMemo(() => {
+    const mapa = new Map<string, NecesidadPendiente[]>();
+    for (const n of vinculadas.values()) {
+      const lista = mapa.get(n.recurso.id) ?? [];
+      lista.push(n);
+      mapa.set(n.recurso.id, lista);
+    }
+    return mapa;
+  }, [vinculadas]);
+
+  const sensores = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor),
+  );
+
+  function soltarNecesidad(necesidad: NecesidadPendiente) {
+    if (!necesidad.recurso.seleccionable) return;
+    const yaEsMeta = metasActuales.some(
+      (m) => m.recursoId === necesidad.recurso.id,
+    );
+    if (!yaEsMeta) {
+      const estimada = necesidad.cantidadEstimada;
+      append({
+        recursoId: necesidad.recurso.id,
+        cantidadObjetivo: estimada && estimada > 0 ? estimada : 1,
+      });
+    }
+    setVinculadas((prev) =>
+      new Map(prev).set(necesidad.recursoSolicitudId, necesidad),
+    );
+  }
+
+  function desvincularNecesidad(recursoSolicitudId: string) {
+    setVinculadas((prev) => {
+      const siguiente = new Map(prev);
+      siguiente.delete(recursoSolicitudId);
+      return siguiente;
+    });
+  }
+
+  // Al quitar una meta, se desvinculan también las necesidades que apuntaban a su
+  // recurso (vuelven al sidebar).
+  function quitarMeta(index: number) {
+    const recursoId = metasActuales[index]?.recursoId;
+    remove(index);
+    if (recursoId) {
+      setVinculadas((prev) => {
+        const siguiente = new Map(prev);
+        for (const [id, n] of prev) {
+          if (n.recurso.id === recursoId) siguiente.delete(id);
+        }
+        return siguiente;
+      });
+    }
+  }
+
+  function onDragStart(event: DragStartEvent) {
+    setNecesidadActiva(
+      (event.active.data.current?.necesidad as NecesidadPendiente) ?? null,
+    );
+  }
+
+  function onDragEnd(event: DragEndEvent) {
+    const necesidad = event.active.data.current?.necesidad as
+      | NecesidadPendiente
+      | undefined;
+    setNecesidadActiva(null);
+    if (event.over?.id === METAS_DROPPABLE_ID && necesidad) {
+      soltarNecesidad(necesidad);
+    }
+  }
   // En el alta el botón es genérico ("Crear actividad"), sin importar el tipo.
   const textoEnviarDinamico = conMetas ? "Crear actividad" : textoEnviar;
   const textoEnviandoDinamico = conMetas ? "Creando…" : textoEnviando;
@@ -203,8 +323,15 @@ export function ActividadForm({
 
   const onSubmit = handleSubmit((datos) => {
     setErrorServidor(null);
+    // Solo se envían las necesidades cuyo recurso sigue siendo meta al enviar.
+    const recursoIdsFinal = new Set(datos.metas.map((m) => m.recursoId));
+    const recursoSolicitudIds = usarDnd
+      ? [...vinculadas.values()]
+          .filter((n) => recursoIdsFinal.has(n.recurso.id))
+          .map((n) => n.recursoSolicitudId)
+      : undefined;
     startTransition(async () => {
-      const resultado = await action(datos);
+      const resultado = await action({ ...datos, recursoSolicitudIds });
       if (resultado.ok) {
         router.push("/panel/actividades");
       } else {
@@ -212,6 +339,197 @@ export function ActividadForm({
       }
     });
   });
+
+  // Cuerpo de la sección "Qué se necesita": la lista de metas con su selector, objetivo
+  // y (feature 030) las necesidades que cada meta atiende. Se reutiliza con o sin el
+  // layout de arrastre.
+  const metasBody = sinRecursos ? (
+    <p className="text-sm text-destructive">
+      No hay recursos activos en el catálogo. Crea alguno antes de definir metas.
+    </p>
+  ) : (
+    <>
+      <ul className="flex flex-col gap-3">
+        {fields.map((field, index) => {
+          const recursoIdMeta = metasActuales[index]?.recursoId;
+          const necesidadesMeta = recursoIdMeta
+            ? (vinculadasPorRecurso.get(recursoIdMeta) ?? [])
+            : [];
+          return (
+            <li
+              key={field.id}
+              className="grid grid-cols-1 gap-3 rounded-lg border border-border p-3 sm:grid-cols-[minmax(0,1fr)_8rem_auto] sm:items-start"
+            >
+              <div className="flex min-w-0 flex-col gap-1.5">
+                <span className="text-xs font-medium text-muted-foreground">
+                  Recurso
+                </span>
+                <Controller
+                  control={control}
+                  name={`metas.${index}.recursoId`}
+                  rules={{ required: "Elige un recurso." }}
+                  render={({ field: recursoField }) => {
+                    const recursoSel = recursos.find(
+                      (r) => r.id === recursoField.value,
+                    );
+                    const aptos =
+                      recursoSel && conteosPorCategoria
+                        ? conteosPorCategoria[recursoSel.categoria]
+                        : undefined;
+                    const miembros = recursoSel
+                      ? (redPorCategoria?.[recursoSel.categoria] ?? [])
+                      : [];
+                    const abierto = redAbierta.has(index);
+                    const alternarInfo = () =>
+                      setRedAbierta((prev) => {
+                        const siguiente = new Set(prev);
+                        if (siguiente.has(index)) siguiente.delete(index);
+                        else siguiente.add(index);
+                        return siguiente;
+                      });
+                    return (
+                      <>
+                        <Select
+                          value={recursoField.value}
+                          onValueChange={recursoField.onChange}
+                        >
+                          <SelectTrigger aria-label="Recurso" className="w-full">
+                            <SelectValue placeholder="Elige un recurso…" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {recursos.map((recurso) => (
+                              <SelectItem key={recurso.id} value={recurso.id}>
+                                {recurso.nombre} ({recurso.unidad})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {aptos !== undefined && (
+                          <div className="flex flex-col gap-1.5">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-xs text-muted-foreground">
+                                {aptos === 0
+                                  ? "Nadie de tu red declaró poder aportar esto todavía."
+                                  : `${aptos} de tu red ${aptos === 1 ? "puede" : "pueden"} aportar esto.`}
+                              </span>
+                              {miembros.length > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={alternarInfo}
+                                  aria-expanded={abierto}
+                                  className="focus-ring inline-flex items-center gap-1 rounded-md text-xs font-medium text-accent"
+                                >
+                                  <Users
+                                    className="size-3.5"
+                                    strokeWidth={1.5}
+                                    aria-hidden
+                                  />
+                                  {abierto ? "Ocultar" : "+ info"}
+                                  <ChevronDown
+                                    className={cn(
+                                      "size-3.5 transition-transform duration-200 ease-[var(--ease-out-emil)] motion-reduce:transition-none",
+                                      abierto && "rotate-180",
+                                    )}
+                                    strokeWidth={1.5}
+                                    aria-hidden
+                                  />
+                                </button>
+                              )}
+                            </div>
+                            {abierto && miembros.length > 0 && (
+                              <RedAptaLista miembros={miembros} />
+                            )}
+                          </div>
+                        )}
+                      </>
+                    );
+                  }}
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label
+                  htmlFor={`meta-cantidad-${index}`}
+                  className="text-xs font-medium text-muted-foreground"
+                >
+                  Objetivo
+                </label>
+                <Input
+                  id={`meta-cantidad-${index}`}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className="numeric-tnum"
+                  aria-invalid={Boolean(errors.metas?.[index]?.cantidadObjetivo)}
+                  {...register(`metas.${index}.cantidadObjetivo`, {
+                    required: "Indica la cantidad.",
+                    valueAsNumber: true,
+                    validate: (v) =>
+                      (Number.isFinite(v) && v > 0) || "Debe ser mayor que cero.",
+                  })}
+                />
+              </div>
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Quitar meta"
+                onClick={() => quitarMeta(index)}
+                disabled={fields.length <= 1}
+                className="justify-self-end sm:mt-6"
+              >
+                <Trash2 strokeWidth={1.5} />
+              </Button>
+
+              {necesidadesMeta.length > 0 && (
+                <div className="flex flex-col gap-1.5 border-t border-border/60 pt-2.5 sm:col-span-3">
+                  <span className="text-[0.6875rem] font-medium text-muted-foreground">
+                    Atiende necesidades de:
+                  </span>
+                  <ul className="flex flex-wrap gap-1.5">
+                    {necesidadesMeta.map((n) => (
+                      <li key={n.recursoSolicitudId}>
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/5 py-0.5 pr-1 pl-2.5 text-xs text-foreground/80">
+                          <span className="max-w-[16rem] truncate">
+                            {n.solicitanteNombre} · {n.sector}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              desvincularNecesidad(n.recursoSolicitudId)
+                            }
+                            aria-label={`Desvincular necesidad de ${n.solicitanteNombre}`}
+                            className="focus-ring inline-flex size-4 items-center justify-center rounded-full text-muted-foreground hover:bg-accent/15 hover:text-foreground"
+                          >
+                            <X className="size-3" strokeWidth={2} aria-hidden />
+                          </button>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+
+      <div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            append({ recursoId: recursos[0]?.id ?? "", cantidadObjetivo: 1 })
+          }
+        >
+          <Plus strokeWidth={1.5} />
+          Añadir recurso
+        </Button>
+      </div>
+    </>
+  );
 
   return (
     <form onSubmit={onSubmit} className="flex w-full flex-col gap-8">
@@ -430,176 +748,54 @@ export function ActividadForm({
         </Seccion>
       )}
 
-      {conMetas && (
-        <Seccion
-          titulo="Qué se necesita"
-          pista="Los recursos y cuánto, con el catálogo activo. Puedes ver quién de tu red puede aportar cada uno."
-        >
-          {sinRecursos ? (
-            <p className="text-sm text-destructive">
-              No hay recursos activos en el catálogo. Crea alguno antes de definir
-              metas.
-            </p>
-          ) : (
-            <>
-              <ul className="flex flex-col gap-3">
-                {fields.map((field, index) => (
-                  <li
-                    key={field.id}
-                    className="grid grid-cols-1 gap-3 rounded-lg border border-border p-3 sm:grid-cols-[minmax(0,1fr)_8rem_auto] sm:items-start"
-                  >
-                    <div className="flex min-w-0 flex-col gap-1.5">
-                      <span className="text-xs font-medium text-muted-foreground">
-                        Recurso
-                      </span>
-                      <Controller
-                        control={control}
-                        name={`metas.${index}.recursoId`}
-                        rules={{ required: "Elige un recurso." }}
-                        render={({ field: recursoField }) => {
-                          const recursoSel = recursos.find(
-                            (r) => r.id === recursoField.value,
-                          );
-                          const aptos =
-                            recursoSel && conteosPorCategoria
-                              ? conteosPorCategoria[recursoSel.categoria]
-                              : undefined;
-                          const miembros = recursoSel
-                            ? (redPorCategoria?.[recursoSel.categoria] ?? [])
-                            : [];
-                          const abierto = redAbierta.has(index);
-                          const alternarInfo = () =>
-                            setRedAbierta((prev) => {
-                              const siguiente = new Set(prev);
-                              if (siguiente.has(index)) siguiente.delete(index);
-                              else siguiente.add(index);
-                              return siguiente;
-                            });
-                          return (
-                            <>
-                              <Select
-                                value={recursoField.value}
-                                onValueChange={recursoField.onChange}
-                              >
-                                <SelectTrigger
-                                  aria-label="Recurso"
-                                  className="w-full"
-                                >
-                                  <SelectValue placeholder="Elige un recurso…" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {recursos.map((recurso) => (
-                                    <SelectItem
-                                      key={recurso.id}
-                                      value={recurso.id}
-                                    >
-                                      {recurso.nombre} ({recurso.unidad})
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              {aptos !== undefined && (
-                                <div className="flex flex-col gap-1.5">
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <span className="text-xs text-muted-foreground">
-                                      {aptos === 0
-                                        ? "Nadie de tu red declaró poder aportar esto todavía."
-                                        : `${aptos} de tu red ${aptos === 1 ? "puede" : "pueden"} aportar esto.`}
-                                    </span>
-                                    {miembros.length > 0 && (
-                                      <button
-                                        type="button"
-                                        onClick={alternarInfo}
-                                        aria-expanded={abierto}
-                                        className="focus-ring inline-flex items-center gap-1 rounded-md text-xs font-medium text-accent"
-                                      >
-                                        <Users
-                                          className="size-3.5"
-                                          strokeWidth={1.5}
-                                          aria-hidden
-                                        />
-                                        {abierto ? "Ocultar" : "+ info"}
-                                        <ChevronDown
-                                          className={cn(
-                                            "size-3.5 transition-transform duration-200 ease-[var(--ease-out-emil)] motion-reduce:transition-none",
-                                            abierto && "rotate-180",
-                                          )}
-                                          strokeWidth={1.5}
-                                          aria-hidden
-                                        />
-                                      </button>
-                                    )}
-                                  </div>
-                                  {abierto && miembros.length > 0 && (
-                                    <RedAptaLista miembros={miembros} />
-                                  )}
-                                </div>
-                              )}
-                            </>
-                          );
-                        }}
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-1.5">
-                      <label
-                        htmlFor={`meta-cantidad-${index}`}
-                        className="text-xs font-medium text-muted-foreground"
-                      >
-                        Objetivo
-                      </label>
-                      <Input
-                        id={`meta-cantidad-${index}`}
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        className="numeric-tnum"
-                        aria-invalid={Boolean(errors.metas?.[index]?.cantidadObjetivo)}
-                        {...register(`metas.${index}.cantidadObjetivo`, {
-                          required: "Indica la cantidad.",
-                          valueAsNumber: true,
-                          validate: (v) =>
-                            (Number.isFinite(v) && v > 0) ||
-                            "Debe ser mayor que cero.",
-                        })}
-                      />
-                    </div>
-
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label="Quitar meta"
-                      onClick={() => remove(index)}
-                      disabled={fields.length <= 1}
-                      className="justify-self-end sm:mt-6"
-                    >
-                      <Trash2 strokeWidth={1.5} />
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-
-              <div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    append({
-                      recursoId: recursos[0]?.id ?? "",
-                      cantidadObjetivo: 1,
-                    })
-                  }
-                >
-                  <Plus strokeWidth={1.5} />
-                  Añadir recurso
-                </Button>
+      {conMetas &&
+        (usarDnd ? (
+          <DndContext
+            sensors={sensores}
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+            onDragCancel={() => setNecesidadActiva(null)}
+          >
+            <section className="flex flex-col gap-4 border-t border-border pt-8">
+              <div className="flex flex-col gap-1">
+                <h2 className="text-sm font-semibold tracking-tight text-foreground">
+                  Qué se necesita
+                </h2>
+                <p className="max-w-[52ch] text-xs text-muted-foreground [text-wrap:pretty]">
+                  Define recursos y cantidades, o arrastra necesidades reales de
+                  las solicitudes desde el panel de la derecha para atenderlas con
+                  esta actividad.
+                </p>
               </div>
-            </>
-          )}
-        </Seccion>
-      )}
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start">
+                <MetasDropZone activo={Boolean(necesidadActiva)}>
+                  {sinRecursos ? (
+                    metasBody
+                  ) : (
+                    <div className="flex flex-col gap-4">{metasBody}</div>
+                  )}
+                </MetasDropZone>
+                <NecesidadesSidebar
+                  necesidades={necesidades ?? []}
+                  recursoIdsEnActividad={recursoIdsEnActividad}
+                  ocultarIds={ocultarIds}
+                />
+              </div>
+            </section>
+            <DragOverlay dropAnimation={null}>
+              {necesidadActiva ? (
+                <NecesidadCard necesidad={necesidadActiva} flotante />
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        ) : (
+          <Seccion
+            titulo="Qué se necesita"
+            pista="Los recursos y cuánto, con el catálogo activo. Puedes ver quién de tu red puede aportar cada uno."
+          >
+            {metasBody}
+          </Seccion>
+        ))}
 
       {errorServidor && (
         <p

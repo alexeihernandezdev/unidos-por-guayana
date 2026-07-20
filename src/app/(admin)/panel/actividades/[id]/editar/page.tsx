@@ -11,14 +11,17 @@ import { fechaParaInput, horaParaInput } from "@/modules/actividades/ui/fechas";
 import { MetasEditor } from "@/modules/actividades/ui/MetasEditor";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { obtenerActividadServicio } from "@/shared/actividades";
+import { listarNecesidadesPendientesServicio } from "@/shared/atenciones";
 import { listarPuntosDeAdminServicio } from "@/shared/acopio";
 import { listarRecursosServicio } from "@/shared/recursos";
 import { requireRol } from "@/shared/auth";
 import { PanelPage, PanelPageSubHeader } from "@/shared/ui/panel";
 import {
+  desvincularNecesidadAction,
   editarCabeceraAction,
   guardarMetaAction,
   quitarMetaAction,
+  vincularNecesidadAction,
 } from "@/app/(admin)/panel/actividades/actions";
 
 type Props = {
@@ -59,6 +62,8 @@ export default async function EditarActividadPage({ params }: Props) {
     categoria: r.categoria,
   }));
   const puntos = await listarPuntosDeAdminServicio(sesion.id, { activo: true });
+  // Necesidades pendientes para el sidebar arrastrable (feature 030).
+  const necesidades = await listarNecesidadesPendientesServicio();
 
   // Server action de cabecera ligada al id de esta ayuda; delega en el action validado.
   async function accionCabecera(input: ActividadFormValores) {
@@ -101,8 +106,11 @@ export default async function EditarActividadPage({ params }: Props) {
           actividadId={ayuda.id}
           metas={ayuda.metas}
           recursos={recursos}
+          necesidades={necesidades}
           guardarAction={guardarMetaAction}
           quitarAction={quitarMetaAction}
+          vincularAction={vincularNecesidadAction}
+          desvincularAction={desvincularNecesidadAction}
         />
       </section>
     </PanelPage>

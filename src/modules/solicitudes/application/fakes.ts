@@ -24,6 +24,7 @@ export class InMemorySolicitudRepository implements SolicitudRepository {
       recursoId: meta.recursoId,
       cantidadEstimada: meta.cantidadEstimada ?? null,
       recurso: null,
+      atencion: null,
     };
   }
 

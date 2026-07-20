@@ -7,6 +7,10 @@ export type RecursoSolicitud = {
   recursoId: string;
   cantidadEstimada: number | null;
   recurso: { id: string; nombre: string; unidad: string } | null;
+  // Actividad que atiende este recurso, si el ADMIN lo vinculó (feature 030). Derivado
+  // de `AtencionNecesidad`; `null` mientras el recurso sigue sin atender. Alimenta el
+  // badge "Atendido por actividad X" en las vistas de solicitud.
+  atencion: { actividadId: string; actividadTitulo: string } | null;
 };
 
 export type Solicitud = {

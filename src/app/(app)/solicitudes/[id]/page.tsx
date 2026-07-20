@@ -4,6 +4,7 @@ import { SolicitudNoEncontradaError } from "@/modules/solicitudes/application/er
 import type { Solicitud } from "@/modules/solicitudes/domain/Solicitud";
 import { esEditable } from "@/modules/solicitudes/domain/maquinaEstados";
 import { EstadoSolicitudBadge } from "@/modules/solicitudes/ui/EstadoSolicitudBadge";
+import { NecesidadAtendidaBadge } from "@/modules/solicitudes/ui/NecesidadAtendidaBadge";
 import { UrgenciaBadge } from "@/modules/solicitudes/ui/UrgenciaBadge";
 import { SolicitudAcciones } from "@/modules/solicitudes/ui/SolicitudAcciones";
 import { formatearFechaCreacion } from "@/modules/solicitudes/ui/fechas";
@@ -85,6 +86,14 @@ export default async function SolicitudDetallePage({ params }: Props) {
                 key={recurso.id}
                 icon={Package}
                 title={recurso.recurso?.nombre ?? "Recurso"}
+                badge={
+                  recurso.atencion ? (
+                    <NecesidadAtendidaBadge
+                      atencion={recurso.atencion}
+                      basePath="/actividades"
+                    />
+                  ) : undefined
+                }
                 meta={[
                   {
                     icon: Hash,

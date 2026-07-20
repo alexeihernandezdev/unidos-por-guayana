@@ -13,13 +13,29 @@ export type RecursoDeMeta = {
   unidad: string;
 };
 
+// Necesidad de una solicitud que esta meta atiende (feature 030). Se puebla al leer
+// con detalle; permite listar dentro de cada meta las solicitudes que cubre y ofrecer
+// el desvínculo fino. Se mantiene desacoplado del dominio de solicitudes (campos
+// planos, `urgencia` como string) para no acoplar actividades a ese módulo.
+export type MetaAtencion = {
+  atencionId: string;
+  recursoSolicitudId: string;
+  solicitudId: string;
+  sector: string;
+  solicitanteNombre: string;
+  cantidadEstimada: number | null;
+};
+
 // Meta de recurso: cuánto necesita la actividad de un recurso concreto. `recurso` se
 // puebla al leer con detalle (para la UI); puede venir `null` en listados ligeros.
+// `atenciones` son las necesidades de solicitud vinculadas a esta meta (feature 030);
+// vacío en listados ligeros o si nadie la atiende.
 export type MetaRecurso = {
   id: string;
   recursoId: string;
   cantidadObjetivo: number;
   recurso: RecursoDeMeta | null;
+  atenciones: MetaAtencion[];
 };
 
 // Punto de acopio asignado a una actividad (feature 026). Datos mínimos para el
