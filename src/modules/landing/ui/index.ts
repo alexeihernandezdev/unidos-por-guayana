@@ -9,3 +9,4 @@ export { NumbersSection } from "./NumbersSection";
 export { TrustSection } from "./TrustSection";
 export { FinalCtaSection } from "./FinalCtaSection";
 export { SiteFooter } from "./SiteFooter";
+export { TestimonialsSection } from "./TestimonialsSection";

@@ -51,7 +51,9 @@ export default async function RootLayout({
   const pathname = (await headers()).get("x-pathname") ?? "";
   const esLanding = pathname === "/";
   const esPaginaPublica =
-    esLanding || pathname.startsWith("/transparencia");
+    esLanding ||
+    pathname.startsWith("/transparencia") ||
+    pathname.startsWith("/testimonios");
 
   return (
     <html

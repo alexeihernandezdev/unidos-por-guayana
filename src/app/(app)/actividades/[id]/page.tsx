@@ -53,7 +53,7 @@ export default async function ActividadDetallePublicoPage({ params }: Props) {
         animated
         title={actividad.titulo}
         backHref="/actividades"
-        backLabel="Volver a las actividades abiertas"
+        backLabel="Volver a las actividades"
         actions={
           aceptaAportes && (
             <Button asChild>

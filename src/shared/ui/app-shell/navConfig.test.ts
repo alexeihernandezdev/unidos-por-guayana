@@ -11,36 +11,40 @@ describe("rutaInicioPorRol", () => {
   it("aterriza a cada rol en su espacio", () => {
     expect(rutaInicioPorRol(Rol.ADMIN)).toBe("/panel");
     expect(rutaInicioPorRol(Rol.SUPERADMIN)).toBe("/superadmin/admins");
+    expect(rutaInicioPorRol(Rol.AUDITOR)).toBe("/auditoria/solicitudes");
     expect(rutaInicioPorRol(Rol.COLABORADOR)).toBe("/actividades");
     expect(rutaInicioPorRol(Rol.SOLICITANTE)).toBe("/solicitudes");
   });
 });
 
 describe("navSectionsPorRol", () => {
-  it("da al COLABORADOR sus destinos (actividades, aportes, puntos, perfil)", () => {
+  it("da al COLABORADOR sus destinos de operación, testimonios y perfil", () => {
     expect(hrefs(Rol.COLABORADOR)).toEqual([
       "/actividades",
       "/mis-aportes",
       "/puntos-acopio",
+      "/mis-testimonios",
       "/mi-perfil",
     ]);
   });
 
-  it("da al SOLICITANTE sus destinos (solicitudes, nueva, proponer, perfil)", () => {
+  it("da al SOLICITANTE sus destinos de solicitudes, testimonios y perfil", () => {
     expect(hrefs(Rol.SOLICITANTE)).toEqual([
       "/solicitudes",
       "/solicitudes/nueva",
       "/solicitudes/proponer-recurso",
+      "/mis-testimonios",
       "/mi-perfil",
     ]);
   });
 
-  it("conserva la navegación del panel del ADMIN (008 + puntos de 011 + donaciones de 014)", () => {
+  it("incluye moderación en la navegación del ADMIN", () => {
     expect(hrefs(Rol.ADMIN)).toEqual([
       "/panel",
       "/panel/actividades",
       "/panel/solicitudes",
       "/panel/red",
+      "/panel/testimonios",
       "/panel/recursos",
       "/panel/donaciones",
       "/panel/perfil",
@@ -48,14 +52,22 @@ describe("navSectionsPorRol", () => {
     ]);
   });
 
-  it("da al SUPERADMIN solo la bandeja de aprobaciones", () => {
-    expect(hrefs(Rol.SUPERADMIN)).toEqual(["/superadmin/admins"]);
+  it("da al SUPERADMIN la gestión de aprobaciones y auditores", () => {
+    expect(hrefs(Rol.SUPERADMIN)).toEqual([
+      "/superadmin/admins",
+      "/superadmin/auditores",
+    ]);
+  });
+
+  it("da al AUDITOR su cola de solicitudes", () => {
+    expect(hrefs(Rol.AUDITOR)).toEqual(["/auditoria/solicitudes"]);
   });
 
   it("empieza el hogar de cada rol dentro de su propia navegación", () => {
     for (const rol of [
       Rol.ADMIN,
       Rol.SUPERADMIN,
+      Rol.AUDITOR,
       Rol.COLABORADOR,
       Rol.SOLICITANTE,
     ] as const) {
@@ -67,6 +79,7 @@ describe("navSectionsPorRol", () => {
     for (const rol of [
       Rol.ADMIN,
       Rol.SUPERADMIN,
+      Rol.AUDITOR,
       Rol.COLABORADOR,
       Rol.SOLICITANTE,
     ] as const) {

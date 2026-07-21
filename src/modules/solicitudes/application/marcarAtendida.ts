@@ -1,5 +1,6 @@
 import type { Solicitud } from "@/modules/solicitudes/domain/Solicitud";
 import { EstadoSolicitud } from "@/modules/solicitudes/domain/EstadoSolicitud";
+import { EstadoVerificacionSolicitud } from "@/modules/auditoria/domain/EstadoVerificacionSolicitud";
 import { puedeMarcarAtendida } from "@/modules/solicitudes/domain/maquinaEstados";
 import type { SolicitudDeps } from "./deps";
 import {
@@ -18,6 +19,13 @@ export async function marcarAtendida(
   if (!puedeMarcarAtendida(actual.estado)) {
     throw new TransicionInvalidaError(
       "Solo se puede marcar atendida una solicitud ABIERTA.",
+    );
+  }
+  if (
+    actual.estadoVerificacion !== EstadoVerificacionSolicitud.VERIFICADA
+  ) {
+    throw new TransicionInvalidaError(
+      "La solicitud debe estar verificada por auditoría antes de ser atendida.",
     );
   }
 

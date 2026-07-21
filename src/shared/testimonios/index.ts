@@ -1,0 +1,15 @@
+export {
+  aprobarTestimonioServicio,
+  contarTestimoniosPublicosServicio,
+  crearTestimonioServicio,
+  destacarTestimonioServicio,
+  editarTestimonioServicio,
+  eliminarTestimonioServicio,
+  listarTestimoniosDeAutorServicio,
+  listarTestimoniosParaModerarServicio,
+  listarTestimoniosPublicosServicio,
+  ocultarTestimonioServicio,
+  quitarDestacadoTestimonioServicio,
+  rechazarTestimonioServicio,
+  retirarTestimonioServicio,
+} from "@/lib/testimonios";

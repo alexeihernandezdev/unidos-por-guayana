@@ -21,6 +21,7 @@ datasource db {
 enum Rol {
   SUPERADMIN
   ADMIN
+  AUDITOR
   COLABORADOR
   SOLICITANTE
 }
@@ -85,6 +86,10 @@ model Usuario {
   // como COLABORADOR (`afiliaciones`) y las de su red como ADMIN (`red`).
   afiliaciones       Afiliacion[]  @relation("ColaboradorAfiliaciones")
   red                Afiliacion[]  @relation("AdminRed")
+  testimonios        Testimonio[]  @relation("TestimoniosAutor")
+  testimoniosModerados Testimonio[] @relation("TestimoniosModerador")
+  solicitudesEnAuditoria Solicitud[] @relation("AuditorActualSolicitud")
+  eventosAuditoria EventoAuditoriaSolicitud[] @relation("ActorEventoAuditoria")
 
   @@index([estadoId])
   @@index([municipioId])
@@ -476,6 +481,25 @@ enum EstadoSolicitud {
   CERRADA
 }
 
+// Estado de validación externa. Es independiente del ciclo operativo de la
+// solicitud: una petición puede seguir ABIERTA, pero no puede atenderse hasta
+// que un AUDITOR la marque como VERIFICADA.
+enum EstadoVerificacionSolicitud {
+  PENDIENTE
+  EN_REVISION
+  REQUIERE_INFORMACION
+  VERIFICADA
+  NO_VERIFICADA
+}
+
+enum TipoEventoAuditoriaSolicitud {
+  CREADA
+  TOMADA
+  LIBERADA
+  DICTAMEN
+  REENVIADA
+}
+
 // Quién cerró la solicitud (feature 007). Distingue cancelación del solicitante de
 // cierre administrativo por el ADMIN.
 enum CerradaPor {
@@ -496,13 +520,106 @@ model Solicitud {
   cerradaPor    CerradaPor?
   solicitanteId String
   solicitante   Usuario            @relation(fields: [solicitanteId], references: [id])
+  estadoVerificacion EstadoVerificacionSolicitud @default(PENDIENTE)
+  auditorActualId String?
+  auditorActual Usuario? @relation("AuditorActualSolicitud", fields: [auditorActualId], references: [id], onDelete: SetNull)
+  cicloAuditoria Int @default(1)
+  eventosAuditoria EventoAuditoriaSolicitud[]
   recursos      RecursoSolicitud[]
+  archivos      ArchivoSolicitud[]
+  testimonios   Testimonio[]
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
 
   @@index([estado])
+  @@index([estadoVerificacion, createdAt])
+  @@index([auditorActualId])
   @@index([sector])
   @@map("solicitudes")
+}
+
+// Bitácora inmutable de la auditoría. Los eventos de dictamen contienen el
+// respaldo de la comprobación externa; las tomas, liberaciones y reenvíos
+// permiten reconstruir el flujo completo sin sobrescribir decisiones previas.
+model EventoAuditoriaSolicitud {
+  id                  String                       @id @default(cuid())
+  solicitudId         String
+  solicitud           Solicitud                    @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+  actorId              String
+  actor                Usuario                      @relation("ActorEventoAuditoria", fields: [actorId], references: [id])
+  tipo                 TipoEventoAuditoriaSolicitud
+  estadoResultante     EstadoVerificacionSolicitud
+  ciclo                Int
+  metodo               String?
+  notaInterna          String?
+  explicacionPublica   String?
+  referenciaExterna   String?
+  createdAt            DateTime                     @default(now())
+
+  @@index([solicitudId, createdAt])
+  @@index([actorId, createdAt])
+  @@map("eventos_auditoria_solicitud")
+}
+
+enum EstadoTestimonio {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+  OCULTO
+}
+
+// Relato enviado por un colaborador o solicitante. La publicación siempre pasa
+// por moderación de un ADMIN. La foto es un placeholder visual en esta versión.
+model Testimonio {
+  id                String            @id @default(cuid())
+  autorId           String
+  autor             Usuario           @relation("TestimoniosAutor", fields: [autorId], references: [id], onDelete: Cascade)
+  solicitudId       String?
+  solicitud         Solicitud?         @relation(fields: [solicitudId], references: [id], onDelete: SetNull)
+  titulo            String
+  contenido         String
+  estado            EstadoTestimonio  @default(PENDIENTE)
+  motivoRechazo     String?
+  destacado         Boolean           @default(false)
+  moderadoPorId     String?
+  moderadoPor       Usuario?          @relation("TestimoniosModerador", fields: [moderadoPorId], references: [id], onDelete: SetNull)
+  moderadoEn        DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([autorId])
+  @@index([solicitudId])
+  @@index([estado, createdAt])
+  @@index([estado, destacado])
+  @@map("testimonios")
+}
+
+// Rol de un archivo dentro de una solicitud (feature 031). `PRINCIPAL` es la imagen de
+// portada (máx 1 por solicitud, garantizado por índice único parcial en la migración);
+// `ADJUNTO` es documentación de apoyo (imágenes, PDF o doc/docx), hasta 10 por solicitud.
+enum TipoArchivoSolicitud {
+  PRINCIPAL
+  ADJUNTO
+}
+
+// ArchivoSolicitud: imagen principal o documento adjunto de una `Solicitud` (feature 031).
+// El binario vive en Supabase Storage (bucket privado); aquí solo se guardan los metadatos
+// y la ruta (`path`) del objeto. Se sirve mediante URLs firmadas de lectura de corta vida.
+// Cascada: al borrar la solicitud desaparecen sus filas (los objetos en Storage se borran
+// en el flujo de eliminación de la solicitud).
+model ArchivoSolicitud {
+  id             String               @id @default(cuid())
+  solicitudId    String
+  solicitud      Solicitud            @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+  tipo           TipoArchivoSolicitud
+  path           String
+  nombreOriginal String
+  contentType    String
+  tamanoBytes    Int
+  createdAt      DateTime             @default(now())
+
+  @@index([solicitudId])
+  @@map("archivos_solicitud")
 }
 
 // RecursoSolicitud: puente entre `Solicitud` y `Recurso`. `cantidadEstimada` es

@@ -75,6 +75,13 @@ export class CuentaAdminNoAprobableError extends Error {
   }
 }
 
+export class CuentaAuditorInvalidaError extends Error {
+  constructor(mensaje: string) {
+    super(mensaje);
+    this.name = "CuentaAuditorInvalidaError";
+  }
+}
+
 // ── Perfil de administrador / centro de acopio (feature 016) ──────────────────
 
 // Los datos del perfil no cumplen las reglas de dominio (documento sin tipo o

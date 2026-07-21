@@ -42,3 +42,26 @@ export class DatosSolicitudInvalidosError extends Error {
     this.name = "DatosSolicitudInvalidosError";
   }
 }
+
+// ── Archivos (feature 031) ──
+
+export class ArchivoInvalidoError extends Error {
+  constructor(mensaje: string) {
+    super(mensaje);
+    this.name = "ArchivoInvalidoError";
+  }
+}
+
+export class LimiteArchivosError extends Error {
+  constructor(mensaje: string) {
+    super(mensaje);
+    this.name = "LimiteArchivosError";
+  }
+}
+
+export class ArchivoNoEncontradoError extends Error {
+  constructor(id: string) {
+    super(`No existe un archivo con el id "${id}".`);
+    this.name = "ArchivoNoEncontradoError";
+  }
+}

@@ -9,8 +9,8 @@ import { PrismaClient } from "../src/generated/prisma/client";
 // el escenario más denso. Todos los aportes pertenecen a
 // `colaborador1@test.com`.
 //
-// Cuentas: admin1@test.com … admin5@test.com y colaborador1@test.com,
-// todas con contraseña 123.
+// Cuentas: admin1@test.com … admin5@test.com, colaborador1@test.com,
+// solicitante1@test.com y auditor1@test.com, todas con contraseña 123.
 //
 // Ejecutar con: `pnpm db:seed:dev` (requiere el catálogo de ubicación ya
 // sembrado: `pnpm db:seed` primero).
@@ -240,6 +240,11 @@ const SOLICITANTE = {
   nombreMunicipio: "Caroní",
 };
 
+const AUDITOR = {
+  email: "auditor1@test.com",
+  nombre: "Ana Auditora",
+};
+
 type CategoriaRecurso =
   | "SUMINISTRO"
   | "TRANSPORTE"
@@ -426,6 +431,99 @@ const SOLICITUDES = [
   { slug: "manoa-refugio", sector: "Manoa", urgencia: "ALTA" as const, estado: "ATENDIDA" as const, recursos: ["ropa", "colchonetas"], descripcion: "Solicitud atendida mediante la entrega al refugio local." },
   { slug: "dalla-costa-medicinas", sector: "Dalla Costa", urgencia: "MEDIA" as const, estado: "ATENDIDA" as const, recursos: ["medicinas"], descripcion: "Insumos médicos canalizados hacia el centro asistencial." },
   { slug: "alta-vista-voluntarios", sector: "Alta Vista", urgencia: "BAJA" as const, estado: "CERRADA" as const, recursos: ["voluntarios"], descripcion: "La comunidad resolvió la convocatoria por medios propios." },
+];
+
+const TESTIMONIOS = [
+  {
+    slug: "refugio-manoa",
+    autor: "SOLICITANTE" as const,
+    solicitudSlug: "manoa-refugio",
+    titulo: "La ayuda llegó cuando más la necesitábamos",
+    contenido:
+      "Después de las lluvias, varias familias del refugio no tenían dónde descansar. La coordinación fue clara y las colchonetas y la ropa llegaron organizadas, sin promesas vacías. Sentimos que nuestra solicitud fue escuchada con respeto.",
+    estado: "APROBADO" as const,
+    destacado: true,
+    dias: -36,
+  },
+  {
+    slug: "aportar-con-confianza",
+    autor: "COLABORADOR" as const,
+    solicitudSlug: null,
+    titulo: "Ahora sé a dónde llega cada aporte",
+    contenido:
+      "Poder consultar la actividad, los recursos necesarios y el punto de acopio antes de colaborar me dio mucha confianza. Entregué mi aporte y luego pude seguir el avance de la jornada desde la plataforma.",
+    estado: "APROBADO" as const,
+    destacado: true,
+    dias: -29,
+  },
+  {
+    slug: "medicinas-dalla-costa",
+    autor: "SOLICITANTE" as const,
+    solicitudSlug: "dalla-costa-medicinas",
+    titulo: "Una respuesta concreta para el ambulatorio",
+    contenido:
+      "La solicitud de insumos médicos se convirtió en una respuesta concreta. El equipo mantuvo comunicación con la comunidad y los medicamentos fueron canalizados hacia el centro asistencial que realmente los necesitaba.",
+    estado: "APROBADO" as const,
+    destacado: true,
+    dias: -23,
+  },
+  {
+    slug: "voluntariado-organizado",
+    autor: "COLABORADOR" as const,
+    solicitudSlug: null,
+    titulo: "Colaborar se siente ordenado y transparente",
+    contenido:
+      "Antes no sabía cómo integrarme a una iniciativa local. Aquí encontré actividades con metas claras, horarios y responsables identificados. Esa organización hace más sencillo comprometer tiempo y recursos de manera responsable.",
+    estado: "APROBADO" as const,
+    destacado: false,
+    dias: -17,
+  },
+  {
+    slug: "seguimiento-chirica",
+    autor: "SOLICITANTE" as const,
+    solicitudSlug: "chirica-lluvias",
+    titulo: "Estamos esperando la validación",
+    contenido:
+      "Registré la situación de varias familias afectadas por las lluvias y pude detallar las necesidades del sector. El proceso muestra claramente que la solicitud está pendiente de revisión antes de movilizar recursos.",
+    estado: "PENDIENTE" as const,
+    destacado: false,
+    dias: -5,
+  },
+  {
+    slug: "primera-experiencia",
+    autor: "COLABORADOR" as const,
+    solicitudSlug: null,
+    titulo: "Mi primera experiencia como colaborador",
+    contenido:
+      "La información de cada actividad me ayudó a elegir dónde podía ser más útil. La experiencia fue sencilla y quiero compartirla para que otras personas también se animen a participar en su comunidad.",
+    estado: "PENDIENTE" as const,
+    destacado: false,
+    dias: -3,
+  },
+  {
+    slug: "informacion-sensible",
+    autor: "SOLICITANTE" as const,
+    solicitudSlug: "core-8-agua",
+    titulo: "Datos de contacto de la comunidad",
+    contenido:
+      "Quería publicar los datos personales de varias familias para facilitar el contacto directo durante la entrega de agua y alimentos en el sector.",
+    estado: "RECHAZADO" as const,
+    destacado: false,
+    motivoRechazo:
+      "El testimonio contiene información sensible de terceros. Reescríbelo sin datos personales.",
+    dias: -11,
+  },
+  {
+    slug: "campana-anterior",
+    autor: "COLABORADOR" as const,
+    solicitudSlug: null,
+    titulo: "Una campaña que unió a muchas personas",
+    contenido:
+      "La jornada reunió a vecinos, voluntarios y centros de acopio alrededor de una meta común. El testimonio se conserva en el historial, aunque ya no se muestra en el archivo público principal.",
+    estado: "OCULTO" as const,
+    destacado: false,
+    dias: -48,
+  },
 ];
 
 async function main() {
@@ -625,6 +723,24 @@ async function main() {
       },
     });
     console.log(`✔ ${SOLICITANTE.email} (SOLICITANTE, perfil completo).`);
+
+    await prisma.usuario.upsert({
+      where: { email: AUDITOR.email },
+      update: {
+        passwordHash,
+        nombre: AUDITOR.nombre,
+        rol: "AUDITOR",
+        estadoVerificacion: "VERIFICADO",
+      },
+      create: {
+        email: AUDITOR.email,
+        passwordHash,
+        nombre: AUDITOR.nombre,
+        rol: "AUDITOR",
+        estadoVerificacion: "VERIFICADO",
+      },
+    });
+    console.log(`✔ ${AUDITOR.email} (AUDITOR VERIFICADO).`);
 
     // El colaborador principal forma parte de varias redes, pero conserva libertad
     // para aportar a cualquier actividad de la plataforma.
@@ -875,6 +991,41 @@ async function main() {
       }
     }
     console.log(`✔ ${SOLICITUDES.length} solicitudes con urgencias y estados variados.`);
+
+    const moderadorId = adminsPorNumero.get(1);
+    if (!moderadorId) throw new Error("No se encontró admin1 para moderar testimonios.");
+
+    for (const semilla of TESTIMONIOS) {
+      const pendiente = semilla.estado === "PENDIENTE";
+      const datos = {
+        autorId:
+          semilla.autor === "SOLICITANTE" ? solicitante.id : colaborador.id,
+        solicitudId: semilla.solicitudSlug
+          ? `seed-dev-solicitud-${semilla.solicitudSlug}`
+          : null,
+        titulo: semilla.titulo,
+        contenido: semilla.contenido,
+        estado: semilla.estado,
+        motivoRechazo:
+          "motivoRechazo" in semilla ? semilla.motivoRechazo : null,
+        destacado: semilla.destacado,
+        moderadoPorId: pendiente ? null : moderadorId,
+        moderadoEn: pendiente ? null : fechaRelativa(semilla.dias + 1, 14),
+        createdAt: fechaRelativa(semilla.dias, 11),
+      };
+
+      await prisma.testimonio.upsert({
+        where: { id: `seed-dev-testimonio-${semilla.slug}` },
+        update: datos,
+        create: {
+          id: `seed-dev-testimonio-${semilla.slug}`,
+          ...datos,
+        },
+      });
+    }
+    console.log(
+      `✔ ${TESTIMONIOS.length} testimonios con moderación, destacados y vínculos variados.`,
+    );
 
     console.log(`\nContraseña de todas las cuentas: ${PASSWORD}`);
   } finally {

@@ -1,6 +1,7 @@
 import type { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import type { DatosContacto } from "./datosContacto";
 import type { EstadoVerificacion } from "./Rol";
+import type { Rol } from "./Rol";
 import type { NuevoUsuario, Usuario } from "./Usuario";
 
 // Contrato de persistencia de usuarios. La implementación concreta (Prisma) vive
@@ -12,6 +13,7 @@ export interface UsuarioRepository {
   // Cédula ya normalizada (`V12345678`). Devuelve `null` si nadie la tiene.
   // Feature 017: unicidad de cédula al registrar o editar datos de contacto.
   buscarPorCedula(cedula: string): Promise<Usuario | null>;
+  listarPorRol(rol: Rol): Promise<Usuario[]>;
   // Cuentas `ADMIN` en `PENDIENTE`, para la bandeja del superadmin (feature 015).
   listarAdminsPendientes(): Promise<Usuario[]>;
   actualizarEstadoVerificacion(

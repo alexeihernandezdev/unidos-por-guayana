@@ -3,6 +3,7 @@ import { auth, buscarUsuarioPorId } from "@/lib/auth";
 import { tieneDatosContactoCompletos } from "@/modules/usuarios/domain/datosContacto";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { puedeOperarComoAdmin } from "@/modules/usuarios/domain/verificacion";
+import { EstadoVerificacion } from "@/modules/usuarios/domain/Rol";
 
 // Helpers de sesión para el servidor (server components, server actions y route
 // handlers). `src/shared` es transversal, así que la presentación puede leer la
@@ -72,6 +73,22 @@ export async function requireAdminVerificado(): Promise<UsuarioSesion> {
   const fresco = await buscarUsuarioPorId(usuario.id);
   if (!fresco || !puedeOperarComoAdmin(fresco)) redirect("/cuenta-admin");
 
+  return usuario;
+}
+
+/** Exige una cuenta AUDITOR activa, comprobada en base en cada operación. */
+export async function requireAuditorActivo(): Promise<UsuarioSesion> {
+  const usuario = await requireSesion();
+  if (usuario.rol !== Rol.AUDITOR) redirect("/");
+
+  const fresco = await buscarUsuarioPorId(usuario.id);
+  if (
+    !fresco ||
+    fresco.rol !== Rol.AUDITOR ||
+    fresco.estadoVerificacion !== EstadoVerificacion.VERIFICADO
+  ) {
+    redirect("/");
+  }
   return usuario;
 }
 

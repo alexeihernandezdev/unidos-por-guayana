@@ -96,6 +96,16 @@ describe("listarActividades", () => {
     expect(jornadas[0]!.titulo).toBe("Jornada");
   });
 
+  it("busca por texto en título o destino sin distinguir mayúsculas", async () => {
+    const porTitulo = await listarActividades(ctx.deps, { texto: "evento" });
+    expect(porTitulo).toHaveLength(1);
+    expect(porTitulo[0]!.titulo).toBe("Evento");
+
+    const porDestino = await listarActividades(ctx.deps, { texto: "TUMEREMO" });
+    expect(porDestino).toHaveLength(1);
+    expect(porDestino[0]!.titulo).toBe("Envío B");
+  });
+
   it("combina filtro de adminId, tipo y estado", async () => {
     const envioRecolectando = await listarActividades(ctx.deps, {
       adminId: ADMIN_A,

@@ -21,6 +21,12 @@ import {
 } from "@/modules/usuarios/application/registrarUsuario";
 import { declararCategorias } from "@/modules/usuarios/application/declararCategorias";
 import { validarCredenciales } from "@/modules/usuarios/application/validarCredenciales";
+import {
+  crearAuditor,
+  listarAuditores,
+  reactivarAuditor,
+  suspenderAuditor,
+} from "@/modules/usuarios/application/gestionarAuditores";
 import type {
   CambiosPerfilAdmin,
   DatosPerfilAdmin,
@@ -123,6 +129,20 @@ export function rechazarAdminGestion(
 ): Promise<Usuario> {
   return rechazarAdmin({ usuarios }, actor, adminId);
 }
+
+export const listarAuditoresGestion = (actor: Actor) =>
+  listarAuditores({ usuarios }, actor);
+
+export const crearAuditorGestion = (
+  actor: Actor,
+  input: { nombre: string; email: string; password: string },
+) => crearAuditor({ usuarios, hasher }, actor, input);
+
+export const suspenderAuditorGestion = (actor: Actor, auditorId: string) =>
+  suspenderAuditor({ usuarios }, actor, auditorId);
+
+export const reactivarAuditorGestion = (actor: Actor, auditorId: string) =>
+  reactivarAuditor({ usuarios }, actor, auditorId);
 
 /**
  * Lee el usuario fresco de base por id. Lo usa el guard de servidor

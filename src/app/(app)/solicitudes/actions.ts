@@ -3,12 +3,19 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
+  ArchivoInvalidoError,
+  ArchivoNoEncontradoError,
   DatosSolicitudInvalidosError,
+  LimiteArchivosError,
   NoAutorizadoError,
   RecursoInvalidoError,
   SolicitudNoEditableError,
   SolicitudNoEncontradaError,
 } from "@/modules/solicitudes/application/errors";
+import {
+  TipoArchivoSolicitud,
+  type ArchivoSolicitud,
+} from "@/modules/solicitudes/domain/ArchivoSolicitud";
 import {
   DatosRecursoInvalidosError,
   NombreDuplicadoError,
@@ -19,13 +26,18 @@ import {
   UrgenciaSolicitud,
 } from "@/modules/solicitudes/domain/UrgenciaSolicitud";
 import { Rol } from "@/modules/usuarios/domain/Rol";
+import { ConflictoAuditoriaError } from "@/modules/auditoria/application";
 import {
   cancelarSolicitudServicio,
+  confirmarArchivoServicio,
   crearSolicitudServicio,
   editarSolicitudServicio,
+  eliminarArchivoServicio,
+  prepararSubidaArchivoServicio,
 } from "@/shared/solicitudes";
 import { proponerRecursoServicio } from "@/shared/recursos";
 import { requireRol } from "@/shared/auth";
+import { reenviarAuditoriaServicio } from "@/shared/auditoria";
 
 const RUTA_LISTADO = "/solicitudes";
 
@@ -62,7 +74,27 @@ export type SolicitudInput = {
 
 type Resultado = { ok: true } | { ok: false; error: string };
 
-function traducirError(error: unknown): Resultado | null {
+export async function reenviarSolicitudAction(
+  solicitudId: string,
+): Promise<Resultado> {
+  const usuario = await requireRol(Rol.SOLICITANTE);
+  try {
+    await reenviarAuditoriaServicio(solicitudId, usuario.id);
+    revalidatePath(RUTA_LISTADO);
+    revalidatePath(`${RUTA_LISTADO}/${solicitudId}`);
+    revalidatePath("/auditoria/solicitudes");
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof ConflictoAuditoriaError) {
+      return { ok: false, error: error.message };
+    }
+    throw error;
+  }
+}
+
+function traducirError(
+  error: unknown,
+): { ok: false; error: string } | null {
   if (error instanceof DatosSolicitudInvalidosError) {
     return { ok: false, error: error.message };
   }
@@ -77,6 +109,15 @@ function traducirError(error: unknown): Resultado | null {
   }
   if (error instanceof SolicitudNoEncontradaError) {
     return { ok: false, error: "La solicitud ya no existe." };
+  }
+  if (error instanceof ArchivoInvalidoError) {
+    return { ok: false, error: error.message };
+  }
+  if (error instanceof LimiteArchivosError) {
+    return { ok: false, error: error.message };
+  }
+  if (error instanceof ArchivoNoEncontradoError) {
+    return { ok: false, error: "El archivo ya no existe." };
   }
   return null;
 }
@@ -209,6 +250,106 @@ export async function cancelarSolicitudAction(
     await cancelarSolicitudServicio(id, usuario.id);
     revalidatePath(RUTA_LISTADO);
     revalidatePath(`${RUTA_LISTADO}/${id}`);
+    return { ok: true };
+  } catch (error) {
+    const traducido = traducirError(error);
+    if (traducido) return traducido;
+    throw error;
+  }
+}
+
+// ── Archivos de la solicitud (feature 031) ──────────────────────────────────
+// La subida va directo del navegador a Supabase. El servidor solo (1) valida y firma
+// la URL de subida, y (2) confirma los metadatos tras la subida. El binario nunca pasa
+// por estas acciones, así que el tope de 1 MB de los server actions no aplica.
+
+const TIPOS_ARCHIVO = [
+  TipoArchivoSolicitud.PRINCIPAL,
+  TipoArchivoSolicitud.ADJUNTO,
+] as const;
+
+const PrepararSubidaSchema = z.object({
+  solicitudId: z.string().min(1),
+  tipo: z.enum(TIPOS_ARCHIVO),
+  contentType: z.string().min(1).max(160),
+  tamanoBytes: z.number().int().positive(),
+});
+
+const ConfirmarArchivoSchema = z.object({
+  solicitudId: z.string().min(1),
+  tipo: z.enum(TIPOS_ARCHIVO),
+  path: z.string().min(1).max(400),
+  nombreOriginal: z.string().trim().min(1).max(255),
+  contentType: z.string().min(1).max(160),
+  tamanoBytes: z.number().int().positive(),
+});
+
+export type PrepararSubidaArchivoInput = z.infer<typeof PrepararSubidaSchema>;
+export type ConfirmarArchivoInput = z.infer<typeof ConfirmarArchivoSchema>;
+
+type PrepararResultado =
+  | { ok: true; path: string; url: string }
+  | { ok: false; error: string };
+
+export async function prepararSubidaArchivoAction(
+  input: PrepararSubidaArchivoInput,
+): Promise<PrepararResultado> {
+  const usuario = await requireRol(Rol.SOLICITANTE);
+
+  const parsed = PrepararSubidaSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: "Datos del archivo no válidos." };
+  }
+
+  try {
+    const { path, url } = await prepararSubidaArchivoServicio(
+      parsed.data,
+      usuario.id,
+    );
+    return { ok: true, path, url };
+  } catch (error) {
+    const traducido = traducirError(error);
+    if (traducido) return traducido;
+    throw error;
+  }
+}
+
+type ConfirmarResultado =
+  | { ok: true; archivo: ArchivoSolicitud }
+  | { ok: false; error: string };
+
+export async function confirmarArchivoAction(
+  input: ConfirmarArchivoInput,
+): Promise<ConfirmarResultado> {
+  const usuario = await requireRol(Rol.SOLICITANTE);
+
+  const parsed = ConfirmarArchivoSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: "Datos del archivo no válidos." };
+  }
+
+  try {
+    const archivo = await confirmarArchivoServicio(parsed.data, usuario.id);
+    revalidatePath(`${RUTA_LISTADO}/${parsed.data.solicitudId}`);
+    revalidatePath(`${RUTA_LISTADO}/${parsed.data.solicitudId}/editar`);
+    return { ok: true, archivo };
+  } catch (error) {
+    const traducido = traducirError(error);
+    if (traducido) return traducido;
+    throw error;
+  }
+}
+
+export async function eliminarArchivoAction(
+  archivoId: string,
+  solicitudId: string,
+): Promise<Resultado> {
+  const usuario = await requireRol(Rol.SOLICITANTE);
+
+  try {
+    await eliminarArchivoServicio(archivoId, usuario.id);
+    revalidatePath(`${RUTA_LISTADO}/${solicitudId}`);
+    revalidatePath(`${RUTA_LISTADO}/${solicitudId}/editar`);
     return { ok: true };
   } catch (error) {
     const traducido = traducirError(error);

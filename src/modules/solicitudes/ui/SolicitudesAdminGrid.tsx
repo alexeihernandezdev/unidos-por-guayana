@@ -40,6 +40,7 @@ import { SolicitudAcciones } from "./SolicitudAcciones";
 import { UrgenciaBadge } from "./UrgenciaBadge";
 import { formatearFechaCreacion } from "./fechas";
 import { URGENCIA_LABEL } from "./urgencias";
+import { EstadoVerificacionBadge } from "@/modules/auditoria/ui/EstadoVerificacionBadge";
 
 type AccionSolicitud = (formData: FormData) => Promise<void>;
 
@@ -181,6 +182,7 @@ function SolicitudCard({
             Urgencia {URGENCIA_LABEL[solicitud.urgencia].toLowerCase()}
           </span>
           <EstadoSolicitudBadge estado={solicitud.estado} />
+          <EstadoVerificacionBadge estado={solicitud.estadoVerificacion} />
         </div>
 
         <p className="mt-4 line-clamp-3 min-h-[3.75rem] text-sm leading-5 text-foreground/80 [text-wrap:pretty]">
@@ -290,6 +292,10 @@ function SolicitudPreview({
                     estado={solicitud.estado}
                     className="border-white/20 bg-white/10 text-white"
                   />
+                  <EstadoVerificacionBadge
+                    estado={solicitud.estadoVerificacion}
+                    className="border border-white/20 bg-white/10 text-white"
+                  />
                 </div>
                 <DialogTitle className="flex items-start gap-3 text-2xl leading-tight tracking-tight sm:text-3xl">
                   <MapPin className="mt-1 size-6 shrink-0" strokeWidth={1.5} aria-hidden />
@@ -371,6 +377,7 @@ function SolicitudPreview({
                   <SolicitudAcciones
                     solicitudId={solicitud.id}
                     estado={solicitud.estado}
+                    estadoVerificacion={solicitud.estadoVerificacion}
                     modo="admin"
                     marcarAtendidaAction={marcarAtendidaAction}
                     cerrarAction={cerrarAction}

@@ -1,5 +1,6 @@
 import type { Solicitud } from "@/modules/solicitudes/domain/Solicitud";
 import type { UrgenciaSolicitud } from "@/modules/solicitudes/domain/UrgenciaSolicitud";
+import { EstadoVerificacionSolicitud } from "@/modules/auditoria/domain/EstadoVerificacionSolicitud";
 import { esEditable } from "@/modules/solicitudes/domain/maquinaEstados";
 import {
   esDescripcionValida,
@@ -41,6 +42,14 @@ export async function editarSolicitud(
   if (!esEditable(actual.estado)) {
     throw new SolicitudNoEditableError(
       "Solo se puede editar una solicitud mientras está ABIERTA.",
+    );
+  }
+  if (
+    actual.estadoVerificacion !==
+    EstadoVerificacionSolicitud.REQUIERE_INFORMACION
+  ) {
+    throw new SolicitudNoEditableError(
+      "Solo puedes editar cuando auditoría solicite información adicional.",
     );
   }
 

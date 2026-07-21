@@ -27,7 +27,7 @@ export class PrismaAtencionRepository implements AtencionRepository {
     const filas = await prisma.recursoSolicitud.findMany({
       where: {
         atencion: { is: null },
-        solicitud: { estado: "ABIERTA" },
+        solicitud: { estado: "ABIERTA", estadoVerificacion: "VERIFICADA" },
       },
       include: {
         recurso: true,
@@ -71,7 +71,9 @@ export class PrismaAtencionRepository implements AtencionRepository {
       recursoSolicitudId: fila.id,
       recursoId: fila.recursoId,
       cantidadEstimada: aNumero(fila.cantidadEstimada),
-      solicitudAbierta: fila.solicitud.estado === "ABIERTA",
+      solicitudAbierta:
+        fila.solicitud.estado === "ABIERTA" &&
+        fila.solicitud.estadoVerificacion === "VERIFICADA",
       yaAtendida: fila.atencion !== null,
       recursoSeleccionable: esSeleccionable(fila.recurso),
       recursoNombre: fila.recurso.nombre,

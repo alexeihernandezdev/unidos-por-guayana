@@ -21,8 +21,10 @@ export default auth((req) => {
   const requiereSesion =
     pathname.startsWith("/panel") ||
     pathname.startsWith("/superadmin") ||
+    pathname.startsWith("/auditoria") ||
     pathname === "/cuenta-admin" ||
     pathname === "/mis-aportes" ||
+    pathname === "/mis-testimonios" ||
     pathname.startsWith("/puntos-acopio") ||
     pathname.startsWith("/solicitudes") ||
     pathname === "/actividades" ||
@@ -30,6 +32,9 @@ export default auth((req) => {
 
   if (requiereSesion && !req.auth) {
     const urlLogin = new URL("/login", req.nextUrl.origin);
+    if (pathname === "/mis-testimonios") {
+      urlLogin.searchParams.set("retorno", pathname);
+    }
     return NextResponse.redirect(urlLogin);
   }
 

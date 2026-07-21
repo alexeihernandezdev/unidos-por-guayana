@@ -7,10 +7,13 @@ import type {
   NuevaMeta,
 } from "./Actividad";
 
-// Filtro de listado de actividades. `estado` acota por etapa del ciclo de vida,
-// `tipo` por tipo de actividad (feature 018) y `adminId` por dueño (feature 022);
-// son combinables. El listado de gestión del ADMIN siempre pasa `adminId`.
+// Filtro de listado de actividades. `texto` busca en los campos visibles principales,
+// `estado` acota por etapa del ciclo de vida, `tipo` por tipo de actividad (feature
+// 018) y `adminId` por dueño (feature 022); son combinables. El listado de gestión
+// del ADMIN siempre pasa `adminId`.
 export type FiltroActividades = {
+  /** Coincidencia parcial, sin distinguir mayúsculas, en título, descripción o destino. */
+  texto?: string;
   estado?: EstadoActividad;
   tipo?: TipoActividad;
   adminId?: string;

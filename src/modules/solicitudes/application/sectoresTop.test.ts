@@ -23,12 +23,11 @@ describe("sectoresTop", () => {
     const base = {
       urgencia: UrgenciaSolicitud.BAJA,
       descripcion: "Necesidad",
-      solicitanteId: "sol-1",
       recursos: [{ recursoId: agua.id, cantidadEstimada: 5 }],
     };
-    await crearSolicitud(deps, { ...base, sector: "Petare" });
-    await crearSolicitud(deps, { ...base, sector: " petare " });
-    await crearSolicitud(deps, { ...base, sector: "Upata" });
+    await crearSolicitud(deps, { ...base, sector: "Petare" }, "sol-1");
+    await crearSolicitud(deps, { ...base, sector: " petare " }, "sol-1");
+    await crearSolicitud(deps, { ...base, sector: "Upata" }, "sol-1");
 
     const top = await sectoresTop(deps, { estado: EstadoSolicitud.ABIERTA }, 2);
     expect(top).toHaveLength(2);

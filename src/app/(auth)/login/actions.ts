@@ -7,15 +7,15 @@ import { signIn } from "@/shared/auth";
 // redirección (a `/inicio`, el despachador por rol de la feature 021) que debe
 // propagarse; solo capturamos el error de credenciales inválidas para devolver
 // un mensaje al formulario.
-export async function iniciarSesionAction(input: {
-  email: string;
-  password: string;
-}): Promise<{ error: string } | undefined> {
+export async function iniciarSesionAction(
+  retorno: string | undefined,
+  input: { email: string; password: string },
+): Promise<{ error: string } | undefined> {
   try {
     await signIn("credentials", {
       email: input.email,
       password: input.password,
-      redirectTo: "/inicio",
+      redirectTo: retorno === "/mis-testimonios" ? retorno : "/inicio",
     });
   } catch (error) {
     if (error instanceof AuthError) {

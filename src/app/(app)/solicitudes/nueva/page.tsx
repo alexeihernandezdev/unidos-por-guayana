@@ -46,6 +46,11 @@ export default async function NuevaSolicitudPage() {
         textoEnviando="Creando…"
         rutaExito="/solicitudes"
       />
+
+      <p className="border-t border-border pt-4 text-sm text-muted-foreground">
+        Si auditoría necesita información adicional, podrás corregir la solicitud
+        y añadir documentos antes de reenviarla.
+      </p>
     </PanelPage>
   );
 }

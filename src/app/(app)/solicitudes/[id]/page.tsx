@@ -3,13 +3,17 @@ import { Hash, Package } from "lucide-react";
 import { SolicitudNoEncontradaError } from "@/modules/solicitudes/application/errors";
 import type { Solicitud } from "@/modules/solicitudes/domain/Solicitud";
 import { esEditable } from "@/modules/solicitudes/domain/maquinaEstados";
+import { ArchivosSolicitudVista } from "@/modules/solicitudes/ui/ArchivosSolicitudVista";
 import { EstadoSolicitudBadge } from "@/modules/solicitudes/ui/EstadoSolicitudBadge";
 import { NecesidadAtendidaBadge } from "@/modules/solicitudes/ui/NecesidadAtendidaBadge";
 import { UrgenciaBadge } from "@/modules/solicitudes/ui/UrgenciaBadge";
 import { SolicitudAcciones } from "@/modules/solicitudes/ui/SolicitudAcciones";
 import { formatearFechaCreacion } from "@/modules/solicitudes/ui/fechas";
 import { Rol } from "@/modules/usuarios/domain/Rol";
-import { obtenerSolicitudServicio } from "@/shared/solicitudes";
+import {
+  cargarArchivosVistaServicio,
+  obtenerSolicitudServicio,
+} from "@/shared/solicitudes";
 import { requireRol } from "@/shared/auth";
 import Link from "next/link";
 import { Button } from "@/shared/ui/button";
@@ -20,6 +24,10 @@ import {
   PanelPageSubHeader,
 } from "@/shared/ui/panel";
 import { cancelarSolicitudAction } from "../actions";
+import { reenviarSolicitudAction } from "../actions";
+import { EstadoVerificacionSolicitud } from "@/modules/auditoria/domain";
+import { ResumenAuditoriaSolicitud } from "@/modules/auditoria/ui";
+import { obtenerAuditoriaSolicitanteServicio } from "@/shared/auditoria";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -40,7 +48,14 @@ export default async function SolicitudDetallePage({ params }: Props) {
   const usuario = await requireRol(Rol.SOLICITANTE);
   const { id } = await params;
   const solicitud = await cargarSolicitud(id, usuario.id);
-  const editable = esEditable(solicitud.estado);
+  const editable =
+    esEditable(solicitud.estado) &&
+    solicitud.estadoVerificacion ===
+      EstadoVerificacionSolicitud.REQUIERE_INFORMACION;
+  const [archivos, auditoria] = await Promise.all([
+    cargarArchivosVistaServicio(solicitud),
+    obtenerAuditoriaSolicitanteServicio(solicitud.id, usuario.id),
+  ]);
 
   return (
     <PanelPage>
@@ -115,13 +130,21 @@ export default async function SolicitudDetallePage({ params }: Props) {
         )}
       </section>
 
+      <ArchivosSolicitudVista archivos={archivos} />
+
+      {auditoria ? (
+        <ResumenAuditoriaSolicitud auditoria={auditoria} modo="solicitante" />
+      ) : null}
+
       <section className="flex flex-col gap-3 border-t border-border pt-6">
         <h2 className="text-lg font-semibold">Acciones</h2>
         <SolicitudAcciones
           solicitudId={solicitud.id}
           estado={solicitud.estado}
+          estadoVerificacion={solicitud.estadoVerificacion}
           modo="solicitante"
           cancelarAction={cancelarSolicitudAction}
+          reenviarAction={reenviarSolicitudAction}
         />
       </section>
     </PanelPage>

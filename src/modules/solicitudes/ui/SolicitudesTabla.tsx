@@ -7,6 +7,8 @@ import { PanelEmptyState, PanelList, PanelListRow } from "@/shared/ui/panel";
 import { EstadoSolicitudBadge } from "./EstadoSolicitudBadge";
 import { UrgenciaBadge } from "./UrgenciaBadge";
 import { formatearFechaCreacion } from "./fechas";
+import { EstadoVerificacionSolicitud } from "@/modules/auditoria/domain";
+import { EstadoVerificacionBadge } from "@/modules/auditoria/ui";
 
 type Props = {
   solicitudes: Solicitud[];
@@ -51,6 +53,7 @@ export function SolicitudesTabla({
             <>
               <UrgenciaBadge urgencia={solicitud.urgencia} />
               <EstadoSolicitudBadge estado={solicitud.estado} />
+              <EstadoVerificacionBadge estado={solicitud.estadoVerificacion} />
             </>
           }
           secondary={
@@ -83,7 +86,10 @@ export function SolicitudesTabla({
               <Button asChild variant="ghost" size="sm">
                 <Link href={`${baseRuta}/${solicitud.id}`}>Ver</Link>
               </Button>
-              {esEditable(solicitud.estado) && !mostrarSolicitante && (
+              {esEditable(solicitud.estado) &&
+                solicitud.estadoVerificacion ===
+                  EstadoVerificacionSolicitud.REQUIERE_INFORMACION &&
+                !mostrarSolicitante && (
                 <Button asChild variant="ghost" size="sm">
                   <Link href={`${baseRuta}/${solicitud.id}/editar`}>
                     Editar

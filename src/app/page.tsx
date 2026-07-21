@@ -5,6 +5,7 @@ import {
   RolesSection,
   SiteFooter,
   SmoothScroll,
+  TestimonialsSection,
 } from "@/modules/landing/ui";
 
 export const metadata: Metadata = {
@@ -34,6 +35,7 @@ export default function Home() {
         <HeroParallaxSection />
         <RolesSection />
         <ActiveShipmentsSection />
+        <TestimonialsSection />
       </main>
       <SiteFooter />
     </SmoothScroll>

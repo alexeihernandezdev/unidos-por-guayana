@@ -11,6 +11,7 @@ import {
 } from "./errors";
 import { editarSolicitud } from "./editarSolicitud";
 import { InMemorySolicitudRepository } from "./fakes";
+import { EstadoVerificacionSolicitud } from "@/modules/auditoria/domain";
 
 const SOLICITANTE_ID = "sol-user-1";
 const OTRO_ID = "sol-user-2";
@@ -50,8 +51,12 @@ describe("editarSolicitud", () => {
     ctx = await crearDeps();
   });
 
-  it("permite al dueño editar mientras está ABIERTA", async () => {
+  it("permite al dueño editar cuando auditoría requiere información", async () => {
     const { deps, solicitud } = ctx;
+    (deps.solicitudes as InMemorySolicitudRepository).establecerEstadoVerificacion(
+      solicitud.id,
+      EstadoVerificacionSolicitud.REQUIERE_INFORMACION,
+    );
 
     const actualizada = await editarSolicitud(
       deps,
@@ -62,6 +67,19 @@ describe("editarSolicitud", () => {
 
     expect(actualizada.sector).toBe("Petare Norte");
     expect(actualizada.descripcion).toBe("Actualizado");
+  });
+
+  it("bloquea la edición mientras está pendiente de auditoría", async () => {
+    const { deps, solicitud } = ctx;
+
+    await expect(
+      editarSolicitud(
+        deps,
+        solicitud.id,
+        { sector: "Otro sector" },
+        SOLICITANTE_ID,
+      ),
+    ).rejects.toBeInstanceOf(SolicitudNoEditableError);
   });
 
   it("rechaza edición por quien no es el dueño", async () => {

@@ -16,10 +16,15 @@ export {
   actualizarPerfilAdminGestion,
   actualizarDatosContactoUsuario,
   buscarUsuarioPorId,
+  crearAuditorGestion,
+  listarAuditoresGestion,
+  reactivarAuditorGestion,
+  suspenderAuditorGestion,
 } from "@/lib/auth";
 export {
   getUsuarioActual,
   requireAdminVerificado,
+  requireAuditorActivo,
   requireDatosContactoCompletos,
   requireRol,
   requireSesion,

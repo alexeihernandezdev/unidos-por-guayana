@@ -30,6 +30,10 @@ export function navItemsPorRol(rol: Rol | null): NavItem[] {
         { label: "Recursos", href: "/panel/recursos" },
         { label: "Solicitudes", href: "/panel/solicitudes" },
       ];
+    case Rol.AUDITOR:
+      return [
+        { label: "Auditoría", href: "/auditoria/solicitudes", exact: true },
+      ];
     case Rol.COLABORADOR:
       return [
         { label: "Actividades", href: "/actividades", exact: true },
@@ -49,6 +53,7 @@ export function navItemsPorRol(rol: Rol | null): NavItem[] {
 export const ROL_ETIQUETA: Record<Rol, string> = {
   [Rol.SUPERADMIN]: "Superadministrador",
   [Rol.ADMIN]: "Administrador",
+  [Rol.AUDITOR]: "Auditor",
   [Rol.COLABORADOR]: "Colaborador",
   [Rol.SOLICITANTE]: "Solicitante",
 };
@@ -60,6 +65,7 @@ export const ROL_ETIQUETA: Record<Rol, string> = {
 export const ROL_DOT: Record<Rol, string> = {
   [Rol.SUPERADMIN]: "bg-primary",
   [Rol.ADMIN]: "bg-primary",
+  [Rol.AUDITOR]: "bg-accent",
   [Rol.COLABORADOR]: "bg-accent",
   [Rol.SOLICITANTE]: "bg-foreground/40",
 };

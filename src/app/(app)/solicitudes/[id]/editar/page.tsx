@@ -2,13 +2,18 @@ import { notFound } from "next/navigation";
 import { SolicitudNoEncontradaError } from "@/modules/solicitudes/application/errors";
 import type { Solicitud } from "@/modules/solicitudes/domain/Solicitud";
 import { esEditable } from "@/modules/solicitudes/domain/maquinaEstados";
+import { ArchivosSolicitud } from "@/modules/solicitudes/ui/ArchivosSolicitud";
 import { SolicitudForm } from "@/modules/solicitudes/ui/SolicitudForm";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarRecursosServicio } from "@/shared/recursos";
-import { obtenerSolicitudServicio } from "@/shared/solicitudes";
+import {
+  cargarArchivosVistaServicio,
+  obtenerSolicitudServicio,
+} from "@/shared/solicitudes";
 import { requireRol } from "@/shared/auth";
 import { PanelPage, PanelPageSubHeader } from "@/shared/ui/panel";
 import { editarSolicitudAction } from "@/app/(app)/solicitudes/actions";
+import { EstadoVerificacionSolicitud } from "@/modules/auditoria/domain";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -19,6 +24,12 @@ async function cargarSolicitud(id: string, solicitanteId: string): Promise<Solic
     const solicitud = await obtenerSolicitudServicio(id);
     if (solicitud.solicitanteId !== solicitanteId) notFound();
     if (!esEditable(solicitud.estado)) notFound();
+    if (
+      solicitud.estadoVerificacion !==
+      EstadoVerificacionSolicitud.REQUIERE_INFORMACION
+    ) {
+      notFound();
+    }
     return solicitud;
   } catch (error) {
     if (error instanceof SolicitudNoEncontradaError) notFound();
@@ -44,6 +55,8 @@ export default async function EditarSolicitudPage({ params }: Props) {
   const editar = (input: Parameters<typeof editarSolicitudAction>[1]) =>
     editarSolicitudAction(id, input);
 
+  const archivos = await cargarArchivosVistaServicio(solicitud);
+
   return (
     <PanelPage>
       <PanelPageSubHeader
@@ -68,6 +81,12 @@ export default async function EditarSolicitudPage({ params }: Props) {
         textoEnviar="Guardar cambios"
         textoEnviando="Guardando…"
         rutaExito={`/solicitudes/${id}`}
+      />
+
+      <ArchivosSolicitud
+        solicitudId={solicitud.id}
+        principalInicial={archivos.principal}
+        adjuntosIniciales={archivos.adjuntos}
       />
     </PanelPage>
   );

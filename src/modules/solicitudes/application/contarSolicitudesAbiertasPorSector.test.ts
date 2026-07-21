@@ -22,11 +22,10 @@ describe("contarSolicitudesAbiertasPorSector", () => {
     const base = {
       urgencia: UrgenciaSolicitud.ALTA,
       descripcion: "Actividad",
-      solicitanteId: "sol-1",
       recursos: [{ recursoId: agua.id, cantidadEstimada: 3 }],
     };
-    await crearSolicitud(deps, { ...base, sector: "Upata Centro" });
-    await crearSolicitud(deps, { ...base, sector: " upata centro " });
+    await crearSolicitud(deps, { ...base, sector: "Upata Centro" }, "sol-1");
+    await crearSolicitud(deps, { ...base, sector: " upata centro " }, "sol-1");
 
     expect(
       await contarSolicitudesAbiertasPorSector(deps, "Upata Centro"),

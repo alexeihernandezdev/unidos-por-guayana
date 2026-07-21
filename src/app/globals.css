@@ -353,6 +353,128 @@
   }
 }
 
+/* Auditoría: entradas breves que ayudan a leer la cola sin retrasar acciones. */
+@keyframes audit-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.audit-card {
+  animation: audit-card-in 260ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) both;
+  animation-delay: calc(var(--audit-index, 0) * 35ms);
+  transition:
+    transform 180ms cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.audit-choice {
+  display: flex;
+  min-height: 3.5rem;
+  cursor: pointer;
+  align-items: center;
+  gap: 0.625rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--card);
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition:
+    transform 140ms cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.audit-choice:has(input:checked) {
+  border-color: color-mix(in oklab, var(--primary) 55%, var(--border));
+  background: color-mix(in oklab, var(--primary) 9%, var(--card));
+  color: var(--primary-ink);
+}
+
+.audit-choice:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .audit-card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in oklab, var(--primary) 35%, var(--border));
+    box-shadow: 0 14px 32px -24px color-mix(in oklab, var(--foreground) 35%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .audit-card {
+    animation: none;
+    transition: border-color 160ms ease;
+  }
+
+  .audit-choice {
+    transition:
+      border-color 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .audit-choice:active,
+  .audit-card:hover {
+    transform: none;
+  }
+}
+
+/* Cards de descubrimiento del colaborador. La entrada vive en `.panel-stagger`;
+   estos estados responden a hover/press sin animar layout ni bloquear el click. */
+.activity-card {
+  transform: translate3d(0, 0, 0) scale(1);
+  transition:
+    border-color 180ms var(--ease-out-emil),
+    background-color 180ms var(--ease-out-emil),
+    box-shadow 180ms var(--ease-out-emil),
+    transform 140ms var(--ease-out-emil);
+}
+
+.activity-card:active {
+  transform: translate3d(0, 0, 0) scale(0.98);
+}
+
+.activity-card-arrow {
+  transition:
+    color 180ms var(--ease-out-emil),
+    transform 180ms var(--ease-out-emil);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .activity-card:hover {
+    border-color: color-mix(in oklch, var(--primary) 35%, var(--border));
+    box-shadow: 0 12px 30px -18px color-mix(in oklch, var(--primary) 38%, transparent);
+    transform: translate3d(0, -3px, 0) scale(1);
+  }
+
+  .activity-card:hover .activity-card-arrow {
+    color: var(--primary-ink);
+    transform: translate3d(2px, -2px, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .activity-card,
+  .activity-card-arrow {
+    transition: none;
+  }
+
+  .activity-card:active,
+  .activity-card:hover,
+  .activity-card:hover .activity-card-arrow {
+    transform: none;
+  }
+}
+
 /* Grano editorial fijo: da textura de papel sin costar frames en scroll.
    Se monta una sola vez en <body> como pseudo-elemento pointer-events-none. */
 .editorial-grain {

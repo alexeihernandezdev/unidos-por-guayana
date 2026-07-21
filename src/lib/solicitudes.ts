@@ -18,14 +18,32 @@ import {
 } from "@/modules/solicitudes/application/listarSolicitudes";
 import { marcarAtendida } from "@/modules/solicitudes/application/marcarAtendida";
 import { obtenerSolicitud } from "@/modules/solicitudes/application/obtenerSolicitud";
+import {
+  prepararSubidaArchivo,
+  type PrepararSubidaInput,
+  type PreparacionSubida,
+} from "@/modules/solicitudes/application/prepararSubidaArchivo";
+import {
+  confirmarArchivo,
+  type ConfirmarArchivoInput,
+} from "@/modules/solicitudes/application/confirmarArchivo";
+import { eliminarArchivo } from "@/modules/solicitudes/application/eliminarArchivo";
+import {
+  urlsLecturaDeSolicitud,
+  type ArchivosDeSolicitud,
+} from "@/modules/solicitudes/application/urlsLecturaDeSolicitud";
+import type { ArchivoSolicitud } from "@/modules/solicitudes/domain/ArchivoSolicitud";
+import { TipoArchivoSolicitud } from "@/modules/solicitudes/domain/ArchivoSolicitud";
 import type { Solicitud } from "@/modules/solicitudes/domain/Solicitud";
 import type { FiltroSolicitudes } from "@/modules/solicitudes/domain/SolicitudRepository";
 import { PrismaSolicitudRepository } from "@/modules/solicitudes/infrastructure/PrismaSolicitudRepository";
 import { PrismaRecursoRepository } from "@/modules/recursos/infrastructure/PrismaRecursoRepository";
+import { SupabaseStorageAdapter } from "@/modules/archivos/infrastructure/SupabaseStorageAdapter";
 
 const solicitudes = new PrismaSolicitudRepository();
 const recursos = new PrismaRecursoRepository();
-const deps = { solicitudes, recursos };
+const storage = new SupabaseStorageAdapter();
+const deps = { solicitudes, recursos, storage };
 
 export function crearSolicitudServicio(
   input: CrearSolicitudInput,
@@ -71,4 +89,89 @@ export function marcarAtendidaServicio(id: string): Promise<Solicitud> {
 
 export function cerrarSolicitudServicio(id: string): Promise<Solicitud> {
   return cerrarSolicitud(deps, id);
+}
+
+// ── Archivos (feature 031) ──
+
+export function prepararSubidaArchivoServicio(
+  input: PrepararSubidaInput,
+  actorId: string,
+): Promise<PreparacionSubida> {
+  return prepararSubidaArchivo(deps, input, actorId);
+}
+
+export function confirmarArchivoServicio(
+  input: ConfirmarArchivoInput,
+  actorId: string,
+): Promise<ArchivoSolicitud> {
+  return confirmarArchivo(deps, input, actorId);
+}
+
+export function eliminarArchivoServicio(
+  archivoId: string,
+  actorId: string,
+): Promise<void> {
+  return eliminarArchivo(deps, archivoId, actorId);
+}
+
+export function urlsLecturaDeSolicitudServicio(
+  solicitud: Solicitud,
+): Promise<ArchivosDeSolicitud> {
+  return urlsLecturaDeSolicitud(deps, solicitud);
+}
+
+// Vista de archivos para los detalles: incluye el enlace firmado cuando el
+// almacenamiento está disponible, y degrada a metadatos sin enlace (`url: null`) si
+// falla (p. ej. Supabase sin configurar en local), para no romper la página.
+export type ArchivoVista = {
+  id: string;
+  tipo: TipoArchivoSolicitud;
+  nombreOriginal: string;
+  contentType: string;
+  tamanoBytes: number;
+  url: string | null;
+};
+
+export type ArchivosVista = {
+  principal: ArchivoVista | null;
+  adjuntos: ArchivoVista[];
+  error: boolean;
+};
+
+function sinEnlace(a: ArchivoSolicitud): ArchivoVista {
+  return {
+    id: a.id,
+    tipo: a.tipo,
+    nombreOriginal: a.nombreOriginal,
+    contentType: a.contentType,
+    tamanoBytes: a.tamanoBytes,
+    url: null,
+  };
+}
+
+export async function cargarArchivosVistaServicio(
+  solicitud: Solicitud,
+): Promise<ArchivosVista> {
+  if (solicitud.archivos.length === 0) {
+    return { principal: null, adjuntos: [], error: false };
+  }
+  try {
+    const { principal, adjuntos } = await urlsLecturaDeSolicitud(
+      deps,
+      solicitud,
+    );
+    return { principal, adjuntos, error: false };
+  } catch {
+    const principal =
+      solicitud.archivos.find(
+        (a) => a.tipo === TipoArchivoSolicitud.PRINCIPAL,
+      ) ?? null;
+    return {
+      principal: principal ? sinEnlace(principal) : null,
+      adjuntos: solicitud.archivos
+        .filter((a) => a.tipo === TipoArchivoSolicitud.ADJUNTO)
+        .map(sinEnlace),
+      error: true,
+    };
+  }
 }

@@ -5,9 +5,9 @@ import { ArrowLeft } from "lucide-react";
 
 type Props = {
   children: ReactNode;
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
-  description: string;
+  description?: string;
   footer: ReactNode;
   wide?: boolean;
 };
@@ -60,15 +60,21 @@ export function AuthShell({
           </Link>
 
           <header className="mb-8">
-            <p className="font-mono text-[0.6875rem] font-medium uppercase text-primary">
-              {eyebrow}
-            </p>
-            <h1 className="mt-3 font-serif text-[clamp(2.25rem,5vw,3.25rem)] font-medium leading-[0.98] text-foreground">
+            {eyebrow ? (
+              <p className="font-mono text-[0.6875rem] font-medium uppercase text-primary">
+                {eyebrow}
+              </p>
+            ) : null}
+            <h1
+              className={`font-serif text-[clamp(2.25rem,5vw,3.25rem)] font-medium leading-[0.98] text-foreground ${eyebrow ? "mt-3" : ""}`}
+            >
               {title}
             </h1>
-            <p className="mt-4 max-w-lg text-[0.9375rem] leading-6 text-muted-foreground">
-              {description}
-            </p>
+            {description ? (
+              <p className="mt-4 max-w-lg text-[0.9375rem] leading-6 text-muted-foreground">
+                {description}
+              </p>
+            ) : null}
           </header>
 
           {children}

@@ -16,6 +16,7 @@ const columns = [
       { label: "Cómo funciona", href: "#como-funciona" },
       { label: "Actividades en curso", href: "#envios" },
       { label: "Transparencia", href: "/transparencia" },
+      { label: "Testimonios", href: "/testimonios" },
     ],
   },
   {

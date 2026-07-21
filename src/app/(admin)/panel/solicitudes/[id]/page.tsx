@@ -2,13 +2,17 @@ import { notFound } from "next/navigation";
 import { Hash, Package } from "lucide-react";
 import { SolicitudNoEncontradaError } from "@/modules/solicitudes/application/errors";
 import type { Solicitud } from "@/modules/solicitudes/domain/Solicitud";
+import { ArchivosSolicitudVista } from "@/modules/solicitudes/ui/ArchivosSolicitudVista";
 import { EstadoSolicitudBadge } from "@/modules/solicitudes/ui/EstadoSolicitudBadge";
 import { NecesidadAtendidaBadge } from "@/modules/solicitudes/ui/NecesidadAtendidaBadge";
 import { UrgenciaBadge } from "@/modules/solicitudes/ui/UrgenciaBadge";
 import { SolicitudAcciones } from "@/modules/solicitudes/ui/SolicitudAcciones";
 import { formatearFechaCreacion } from "@/modules/solicitudes/ui/fechas";
 import { Rol } from "@/modules/usuarios/domain/Rol";
-import { obtenerSolicitudServicio } from "@/shared/solicitudes";
+import {
+  cargarArchivosVistaServicio,
+  obtenerSolicitudServicio,
+} from "@/shared/solicitudes";
 import { requireRol } from "@/shared/auth";
 import {
   PanelList,
@@ -17,6 +21,8 @@ import {
   PanelPageSubHeader,
 } from "@/shared/ui/panel";
 import { cerrarSolicitudAction, marcarAtendidaAction } from "../actions";
+import { ResumenAuditoriaSolicitud } from "@/modules/auditoria/ui";
+import { obtenerAuditoriaAdministracionServicio } from "@/shared/auditoria";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -36,6 +42,10 @@ export default async function SolicitudAdminDetallePage({ params }: Props) {
 
   const { id } = await params;
   const solicitud = await cargarSolicitud(id);
+  const [archivos, auditoria] = await Promise.all([
+    cargarArchivosVistaServicio(solicitud),
+    obtenerAuditoriaAdministracionServicio(solicitud.id),
+  ]);
 
   return (
     <PanelPage>
@@ -103,6 +113,12 @@ export default async function SolicitudAdminDetallePage({ params }: Props) {
         )}
       </section>
 
+      <ArchivosSolicitudVista archivos={archivos} />
+
+      {auditoria ? (
+        <ResumenAuditoriaSolicitud auditoria={auditoria} modo="admin" />
+      ) : null}
+
       <section className="flex flex-col gap-3 border-t border-border pt-6">
         <h2 className="text-lg font-semibold">Gestión</h2>
         <p className="text-sm text-muted-foreground">
@@ -112,6 +128,7 @@ export default async function SolicitudAdminDetallePage({ params }: Props) {
         <SolicitudAcciones
           solicitudId={solicitud.id}
           estado={solicitud.estado}
+          estadoVerificacion={solicitud.estadoVerificacion}
           modo="admin"
           marcarAtendidaAction={marcarAtendidaAction}
           cerrarAction={cerrarSolicitudAction}

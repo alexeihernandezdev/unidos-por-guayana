@@ -1,4 +1,8 @@
 import type {
+  ArchivoSolicitud,
+  NuevoArchivoSolicitud,
+} from "./ArchivoSolicitud";
+import type {
   CambiosSolicitud,
   NuevaSolicitud,
   NuevoRecursoSolicitud,
@@ -30,4 +34,15 @@ export interface SolicitudRepository {
     nuevoEstado: EstadoSolicitud,
     cerradaPor?: CerradaPor | null,
   ): Promise<Solicitud>;
+
+  // ── Archivos (feature 031) ──
+  crearArchivo(nuevo: NuevoArchivoSolicitud): Promise<ArchivoSolicitud>;
+  eliminarArchivo(archivoId: string): Promise<void>;
+  buscarArchivoPorId(
+    archivoId: string,
+  ): Promise<{ archivo: ArchivoSolicitud; solicitudId: string } | null>;
+  contarAdjuntos(solicitudId: string): Promise<number>;
+  obtenerArchivoPrincipal(
+    solicitudId: string,
+  ): Promise<ArchivoSolicitud | null>;
 }

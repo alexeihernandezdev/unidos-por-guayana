@@ -6,15 +6,14 @@ import { iniciarSesionAction } from "./actions";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ registrado?: string }>;
+  searchParams: Promise<{ registrado?: string; retorno?: string }>;
 }) {
-  const { registrado } = await searchParams;
+  const { registrado, retorno } = await searchParams;
+  const retornoSeguro = retorno === "/mis-testimonios" ? retorno : undefined;
 
   return (
     <AuthShell
-      eyebrow="Acceso a la red"
       title="Qué bueno tenerte de vuelta."
-      description="Entra para coordinar solicitudes, aportes y entregas desde un solo lugar."
       footer={
         <p>
           ¿Aún no tienes cuenta?{" "}
@@ -35,7 +34,7 @@ export default async function LoginPage({
         </p>
       ) : null}
 
-      <LoginForm action={iniciarSesionAction} />
+      <LoginForm action={iniciarSesionAction.bind(null, retornoSeguro)} />
     </AuthShell>
   );
 }

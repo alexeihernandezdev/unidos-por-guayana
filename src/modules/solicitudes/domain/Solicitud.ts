@@ -1,3 +1,5 @@
+import type { ArchivoSolicitud } from "./ArchivoSolicitud";
+import type { EstadoVerificacionSolicitud } from "@/modules/auditoria/domain/EstadoVerificacionSolicitud";
 import type { CerradaPor } from "./CerradaPor";
 import type { EstadoSolicitud } from "./EstadoSolicitud";
 import type { UrgenciaSolicitud } from "./UrgenciaSolicitud";
@@ -19,9 +21,13 @@ export type Solicitud = {
   urgencia: UrgenciaSolicitud;
   descripcion: string;
   estado: EstadoSolicitud;
+  estadoVerificacion: EstadoVerificacionSolicitud;
+  auditorActualId: string | null;
+  cicloAuditoria: number;
   cerradaPor: CerradaPor | null;
   solicitanteId: string;
   recursos: RecursoSolicitud[];
+  archivos: ArchivoSolicitud[];
   createdAt: Date;
   updatedAt: Date;
 };

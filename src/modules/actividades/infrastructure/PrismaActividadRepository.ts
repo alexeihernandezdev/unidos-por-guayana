@@ -174,6 +174,27 @@ export class PrismaActividadRepository implements ActividadRepository {
   async listar(filtro?: FiltroActividades): Promise<Actividad[]> {
     const filas = await prisma.actividad.findMany({
       where: {
+        ...(filtro?.texto
+          ? {
+              OR: [
+                {
+                  titulo: { contains: filtro.texto, mode: "insensitive" as const },
+                },
+                {
+                  descripcion: {
+                    contains: filtro.texto,
+                    mode: "insensitive" as const,
+                  },
+                },
+                {
+                  sectorDestino: {
+                    contains: filtro.texto,
+                    mode: "insensitive" as const,
+                  },
+                },
+              ],
+            }
+          : {}),
         ...(filtro?.estado ? { estado: filtro.estado } : {}),
         ...(filtro?.tipo ? { tipo: filtro.tipo } : {}),
         ...(filtro?.adminId ? { adminId: filtro.adminId } : {}),

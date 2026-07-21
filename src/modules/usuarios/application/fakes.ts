@@ -21,7 +21,8 @@ export class InMemoryUsuarioRepository implements UsuarioRepository {
     const ahora = new Date();
     const usuario: Usuario = {
       id: `usuario-${++this.secuencia}`,
-      estadoVerificacion: EstadoVerificacion.PENDIENTE,
+      estadoVerificacion:
+        datos.estadoVerificacion ?? EstadoVerificacion.PENDIENTE,
       cedula: datos.cedula ?? null,
       telefono: datos.telefono ?? null,
       telefonoEsWhatsApp: datos.telefonoEsWhatsApp ?? false,
@@ -55,6 +56,10 @@ export class InMemoryUsuarioRepository implements UsuarioRepository {
       if (usuario.cedula === cedula) return usuario;
     }
     return null;
+  }
+
+  async listarPorRol(rol: Rol): Promise<Usuario[]> {
+    return [...this.porId.values()].filter((usuario) => usuario.rol === rol);
   }
 
   async listarAdminsPendientes(): Promise<Usuario[]> {

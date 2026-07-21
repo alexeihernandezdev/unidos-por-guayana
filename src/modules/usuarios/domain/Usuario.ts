@@ -37,6 +37,7 @@ export type NuevoUsuario = {
   nombre: string;
   passwordHash: string;
   rol: Rol;
+  estadoVerificacion?: EstadoVerificacion;
   cedula?: string | null;
   telefono?: string | null;
   telefonoEsWhatsApp?: boolean;

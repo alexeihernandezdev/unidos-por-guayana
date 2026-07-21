@@ -24,16 +24,14 @@ describe("contarSolicitudesPorUrgencia", () => {
       sector: "Upata",
       urgencia: UrgenciaSolicitud.ALTA,
       descripcion: "Urgente",
-      solicitanteId: "sol-1",
       recursos: recurso,
-    });
+    }, "sol-1");
     await crearSolicitud(deps, {
       sector: "Tumeremo",
       urgencia: UrgenciaSolicitud.MEDIA,
       descripcion: "Media",
-      solicitanteId: "sol-1",
       recursos: recurso,
-    });
+    }, "sol-1");
 
     const conteos = await contarSolicitudesPorUrgencia(deps);
     expect(conteos.ALTA).toBe(1);

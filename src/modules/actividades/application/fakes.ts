@@ -59,6 +59,14 @@ export class InMemoryActividadRepository implements ActividadRepository {
 
   async listar(filtro?: FiltroActividades): Promise<Actividad[]> {
     let actividades = [...this.porId.values()];
+    if (filtro?.texto) {
+      const texto = filtro.texto.toLocaleLowerCase("es-VE");
+      actividades = actividades.filter((a) =>
+        [a.titulo, a.descripcion ?? "", a.sectorDestino].some((campo) =>
+          campo.toLocaleLowerCase("es-VE").includes(texto),
+        ),
+      );
+    }
     if (filtro?.estado) {
       actividades = actividades.filter((a) => a.estado === filtro.estado);
     }

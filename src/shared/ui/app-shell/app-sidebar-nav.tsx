@@ -11,8 +11,10 @@ import {
   LayoutDashboardIcon,
   LightbulbIcon,
   MapPinnedIcon,
+  MessageSquareQuoteIcon,
   PackageIcon,
   ScrollTextIcon,
+  ScanSearchIcon,
   UserRoundIcon,
   UserCheckIcon,
   UsersIcon,
@@ -37,6 +39,8 @@ const ICONOS: Record<IconoNav, LucideIcon> = {
   proponer: LightbulbIcon,
   aprobaciones: UserCheckIcon,
   red: UsersIcon,
+  testimonios: MessageSquareQuoteIcon,
+  auditoria: ScanSearchIcon,
 };
 
 type Props = {

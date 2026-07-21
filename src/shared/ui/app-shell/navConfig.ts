@@ -16,7 +16,9 @@ export type IconoNav =
   | "nuevaSolicitud"
   | "proponer"
   | "aprobaciones"
-  | "red";
+  | "red"
+  | "testimonios"
+  | "auditoria";
 
 // Ítem de navegación del panel. `exact` = activo solo con la ruta exacta.
 export type NavItem = {
@@ -43,6 +45,7 @@ const NAV_ADMIN: NavSection[] = [
       { label: "Actividades", href: "/panel/actividades", icon: "actividades" },
       { label: "Solicitudes", href: "/panel/solicitudes", icon: "solicitudes" },
       { label: "Mi red", href: "/panel/red", icon: "red" },
+      { label: "Testimonios", href: "/panel/testimonios", icon: "testimonios" },
     ],
   },
   {
@@ -80,6 +83,24 @@ const NAV_SUPERADMIN: NavSection[] = [
         icon: "aprobaciones",
         exact: true,
       },
+      {
+        label: "Auditores",
+        href: "/superadmin/auditores",
+        icon: "auditoria",
+      },
+    ],
+  },
+];
+
+const NAV_AUDITOR: NavSection[] = [
+  {
+    label: "Verificación",
+    items: [
+      {
+        label: "Solicitudes",
+        href: "/auditoria/solicitudes",
+        icon: "auditoria",
+      },
     ],
   },
 ];
@@ -97,7 +118,10 @@ const NAV_COLABORADOR: NavSection[] = [
   },
   {
     label: "Mi cuenta",
-    items: [{ label: "Mi perfil", href: "/mi-perfil", icon: "perfil", exact: true }],
+    items: [
+      { label: "Mis testimonios", href: "/mis-testimonios", icon: "testimonios", exact: true },
+      { label: "Mi perfil", href: "/mi-perfil", icon: "perfil", exact: true },
+    ],
   },
 ];
 
@@ -128,7 +152,10 @@ const NAV_SOLICITANTE: NavSection[] = [
   },
   {
     label: "Mi cuenta",
-    items: [{ label: "Mi perfil", href: "/mi-perfil", icon: "perfil", exact: true }],
+    items: [
+      { label: "Mis testimonios", href: "/mis-testimonios", icon: "testimonios", exact: true },
+      { label: "Mi perfil", href: "/mi-perfil", icon: "perfil", exact: true },
+    ],
   },
 ];
 
@@ -143,6 +170,8 @@ export function navSectionsPorRol(rol: Rol): NavSection[] {
       return NAV_ADMIN;
     case Rol.SUPERADMIN:
       return NAV_SUPERADMIN;
+    case Rol.AUDITOR:
+      return NAV_AUDITOR;
     case Rol.COLABORADOR:
       return NAV_COLABORADOR;
     case Rol.SOLICITANTE:
@@ -161,6 +190,8 @@ export function rutaInicioPorRol(rol: Rol): string {
       return "/panel";
     case Rol.SUPERADMIN:
       return "/superadmin/admins";
+    case Rol.AUDITOR:
+      return "/auditoria/solicitudes";
     case Rol.COLABORADOR:
       return "/actividades";
     case Rol.SOLICITANTE:

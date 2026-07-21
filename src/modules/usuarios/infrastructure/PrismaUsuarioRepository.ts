@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import type { DatosContacto } from "@/modules/usuarios/domain/datosContacto";
-import type { EstadoVerificacion } from "@/modules/usuarios/domain/Rol";
+import type { EstadoVerificacion, Rol as RolType } from "@/modules/usuarios/domain/Rol";
 import {
   EstadoVerificacion as EstadoVerificacionEnum,
   Rol,
@@ -27,6 +27,13 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
 
   async buscarPorCedula(cedula: string): Promise<Usuario | null> {
     return prisma.usuario.findUnique({ where: { cedula } });
+  }
+
+  async listarPorRol(rol: RolType): Promise<Usuario[]> {
+    return prisma.usuario.findMany({
+      where: { rol },
+      orderBy: { createdAt: "desc" },
+    });
   }
 
   async listarAdminsPendientes(): Promise<Usuario[]> {

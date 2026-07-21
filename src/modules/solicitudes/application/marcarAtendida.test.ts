@@ -10,6 +10,7 @@ import type { SolicitudDeps } from "./deps";
 import { TransicionInvalidaError } from "./errors";
 import { InMemorySolicitudRepository } from "./fakes";
 import { marcarAtendida } from "./marcarAtendida";
+import { EstadoVerificacionSolicitud } from "@/modules/auditoria/domain";
 
 const SOLICITANTE_ID = "sol-user-1";
 
@@ -50,6 +51,10 @@ describe("marcarAtendida", () => {
 
   it("marca una solicitud ABIERTA como ATENDIDA", async () => {
     const { deps, solicitud } = ctx;
+    (deps.solicitudes as InMemorySolicitudRepository).establecerEstadoVerificacion(
+      solicitud.id,
+      EstadoVerificacionSolicitud.VERIFICADA,
+    );
 
     const atendida = await marcarAtendida(deps, solicitud.id);
 
@@ -60,7 +65,20 @@ describe("marcarAtendida", () => {
   it("rechaza marcar atendida una solicitud que ya no está ABIERTA", async () => {
     const { deps, solicitud } = ctx;
 
+    (deps.solicitudes as InMemorySolicitudRepository).establecerEstadoVerificacion(
+      solicitud.id,
+      EstadoVerificacionSolicitud.VERIFICADA,
+    );
+
     await marcarAtendida(deps, solicitud.id);
+
+    await expect(marcarAtendida(deps, solicitud.id)).rejects.toBeInstanceOf(
+      TransicionInvalidaError,
+    );
+  });
+
+  it("rechaza una solicitud que aún no ha sido verificada", async () => {
+    const { deps, solicitud } = ctx;
 
     await expect(marcarAtendida(deps, solicitud.id)).rejects.toBeInstanceOf(
       TransicionInvalidaError,
