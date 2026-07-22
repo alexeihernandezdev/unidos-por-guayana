@@ -21,8 +21,14 @@ import {
   PanelPageSubHeader,
 } from "@/shared/ui/panel";
 import { cerrarSolicitudAction, marcarAtendidaAction } from "../actions";
-import { ResumenAuditoriaSolicitud } from "@/modules/auditoria/ui";
-import { obtenerAuditoriaAdministracionServicio } from "@/shared/auditoria";
+import {
+  EvidenciaAuditoriaVista,
+  ResumenAuditoriaSolicitud,
+} from "@/modules/auditoria/ui";
+import {
+  cargarEvidenciasVistaServicio,
+  obtenerAuditoriaAdministracionServicio,
+} from "@/shared/auditoria";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -42,9 +48,10 @@ export default async function SolicitudAdminDetallePage({ params }: Props) {
 
   const { id } = await params;
   const solicitud = await cargarSolicitud(id);
-  const [archivos, auditoria] = await Promise.all([
+  const [archivos, auditoria, evidencia] = await Promise.all([
     cargarArchivosVistaServicio(solicitud),
     obtenerAuditoriaAdministracionServicio(solicitud.id),
+    cargarEvidenciasVistaServicio(solicitud.id),
   ]);
 
   return (
@@ -114,6 +121,11 @@ export default async function SolicitudAdminDetallePage({ params }: Props) {
       </section>
 
       <ArchivosSolicitudVista archivos={archivos} />
+
+      <EvidenciaAuditoriaVista
+        evidencias={evidencia.evidencias}
+        error={evidencia.error}
+      />
 
       {auditoria ? (
         <ResumenAuditoriaSolicitud auditoria={auditoria} modo="admin" />

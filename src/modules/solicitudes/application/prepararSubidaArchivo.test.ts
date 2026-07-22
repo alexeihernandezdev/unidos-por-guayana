@@ -12,7 +12,6 @@ import {
 } from "./errors";
 import { InMemorySolicitudRepository } from "./fakes";
 import { prepararSubidaArchivo } from "./prepararSubidaArchivo";
-import { EstadoVerificacionSolicitud } from "@/modules/auditoria/domain";
 
 const DUENO = "sol-1";
 const OTRO = "sol-2";
@@ -21,6 +20,8 @@ async function crearContexto() {
   const solicitudes = new InMemorySolicitudRepository();
   const storage = new FakeStorage();
   const deps: ArchivoSolicitudDeps = { solicitudes, storage };
+  // Solicitud recién creada: nace ABIERTA/PENDIENTE. El dueño puede subir archivos
+  // desde la creación, sin esperar a que auditoría pida información adicional.
   const solicitud = await solicitudes.crear({
     sector: "Petare",
     urgencia: UrgenciaSolicitud.ALTA,
@@ -28,10 +29,6 @@ async function crearContexto() {
     solicitanteId: DUENO,
     recursos: [],
   });
-  solicitudes.establecerEstadoVerificacion(
-    solicitud.id,
-    EstadoVerificacionSolicitud.REQUIERE_INFORMACION,
-  );
   return { solicitudes, storage, deps, solicitud };
 }
 
@@ -60,6 +57,23 @@ describe("prepararSubidaArchivo", () => {
     );
     expect(resultado.url).toContain(resultado.path);
     expect(storage.subidas).toContain(resultado.path);
+  });
+
+  it("permite subir en una solicitud recién creada (PENDIENTE, sin auditoría previa)", async () => {
+    const { deps, solicitud } = ctx;
+    const resultado = await prepararSubidaArchivo(
+      deps,
+      {
+        solicitudId: solicitud.id,
+        tipo: TipoArchivoSolicitud.ADJUNTO,
+        contentType: "application/pdf",
+        tamanoBytes: 4096,
+      },
+      DUENO,
+    );
+
+    expect(resultado.path).toContain(`solicitudes/${solicitud.id}/adjuntos/`);
+    expect(resultado.url).toContain(resultado.path);
   });
 
   it("rechaza a quien no es el dueño", async () => {

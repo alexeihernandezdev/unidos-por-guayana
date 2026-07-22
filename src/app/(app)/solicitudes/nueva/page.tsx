@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { SolicitudForm } from "@/modules/solicitudes/ui/SolicitudForm";
+import { NuevaSolicitudCliente } from "@/modules/solicitudes/ui/NuevaSolicitudCliente";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarRecursosServicio } from "@/shared/recursos";
 import { requireRol } from "@/shared/auth";
 import { PanelPage, PanelPageSubHeader } from "@/shared/ui/panel";
-import { crearSolicitudAction } from "../actions";
 
 export default async function NuevaSolicitudPage() {
   await requireRol(Rol.SOLICITANTE);
@@ -39,18 +38,7 @@ export default async function NuevaSolicitudPage() {
         .
       </p>
 
-      <SolicitudForm
-        action={crearSolicitudAction}
-        recursos={recursos}
-        textoEnviar="Crear solicitud"
-        textoEnviando="Creando…"
-        rutaExito="/solicitudes"
-      />
-
-      <p className="border-t border-border pt-4 text-sm text-muted-foreground">
-        Si auditoría necesita información adicional, podrás corregir la solicitud
-        y añadir documentos antes de reenviarla.
-      </p>
+      <NuevaSolicitudCliente recursos={recursos} />
     </PanelPage>
   );
 }

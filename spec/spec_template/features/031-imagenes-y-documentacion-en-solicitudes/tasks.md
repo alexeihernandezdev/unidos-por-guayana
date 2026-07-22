@@ -62,6 +62,7 @@
 
 ## Validación y cierre
 
+- [x] `seed-dev`: una imagen `PRINCIPAL` y una `ADJUNTO` por solicitud demo, con carga idempotente a Storage.
 - [x] `pnpm test` en verde (406 tests; 19 nuevos).
 - [x] `pnpm lint` sin errores (solo warnings preexistentes).
 - [x] `pnpm build` sin errores.

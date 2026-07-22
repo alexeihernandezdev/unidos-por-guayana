@@ -12,7 +12,10 @@ import { SolicitudesAdminGrid } from "@/modules/solicitudes/ui/SolicitudesAdminG
 import { ESTADO_LABEL } from "@/modules/solicitudes/ui/estados";
 import { URGENCIA_LABEL } from "@/modules/solicitudes/ui/urgencias";
 import { Rol } from "@/modules/usuarios/domain/Rol";
-import { listarSolicitudesServicio } from "@/shared/solicitudes";
+import {
+  cargarPortadasServicio,
+  listarSolicitudesServicio,
+} from "@/shared/solicitudes";
 import { requireRol } from "@/shared/auth";
 import { FiltroSelect } from "@/shared/ui/filtro-select";
 import { Input } from "@/shared/ui/input";
@@ -43,6 +46,7 @@ export default async function SolicitudesAdminPage({ searchParams }: Props) {
   if (estado && esEstadoSolicitud(estado)) filtro.estado = estado;
 
   const solicitudes = await listarSolicitudesServicio(filtro);
+  const portadas = await cargarPortadasServicio(solicitudes);
 
   return (
     <PanelPage>
@@ -103,6 +107,7 @@ export default async function SolicitudesAdminPage({ searchParams }: Props) {
       <SolicitudesAdminGrid
         solicitudes={solicitudes}
         baseRuta="/panel/solicitudes"
+        portadas={portadas}
         marcarAtendidaAction={marcarAtendidaAction}
         cerrarAction={cerrarSolicitudAction}
       />

@@ -7,7 +7,6 @@ import type { ArchivoSolicitudDeps } from "./deps";
 import { eliminarArchivo } from "./eliminarArchivo";
 import { ArchivoNoEncontradoError, NoAutorizadoError } from "./errors";
 import { InMemorySolicitudRepository } from "./fakes";
-import { EstadoVerificacionSolicitud } from "@/modules/auditoria/domain";
 
 const DUENO = "sol-1";
 const OTRO = "sol-2";
@@ -16,6 +15,7 @@ async function crearContexto() {
   const solicitudes = new InMemorySolicitudRepository();
   const storage = new FakeStorage();
   const deps: ArchivoSolicitudDeps = { solicitudes, storage };
+  // Solicitud ABIERTA/PENDIENTE recién creada: los archivos se gestionan desde ya.
   const solicitud = await solicitudes.crear({
     sector: "Petare",
     urgencia: UrgenciaSolicitud.ALTA,
@@ -23,10 +23,6 @@ async function crearContexto() {
     solicitanteId: DUENO,
     recursos: [],
   });
-  solicitudes.establecerEstadoVerificacion(
-    solicitud.id,
-    EstadoVerificacionSolicitud.REQUIERE_INFORMACION,
-  );
   const archivo: ArchivoSolicitud = await solicitudes.crearArchivo({
     solicitudId: solicitud.id,
     tipo: TipoArchivoSolicitud.ADJUNTO,

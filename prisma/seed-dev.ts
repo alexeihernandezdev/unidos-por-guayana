@@ -1,5 +1,8 @@
 import "dotenv/config";
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "../src/generated/prisma/client";
 
@@ -432,6 +435,29 @@ const SOLICITUDES = [
   { slug: "dalla-costa-medicinas", sector: "Dalla Costa", urgencia: "MEDIA" as const, estado: "ATENDIDA" as const, recursos: ["medicinas"], descripcion: "Insumos médicos canalizados hacia el centro asistencial." },
   { slug: "alta-vista-voluntarios", sector: "Alta Vista", urgencia: "BAJA" as const, estado: "CERRADA" as const, recursos: ["voluntarios"], descripcion: "La comunidad resolvió la convocatoria por medios propios." },
 ];
+
+// Assets livianos ya versionados. Se rotan para que cada solicitud tenga una
+// portada y una segunda foto sin añadir 20 binarios duplicados al repositorio.
+const IMAGENES_SOLICITUD_DEMO = [
+  {
+    ruta: "public/assets/help1.webp",
+    nombre: "situacion-comunitaria.webp",
+    contentType: "image/webp",
+    extension: "webp",
+  },
+  {
+    ruta: "public/assets/help2.jpg",
+    nombre: "apoyo-en-comunidad.jpg",
+    contentType: "image/jpeg",
+    extension: "jpg",
+  },
+  {
+    ruta: "public/assets/help3.webp",
+    nombre: "respuesta-solidaria.webp",
+    contentType: "image/webp",
+    extension: "webp",
+  },
+] as const;
 
 const TESTIMONIOS = [
   {
@@ -941,7 +967,39 @@ async function main() {
       `✔ ${ACTIVIDADES.length} actividades, ${metasCreadas} metas y ${aportesCreados} aportes de ${COLABORADOR.email}.`,
     );
 
-    for (const semilla of SOLICITUDES) {
+    const supabaseUrl =
+      process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const storageBucket = process.env.SUPABASE_STORAGE_BUCKET;
+    const hayAlgunaConfigStorage = Boolean(
+      supabaseUrl || supabaseKey || storageBucket,
+    );
+    if (hayAlgunaConfigStorage && (!supabaseUrl || !supabaseKey || !storageBucket)) {
+      throw new Error(
+        "Configuración incompleta de Storage para el seed: define SUPABASE_URL " +
+          "(o NEXT_PUBLIC_SUPABASE_URL), SUPABASE_SERVICE_ROLE_KEY y " +
+          "SUPABASE_STORAGE_BUCKET.",
+      );
+    }
+
+    const storage =
+      supabaseUrl && supabaseKey && storageBucket
+        ? {
+            cliente: createClient(supabaseUrl, supabaseKey, {
+              auth: { persistSession: false },
+            }),
+            bucket: storageBucket,
+            imagenes: await Promise.all(
+              IMAGENES_SOLICITUD_DEMO.map(async (imagen) => ({
+                ...imagen,
+                bytes: await readFile(resolve(process.cwd(), imagen.ruta)),
+              })),
+            ),
+          }
+        : null;
+
+    let archivosSolicitudCreados = 0;
+    for (const [indiceSolicitud, semilla] of SOLICITUDES.entries()) {
       const solicitudId = `seed-dev-solicitud-${semilla.slug}`;
       await prisma.solicitud.upsert({
         where: { id: solicitudId },
@@ -989,8 +1047,63 @@ async function main() {
           },
         });
       }
+
+      if (storage) {
+        const imagenes = [
+          storage.imagenes[indiceSolicitud % storage.imagenes.length],
+          storage.imagenes[(indiceSolicitud + 1) % storage.imagenes.length],
+        ];
+        for (const [indiceImagen, imagen] of imagenes.entries()) {
+          const tipo = indiceImagen === 0 ? "PRINCIPAL" : "ADJUNTO";
+          const carpeta = tipo === "PRINCIPAL" ? "principal" : "adjuntos";
+          const archivoId = `seed-dev-archivo-solicitud-${semilla.slug}-${tipo.toLowerCase()}`;
+          const path = `solicitudes/${solicitudId}/${carpeta}/seed-dev-${indiceImagen + 1}.${imagen.extension}`;
+          const { error } = await storage.cliente.storage
+            .from(storage.bucket)
+            .upload(path, imagen.bytes, {
+              contentType: imagen.contentType,
+              upsert: true,
+            });
+          if (error) {
+            throw new Error(
+              `No se pudo subir la imagen demo ${path}: ${error.message}.`,
+            );
+          }
+
+          await prisma.archivoSolicitud.upsert({
+            where: { id: archivoId },
+            update: {
+              solicitudId,
+              tipo,
+              path,
+              nombreOriginal: imagen.nombre,
+              contentType: imagen.contentType,
+              tamanoBytes: imagen.bytes.byteLength,
+            },
+            create: {
+              id: archivoId,
+              solicitudId,
+              tipo,
+              path,
+              nombreOriginal: imagen.nombre,
+              contentType: imagen.contentType,
+              tamanoBytes: imagen.bytes.byteLength,
+            },
+          });
+          archivosSolicitudCreados += 1;
+        }
+      }
     }
     console.log(`✔ ${SOLICITUDES.length} solicitudes con urgencias y estados variados.`);
+    if (storage) {
+      console.log(
+        `✔ ${archivosSolicitudCreados} imágenes para solicitudes cargadas en Storage.`,
+      );
+    } else {
+      console.warn(
+        "↷ Storage no configurado: se omitieron las imágenes demo de solicitudes.",
+      );
+    }
 
     const moderadorId = adminsPorNumero.get(1);
     if (!moderadorId) throw new Error("No se encontró admin1 para moderar testimonios.");

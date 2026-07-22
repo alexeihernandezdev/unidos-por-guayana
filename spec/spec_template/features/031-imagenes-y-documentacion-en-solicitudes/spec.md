@@ -27,6 +27,7 @@ Es la primera feature del proyecto que sube archivos de usuario, así que introd
 - **Bucket privado + URLs firmadas de lectura (~1 h).** Los archivos no son de acceso público en internet: se sirven solo con sesión, mediante URLs de lectura firmadas generadas en el servidor al renderizar el detalle. Respeta la decisión "visibles solo dentro de la app". No se crea ninguna página pública sin sesión ni se toca la transparencia (009).
 - **Abstracción de almacenamiento (`StoragePort`) con un único adaptador real (Supabase).** El dominio define un puerto puro; la infraestructura implementa el adaptador con `@supabase/supabase-js` usando la **service role key solo en servidor**. Los tests usan un fake del puerto. Mantiene el dominio limpio y swappable sin duplicar caminos de subida.
 - **Local dev usa el mismo Supabase cloud para storage.** El Docker Postgres sigue siendo solo la BD; para archivos, el entorno local apunta a un proyecto Supabase (env `SUPABASE_*` en `.env.local`). Se evita mantener un adaptador de disco local en paralelo.
+- **El seed de desarrollo incluye una galería mínima por solicitud.** Cada solicitud demo recibe dos imágenes deterministas: una `PRINCIPAL` para la portada del grid y una `ADJUNTO` para probar composiciones con más de una imagen. Los binarios reutilizan assets locales del repositorio y se suben con `upsert` al bucket configurado; sin configuración de Storage, el seed conserva el escenario de datos y avisa que omitió los archivos.
 - **Solo el dueño sube y solo mientras `ABIERTA`.** La gestión de archivos se habilita bajo la misma regla `esEditable(estado)` que el resto de la edición de la solicitud. El `ADMIN` los ve en solo lectura; no sube ni borra. Los colaboradores no tienen vista de solicitudes, así que no aplican.
 - **Borrado consistente.** Quitar un archivo borra el objeto en Storage y luego la fila. Al eliminarse la solicitud, la cascada borra las filas `ArchivoSolicitud`; la limpieza de los objetos huérfanos en Storage se hace en el mismo flujo de borrado de solicitud (no se delega a un job).
 
@@ -67,6 +68,7 @@ Es la primera feature del proyecto que sube archivos de usuario, así que introd
   - `prepararSubidaArchivo`: rechaza no-dueño, solicitud no `ABIERTA`, tipo/tamaño inválidos, adjunto nº 11; acepta caso válido y genera `path` correcto.
   - `confirmarArchivo`: reemplazo de principal borra la anterior; persiste metadatos.
   - `eliminarArchivo`: solo dueño + `ABIERTA`; borra objeto y fila (con fake de `StoragePort`).
+- **Datos demo:** `pnpm db:seed:dev` carga una imagen principal y una imagen adjunta por cada solicitud demo cuando `SUPABASE_*` está configurado.
 
 **No incluye**
 
@@ -89,6 +91,7 @@ Es la primera feature del proyecto que sube archivos de usuario, así que introd
 - [ ] El detalle del dueño y el del `ADMIN` muestran la imagen principal (destacada) y la lista de adjuntos descargables mediante **URLs firmadas de lectura**; el `ADMIN` no puede subir ni borrar.
 - [ ] Los archivos **no** son accesibles sin sesión (bucket privado) y **no** aparecen en la transparencia pública.
 - [ ] Al eliminar una solicitud se borran sus filas `ArchivoSolicitud` (cascada) y sus objetos en Storage.
+- [ ] Con Storage configurado, `pnpm db:seed:dev` deja cada solicitud demo con dos imágenes válidas y puede reejecutarse sin duplicarlas.
 - [ ] `pnpm test` cubre lo listado en verde; `pnpm lint` / `pnpm build` sin errores; `solicitudes/domain`, `solicitudes/application` y `archivos/domain` permanecen **puras** (sin framework ni Prisma).
 
 ## Notas y riesgos

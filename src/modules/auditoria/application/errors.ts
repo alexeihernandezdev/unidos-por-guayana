@@ -25,3 +25,26 @@ export class DictamenAuditoriaInvalidoError extends Error {
     this.name = "DictamenAuditoriaInvalidoError";
   }
 }
+
+// ── Evidencia de verificación (feature 032) ──
+
+export class EvidenciaInvalidaError extends Error {
+  constructor(mensaje: string) {
+    super(mensaje);
+    this.name = "EvidenciaInvalidaError";
+  }
+}
+
+export class LimiteEvidenciasError extends Error {
+  constructor(mensaje: string) {
+    super(mensaje);
+    this.name = "LimiteEvidenciasError";
+  }
+}
+
+export class EvidenciaNoEncontradaError extends Error {
+  constructor() {
+    super("La evidencia ya no existe.");
+    this.name = "EvidenciaNoEncontradaError";
+  }
+}

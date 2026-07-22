@@ -11,17 +11,14 @@ import {
 } from "@/modules/solicitudes/domain/reglasArchivos";
 import type { ArchivoVista } from "@/shared/solicitudes";
 import { Button } from "@/shared/ui/button";
-import {
-  confirmarArchivoAction,
-  eliminarArchivoAction,
-  prepararSubidaArchivoAction,
-} from "@/app/(app)/solicitudes/actions";
+import { eliminarArchivoAction } from "@/app/(app)/solicitudes/actions";
 import {
   ACCEPT_ADJUNTO,
   ACCEPT_IMAGEN,
   formatearTamano,
   iconoDeContentType,
 } from "./archivos";
+import { subirArchivoDirecto } from "./subirArchivo";
 
 type Props = {
   solicitudId: string;
@@ -66,47 +63,19 @@ export function ArchivosSolicitud({
 
     setOcupado(tipo);
     try {
-      const prep = await prepararSubidaArchivoAction({
-        solicitudId,
-        tipo,
-        contentType: file.type,
-        tamanoBytes: file.size,
-      });
-      if (!prep.ok) {
-        setError(prep.error);
-        return;
-      }
-
-      const subida = await fetch(prep.url, {
-        method: "PUT",
-        headers: { "content-type": file.type, "x-upsert": "true" },
-        body: file,
-      });
-      if (!subida.ok) {
-        setError("No se pudo subir el archivo. Inténtalo de nuevo.");
-        return;
-      }
-
-      const confirmado = await confirmarArchivoAction({
-        solicitudId,
-        tipo,
-        path: prep.path,
-        nombreOriginal: file.name,
-        contentType: file.type,
-        tamanoBytes: file.size,
-      });
-      if (!confirmado.ok) {
-        setError(confirmado.error);
+      const resultado = await subirArchivoDirecto(solicitudId, file, tipo);
+      if (!resultado.ok) {
+        setError(resultado.error);
         return;
       }
 
       // Vista previa inmediata sin recargar: enlace local al archivo elegido.
       const vista: ArchivoVista = {
-        id: confirmado.archivo.id,
-        tipo: confirmado.archivo.tipo,
-        nombreOriginal: confirmado.archivo.nombreOriginal,
-        contentType: confirmado.archivo.contentType,
-        tamanoBytes: confirmado.archivo.tamanoBytes,
+        id: resultado.archivo.id,
+        tipo: resultado.archivo.tipo,
+        nombreOriginal: resultado.archivo.nombreOriginal,
+        contentType: resultado.archivo.contentType,
+        tamanoBytes: resultado.archivo.tamanoBytes,
         url: URL.createObjectURL(file),
       };
       if (tipo === TipoArchivoSolicitud.PRINCIPAL) {

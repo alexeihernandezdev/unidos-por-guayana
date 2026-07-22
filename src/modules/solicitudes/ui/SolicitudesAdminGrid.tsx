@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowUpRight,
   CalendarDays,
   ChevronDown,
   Clock3,
+  ImageIcon,
   MapPin,
   Minus,
   Package,
@@ -36,6 +38,7 @@ import {
 } from "@/shared/ui/dialog";
 import { PanelEmptyState } from "@/shared/ui/panel";
 import { EstadoSolicitudBadge } from "./EstadoSolicitudBadge";
+import { PortadaImagen } from "./PortadaImagen";
 import { SolicitudAcciones } from "./SolicitudAcciones";
 import { UrgenciaBadge } from "./UrgenciaBadge";
 import { formatearFechaCreacion } from "./fechas";
@@ -47,6 +50,8 @@ type AccionSolicitud = (formData: FormData) => Promise<void>;
 type Props = {
   solicitudes: Solicitud[];
   baseRuta: string;
+  /** solicitudId → URL firmada de la imagen principal (portada). */
+  portadas: Map<string, string>;
   marcarAtendidaAction: AccionSolicitud;
   cerrarAction: AccionSolicitud;
 };
@@ -85,6 +90,7 @@ type CardProps = {
   solicitud: Solicitud;
   indice: number;
   reducirMovimiento: boolean;
+  portada?: string;
   abrirPreview: (id: string) => void;
 };
 
@@ -92,6 +98,7 @@ function SolicitudCard({
   solicitud,
   indice,
   reducirMovimiento,
+  portada,
   abrirPreview,
 }: CardProps) {
   const IconoUrgencia = ICONO_URGENCIA[solicitud.urgencia];
@@ -101,14 +108,14 @@ function SolicitudCard({
   return (
     <m.article
       layout={!reducirMovimiento}
-      initial={reducirMovimiento ? false : { opacity: 0, y: 22, scale: 0.97 }}
+      initial={reducirMovimiento ? false : { opacity: 0, y: 64, scale: 0.9 }}
       animate={{
         opacity: 1,
         y: 0,
         scale: 1,
         transition: {
-          duration: 0.28,
-          delay: reducirMovimiento ? 0 : Math.min(indice % TAMANO_PAGINA, 8) * 0.035,
+          duration: 0.55,
+          delay: reducirMovimiento ? 0 : Math.min(indice % TAMANO_PAGINA, 10) * 0.07,
           ease: [0.23, 1, 0.32, 1],
         },
       }}
@@ -117,18 +124,18 @@ function SolicitudCard({
           ? undefined
           : {
               opacity: 0,
-              y: -10,
-              scale: 0.98,
-              transition: { duration: 0.18, ease: [0.23, 1, 0.32, 1] },
+              y: -16,
+              scale: 0.96,
+              transition: { duration: 0.22, ease: [0.23, 1, 0.32, 1] },
             }
       }
       whileHover={
         reducirMovimiento
           ? undefined
           : {
-              y: -4,
-              scale: 1.005,
-              transition: { duration: 0.18, delay: 0, ease: [0.23, 1, 0.32, 1] },
+              y: -7,
+              scale: 1.012,
+              transition: { duration: 0.2, delay: 0, ease: [0.23, 1, 0.32, 1] },
             }
       }
       whileTap={
@@ -144,10 +151,30 @@ function SolicitudCard({
       <span
         aria-hidden="true"
         className={cn(
-          "absolute inset-y-0 left-0 w-1",
+          "absolute inset-y-0 left-0 z-20 w-1",
           SENAL_URGENCIA[solicitud.urgencia],
         )}
       />
+
+      {/* Portada compacta (banner). Feature 033: imagen principal de la solicitud. */}
+      <div className="relative h-36 shrink-0 overflow-hidden bg-muted">
+        {portada ? (
+          <PortadaImagen
+            src={portada}
+            alt={`Imagen de la solicitud de ${solicitud.sector}`}
+            sizes="(min-width: 1536px) 22vw, (min-width: 1280px) 30vw, (min-width: 640px) 45vw, 100vw"
+            className="group-hover:scale-[1.05]"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 via-muted to-muted text-muted-foreground">
+            <ImageIcon strokeWidth={1.5} className="size-6 opacity-70" aria-hidden />
+          </div>
+        )}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-card/60 to-transparent"
+        />
+      </div>
 
       <div className="flex flex-1 flex-col p-4 pl-5 sm:p-5 sm:pl-6">
         <div className="flex items-start justify-between gap-4">
@@ -254,9 +281,35 @@ function SolicitudCard({
   );
 }
 
+// Imagen de portada del header del modal: funde sobre la base teal (que hace de
+// estado de carga y garantiza legibilidad del texto blanco) con un veil degradado.
+function HeroPortada({ src, alt }: { src: string; alt: string }) {
+  const [cargada, setCargada] = useState(false);
+  return (
+    <>
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes="(min-width: 640px) 42rem, 100vw"
+        onLoad={() => setCargada(true)}
+        className={cn(
+          "object-cover transition-opacity duration-500 ease-[var(--ease-out-emil)]",
+          cargada ? "opacity-100" : "opacity-0",
+        )}
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-gradient-to-t from-primary-ink/95 via-primary-ink/70 to-primary-ink/45"
+      />
+    </>
+  );
+}
+
 type PreviewProps = {
   solicitud: Solicitud | null;
   baseRuta: string;
+  portada?: string;
   cerrar: () => void;
   marcarAtendidaAction: AccionSolicitud;
   cerrarAction: AccionSolicitud;
@@ -265,6 +318,7 @@ type PreviewProps = {
 function SolicitudPreview({
   solicitud,
   baseRuta,
+  portada,
   cerrar,
   marcarAtendidaAction,
   cerrarAction,
@@ -278,11 +332,19 @@ function SolicitudPreview({
         {solicitud ? (
           <>
             <div className="relative overflow-hidden border-b border-border/70 bg-primary-ink px-5 py-6 text-primary-foreground sm:px-7">
-              <div
-                aria-hidden="true"
-                className="absolute -right-14 -top-16 size-48 rounded-full border border-white/10"
-              />
-              <DialogHeader className="relative pr-14 text-left">
+              {portada ? (
+                <HeroPortada
+                  key={solicitud.id}
+                  src={portada}
+                  alt={`Imagen de la solicitud de ${solicitud.sector}`}
+                />
+              ) : (
+                <div
+                  aria-hidden="true"
+                  className="absolute -right-14 -top-16 size-48 rounded-full border border-white/10"
+                />
+              )}
+              <DialogHeader className="relative z-10 pr-14 text-left">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <UrgenciaBadge
                     urgencia={solicitud.urgencia}
@@ -310,7 +372,7 @@ function SolicitudPreview({
                   type="button"
                   variant="outline"
                   size="icon"
-                  className="absolute right-5 top-5 size-11 border-white/20 bg-white/10 text-white shadow-none hover:bg-white/20 hover:text-white sm:right-7"
+                  className="absolute right-5 top-5 z-10 size-11 border-white/20 bg-white/10 text-white shadow-none hover:bg-white/20 hover:text-white sm:right-7"
                   aria-label="Cerrar vista rápida"
                 >
                   <X strokeWidth={1.5} aria-hidden />
@@ -407,6 +469,7 @@ function SolicitudPreview({
 export function SolicitudesAdminGrid({
   solicitudes,
   baseRuta,
+  portadas,
   marcarAtendidaAction,
   cerrarAction,
 }: Props) {
@@ -428,6 +491,9 @@ export function SolicitudesAdminGrid({
   const solicitudesVisibles = solicitudes.slice(0, cantidadVisible);
   const solicitudPreview =
     solicitudes.find((solicitud) => solicitud.id === solicitudPreviewId) ?? null;
+  const portadaPreview = solicitudPreview
+    ? portadas.get(solicitudPreview.id)
+    : undefined;
   const faltantes = solicitudes.length - solicitudesVisibles.length;
   const siguienteBloque = Math.min(TAMANO_PAGINA, faltantes);
 
@@ -456,6 +522,7 @@ export function SolicitudesAdminGrid({
                 solicitud={solicitud}
                 indice={indice}
                 reducirMovimiento={reducirMovimiento}
+                portada={portadas.get(solicitud.id)}
                 abrirPreview={setSolicitudPreviewId}
               />
             ))}
@@ -486,6 +553,7 @@ export function SolicitudesAdminGrid({
       <SolicitudPreview
         solicitud={solicitudPreview}
         baseRuta={baseRuta}
+        portada={portadaPreview}
         cerrar={() => setSolicitudPreviewId(null)}
         marcarAtendidaAction={marcarAtendidaAction}
         cerrarAction={cerrarAction}

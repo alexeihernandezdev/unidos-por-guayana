@@ -6,7 +6,6 @@ import { confirmarArchivo } from "./confirmarArchivo";
 import type { ArchivoSolicitudDeps } from "./deps";
 import { ArchivoInvalidoError } from "./errors";
 import { InMemorySolicitudRepository } from "./fakes";
-import { EstadoVerificacionSolicitud } from "@/modules/auditoria/domain";
 
 const DUENO = "sol-1";
 
@@ -14,6 +13,8 @@ async function crearContexto() {
   const solicitudes = new InMemorySolicitudRepository();
   const storage = new FakeStorage();
   const deps: ArchivoSolicitudDeps = { solicitudes, storage };
+  // La solicitud nace ABIERTA/PENDIENTE: el dueño puede gestionar archivos desde su
+  // creación, sin depender del estado de verificación de auditoría.
   const solicitud = await solicitudes.crear({
     sector: "Petare",
     urgencia: UrgenciaSolicitud.ALTA,
@@ -21,10 +22,6 @@ async function crearContexto() {
     solicitanteId: DUENO,
     recursos: [],
   });
-  solicitudes.establecerEstadoVerificacion(
-    solicitud.id,
-    EstadoVerificacionSolicitud.REQUIERE_INFORMACION,
-  );
   return { solicitudes, storage, deps, solicitud };
 }
 

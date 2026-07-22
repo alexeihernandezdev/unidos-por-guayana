@@ -122,9 +122,14 @@ function traducirError(
   return null;
 }
 
+// La creación devuelve el `id` para que el cliente pueda subir a continuación los
+// archivos elegidos (imagen principal + documentos) directo al almacenamiento con ese
+// `id`, sin pasar por el servidor (feature 031, extensión: subida al crear).
+type CrearResultado = { ok: true; id: string } | { ok: false; error: string };
+
 export async function crearSolicitudAction(
   input: SolicitudInput,
-): Promise<Resultado> {
+): Promise<CrearResultado> {
   const usuario = await requireRol(Rol.SOLICITANTE);
 
   const parsed = SolicitudSchema.safeParse(input);
@@ -136,7 +141,7 @@ export async function crearSolicitudAction(
   }
 
   try {
-    await crearSolicitudServicio(
+    const solicitud = await crearSolicitudServicio(
       {
         sector: parsed.data.sector,
         urgencia: parsed.data.urgencia as UrgenciaSolicitud,
@@ -146,7 +151,7 @@ export async function crearSolicitudAction(
       usuario.id,
     );
     revalidatePath(RUTA_LISTADO);
-    return { ok: true };
+    return { ok: true, id: solicitud.id };
   } catch (error) {
     const traducido = traducirError(error);
     if (traducido) return traducido;

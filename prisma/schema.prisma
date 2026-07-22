@@ -90,6 +90,8 @@ model Usuario {
   testimoniosModerados Testimonio[] @relation("TestimoniosModerador")
   solicitudesEnAuditoria Solicitud[] @relation("AuditorActualSolicitud")
   eventosAuditoria EventoAuditoriaSolicitud[] @relation("ActorEventoAuditoria")
+  // Evidencia de verificación subida por este auditor (feature 032).
+  evidenciasAuditoria ArchivoEvidenciaAuditoria[] @relation("EvidenciaAuditoria")
 
   @@index([estadoId])
   @@index([municipioId])
@@ -527,6 +529,7 @@ model Solicitud {
   eventosAuditoria EventoAuditoriaSolicitud[]
   recursos      RecursoSolicitud[]
   archivos      ArchivoSolicitud[]
+  evidenciasAuditoria ArchivoEvidenciaAuditoria[]
   testimonios   Testimonio[]
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
@@ -620,6 +623,30 @@ model ArchivoSolicitud {
 
   @@index([solicitudId])
   @@map("archivos_solicitud")
+}
+
+// ArchivoEvidenciaAuditoria: evidencia física de verificación que sube el AUDITOR mientras
+// tiene la solicitud en revisión (feature 032). Es INTERNA: solo la ven auditores y
+// administradores; el solicitante NO. Admite imágenes, video y PDF (hasta 50 MB, 15 por
+// solicitud). El binario vive en Supabase Storage (bucket privado, prefijo `auditoria/`);
+// aquí solo metadatos y ruta. `ciclo` deja constancia del ciclo de auditoría en que se
+// subió. Se borra en cascada con la solicitud; si se elimina la cuenta del auditor, la
+// evidencia sobrevive con `subidoPorId = null`.
+model ArchivoEvidenciaAuditoria {
+  id             String    @id @default(cuid())
+  solicitudId    String
+  solicitud      Solicitud @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+  subidoPorId    String?
+  subidoPor      Usuario?  @relation("EvidenciaAuditoria", fields: [subidoPorId], references: [id], onDelete: SetNull)
+  ciclo          Int
+  path           String
+  nombreOriginal String
+  contentType    String
+  tamanoBytes    Int
+  createdAt      DateTime  @default(now())
+
+  @@index([solicitudId, createdAt])
+  @@map("archivos_evidencia_auditoria")
 }
 
 // RecursoSolicitud: puente entre `Solicitud` y `Recurso`. `cantidadEstimada` es

@@ -3,7 +3,6 @@ import type { RecursoRepository } from "@/modules/recursos/domain/RecursoReposit
 import type { Solicitud } from "@/modules/solicitudes/domain/Solicitud";
 import type { SolicitudRepository } from "@/modules/solicitudes/domain/SolicitudRepository";
 import { esEditable } from "@/modules/solicitudes/domain/maquinaEstados";
-import { EstadoVerificacionSolicitud } from "@/modules/auditoria/domain";
 import { esCantidadEstimadaValida } from "@/modules/solicitudes/domain/reglas";
 import {
   DatosSolicitudInvalidosError,
@@ -56,7 +55,9 @@ export async function validarRecursoSolicitud(
 
 /**
  * Carga una solicitud y comprueba que `actorId` es su dueño y que sigue editable
- * (`ABIERTA`). Reusado por los casos de uso de archivos (feature 031).
+ * (`ABIERTA`). Reusado por los casos de uso de archivos (feature 031). El solicitante
+ * puede gestionar sus archivos en cualquier momento mientras la solicitud siga
+ * `ABIERTA` —desde su creación—, sin depender del estado de verificación de auditoría.
  */
 export async function cargarSolicitudEditableDelDueno(
   solicitudes: SolicitudRepository,
@@ -75,14 +76,6 @@ export async function cargarSolicitudEditableDelDueno(
   if (!esEditable(solicitud.estado)) {
     throw new SolicitudNoEditableError(
       "Solo se pueden gestionar archivos mientras la solicitud está ABIERTA.",
-    );
-  }
-  if (
-    solicitud.estadoVerificacion !==
-    EstadoVerificacionSolicitud.REQUIERE_INFORMACION
-  ) {
-    throw new SolicitudNoEditableError(
-      "Solo puedes gestionar archivos cuando auditoría solicite información adicional.",
     );
   }
   return solicitud;

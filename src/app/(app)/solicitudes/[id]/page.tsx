@@ -3,6 +3,7 @@ import { Hash, Package } from "lucide-react";
 import { SolicitudNoEncontradaError } from "@/modules/solicitudes/application/errors";
 import type { Solicitud } from "@/modules/solicitudes/domain/Solicitud";
 import { esEditable } from "@/modules/solicitudes/domain/maquinaEstados";
+import { ArchivosSolicitud } from "@/modules/solicitudes/ui/ArchivosSolicitud";
 import { ArchivosSolicitudVista } from "@/modules/solicitudes/ui/ArchivosSolicitudVista";
 import { EstadoSolicitudBadge } from "@/modules/solicitudes/ui/EstadoSolicitudBadge";
 import { NecesidadAtendidaBadge } from "@/modules/solicitudes/ui/NecesidadAtendidaBadge";
@@ -48,10 +49,13 @@ export default async function SolicitudDetallePage({ params }: Props) {
   const usuario = await requireRol(Rol.SOLICITANTE);
   const { id } = await params;
   const solicitud = await cargarSolicitud(id, usuario.id);
+  // Los CAMPOS solo se editan cuando auditoría lo pide (regla de auditoría). Los ARCHIVOS
+  // el dueño los gestiona siempre que la solicitud siga ABIERTA (feature 031, extensión).
   const editable =
     esEditable(solicitud.estado) &&
     solicitud.estadoVerificacion ===
       EstadoVerificacionSolicitud.REQUIERE_INFORMACION;
+  const puedeGestionarArchivos = esEditable(solicitud.estado);
   const [archivos, auditoria] = await Promise.all([
     cargarArchivosVistaServicio(solicitud),
     obtenerAuditoriaSolicitanteServicio(solicitud.id, usuario.id),
@@ -130,7 +134,15 @@ export default async function SolicitudDetallePage({ params }: Props) {
         )}
       </section>
 
-      <ArchivosSolicitudVista archivos={archivos} />
+      {puedeGestionarArchivos ? (
+        <ArchivosSolicitud
+          solicitudId={solicitud.id}
+          principalInicial={archivos.principal}
+          adjuntosIniciales={archivos.adjuntos}
+        />
+      ) : (
+        <ArchivosSolicitudVista archivos={archivos} />
+      )}
 
       {auditoria ? (
         <ResumenAuditoriaSolicitud auditoria={auditoria} modo="solicitante" />

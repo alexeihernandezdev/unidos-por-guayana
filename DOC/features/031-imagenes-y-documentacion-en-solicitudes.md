@@ -25,9 +25,10 @@ Hasta ahora una solicitud era solo texto (sector, urgencia, descripción y recur
 
 ## Cómo se usa
 
-1. El solicitante crea su solicitud como siempre.
-2. Desde la **edición** de la solicitud añade la imagen principal y los documentos (se suben al momento, con vista previa).
-3. El administrador los ve en el detalle de la solicitud, en su panel.
+1. **Al crear la solicitud**, en la misma pantalla, un panel a la derecha permite elegir la imagen principal y los documentos con vista previa. Se suben automáticamente al pulsar "Crear solicitud".
+2. **Después, mientras la solicitud siga `ABIERTA`**, el solicitante puede añadir o quitar archivos en cualquier momento —incluye reintentar una subida que falló— desde el **detalle** de su solicitud o desde la página de **edición**. No necesita esperar a que auditoría se lo pida.
+3. Los **datos** de la solicitud (sector, urgencia, descripción, recursos), en cambio, solo pueden modificarse cuando auditoría solicita información adicional; los archivos no tienen esa restricción.
+4. El administrador ve imagen y documentos en el detalle de la solicitud, en su panel (solo lectura).
 
 ## Qué queda fuera (por ahora)
 

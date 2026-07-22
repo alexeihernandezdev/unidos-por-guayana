@@ -8,6 +8,7 @@ import {
   URGENCIAS_SOLICITUD,
   UrgenciaSolicitud,
 } from "@/modules/solicitudes/domain/UrgenciaSolicitud";
+import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import {
   Select,
@@ -39,12 +40,22 @@ export type SolicitudFormValores = {
 type Props = {
   action: (
     input: SolicitudFormValores,
-  ) => Promise<{ ok: boolean; error?: string }>;
+  ) => Promise<{ ok: boolean; error?: string; id?: string }>;
   recursos: RecursoOpcion[];
   valoresIniciales?: Partial<SolicitudFormValores>;
   textoEnviar: string;
   textoEnviando: string;
   rutaExito: string;
+  /** Ancho del formulario. Por defecto `max-w-2xl`; en layout de dos columnas se
+   *  pasa `max-w-none` para que llene su columna. */
+  className?: string;
+  /**
+   * Se ejecuta tras `action` exitosa y antes de navegar; recibe el `id` que devuelva
+   * la acción (p. ej. la solicitud recién creada). Úsalo para trabajo posterior como
+   * subir archivos. Puede devolver una ruta de destino que reemplaza a `rutaExito`.
+   * Debe capturar sus propios errores (no lanzar): la solicitud ya está creada.
+   */
+  alExito?: (id: string | undefined) => Promise<string | void>;
 };
 
 const campo =
@@ -57,6 +68,8 @@ export function SolicitudForm({
   textoEnviar,
   textoEnviando,
   rutaExito,
+  className,
+  alExito,
 }: Props) {
   const router = useRouter();
   const [pendiente, startTransition] = useTransition();
@@ -88,16 +101,20 @@ export function SolicitudForm({
     setErrorServidor(null);
     startTransition(async () => {
       const resultado = await action(datos);
-      if (resultado.ok) {
-        router.push(rutaExito);
-      } else {
+      if (!resultado.ok) {
         setErrorServidor(resultado.error ?? "No se pudo guardar la solicitud.");
+        return;
       }
+      const destino = alExito ? await alExito(resultado.id) : undefined;
+      router.push(destino ?? rutaExito);
     });
   });
 
   return (
-    <form onSubmit={onSubmit} className="flex w-full max-w-2xl flex-col gap-4">
+    <form
+      onSubmit={onSubmit}
+      className={cn("flex w-full flex-col gap-4", className ?? "max-w-2xl")}
+    >
       <div className="flex flex-col gap-1.5">
         <label htmlFor="sector" className="text-sm font-medium">
           Sector

@@ -149,6 +149,35 @@ function sinEnlace(a: ArchivoSolicitud): ArchivoVista {
   };
 }
 
+// Portadas para el grid de solicitudes: mapa solicitudId → URL firmada de su imagen
+// PRINCIPAL (o ausente si no tiene). Firma en lote; si el almacenamiento no está
+// disponible degrada a un mapa vacío (los cards usan placeholder) sin romper la página.
+export async function cargarPortadasServicio(
+  solicitudes: Solicitud[],
+): Promise<Map<string, string>> {
+  const conPortada = solicitudes
+    .map((s) => {
+      const principal = s.archivos.find(
+        (a) => a.tipo === TipoArchivoSolicitud.PRINCIPAL,
+      );
+      return principal ? { id: s.id, path: principal.path } : null;
+    })
+    .filter((x): x is { id: string; path: string } => x !== null);
+
+  const portadas = new Map<string, string>();
+  if (conPortada.length === 0) return portadas;
+
+  try {
+    const urls = await Promise.all(
+      conPortada.map((x) => storage.crearUrlLecturaFirmada(x.path, 60 * 60)),
+    );
+    conPortada.forEach((x, i) => portadas.set(x.id, urls[i]));
+  } catch {
+    // Storage no disponible (p. ej. Supabase sin configurar): sin portadas.
+  }
+  return portadas;
+}
+
 export async function cargarArchivosVistaServicio(
   solicitud: Solicitud,
 ): Promise<ArchivosVista> {

@@ -19,17 +19,15 @@ type Props = {
   params: Promise<{ id: string }>;
 };
 
+// La página es accesible siempre que la solicitud sea del dueño y siga ABIERTA: ahí el
+// solicitante puede gestionar sus archivos (incl. reintentos de subida). La edición de
+// CAMPOS, en cambio, solo se habilita cuando auditoría pide información (se decide en el
+// render, no aquí), preservando la regla de auditoría.
 async function cargarSolicitud(id: string, solicitanteId: string): Promise<Solicitud> {
   try {
     const solicitud = await obtenerSolicitudServicio(id);
     if (solicitud.solicitanteId !== solicitanteId) notFound();
     if (!esEditable(solicitud.estado)) notFound();
-    if (
-      solicitud.estadoVerificacion !==
-      EstadoVerificacionSolicitud.REQUIERE_INFORMACION
-    ) {
-      notFound();
-    }
     return solicitud;
   } catch (error) {
     if (error instanceof SolicitudNoEncontradaError) notFound();
@@ -42,15 +40,21 @@ export default async function EditarSolicitudPage({ params }: Props) {
   const { id } = await params;
   const solicitud = await cargarSolicitud(id, usuario.id);
 
-  const recursos = (
-    await listarRecursosServicio({ soloSeleccionables: true })
-  ).map(
-    (r) => ({
-      id: r.id,
-      nombre: r.nombre,
-      unidad: r.unidad,
-    }),
-  );
+  // Los campos solo se editan cuando auditoría solicita información adicional; en el resto
+  // de estados ABIERTA esta página sirve solo para gestionar archivos.
+  const puedeEditarCampos =
+    solicitud.estadoVerificacion ===
+    EstadoVerificacionSolicitud.REQUIERE_INFORMACION;
+
+  // El catálogo de recursos solo hace falta para editar campos; se evita la consulta
+  // cuando la página se usa únicamente para gestionar archivos.
+  const recursos = puedeEditarCampos
+    ? (await listarRecursosServicio({ soloSeleccionables: true })).map((r) => ({
+        id: r.id,
+        nombre: r.nombre,
+        unidad: r.unidad,
+      }))
+    : [];
 
   const editar = (input: Parameters<typeof editarSolicitudAction>[1]) =>
     editarSolicitudAction(id, input);
@@ -60,28 +64,36 @@ export default async function EditarSolicitudPage({ params }: Props) {
   return (
     <PanelPage>
       <PanelPageSubHeader
-        title="Editar solicitud"
+        title={puedeEditarCampos ? "Editar solicitud" : "Archivos de la solicitud"}
         description={`Sector: ${solicitud.sector}`}
         backHref={`/solicitudes/${id}`}
         backLabel="Volver al detalle"
       />
 
-      <SolicitudForm
-        action={editar}
-        recursos={recursos}
-        valoresIniciales={{
-          sector: solicitud.sector,
-          urgencia: solicitud.urgencia,
-          descripcion: solicitud.descripcion,
-          recursos: solicitud.recursos.map((r) => ({
-            recursoId: r.recursoId,
-            cantidadEstimada: r.cantidadEstimada,
-          })),
-        }}
-        textoEnviar="Guardar cambios"
-        textoEnviando="Guardando…"
-        rutaExito={`/solicitudes/${id}`}
-      />
+      {puedeEditarCampos ? (
+        <SolicitudForm
+          action={editar}
+          recursos={recursos}
+          valoresIniciales={{
+            sector: solicitud.sector,
+            urgencia: solicitud.urgencia,
+            descripcion: solicitud.descripcion,
+            recursos: solicitud.recursos.map((r) => ({
+              recursoId: r.recursoId,
+              cantidadEstimada: r.cantidadEstimada,
+            })),
+          }}
+          textoEnviar="Guardar cambios"
+          textoEnviando="Guardando…"
+          rutaExito={`/solicitudes/${id}`}
+        />
+      ) : (
+        <p className="max-w-2xl text-sm text-muted-foreground">
+          Los datos de la solicitud (sector, urgencia, descripción y recursos)
+          solo pueden editarse cuando auditoría solicite información adicional.
+          Mientras tanto, puedes añadir o quitar la imagen y los documentos.
+        </p>
+      )}
 
       <ArchivosSolicitud
         solicitudId={solicitud.id}

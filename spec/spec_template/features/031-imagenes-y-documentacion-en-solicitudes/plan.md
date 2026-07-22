@@ -120,3 +120,12 @@ validación**.
 - `pnpm test`, `pnpm lint`, `pnpm build`. Comprobar que `solicitudes/domain`, `solicitudes/application` y
   `archivos/domain` quedan puras (sin Prisma ni framework). La subida real a Supabase requiere
   `SUPABASE_*` configuradas; en local sin ellas el resto de la solicitud funciona.
+
+## 11. Datos demo para el grid
+
+- `prisma/seed-dev.ts` reutiliza imágenes válidas de `public/assets`, asigna de forma determinista una
+  `PRINCIPAL` y una `ADJUNTO` a cada solicitud demo, y sube los objetos al bucket con `upsert`.
+- Las filas `ArchivoSolicitud` usan ids y paths estables para que reejecutar el seed actualice los mismos
+  20 archivos en vez de duplicarlos.
+- Si ninguna variable `SUPABASE_*` está presente, se omite solo esta parte con un aviso. Una configuración
+  parcial se considera un error para evitar sembrar metadatos o archivos incompletos.

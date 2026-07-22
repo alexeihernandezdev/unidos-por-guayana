@@ -6,6 +6,7 @@ import { Button } from "@/shared/ui/button";
 import { PanelEmptyState, PanelList, PanelListRow } from "@/shared/ui/panel";
 import { EstadoSolicitudBadge } from "./EstadoSolicitudBadge";
 import { UrgenciaBadge } from "./UrgenciaBadge";
+import { URGENCIA_RAIL } from "./urgencias";
 import { formatearFechaCreacion } from "./fechas";
 import { EstadoVerificacionSolicitud } from "@/modules/auditoria/domain";
 import { EstadoVerificacionBadge } from "@/modules/auditoria/ui";
@@ -36,11 +37,12 @@ export function SolicitudesTabla({
   }
 
   return (
-    <PanelList>
+    <PanelList animated>
       {solicitudes.map((solicitud) => (
         <PanelListRow
           key={solicitud.id}
           icon={Inbox}
+          accent={URGENCIA_RAIL[solicitud.urgencia]}
           title={
             <Link
               href={`${baseRuta}/${solicitud.id}`}

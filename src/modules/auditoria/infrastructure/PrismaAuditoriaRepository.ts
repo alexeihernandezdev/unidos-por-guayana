@@ -3,9 +3,12 @@ import { prisma } from "@/lib/prisma";
 import {
   EstadoVerificacionSolicitud,
   TipoEventoAuditoriaSolicitud,
+  type ArchivoEvidenciaAuditoria,
   type AuditoriaRepository,
   type DictamenAuditoria,
+  type EvidenciaAuditoriaRepository,
   type FiltrosAuditoria,
+  type NuevaEvidenciaAuditoria,
   type SolicitudAuditable,
 } from "@/modules/auditoria/domain";
 
@@ -63,7 +66,32 @@ function mapear(fila: FilaAuditable): SolicitudAuditable {
   };
 }
 
-export class PrismaAuditoriaRepository implements AuditoriaRepository {
+const INCLUDE_EVIDENCIA = {
+  subidoPor: { select: { nombre: true } },
+} as const;
+
+type FilaEvidencia = Prisma.ArchivoEvidenciaAuditoriaGetPayload<{
+  include: typeof INCLUDE_EVIDENCIA;
+}>;
+
+function mapearEvidencia(fila: FilaEvidencia): ArchivoEvidenciaAuditoria {
+  return {
+    id: fila.id,
+    solicitudId: fila.solicitudId,
+    subidoPorId: fila.subidoPorId,
+    subidoPorNombre: fila.subidoPor?.nombre ?? null,
+    ciclo: fila.ciclo,
+    path: fila.path,
+    nombreOriginal: fila.nombreOriginal,
+    contentType: fila.contentType,
+    tamanoBytes: fila.tamanoBytes,
+    createdAt: fila.createdAt,
+  };
+}
+
+export class PrismaAuditoriaRepository
+  implements AuditoriaRepository, EvidenciaAuditoriaRepository
+{
   async listar(filtros?: FiltrosAuditoria): Promise<SolicitudAuditable[]> {
     const texto = filtros?.texto?.trim();
     const filas = await prisma.solicitud.findMany({
@@ -304,5 +332,54 @@ export class PrismaAuditoriaRepository implements AuditoriaRepository {
       }
       return liberadas.length;
     });
+  }
+
+  // ── Evidencia de verificación (feature 032) ──
+
+  async crearEvidencia(
+    input: NuevaEvidenciaAuditoria,
+  ): Promise<ArchivoEvidenciaAuditoria> {
+    const fila = await prisma.archivoEvidenciaAuditoria.create({
+      data: {
+        solicitudId: input.solicitudId,
+        subidoPorId: input.subidoPorId,
+        ciclo: input.ciclo,
+        path: input.path,
+        nombreOriginal: input.nombreOriginal,
+        contentType: input.contentType,
+        tamanoBytes: input.tamanoBytes,
+      },
+      include: INCLUDE_EVIDENCIA,
+    });
+    return mapearEvidencia(fila);
+  }
+
+  async listarEvidencias(
+    solicitudId: string,
+  ): Promise<ArchivoEvidenciaAuditoria[]> {
+    const filas = await prisma.archivoEvidenciaAuditoria.findMany({
+      where: { solicitudId },
+      orderBy: { createdAt: "asc" },
+      include: INCLUDE_EVIDENCIA,
+    });
+    return filas.map(mapearEvidencia);
+  }
+
+  async buscarEvidenciaPorId(
+    id: string,
+  ): Promise<ArchivoEvidenciaAuditoria | null> {
+    const fila = await prisma.archivoEvidenciaAuditoria.findUnique({
+      where: { id },
+      include: INCLUDE_EVIDENCIA,
+    });
+    return fila ? mapearEvidencia(fila) : null;
+  }
+
+  async eliminarEvidencia(id: string): Promise<void> {
+    await prisma.archivoEvidenciaAuditoria.delete({ where: { id } });
+  }
+
+  async contarEvidencias(solicitudId: string): Promise<number> {
+    return prisma.archivoEvidenciaAuditoria.count({ where: { solicitudId } });
   }
 }

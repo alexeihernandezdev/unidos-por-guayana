@@ -1,6 +1,7 @@
 export {
   cancelarSolicitudServicio,
   cargarArchivosVistaServicio,
+  cargarPortadasServicio,
   cerrarSolicitudServicio,
   confirmarArchivoServicio,
   crearSolicitudServicio,

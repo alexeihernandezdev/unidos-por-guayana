@@ -15,11 +15,16 @@ import {
 } from "@/modules/auditoria/domain";
 import {
   EstadoVerificacionBadge,
+  EvidenciaAuditoria,
+  EvidenciaAuditoriaVista,
   FormularioDictamenAuditoria,
   BotonAccionAuditoria,
 } from "@/modules/auditoria/ui";
 import { UrgenciaBadge } from "@/modules/solicitudes/ui/UrgenciaBadge";
-import { obtenerAuditoriaServicio } from "@/shared/auditoria";
+import {
+  cargarEvidenciasVistaServicio,
+  obtenerAuditoriaServicio,
+} from "@/shared/auditoria";
 import { requireAuditorActivo } from "@/shared/auth";
 import {
   PanelList,
@@ -64,6 +69,8 @@ export default async function AuditoriaSolicitudDetallePage({ params }: Props) {
   const enRevisionPropia =
     solicitud.estadoVerificacion === EstadoVerificacionSolicitud.EN_REVISION &&
     solicitud.auditorActualId === actor.id;
+
+  const evidencia = await cargarEvidenciasVistaServicio(solicitud.id);
 
   return (
     <PanelPage>
@@ -186,6 +193,12 @@ export default async function AuditoriaSolicitudDetallePage({ params }: Props) {
               Documenta la comprobación externa. Una vez emitido, el registro no podrá editarse.
             </p>
           </div>
+          <div className="mb-6 border-b border-border/70 pb-6">
+            <EvidenciaAuditoria
+              solicitudId={solicitud.id}
+              evidenciasIniciales={evidencia.evidencias}
+            />
+          </div>
           <FormularioDictamenAuditoria
             solicitudId={solicitud.id}
             action={emitirDictamenAction}
@@ -195,6 +208,13 @@ export default async function AuditoriaSolicitudDetallePage({ params }: Props) {
         <p className="rounded-xl border border-border bg-muted/30 p-5 text-sm text-muted-foreground">
           {solicitud.auditorActualNombre} está revisando esta solicitud. Puedes consultar el historial, pero no emitir un dictamen.
         </p>
+      ) : null}
+
+      {!enRevisionPropia ? (
+        <EvidenciaAuditoriaVista
+          evidencias={evidencia.evidencias}
+          error={evidencia.error}
+        />
       ) : null}
 
       <section className="space-y-4 border-t border-border pt-6">

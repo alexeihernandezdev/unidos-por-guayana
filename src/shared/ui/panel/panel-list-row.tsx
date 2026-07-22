@@ -30,6 +30,12 @@ type Props = {
    * hairline; no participa del layout semitabular de la fila.
    */
   detail?: React.ReactNode;
+  /**
+   * Rail de acento vertical a la izquierda de la fila. Clase de color de fondo
+   * (p. ej. `bg-destructive`). Opt-in: si se omite, la fila se ve como siempre.
+   * Da lectura de un vistazo (p. ej. urgencia) sin ser el único portador del estado.
+   */
+  accent?: string;
   className?: string;
 };
 
@@ -41,15 +47,25 @@ export function PanelListRow({
   meta,
   actions,
   detail,
+  accent,
   className,
 }: Props) {
   return (
     <article
       className={cn(
-        "flex flex-col gap-4 p-4 transition-colors duration-150 hover:bg-muted/40",
+        "group relative flex flex-col gap-4 p-4 transition-colors duration-150 hover:bg-muted/40",
         className,
       )}
     >
+      {accent && (
+        <span
+          aria-hidden="true"
+          className={cn(
+            "absolute inset-y-0 left-0 w-[3px] opacity-80 transition-opacity duration-150 group-hover:opacity-100",
+            accent,
+          )}
+        />
+      )}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex min-w-0 items-start gap-3">
           <span className="profile-icon size-10">
