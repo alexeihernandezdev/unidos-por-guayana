@@ -20,6 +20,10 @@ export class FakeStorage implements StoragePort {
     return `https://fake.storage/read/${path}`;
   }
 
+  urlPublica(path: string): string {
+    return `https://fake.storage/public/${path}`;
+  }
+
   async eliminar(paths: string[]): Promise<void> {
     this.eliminados.push(...paths);
   }

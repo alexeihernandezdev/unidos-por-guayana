@@ -1,3 +1,4 @@
+import type { ArchivoActividad } from "./ArchivoActividad";
 import type { EstadoActividad } from "./EstadoActividad";
 import type { TipoActividad } from "./TipoActividad";
 
@@ -64,6 +65,9 @@ export type Actividad = {
   descripcion: string | null;
   puntosAcopio: PuntoAcopioDeActividad[];
   metas: MetaRecurso[];
+  // Imagen principal y documentos (feature 033). Vacío en listados ligeros; poblado al
+  // leer con detalle o cuando la lista necesita la portada.
+  archivos: ArchivoActividad[];
   createdAt: Date;
   updatedAt: Date;
 };

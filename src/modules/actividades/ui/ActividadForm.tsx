@@ -109,10 +109,11 @@ const TIPO_INFO: Record<TipoActividad, { icono: LucideIcon; descripcion: string 
 
 type Props = {
   // El server action se recibe como prop desde la página (server component), así el
-  // formulario no importa la capa `app` y se reutiliza para alta y edición.
+  // formulario no importa la capa `app` y se reutiliza para alta y edición. El `id`
+  // (creación) permite subir archivos a continuación (feature 033).
   action: (
     input: ActividadFormValores,
-  ) => Promise<{ ok: boolean; error?: string }>;
+  ) => Promise<{ ok: boolean; error?: string; id?: string }>;
   // Recursos activos disponibles para las metas. En modo edición de cabecera puede
   // venir vacío (las metas se gestionan aparte con `MetasEditor`).
   recursos: RecursoOpcion[];
@@ -134,6 +135,15 @@ type Props = {
   valoresIniciales?: Partial<ActividadFormValores>;
   textoEnviar: string;
   textoEnviando: string;
+  // A dónde navegar tras el éxito. Por defecto el listado de actividades.
+  rutaExito?: string;
+  /**
+   * Se ejecuta tras `action` exitosa y antes de navegar; recibe el `id` que devuelva la
+   * acción (la actividad recién creada). Úsalo para trabajo posterior como subir archivos
+   * (feature 033). Puede devolver una ruta de destino que reemplaza a `rutaExito`. Debe
+   * capturar sus propios errores (no lanzar): la actividad ya está creada.
+   */
+  alExito?: (id: string | undefined) => Promise<string | void>;
 };
 
 // Fila de sección en dos paneles: la etiqueta y su pista a la izquierda, los campos
@@ -187,6 +197,8 @@ export function ActividadForm({
   valoresIniciales,
   textoEnviar,
   textoEnviando,
+  rutaExito = "/panel/actividades",
+  alExito,
 }: Props) {
   const router = useRouter();
   const [pendiente, startTransition] = useTransition();
@@ -332,11 +344,12 @@ export function ActividadForm({
       : undefined;
     startTransition(async () => {
       const resultado = await action({ ...datos, recursoSolicitudIds });
-      if (resultado.ok) {
-        router.push("/panel/actividades");
-      } else {
+      if (!resultado.ok) {
         setErrorServidor(resultado.error ?? "No se pudo guardar la actividad.");
+        return;
       }
+      const destino = alExito ? await alExito(resultado.id) : undefined;
+      router.push(destino ?? rutaExito);
     });
   });
 

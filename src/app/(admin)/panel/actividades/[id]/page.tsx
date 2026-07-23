@@ -8,6 +8,7 @@ import {
 import type { Actividad } from "@/modules/actividades/domain/Actividad";
 import { EstadoActividad } from "@/modules/actividades/domain/EstadoActividad";
 import { esEditable } from "@/modules/actividades/domain/maquinaEstados";
+import { ArchivosActividad } from "@/modules/actividades/ui/ArchivosActividad";
 import { AvanzarEstadoBoton } from "@/modules/actividades/ui/AvanzarEstadoBoton";
 import { EstadoBadge } from "@/modules/actividades/ui/EstadoBadge";
 import { TipoBadge } from "@/modules/actividades/ui/TipoBadge";
@@ -16,7 +17,10 @@ import { AportesTabla } from "@/modules/aportes/ui/AportesTabla";
 import { DonacionDirectaForm } from "@/modules/aportes/ui/DonacionDirectaForm";
 import { ProgresoMetas } from "@/modules/aportes/ui/ProgresoMetas";
 import { Rol } from "@/modules/usuarios/domain/Rol";
-import { obtenerActividadServicio } from "@/shared/actividades";
+import {
+  cargarArchivosVistaServicio,
+  obtenerActividadServicio,
+} from "@/shared/actividades";
 import {
   listarAportesPorActividadServicio,
   progresoDeActividadServicio,
@@ -61,6 +65,9 @@ export default async function ActividadDetallePage({ params }: Props) {
     progresoDeActividadServicio(actividad.id),
     listarAportesPorActividadServicio(actividad.id),
   ]);
+  // Imagen principal y documentos de la actividad (feature 033). El dueño los gestiona
+  // en cualquier estado; se muestran como URLs públicas.
+  const archivos = cargarArchivosVistaServicio(actividad);
 
   // Recursos de las metas sobre los que se puede imputar una donación directa.
   const opcionesDonacion = actividad.metas
@@ -108,6 +115,23 @@ export default async function ActividadDetallePage({ params }: Props) {
 
       <div className="grid grid-cols-1 gap-8 border-t border-border pt-8 lg:grid-cols-[minmax(0,1fr)_17rem]">
         <div className="flex flex-col gap-10">
+          <section className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-lg font-semibold tracking-tight">
+                Imagen y documentación
+              </h2>
+              <p className="max-w-[60ch] text-sm text-muted-foreground [text-wrap:pretty]">
+                Sube una imagen de portada y documentos de la actividad. Se ven en la
+                transparencia pública. Puedes gestionarlos en cualquier momento.
+              </p>
+            </div>
+            <ArchivosActividad
+              actividadId={actividad.id}
+              principalInicial={archivos.principal}
+              adjuntosIniciales={archivos.adjuntos}
+            />
+          </section>
+
           <section className="flex flex-col gap-4">
             <h2 className="text-lg font-semibold tracking-tight">
               Metas de recursos

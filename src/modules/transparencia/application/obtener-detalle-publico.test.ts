@@ -6,6 +6,7 @@ import { crearActividad } from "@/modules/actividades/application/crearActividad
 import { InMemoryActividadRepository } from "@/modules/actividades/application/fakes";
 import { InMemoryRecursoRepository } from "@/modules/recursos/application/fakes";
 import { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
+import { FakeStorage } from "@/modules/archivos/application/fakes";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { assertSinDatosPersonales } from "./obtener-resumen-publico";
 import { obtenerDetallePublico } from "./obtener-detalle-publico";
@@ -15,7 +16,8 @@ describe("obtenerDetallePublico", () => {
   const actividades = new InMemoryActividadRepository();
   const recursos = new InMemoryRecursoRepository();
   const aportes = new InMemoryAporteRepository();
-  const deps = { actividades, recursos, aportes };
+  const storage = new FakeStorage();
+  const deps = { actividades, recursos, aportes, storage };
 
   beforeEach(async () => {
     actividades["porId"].clear();
@@ -55,6 +57,39 @@ describe("obtenerDetallePublico", () => {
       porcentaje: 50,
     });
     expect(detalle?.porcentajeGlobal).toBe(50);
+    assertSinDatosPersonales(detalle);
+  });
+
+  it("expone portada y adjuntos públicos en el detalle", async () => {
+    const ayuda = await crearActividad(deps, {
+      adminId: "admin-1",
+      titulo: "Con archivos",
+      sectorDestino: "Upata",
+      fecha: new Date("2026-10-05"),
+      tipo: "ENVIO",
+      metas: [{ recursoId: aguaId, cantidadObjetivo: 20 }],
+    });
+    await actividades.crearArchivo({
+      actividadId: ayuda.id,
+      tipo: "PRINCIPAL",
+      path: `actividades/${ayuda.id}/principal/portada.jpg`,
+      nombreOriginal: "portada.jpg",
+      contentType: "image/jpeg",
+      tamanoBytes: 2048,
+    });
+    await actividades.crearArchivo({
+      actividadId: ayuda.id,
+      tipo: "ADJUNTO",
+      path: `actividades/${ayuda.id}/adjuntos/acta.pdf`,
+      nombreOriginal: "acta.pdf",
+      contentType: "application/pdf",
+      tamanoBytes: 4096,
+    });
+
+    const detalle = await obtenerDetallePublico(deps, ayuda.id);
+    expect(detalle?.portadaUrl).toContain("/principal/portada.jpg");
+    expect(detalle?.adjuntos).toHaveLength(1);
+    expect(detalle?.adjuntos[0]?.nombreOriginal).toBe("acta.pdf");
     assertSinDatosPersonales(detalle);
   });
 

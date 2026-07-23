@@ -10,4 +10,11 @@ export {
   quitarMetaServicio,
   avanzarEstadoServicio,
   eliminarActividadServicio,
+  // Archivos (feature 033)
+  prepararSubidaArchivoServicio,
+  confirmarArchivoServicio,
+  eliminarArchivoServicio,
+  cargarArchivosVistaServicio,
+  portadaDeActividad,
 } from "@/lib/actividades";
+export type { ArchivoVista, ArchivosVista } from "@/lib/actividades";

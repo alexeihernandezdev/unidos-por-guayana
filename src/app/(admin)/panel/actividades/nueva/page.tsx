@@ -2,7 +2,7 @@ import {
   TipoActividad,
   esTipoActividad,
 } from "@/modules/actividades/domain/TipoActividad";
-import { ActividadForm } from "@/modules/actividades/ui/ActividadForm";
+import { NuevaActividadCliente } from "@/modules/actividades/ui/NuevaActividadCliente";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarNecesidadesPendientesServicio } from "@/shared/atenciones";
 import { listarPuntosDeAdminServicio } from "@/shared/acopio";
@@ -13,7 +13,6 @@ import {
 import { listarRecursosServicio } from "@/shared/recursos";
 import { requireRol } from "@/shared/auth";
 import { PanelPage, PanelPageSubHeader } from "@/shared/ui/panel";
-import { crearActividadAction } from "../actions";
 
 type Props = {
   searchParams: Promise<{ tipo?: string }>;
@@ -49,8 +48,7 @@ export default async function NuevaActividadPage({ searchParams }: Props) {
         backLabel="Volver a las actividades"
       />
 
-      <ActividadForm
-        action={crearActividadAction}
+      <NuevaActividadCliente
         recursos={recursos.map((r) => ({
           id: r.id,
           nombre: r.nombre,
@@ -61,10 +59,7 @@ export default async function NuevaActividadPage({ searchParams }: Props) {
         conteosPorCategoria={conteos}
         redPorCategoria={redPorCategoria}
         necesidades={necesidades}
-        conMetas
-        valoresIniciales={{ tipo: tipoInicial }}
-        textoEnviar="Crear actividad"
-        textoEnviando="Creando…"
+        tipoInicial={tipoInicial}
       />
     </PanelPage>
   );

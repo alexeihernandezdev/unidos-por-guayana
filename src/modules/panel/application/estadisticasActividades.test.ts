@@ -22,6 +22,7 @@ function actividad(
     descripcion: null,
     puntosAcopio: [],
     metas: [],
+    archivos: [],
     createdAt: new Date(createdAt),
     updatedAt: new Date(createdAt),
   };

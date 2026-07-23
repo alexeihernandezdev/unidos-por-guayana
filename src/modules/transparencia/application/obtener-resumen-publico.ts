@@ -6,10 +6,36 @@ import { recolectadoPorRecurso } from "@/modules/aportes/application/recolectado
 import { EstadoAporte } from "@/modules/aportes/domain/EstadoAporte";
 import type { AporteDeps } from "@/modules/aportes/application/deps";
 import type { ActividadDeps } from "@/modules/actividades/application/deps";
+import type { ArchivoActividad } from "@/modules/actividades/domain/ArchivoActividad";
+import { TipoArchivoActividad } from "@/modules/actividades/domain/ArchivoActividad";
+import type { StoragePort } from "@/modules/archivos/domain/StoragePort";
 import type { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 
 export type TransparenciaDeps = Pick<ActividadDeps, "actividades"> &
-  Pick<AporteDeps, "aportes" | "actividades" | "recursos">;
+  Pick<AporteDeps, "aportes" | "actividades" | "recursos"> & {
+    // Almacenamiento público para resolver la portada de cada actividad (feature 033).
+    storage: StoragePort;
+  };
+
+/**
+ * URL pública de la imagen principal de una actividad, o `null` si no tiene o si el
+ * almacenamiento no está disponible (degradación silenciosa para no romper la página
+ * pública). Feature 033.
+ */
+export function portadaPublica(
+  archivos: ArchivoActividad[],
+  storage: StoragePort,
+): string | null {
+  const principal = archivos.find(
+    (a) => a.tipo === TipoArchivoActividad.PRINCIPAL,
+  );
+  if (!principal) return null;
+  try {
+    return storage.urlPublica(principal.path);
+  } catch {
+    return null;
+  }
+}
 
 export type TotalesImpactoPublico = {
   enviosTotal: number;
@@ -32,6 +58,8 @@ export type EnvioResumenPublico = {
   estado: EstadoActividadType;
   tipo: import("@/modules/actividades/domain/TipoActividad").TipoActividad;
   porcentaje: number;
+  // URL pública de la imagen de portada, o `null` si no tiene (feature 033).
+  portadaUrl: string | null;
 };
 
 export type ResumenPublico = {
@@ -98,6 +126,7 @@ export async function obtenerResumenPublico(
       estado: ayuda.estado,
       tipo: ayuda.tipo,
       porcentaje,
+      portadaUrl: portadaPublica(ayuda.archivos, deps.storage),
     })),
   };
 

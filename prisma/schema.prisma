@@ -346,6 +346,9 @@ model Actividad {
   puntosAcopio  ActividadPuntoAcopio[]
   metas         MetaRecurso[]
   aportes       Aporte[]
+  // Imagen principal y documentos de la actividad (feature 033). Se muestran en las
+  // superficies públicas (transparencia) además de dentro de la app.
+  archivos      ArchivoActividad[]
   createdAt     DateTime               @default(now())
   updatedAt     DateTime               @updatedAt
 
@@ -623,6 +626,36 @@ model ArchivoSolicitud {
 
   @@index([solicitudId])
   @@map("archivos_solicitud")
+}
+
+// Rol de un archivo dentro de una actividad (feature 033). Mismo modelo que
+// `TipoArchivoSolicitud`: `PRINCIPAL` es la imagen de portada (máx 1 por actividad,
+// garantizado por índice único parcial en la migración) y `ADJUNTO` es documentación
+// de apoyo (imágenes, PDF o doc/docx), hasta 10 por actividad.
+enum TipoArchivoActividad {
+  PRINCIPAL
+  ADJUNTO
+}
+
+// ArchivoActividad: imagen principal o documento adjunto de una `Actividad` (feature 033).
+// A diferencia de `ArchivoSolicitud` (bucket privado), el binario vive en un bucket
+// PÚBLICO de Supabase Storage: se muestra en la transparencia pública sin sesión, servido
+// por URL pública permanente. Aquí solo se guardan los metadatos y la ruta (`path`) del
+// objeto. Cascada: al borrar la actividad desaparecen sus filas (los objetos en Storage se
+// borran en el flujo de eliminación de la actividad).
+model ArchivoActividad {
+  id             String               @id @default(cuid())
+  actividadId    String
+  actividad      Actividad            @relation(fields: [actividadId], references: [id], onDelete: Cascade)
+  tipo           TipoArchivoActividad
+  path           String
+  nombreOriginal String
+  contentType    String
+  tamanoBytes    Int
+  createdAt      DateTime             @default(now())
+
+  @@index([actividadId])
+  @@map("archivos_actividad")
 }
 
 // ArchivoEvidenciaAuditoria: evidencia física de verificación que sube el AUDITOR mientras

@@ -7,6 +7,11 @@ import type {
   NuevaMeta,
   PuntoAcopioDeActividad,
 } from "@/modules/actividades/domain/Actividad";
+import type {
+  ArchivoActividad,
+  NuevoArchivoActividad,
+  TipoArchivoActividad,
+} from "@/modules/actividades/domain/ArchivoActividad";
 import type { EstadoActividad } from "@/modules/actividades/domain/EstadoActividad";
 import type { TipoActividad } from "@/modules/actividades/domain/TipoActividad";
 import type {
@@ -37,6 +42,10 @@ const INCLUDE_DETALLE = {
   puntosAcopio: {
     include: { puntoAcopio: true },
     orderBy: { puntoAcopio: { nombre: "asc" } },
+  },
+  // Imagen principal y adjuntos de la actividad (feature 033).
+  archivos: {
+    orderBy: { createdAt: "asc" },
   },
 } as const;
 
@@ -70,6 +79,16 @@ type FilaPuntoAsignado = {
   };
 };
 
+type FilaArchivo = {
+  id: string;
+  tipo: TipoArchivoActividad;
+  path: string;
+  nombreOriginal: string;
+  contentType: string;
+  tamanoBytes: number;
+  createdAt: Date;
+};
+
 type FilaActividad = {
   id: string;
   adminId: string;
@@ -82,6 +101,7 @@ type FilaActividad = {
   descripcion: string | null;
   puntosAcopio: FilaPuntoAsignado[];
   metas: FilaMeta[];
+  archivos: FilaArchivo[];
   createdAt: Date;
   updatedAt: Date;
 };
@@ -92,6 +112,18 @@ function mapearPunto(fila: FilaPuntoAsignado): PuntoAcopioDeActividad {
     nombre: fila.puntoAcopio.nombre,
     referencia: fila.puntoAcopio.referencia,
     horarios: fila.puntoAcopio.horarios,
+  };
+}
+
+function mapearArchivo(fila: FilaArchivo): ArchivoActividad {
+  return {
+    id: fila.id,
+    tipo: fila.tipo,
+    path: fila.path,
+    nombreOriginal: fila.nombreOriginal,
+    contentType: fila.contentType,
+    tamanoBytes: fila.tamanoBytes,
+    createdAt: fila.createdAt,
   };
 }
 
@@ -135,6 +167,7 @@ function mapearActividad(fila: FilaActividad): Actividad {
     descripcion: fila.descripcion,
     puntosAcopio: fila.puntosAcopio.map(mapearPunto),
     metas: fila.metas.map(mapearMeta),
+    archivos: fila.archivos.map(mapearArchivo),
     createdAt: fila.createdAt,
     updatedAt: fila.updatedAt,
   };
@@ -279,6 +312,51 @@ export class PrismaActividadRepository implements ActividadRepository {
 
   async eliminar(id: string): Promise<void> {
     await prisma.actividad.delete({ where: { id } });
+  }
+
+  // ── Archivos (feature 033) ──
+
+  async crearArchivo(nuevo: NuevoArchivoActividad): Promise<ArchivoActividad> {
+    const fila = await prisma.archivoActividad.create({
+      data: {
+        actividadId: nuevo.actividadId,
+        tipo: nuevo.tipo,
+        path: nuevo.path,
+        nombreOriginal: nuevo.nombreOriginal,
+        contentType: nuevo.contentType,
+        tamanoBytes: nuevo.tamanoBytes,
+      },
+    });
+    return mapearArchivo(fila);
+  }
+
+  async eliminarArchivo(archivoId: string): Promise<void> {
+    await prisma.archivoActividad.delete({ where: { id: archivoId } });
+  }
+
+  async buscarArchivoPorId(
+    archivoId: string,
+  ): Promise<{ archivo: ArchivoActividad; actividadId: string } | null> {
+    const fila = await prisma.archivoActividad.findUnique({
+      where: { id: archivoId },
+    });
+    if (!fila) return null;
+    return { archivo: mapearArchivo(fila), actividadId: fila.actividadId };
+  }
+
+  async contarAdjuntos(actividadId: string): Promise<number> {
+    return prisma.archivoActividad.count({
+      where: { actividadId, tipo: "ADJUNTO" },
+    });
+  }
+
+  async obtenerArchivoPrincipal(
+    actividadId: string,
+  ): Promise<ArchivoActividad | null> {
+    const fila = await prisma.archivoActividad.findFirst({
+      where: { actividadId, tipo: "PRINCIPAL" },
+    });
+    return fila ? mapearArchivo(fila) : null;
   }
 
   // Relee la Actividad tras modificar sus metas. Si desapareció entre operaciones,

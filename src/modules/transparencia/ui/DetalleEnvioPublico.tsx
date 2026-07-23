@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { EstadoBadge } from "@/modules/actividades/ui/EstadoBadge";
 import { TipoBadge } from "@/modules/actividades/ui/TipoBadge";
@@ -5,6 +6,7 @@ import { formatearFecha } from "@/modules/actividades/ui/fechas";
 import { EstadoActividad } from "@/modules/actividades/domain/EstadoActividad";
 import type { DetallePublico } from "@/modules/transparencia/application/obtener-detalle-publico";
 import { BarraProgreso } from "./BarraProgreso";
+import { GaleriaAdjuntos } from "./GaleriaAdjuntos";
 
 type Props = {
   detalle: DetallePublico;
@@ -19,13 +21,29 @@ export function DetalleEnvioPublico({ detalle }: Props) {
 
   return (
     <article className="mx-auto flex max-w-4xl flex-col gap-10 px-6 py-12 md:px-8 md:py-16">
-      <header className="flex flex-col gap-4 border-b border-border pb-8">
+      <div>
         <Link
           href="/transparencia"
           className="focus-ring text-sm text-muted-foreground transition-colors hover:text-accent"
         >
           ← Volver al tablero
         </Link>
+      </div>
+
+      {detalle.portadaUrl && (
+        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl border border-border bg-muted sm:aspect-[2/1]">
+          <Image
+            src={detalle.portadaUrl}
+            alt={`Portada de ${detalle.titulo}`}
+            fill
+            priority
+            sizes="(max-width: 896px) 100vw, 56rem"
+            className="object-cover"
+          />
+        </div>
+      )}
+
+      <header className="flex flex-col gap-4 border-b border-border pb-8">
         <div className="flex flex-wrap items-center gap-2">
           <TipoBadge tipo={detalle.tipo} />
           <EstadoBadge estado={detalle.estado} />
@@ -95,6 +113,8 @@ export function DetalleEnvioPublico({ detalle }: Props) {
           </ul>
         )}
       </section>
+
+      <GaleriaAdjuntos adjuntos={detalle.adjuntos} />
     </article>
   );
 }

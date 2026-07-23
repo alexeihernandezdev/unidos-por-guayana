@@ -8,6 +8,10 @@ import type {
 import type { EstadoActividad } from "@/modules/actividades/domain/EstadoActividad";
 import { EstadoActividad as Estados } from "@/modules/actividades/domain/EstadoActividad";
 import type {
+  ArchivoActividad,
+  NuevoArchivoActividad,
+} from "@/modules/actividades/domain/ArchivoActividad";
+import type {
   ActividadRepository,
   FiltroActividades,
 } from "@/modules/actividades/domain/ActividadRepository";
@@ -18,8 +22,13 @@ import { ActividadNoEncontradaError } from "./errors";
 // la lógica de aplicación; el detalle enriquecido lo resuelve la infraestructura.
 export class InMemoryActividadRepository implements ActividadRepository {
   private readonly porId = new Map<string, Actividad>();
+  private readonly archivosPorId = new Map<
+    string,
+    ArchivoActividad & { actividadId: string }
+  >();
   private secuencia = 0;
   private metaSecuencia = 0;
+  private archivoSecuencia = 0;
 
   private nuevaMeta(meta: NuevaMeta): MetaRecurso {
     return {
@@ -50,6 +59,7 @@ export class InMemoryActividadRepository implements ActividadRepository {
         horarios: "",
       })),
       metas: datos.metas.map((m) => this.nuevaMeta(m)),
+      archivos: [],
       createdAt: ahora,
       updatedAt: ahora,
     };
@@ -156,18 +166,73 @@ export class InMemoryActividadRepository implements ActividadRepository {
     this.porId.delete(id);
   }
 
+  async crearArchivo(nuevo: NuevoArchivoActividad): Promise<ArchivoActividad> {
+    const archivo: ArchivoActividad & { actividadId: string } = {
+      id: `archivo-${++this.archivoSecuencia}`,
+      actividadId: nuevo.actividadId,
+      tipo: nuevo.tipo,
+      path: nuevo.path,
+      nombreOriginal: nuevo.nombreOriginal,
+      contentType: nuevo.contentType,
+      tamanoBytes: nuevo.tamanoBytes,
+      createdAt: new Date(),
+    };
+    this.archivosPorId.set(archivo.id, archivo);
+    const { actividadId, ...sinActividad } = archivo;
+    void actividadId;
+    return { ...sinActividad };
+  }
+
+  async eliminarArchivo(archivoId: string): Promise<void> {
+    this.archivosPorId.delete(archivoId);
+  }
+
+  async buscarArchivoPorId(
+    archivoId: string,
+  ): Promise<{ archivo: ArchivoActividad; actividadId: string } | null> {
+    const fila = this.archivosPorId.get(archivoId);
+    if (!fila) return null;
+    const { actividadId, ...archivo } = fila;
+    return { archivo: { ...archivo }, actividadId };
+  }
+
+  async contarAdjuntos(actividadId: string): Promise<number> {
+    return [...this.archivosPorId.values()].filter(
+      (a) => a.actividadId === actividadId && a.tipo === "ADJUNTO",
+    ).length;
+  }
+
+  async obtenerArchivoPrincipal(
+    actividadId: string,
+  ): Promise<ArchivoActividad | null> {
+    const fila = [...this.archivosPorId.values()].find(
+      (a) => a.actividadId === actividadId && a.tipo === "PRINCIPAL",
+    );
+    if (!fila) return null;
+    const { actividadId: _actividadId, ...archivo } = fila;
+    void _actividadId;
+    return { ...archivo };
+  }
+
   private requerir(id: string): Actividad {
     const ayuda = this.porId.get(id);
     if (!ayuda) throw new ActividadNoEncontradaError(id);
     return ayuda;
   }
 
-  // Clona para que los tests no muten el estado interno por referencia.
+  // Clona para que los tests no muten el estado interno por referencia. Los `archivos`
+  // se resuelven desde el almacén de archivos (se mantienen en su propio mapa).
   private clonar(ayuda: Actividad): Actividad {
     return {
       ...ayuda,
       metas: ayuda.metas.map((m) => ({ ...m })),
       puntosAcopio: ayuda.puntosAcopio.map((p) => ({ ...p })),
+      archivos: [...this.archivosPorId.values()]
+        .filter((a) => a.actividadId === ayuda.id)
+        .map(({ actividadId, ...archivo }) => {
+          void actividadId;
+          return { ...archivo };
+        }),
     };
   }
 }

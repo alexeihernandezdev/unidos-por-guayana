@@ -1,6 +1,6 @@
 # 033 · Imágenes y documentación en actividades
 
-> Estado: **En curso** · Enmienda: `024 · Actividad` · Depende de: `024`, `022`, `031`, `009`, `021` · Roadmap: `constitution/roadmap.md`
+> Estado: **Hecho** · Enmienda: `024 · Actividad` · Depende de: `024`, `022`, `031`, `009`, `021` · Roadmap: `constitution/roadmap.md`
 
 ## Qué hace
 

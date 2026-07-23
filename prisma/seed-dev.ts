@@ -1105,6 +1105,96 @@ async function main() {
       );
     }
 
+    // ── Imágenes demo de actividades (feature 033): bucket PÚBLICO ──────────────
+    const bucketPublico = process.env.SUPABASE_STORAGE_BUCKET_PUBLICO;
+    if (
+      hayAlgunaConfigStorage &&
+      (!supabaseUrl || !supabaseKey || !bucketPublico)
+    ) {
+      throw new Error(
+        "Configuración incompleta de Storage para el seed: define también " +
+          "SUPABASE_STORAGE_BUCKET_PUBLICO (bucket público de actividades).",
+      );
+    }
+    const storageActividades =
+      supabaseUrl && supabaseKey && bucketPublico
+        ? {
+            cliente: createClient(supabaseUrl, supabaseKey, {
+              auth: { persistSession: false },
+            }),
+            bucket: bucketPublico,
+            imagenes:
+              storage?.imagenes ??
+              (await Promise.all(
+                IMAGENES_SOLICITUD_DEMO.map(async (imagen) => ({
+                  ...imagen,
+                  bytes: await readFile(resolve(process.cwd(), imagen.ruta)),
+                })),
+              )),
+          }
+        : null;
+
+    let archivosActividadCreados = 0;
+    if (storageActividades) {
+      for (const [indiceActividad, semilla] of ACTIVIDADES.entries()) {
+        const actividadId = `seed-dev-actividad-${semilla.slug}`;
+        const imagenes = [
+          storageActividades.imagenes[
+            indiceActividad % storageActividades.imagenes.length
+          ],
+          storageActividades.imagenes[
+            (indiceActividad + 1) % storageActividades.imagenes.length
+          ],
+        ];
+        for (const [indiceImagen, imagen] of imagenes.entries()) {
+          const tipo = indiceImagen === 0 ? "PRINCIPAL" : "ADJUNTO";
+          const carpeta = tipo === "PRINCIPAL" ? "principal" : "adjuntos";
+          const archivoId = `seed-dev-archivo-actividad-${semilla.slug}-${tipo.toLowerCase()}`;
+          const path = `actividades/${actividadId}/${carpeta}/seed-dev-${indiceImagen + 1}.${imagen.extension}`;
+          const { error } = await storageActividades.cliente.storage
+            .from(storageActividades.bucket)
+            .upload(path, imagen.bytes, {
+              contentType: imagen.contentType,
+              upsert: true,
+            });
+          if (error) {
+            throw new Error(
+              `No se pudo subir la imagen demo ${path}: ${error.message}.`,
+            );
+          }
+
+          await prisma.archivoActividad.upsert({
+            where: { id: archivoId },
+            update: {
+              actividadId,
+              tipo,
+              path,
+              nombreOriginal: imagen.nombre,
+              contentType: imagen.contentType,
+              tamanoBytes: imagen.bytes.byteLength,
+            },
+            create: {
+              id: archivoId,
+              actividadId,
+              tipo,
+              path,
+              nombreOriginal: imagen.nombre,
+              contentType: imagen.contentType,
+              tamanoBytes: imagen.bytes.byteLength,
+            },
+          });
+          archivosActividadCreados += 1;
+        }
+      }
+      console.log(
+        `✔ ${archivosActividadCreados} imágenes para actividades cargadas en Storage (bucket público).`,
+      );
+    } else {
+      console.warn(
+        "↷ Storage público no configurado: se omitieron las imágenes demo de actividades.",
+      );
+    }
+
     const moderadorId = adminsPorNumero.get(1);
     if (!moderadorId) throw new Error("No se encontró admin1 para moderar testimonios.");
 

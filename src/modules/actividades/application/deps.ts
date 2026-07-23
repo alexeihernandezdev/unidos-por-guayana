@@ -1,3 +1,4 @@
+import type { StoragePort } from "@/modules/archivos/domain/StoragePort";
 import type { Actividad } from "@/modules/actividades/domain/Actividad";
 import { dedupeIds, esDueño } from "@/modules/actividades/domain/reglas";
 import type { RecursoRepository } from "@/modules/recursos/domain/RecursoRepository";
@@ -5,6 +6,7 @@ import type { ActividadRepository } from "@/modules/actividades/domain/Actividad
 import { esCantidadObjetivoValida } from "@/modules/actividades/domain/reglas";
 import type { PuntoAcopioRepository } from "@/modules/acopio/domain/PuntoAcopioRepository";
 import {
+  ActividadNoEncontradaError,
   ActividadNoPerteneceAlAdminError,
   DatosActividadInvalidosError,
   PuntoAcopioInvalidoError,
@@ -21,6 +23,37 @@ export type ActividadDeps = {
   recursos: RecursoRepository;
   puntos?: PuntoAcopioRepository;
 };
+
+/**
+ * Dependencias de los casos de uso de archivos (feature 033). Separadas de
+ * `ActividadDeps` para no obligar a los demás consumidores a inyectar el
+ * almacenamiento, que solo estos casos de uso necesitan.
+ */
+export type ArchivoActividadDeps = {
+  actividades: ActividadRepository;
+  storage: StoragePort;
+};
+
+/**
+ * Carga una actividad y comprueba que `actorId` es su dueño (feature 022). A diferencia
+ * de la edición de cabecera, la gestión de archivos NO exige estado `RECOLECTANDO`: el
+ * ADMIN dueño puede subir/quitar imágenes en cualquier estado (feature 033). El único
+ * gate es la propiedad.
+ */
+export async function cargarActividadDelDueno(
+  actividades: ActividadRepository,
+  actividadId: string,
+  actorId: string,
+): Promise<Actividad> {
+  const actividad = await actividades.buscarPorId(actividadId);
+  if (!actividad) {
+    throw new ActividadNoEncontradaError(actividadId);
+  }
+  if (!esDueño(actividad, actorId)) {
+    throw new ActividadNoPerteneceAlAdminError(actividadId);
+  }
+  return actividad;
+}
 
 /**
  * Valida una meta que se va a persistir: la `cantidadObjetivo` debe ser positiva y

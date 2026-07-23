@@ -60,3 +60,28 @@ export class ActividadNoPerteneceAlAdminError extends Error {
     this.name = "ActividadNoPerteneceAlAdminError";
   }
 }
+
+// ── Archivos (feature 033) ──
+
+// Archivo con tipo MIME o tamaño fuera de lo permitido, o ruta que no corresponde.
+export class ArchivoInvalidoError extends Error {
+  constructor(mensaje: string) {
+    super(mensaje);
+    this.name = "ArchivoInvalidoError";
+  }
+}
+
+// Se alcanzó el cupo de documentos adjuntos de la actividad.
+export class LimiteArchivosError extends Error {
+  constructor(mensaje: string) {
+    super(mensaje);
+    this.name = "LimiteArchivosError";
+  }
+}
+
+export class ArchivoNoEncontradoError extends Error {
+  constructor(id: string) {
+    super(`No existe un archivo con el id "${id}".`);
+    this.name = "ArchivoNoEncontradoError";
+  }
+}

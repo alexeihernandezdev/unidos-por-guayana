@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Clock, MapPin } from "lucide-react";
 import { ActividadNoEncontradaError } from "@/modules/actividades/application/errors";
 import { EstadoActividad } from "@/modules/actividades/domain/EstadoActividad";
+import { ArchivosActividadVista } from "@/modules/actividades/ui/ArchivosActividadVista";
 import { EstadoBadge } from "@/modules/actividades/ui/EstadoBadge";
 import { TipoBadge } from "@/modules/actividades/ui/TipoBadge";
 import { ESTADO_LABEL } from "@/modules/actividades/ui/estados";
@@ -15,7 +16,10 @@ import {
   progresoDeActividadServicio,
 } from "@/shared/aportes";
 import { requireRol } from "@/shared/auth";
-import { obtenerActividadServicio } from "@/shared/actividades";
+import {
+  cargarArchivosVistaServicio,
+  obtenerActividadServicio,
+} from "@/shared/actividades";
 import { Button } from "@/shared/ui/button";
 import { PanelPage, PanelPageSubHeader } from "@/shared/ui/panel";
 
@@ -46,6 +50,8 @@ export default async function ActividadDetallePublicoPage({ params }: Props) {
       : Promise.resolve(null),
   ]);
   const aceptaAportes = actividad.estado === EstadoActividad.RECOLECTANDO;
+  // Imagen principal y documentos públicos de la actividad (feature 033).
+  const archivos = cargarArchivosVistaServicio(actividad);
 
   return (
     <PanelPage>
@@ -77,6 +83,8 @@ export default async function ActividadDetallePublicoPage({ params }: Props) {
 
       <div className="grid grid-cols-1 gap-8 border-t border-border pt-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <div className="flex flex-col gap-10">
+          <ArchivosActividadVista archivos={archivos} />
+
           <section className="flex flex-col gap-4">
             <h2 className="text-lg font-semibold tracking-tight">
               Metas de recursos

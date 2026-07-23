@@ -6,6 +6,10 @@ import type {
   NuevaActividad,
   NuevaMeta,
 } from "./Actividad";
+import type {
+  ArchivoActividad,
+  NuevoArchivoActividad,
+} from "./ArchivoActividad";
 
 // Filtro de listado de actividades. `texto` busca en los campos visibles principales,
 // `estado` acota por etapa del ciclo de vida, `tipo` por tipo de actividad (feature
@@ -38,4 +42,15 @@ export interface ActividadRepository {
   quitarMeta(actividadId: string, recursoId: string): Promise<Actividad>;
   cambiarEstado(id: string, estado: EstadoActividad): Promise<Actividad>;
   eliminar(id: string): Promise<void>;
+
+  // ── Archivos (feature 033) ──
+  crearArchivo(nuevo: NuevoArchivoActividad): Promise<ArchivoActividad>;
+  eliminarArchivo(archivoId: string): Promise<void>;
+  buscarArchivoPorId(
+    archivoId: string,
+  ): Promise<{ archivo: ArchivoActividad; actividadId: string } | null>;
+  contarAdjuntos(actividadId: string): Promise<number>;
+  obtenerArchivoPrincipal(
+    actividadId: string,
+  ): Promise<ArchivoActividad | null>;
 }

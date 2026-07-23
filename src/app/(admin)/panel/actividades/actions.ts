@@ -6,10 +6,17 @@ import {
   ActividadNoPerteneceAlAdminError,
   ActividadNoEditableError,
   ActividadNoEncontradaError,
+  ArchivoInvalidoError,
+  ArchivoNoEncontradoError,
   DatosActividadInvalidosError,
+  LimiteArchivosError,
   RecursoInvalidoError,
   TransicionInvalidaError,
 } from "@/modules/actividades/application/errors";
+import {
+  TipoArchivoActividad,
+  type ArchivoActividad,
+} from "@/modules/actividades/domain/ArchivoActividad";
 import { TIPOS_ACTIVIDAD } from "@/modules/actividades/domain/TipoActividad";
 import {
   AtencionNoEncontradaError,
@@ -20,10 +27,13 @@ import {
 } from "@/modules/atenciones/application/errors";
 import {
   avanzarEstadoServicio,
+  confirmarArchivoServicio,
   crearActividadServicio,
   editarCabeceraServicio,
   eliminarActividadServicio,
+  eliminarArchivoServicio,
   guardarMetaServicio,
+  prepararSubidaArchivoServicio,
   quitarMetaServicio,
 } from "@/shared/actividades";
 import {
@@ -116,7 +126,9 @@ function parseHoraFin(fecha: string, horaFin?: string): Date | null {
   return new Date(`${fecha}T${horaFin}:00.000Z`);
 }
 
-function traducirError(error: unknown): Resultado | null {
+function traducirError(
+  error: unknown,
+): { ok: false; error: string } | null {
   if (error instanceof DatosActividadInvalidosError) {
     return { ok: false, error: error.message };
   }
@@ -135,6 +147,16 @@ function traducirError(error: unknown): Resultado | null {
   ) {
     return { ok: false, error: "La actividad ya no existe." };
   }
+  // Archivos (feature 033).
+  if (error instanceof ArchivoInvalidoError) {
+    return { ok: false, error: error.message };
+  }
+  if (error instanceof LimiteArchivosError) {
+    return { ok: false, error: error.message };
+  }
+  if (error instanceof ArchivoNoEncontradoError) {
+    return { ok: false, error: "El archivo ya no existe." };
+  }
   // Errores del puente de atenciones (feature 030): todos son mensajes claros de
   // negocio que se muestran tal cual.
   if (
@@ -149,7 +171,16 @@ function traducirError(error: unknown): Resultado | null {
   return null;
 }
 
-export async function crearActividadAction(input: ActividadInput): Promise<Resultado> {
+// La creación devuelve el `id` para que el cliente pueda subir a continuación los
+// archivos elegidos (imagen principal + documentos) directo al almacenamiento con ese
+// `id`, sin pasar por el servidor (feature 033, subida al crear).
+type CrearResultado =
+  | { ok: true; id: string; aviso?: string }
+  | { ok: false; error: string };
+
+export async function crearActividadAction(
+  input: ActividadInput,
+): Promise<CrearResultado> {
   const sesion = await requireAdminVerificado();
 
   const parsed = CrearActividadSchema.safeParse(input);
@@ -192,6 +223,7 @@ export async function crearActividadAction(input: ActividadInput): Promise<Resul
       revalidatePath(RUTA_SOLICITUDES_APP);
       return {
         ok: true,
+        id: actividad.id,
         aviso: `La actividad se creó, pero ${fallidas.length} necesidad(es) ya no estaban disponibles y no se vincularon.`,
       };
     }
@@ -199,7 +231,7 @@ export async function crearActividadAction(input: ActividadInput): Promise<Resul
       revalidatePath(RUTA_SOLICITUDES_ADMIN);
       revalidatePath(RUTA_SOLICITUDES_APP);
     }
-    return { ok: true };
+    return { ok: true, id: actividad.id };
   } catch (error) {
     const traducido = traducirError(error);
     if (traducido) return traducido;
@@ -348,5 +380,103 @@ export async function eliminarActividadAction(formData: FormData): Promise<void>
   if (typeof id === "string" && id) {
     await eliminarActividadServicio(id, sesion.id);
     revalidatePath(RUTA_LISTADO);
+  }
+}
+
+// ── Archivos de la actividad (feature 033) ──────────────────────────────────
+// La subida va directo del navegador a Supabase (bucket público). El servidor solo
+// (1) valida y firma la URL de subida, y (2) confirma los metadatos tras la subida. El
+// binario nunca pasa por estas acciones. Solo el ADMIN dueño gestiona, en cualquier estado.
+
+const TIPOS_ARCHIVO = [
+  TipoArchivoActividad.PRINCIPAL,
+  TipoArchivoActividad.ADJUNTO,
+] as const;
+
+const PrepararSubidaSchema = z.object({
+  actividadId: z.string().min(1),
+  tipo: z.enum(TIPOS_ARCHIVO),
+  contentType: z.string().min(1).max(160),
+  tamanoBytes: z.number().int().positive(),
+});
+
+const ConfirmarArchivoSchema = z.object({
+  actividadId: z.string().min(1),
+  tipo: z.enum(TIPOS_ARCHIVO),
+  path: z.string().min(1).max(400),
+  nombreOriginal: z.string().trim().min(1).max(255),
+  contentType: z.string().min(1).max(160),
+  tamanoBytes: z.number().int().positive(),
+});
+
+export type PrepararSubidaArchivoInput = z.infer<typeof PrepararSubidaSchema>;
+export type ConfirmarArchivoInput = z.infer<typeof ConfirmarArchivoSchema>;
+
+type PrepararResultado =
+  | { ok: true; path: string; url: string }
+  | { ok: false; error: string };
+
+export async function prepararSubidaArchivoAction(
+  input: PrepararSubidaArchivoInput,
+): Promise<PrepararResultado> {
+  const sesion = await requireAdminVerificado();
+
+  const parsed = PrepararSubidaSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: "Datos del archivo no válidos." };
+  }
+
+  try {
+    const { path, url } = await prepararSubidaArchivoServicio(
+      parsed.data,
+      sesion.id,
+    );
+    return { ok: true, path, url };
+  } catch (error) {
+    const traducido = traducirError(error);
+    if (traducido) return traducido;
+    throw error;
+  }
+}
+
+type ConfirmarResultado =
+  | { ok: true; archivo: ArchivoActividad }
+  | { ok: false; error: string };
+
+export async function confirmarArchivoAction(
+  input: ConfirmarArchivoInput,
+): Promise<ConfirmarResultado> {
+  const sesion = await requireAdminVerificado();
+
+  const parsed = ConfirmarArchivoSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: "Datos del archivo no válidos." };
+  }
+
+  try {
+    const archivo = await confirmarArchivoServicio(parsed.data, sesion.id);
+    revalidatePath(`${RUTA_LISTADO}/${parsed.data.actividadId}`);
+    return { ok: true, archivo };
+  } catch (error) {
+    const traducido = traducirError(error);
+    if (traducido) return traducido;
+    throw error;
+  }
+}
+
+export async function eliminarArchivoAction(
+  archivoId: string,
+  actividadId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const sesion = await requireAdminVerificado();
+
+  try {
+    await eliminarArchivoServicio(archivoId, sesion.id);
+    revalidatePath(`${RUTA_LISTADO}/${actividadId}`);
+    return { ok: true };
+  } catch (error) {
+    const traducido = traducirError(error);
+    if (traducido) return traducido;
+    throw error;
   }
 }

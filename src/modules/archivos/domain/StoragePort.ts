@@ -24,6 +24,14 @@ export interface StoragePort {
   /** Crea una URL firmada de lectura para `path`, válida `expiraSegundos`. */
   crearUrlLecturaFirmada(path: string, expiraSegundos: number): Promise<string>;
 
+  /**
+   * URL pública y permanente de lectura para `path` (feature 033). Solo tiene sentido
+   * en un bucket público; se usa para servir las imágenes de actividades en la
+   * transparencia sin sesión (cacheable, sin firmar). No hace red: es una construcción
+   * determinista de la URL a partir del `path`.
+   */
+  urlPublica(path: string): string;
+
   /** Borra los objetos indicados por sus `paths`. No falla si la lista está vacía. */
   eliminar(paths: string[]): Promise<void>;
 }

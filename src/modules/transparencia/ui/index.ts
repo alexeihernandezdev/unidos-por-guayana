@@ -1,7 +1,14 @@
+export { AreaTemporal } from "./AreaTemporal";
 export { BarraProgreso } from "./BarraProgreso";
+export { BarrasSectores } from "./BarrasSectores";
+export { ContadorAnimado } from "./ContadorAnimado";
 export { DetalleEnvioPublico } from "./DetalleEnvioPublico";
-export { ListaEnviosPublicos } from "./ListaEnviosPublicos";
+export { DonutTipos } from "./DonutTipos";
+export { EnvioDestacado } from "./EnvioDestacado";
+export { FranjaFases } from "./FranjaFases";
+export { GaleriaActividades } from "./GaleriaActividades";
+export { GaleriaAdjuntos } from "./GaleriaAdjuntos";
+export { PanelImpacto } from "./PanelImpacto";
 export { RecolectadoPorRecurso } from "./RecolectadoPorRecurso";
 export { ResumenTransparencia } from "./ResumenTransparencia";
 export { TarjetaEnvioPublico } from "./TarjetaEnvioPublico";
-export { TotalesImpacto } from "./TotalesImpacto";

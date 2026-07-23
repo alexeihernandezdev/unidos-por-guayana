@@ -7,6 +7,7 @@ import { crearActividad } from "@/modules/actividades/application/crearActividad
 import { InMemoryActividadRepository } from "@/modules/actividades/application/fakes";
 import { InMemoryRecursoRepository } from "@/modules/recursos/application/fakes";
 import { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
+import { FakeStorage } from "@/modules/archivos/application/fakes";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import {
   assertSinDatosPersonales,
@@ -19,7 +20,8 @@ describe("obtenerResumenPublico", () => {
   const actividades = new InMemoryActividadRepository();
   const recursos = new InMemoryRecursoRepository();
   const aportes = new InMemoryAporteRepository();
-  const deps = { actividades, recursos, aportes };
+  const storage = new FakeStorage();
+  const deps = { actividades, recursos, aportes, storage };
 
   beforeEach(async () => {
     actividades["porId"].clear();
@@ -92,6 +94,32 @@ describe("obtenerResumenPublico", () => {
     ).toBe("USD");
     expect(resumen.envios[0]?.titulo).toBe("Reciente");
     expect(resumen.envios[0]?.porcentaje).toBe(50);
+    assertSinDatosPersonales(resumen);
+  });
+
+  it("expone la portada pública de la actividad sin filtrar datos personales", async () => {
+    const actividad = await crearActividad(deps, {
+      adminId: "admin-1",
+      titulo: "Con portada",
+      sectorDestino: "D",
+      fecha: new Date("2026-09-20"),
+      tipo: "ENVIO",
+      metas: [{ recursoId: aguaId, cantidadObjetivo: 10 }],
+    });
+    await actividades.crearArchivo({
+      actividadId: actividad.id,
+      tipo: "PRINCIPAL",
+      path: `actividades/${actividad.id}/principal/portada.jpg`,
+      nombreOriginal: "portada.jpg",
+      contentType: "image/jpeg",
+      tamanoBytes: 2048,
+    });
+
+    const resumen = await obtenerResumenPublico(deps);
+    const envio = resumen.envios.find((e) => e.actividadId === actividad.id);
+    expect(envio?.portadaUrl).toBe(
+      `https://fake.storage/public/actividades/${actividad.id}/principal/portada.jpg`,
+    );
     assertSinDatosPersonales(resumen);
   });
 

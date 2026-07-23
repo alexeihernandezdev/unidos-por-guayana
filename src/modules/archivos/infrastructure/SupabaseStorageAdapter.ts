@@ -11,18 +11,18 @@ import type {
 
 type ConfigSupabase = { url: string; key: string; bucket: string };
 
-function leerConfig(): ConfigSupabase {
+function leerConfig(bucketEnv: string): ConfigSupabase {
   // La URL no es secreta: se acepta también la que Supabase entrega como
   // `NEXT_PUBLIC_SUPABASE_URL`. La clave, en cambio, es la SECRETA (service_role /
   // secret key) y solo se lee de `SUPABASE_SERVICE_ROLE_KEY`, nunca de una var pública.
   const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const bucket = process.env.SUPABASE_STORAGE_BUCKET;
+  const bucket = process.env[bucketEnv];
   if (!url || !key || !bucket) {
     throw new Error(
       "Supabase Storage no está configurado. Define SUPABASE_URL (o " +
-        "NEXT_PUBLIC_SUPABASE_URL), SUPABASE_SERVICE_ROLE_KEY y " +
-        "SUPABASE_STORAGE_BUCKET en el entorno.",
+        `NEXT_PUBLIC_SUPABASE_URL), SUPABASE_SERVICE_ROLE_KEY y ${bucketEnv} ` +
+        "en el entorno.",
     );
   }
   return { url, key, bucket };
@@ -34,11 +34,16 @@ export class SupabaseStorageAdapter implements StoragePort {
     bucket: string;
   } | null = null;
 
+  // Qué variable de entorno da el nombre del bucket. Por defecto el privado de la
+  // feature 031 (`SUPABASE_STORAGE_BUCKET`); las actividades (033) componen el
+  // adaptador con `SUPABASE_STORAGE_BUCKET_PUBLICO` para usar un bucket público.
+  constructor(private readonly bucketEnv: string = "SUPABASE_STORAGE_BUCKET") {}
+
   // Cliente perezoso: no se instancia (ni exige config) hasta el primer uso, para
   // que el resto de la app funcione en local sin las variables de Supabase.
   private cliente() {
     if (!this.memo) {
-      const { url, key, bucket } = leerConfig();
+      const { url, key, bucket } = leerConfig(this.bucketEnv);
       const supabase = createClient(url, key, {
         auth: { persistSession: false },
       });
@@ -79,6 +84,11 @@ export class SupabaseStorageAdapter implements StoragePort {
       );
     }
     return data.signedUrl;
+  }
+
+  urlPublica(path: string): string {
+    const { supabase, bucket } = this.cliente();
+    return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
   }
 
   async eliminar(paths: string[]): Promise<void> {
