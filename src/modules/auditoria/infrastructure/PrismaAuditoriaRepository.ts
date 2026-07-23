@@ -16,6 +16,8 @@ const INCLUDE_AUDITORIA = {
   solicitante: {
     select: { id: true, nombre: true, email: true, telefono: true },
   },
+  estadoUbicacion: { select: { nombre: true } },
+  municipioUbicacion: { select: { nombre: true } },
   auditorActual: { select: { id: true, nombre: true } },
   recursos: {
     include: { recurso: { select: { nombre: true, unidad: true } } },
@@ -35,6 +37,8 @@ function mapear(fila: FilaAuditable): SolicitudAuditable {
   return {
     id: fila.id,
     sector: fila.sector,
+    estadoNombre: fila.estadoUbicacion.nombre,
+    municipioNombre: fila.municipioUbicacion.nombre,
     descripcion: fila.descripcion,
     urgencia: fila.urgencia,
     estadoVerificacion: fila.estadoVerificacion,

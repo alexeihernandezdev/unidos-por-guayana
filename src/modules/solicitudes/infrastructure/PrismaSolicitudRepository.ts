@@ -21,6 +21,9 @@ import type {
 } from "@/modules/solicitudes/domain/SolicitudRepository";
 
 const INCLUDE_RECURSOS = {
+  // Ubicación por catálogo (feature 035): nombres para las vistas.
+  estadoUbicacion: { select: { nombre: true } },
+  municipioUbicacion: { select: { nombre: true } },
   recursos: {
     include: {
       recurso: true,
@@ -59,6 +62,10 @@ type FilaArchivo = {
 type FilaSolicitud = {
   id: string;
   sector: string;
+  estadoId: string;
+  municipioId: string;
+  estadoUbicacion: { nombre: string };
+  municipioUbicacion: { nombre: string };
   urgencia: Solicitud["urgencia"];
   descripcion: string;
   estado: EstadoSolicitud;
@@ -112,6 +119,10 @@ function mapearSolicitud(fila: FilaSolicitud): Solicitud {
   return {
     id: fila.id,
     sector: fila.sector,
+    estadoId: fila.estadoId,
+    estadoNombre: fila.estadoUbicacion.nombre,
+    municipioId: fila.municipioId,
+    municipioNombre: fila.municipioUbicacion.nombre,
     urgencia: fila.urgencia,
     descripcion: fila.descripcion,
     estado: fila.estado,
@@ -132,6 +143,8 @@ export class PrismaSolicitudRepository implements SolicitudRepository {
     const fila = await prisma.solicitud.create({
       data: {
         sector: datos.sector,
+        estadoId: datos.estadoId,
+        municipioId: datos.municipioId,
         urgencia: datos.urgencia,
         descripcion: datos.descripcion,
         solicitanteId: datos.solicitanteId,

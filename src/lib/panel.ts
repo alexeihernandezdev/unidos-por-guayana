@@ -4,12 +4,15 @@ import { obtenerResumenPanel } from "@/modules/panel/application/obtenerResumenP
 import type { FiltroPanel } from "@/modules/panel/application/obtenerResumenPanel";
 import { PrismaRecursoRepository } from "@/modules/recursos/infrastructure/PrismaRecursoRepository";
 import { PrismaSolicitudRepository } from "@/modules/solicitudes/infrastructure/PrismaSolicitudRepository";
+import { catalogoUbicacion } from "@/lib/ubicacion";
 
 const actividades = new PrismaActividadRepository();
 const recursos = new PrismaRecursoRepository();
 const aportes = new PrismaAporteRepository();
 const solicitudes = new PrismaSolicitudRepository();
-const deps = { actividades, recursos, aportes, solicitudes };
+// `catalogo` viene con `SolicitudDeps` (feature 035); el panel no crea solicitudes,
+// pero comparte el tipo de dependencias, así que se inyecta la misma instancia.
+const deps = { actividades, recursos, aportes, solicitudes, catalogo: catalogoUbicacion };
 
 export function obtenerResumenPanelServicio(
   adminId: string,

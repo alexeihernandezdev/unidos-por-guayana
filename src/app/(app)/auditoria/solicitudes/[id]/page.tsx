@@ -117,8 +117,13 @@ export default async function AuditoriaSolicitudDetallePage({ params }: Props) {
           <div className="mt-5 flex items-start gap-3">
             <MapPin className="mt-0.5 size-5 shrink-0 text-primary-ink" strokeWidth={1.5} aria-hidden />
             <div>
-              <p className="text-xs text-muted-foreground">Sector reportado</p>
-              <h1 className="mt-1 text-2xl font-semibold tracking-tight">{solicitud.sector}</h1>
+              <p className="text-xs text-muted-foreground">Ubicación reportada</p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+                {solicitud.municipioNombre}, {solicitud.estadoNombre}
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Sector: <span className="text-foreground">{solicitud.sector}</span>
+              </p>
             </div>
           </div>
           <p className="mt-5 max-w-[70ch] text-sm leading-6 text-foreground/80">

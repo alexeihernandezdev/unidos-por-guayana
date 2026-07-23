@@ -217,6 +217,7 @@ model Estado {
   usuarios      Usuario[]
   perfilesAdmin PerfilAdmin[]
   puntosAcopio  PuntoAcopio[]
+  solicitudes   Solicitud[]
 
   @@map("estados")
 }
@@ -234,6 +235,7 @@ model Municipio {
   usuarios      Usuario[]
   perfilesAdmin PerfilAdmin[]
   puntosAcopio  PuntoAcopio[]
+  solicitudes   Solicitud[]
 
   @@index([estadoId])
   @@map("municipios")
@@ -519,6 +521,14 @@ enum CerradaPor {
 model Solicitud {
   id            String             @id @default(cuid())
   sector        String
+  // Ubicación estructurada por catálogo (feature 035). `sector` sigue siendo el
+  // detalle fino (barrio/zona); `estadoId`/`municipioId` dan la ubicación exacta
+  // que el auditor usa para verificar. Obligatorios: la migración rellenó las
+  // solicitudes previas con la ubicación del perfil del solicitante.
+  estadoId      String
+  estadoUbicacion    Estado        @relation(fields: [estadoId], references: [id])
+  municipioId   String
+  municipioUbicacion Municipio     @relation(fields: [municipioId], references: [id])
   urgencia      UrgenciaSolicitud
   descripcion   String
   estado        EstadoSolicitud    @default(ABIERTA)
@@ -541,6 +551,8 @@ model Solicitud {
   @@index([estadoVerificacion, createdAt])
   @@index([auditorActualId])
   @@index([sector])
+  @@index([estadoId])
+  @@index([municipioId])
   @@map("solicitudes")
 }
 

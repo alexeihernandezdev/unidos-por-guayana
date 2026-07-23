@@ -10,6 +10,7 @@ import {
   cargarArchivosVistaServicio,
   obtenerSolicitudServicio,
 } from "@/shared/solicitudes";
+import { cargarCatalogoUbicacion } from "@/shared/ubicacion";
 import { requireRol } from "@/shared/auth";
 import { PanelPage, PanelPageSubHeader } from "@/shared/ui/panel";
 import { editarSolicitudAction } from "@/app/(app)/solicitudes/actions";
@@ -46,15 +47,16 @@ export default async function EditarSolicitudPage({ params }: Props) {
     solicitud.estadoVerificacion ===
     EstadoVerificacionSolicitud.REQUIERE_INFORMACION;
 
-  // El catálogo de recursos solo hace falta para editar campos; se evita la consulta
-  // cuando la página se usa únicamente para gestionar archivos.
-  const recursos = puedeEditarCampos
-    ? (await listarRecursosServicio({ soloSeleccionables: true })).map((r) => ({
-        id: r.id,
-        nombre: r.nombre,
-        unidad: r.unidad,
-      }))
-    : [];
+  // El catálogo (recursos + ubicación) solo hace falta para editar campos; se evita la
+  // consulta cuando la página se usa únicamente para gestionar archivos.
+  const [recursos, ubicacion] = puedeEditarCampos
+    ? await Promise.all([
+        listarRecursosServicio({ soloSeleccionables: true }).then((lista) =>
+          lista.map((r) => ({ id: r.id, nombre: r.nombre, unidad: r.unidad })),
+        ),
+        cargarCatalogoUbicacion(),
+      ])
+    : [[], { estados: [], municipios: [] }];
 
   const editar = (input: Parameters<typeof editarSolicitudAction>[1]) =>
     editarSolicitudAction(id, input);
@@ -74,8 +76,12 @@ export default async function EditarSolicitudPage({ params }: Props) {
         <SolicitudForm
           action={editar}
           recursos={recursos}
+          estados={ubicacion.estados}
+          municipios={ubicacion.municipios}
           valoresIniciales={{
             sector: solicitud.sector,
+            estadoId: solicitud.estadoId,
+            municipioId: solicitud.municipioId,
             urgencia: solicitud.urgencia,
             descripcion: solicitud.descripcion,
             recursos: solicitud.recursos.map((r) => ({

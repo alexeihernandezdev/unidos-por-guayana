@@ -7,18 +7,21 @@ import {
   hayRecursosRepetidos,
   normalizarTexto,
 } from "@/modules/solicitudes/domain/reglas";
+import { validarUbicacion } from "@/modules/ubicacion/domain/validarUbicacion";
 import { type SolicitudDeps, validarRecursoSolicitud } from "./deps";
 import { DatosSolicitudInvalidosError } from "./errors";
 
 export type CrearSolicitudInput = {
   sector: string;
+  estadoId: string;
+  municipioId: string;
   urgencia: UrgenciaSolicitud;
   descripcion: string;
   recursos: { recursoId: string; cantidadEstimada?: number | null }[];
 };
 
 export async function crearSolicitud(
-  { solicitudes, recursos }: SolicitudDeps,
+  { solicitudes, recursos, catalogo }: SolicitudDeps,
   input: CrearSolicitudInput,
   solicitanteId: string,
 ): Promise<Solicitud> {
@@ -27,6 +30,14 @@ export async function crearSolicitud(
 
   if (!esSectorValido(sector)) {
     throw new DatosSolicitudInvalidosError("El sector no puede estar vacío.");
+  }
+
+  const ubicacion = await validarUbicacion(
+    { estadoId: input.estadoId, municipioId: input.municipioId },
+    catalogo,
+  );
+  if (!ubicacion.ok) {
+    throw new DatosSolicitudInvalidosError(ubicacion.error);
   }
   if (!esDescripcionValida(descripcion)) {
     throw new DatosSolicitudInvalidosError(
@@ -57,6 +68,8 @@ export async function crearSolicitud(
 
   return solicitudes.crear({
     sector,
+    estadoId: ubicacion.valor.estadoId,
+    municipioId: ubicacion.valor.municipioId,
     urgencia: input.urgencia,
     descripcion,
     solicitanteId,

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Hash, Package } from "lucide-react";
+import { Hash, MapPin, Package } from "lucide-react";
 import { SolicitudNoEncontradaError } from "@/modules/solicitudes/application/errors";
 import type { Solicitud } from "@/modules/solicitudes/domain/Solicitud";
 import { esEditable } from "@/modules/solicitudes/domain/maquinaEstados";
@@ -81,6 +81,13 @@ export default async function SolicitudDetallePage({ params }: Props) {
           <EstadoSolicitudBadge estado={solicitud.estado} />
           <UrgenciaBadge urgencia={solicitud.urgencia} />
         </div>
+        <p className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+          <MapPin className="size-4 text-primary-ink" strokeWidth={1.5} aria-hidden />
+          <span className="text-foreground">
+            {solicitud.municipioNombre}, {solicitud.estadoNombre}
+          </span>
+          <span className="text-muted-foreground">· {solicitud.sector}</span>
+        </p>
         <p className="text-sm text-muted-foreground">
           Creada el{" "}
           <span className="numeric-tnum font-mono text-foreground">

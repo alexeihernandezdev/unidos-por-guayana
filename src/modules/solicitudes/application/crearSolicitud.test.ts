@@ -3,12 +3,18 @@ import { InMemoryRecursoRepository } from "@/modules/recursos/application/fakes"
 import { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
 import { EstadoSolicitud } from "@/modules/solicitudes/domain/EstadoSolicitud";
 import { UrgenciaSolicitud } from "@/modules/solicitudes/domain/UrgenciaSolicitud";
+import { catalogoDePrueba } from "@/modules/ubicacion/application/fakes";
 import { crearSolicitud } from "./crearSolicitud";
 import type { SolicitudDeps } from "./deps";
 import { DatosSolicitudInvalidosError, RecursoInvalidoError } from "./errors";
 import { InMemorySolicitudRepository } from "./fakes";
 
 const SOLICITANTE_ID = "sol-user-1";
+
+// Ubicación válida por defecto para las entradas de prueba (feature 035); los tests
+// que no verifican ubicación la incluyen para satisfacer el contrato de entrada.
+const { repo: catalogo, guaira, vargas } = catalogoDePrueba();
+const UBICACION = { estadoId: guaira.id, municipioId: vargas.id } as const;
 
 async function crearDeps() {
   const recursos = new InMemoryRecursoRepository();
@@ -35,6 +41,7 @@ async function crearDeps() {
   const deps: SolicitudDeps = {
     solicitudes: new InMemorySolicitudRepository(),
     recursos,
+    catalogo,
   };
   return { deps, agua, alimentos, archivado };
 }
@@ -53,6 +60,7 @@ describe("crearSolicitud", () => {
       deps,
       {
         sector: "Petare Sur",
+        ...UBICACION,
         urgencia: UrgenciaSolicitud.ALTA,
         descripcion: "Necesitamos agua y alimentos urgentemente.",
         recursos: [
@@ -77,6 +85,7 @@ describe("crearSolicitud", () => {
       deps,
       {
         sector: "  Petare Sur  ",
+        ...UBICACION,
         urgencia: UrgenciaSolicitud.MEDIA,
         descripcion: "  Necesitamos ayuda  ",
         recursos: [{ recursoId: agua.id }],
@@ -96,6 +105,7 @@ describe("crearSolicitud", () => {
         deps,
         {
           sector: "   ",
+          ...UBICACION,
           urgencia: UrgenciaSolicitud.BAJA,
           descripcion: "Actividad",
           recursos: [{ recursoId: agua.id }],
@@ -113,6 +123,7 @@ describe("crearSolicitud", () => {
         deps,
         {
           sector: "Petare",
+          ...UBICACION,
           urgencia: UrgenciaSolicitud.BAJA,
           descripcion: "  ",
           recursos: [{ recursoId: agua.id }],
@@ -130,6 +141,7 @@ describe("crearSolicitud", () => {
         deps,
         {
           sector: "Petare",
+          ...UBICACION,
           urgencia: UrgenciaSolicitud.BAJA,
           descripcion: "Actividad",
           recursos: [],
@@ -147,6 +159,7 @@ describe("crearSolicitud", () => {
         deps,
         {
           sector: "Petare",
+          ...UBICACION,
           urgencia: UrgenciaSolicitud.BAJA,
           descripcion: "Actividad",
           recursos: [
@@ -167,6 +180,7 @@ describe("crearSolicitud", () => {
         deps,
         {
           sector: "Petare",
+          ...UBICACION,
           urgencia: UrgenciaSolicitud.BAJA,
           descripcion: "Actividad",
           recursos: [{ recursoId: agua.id, cantidadEstimada: 0 }],
@@ -184,6 +198,7 @@ describe("crearSolicitud", () => {
         deps,
         {
           sector: "Petare",
+          ...UBICACION,
           urgencia: UrgenciaSolicitud.BAJA,
           descripcion: "Actividad",
           recursos: [{ recursoId: "no-existe" }],
@@ -201,6 +216,7 @@ describe("crearSolicitud", () => {
         deps,
         {
           sector: "Petare",
+          ...UBICACION,
           urgencia: UrgenciaSolicitud.BAJA,
           descripcion: "Actividad",
           recursos: [{ recursoId: archivado.id }],
@@ -208,5 +224,39 @@ describe("crearSolicitud", () => {
         SOLICITANTE_ID,
       ),
     ).rejects.toBeInstanceOf(RecursoInvalidoError);
+  });
+
+  it("guarda la ubicación y rechaza un municipio de otro estado", async () => {
+    const { deps, agua } = ctx;
+
+    const solicitud = await crearSolicitud(
+      deps,
+      {
+        sector: "Petare",
+        ...UBICACION,
+        urgencia: UrgenciaSolicitud.MEDIA,
+        descripcion: "Necesitamos agua.",
+        recursos: [{ recursoId: agua.id }],
+      },
+      SOLICITANTE_ID,
+    );
+    expect(solicitud.estadoId).toBe(UBICACION.estadoId);
+    expect(solicitud.municipioId).toBe(UBICACION.municipioId);
+
+    // Municipio válido pero de otro estado → incoherencia rechazada.
+    await expect(
+      crearSolicitud(
+        deps,
+        {
+          sector: "Petare",
+          estadoId: guaira.id,
+          municipioId: "mun-baruta",
+          urgencia: UrgenciaSolicitud.MEDIA,
+          descripcion: "Necesitamos agua.",
+          recursos: [{ recursoId: agua.id }],
+        },
+        SOLICITANTE_ID,
+      ),
+    ).rejects.toBeInstanceOf(DatosSolicitudInvalidosError);
   });
 });

@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { TipoArchivoSolicitud } from "@/modules/solicitudes/domain/ArchivoSolicitud";
 import { crearSolicitudAction } from "@/app/(app)/solicitudes/actions";
-import type { RecursoOpcion } from "./SolicitudForm";
+import type { Estado } from "@/modules/ubicacion/domain/Estado";
+import type { Municipio } from "@/modules/ubicacion/domain/Municipio";
+import type { RecursoOpcion, SolicitudFormValores } from "./SolicitudForm";
 import { SolicitudForm } from "./SolicitudForm";
 import { SelectorArchivosNueva } from "./SelectorArchivosNueva";
 import { subirArchivoDirecto } from "./subirArchivo";
@@ -16,9 +18,18 @@ import { subirArchivoDirecto } from "./subirArchivo";
 
 type Props = {
   recursos: RecursoOpcion[];
+  estados: Estado[];
+  municipios: Municipio[];
+  /** Ubicación del perfil del solicitante para pre-llenar el selector (feature 035). */
+  ubicacionInicial?: Pick<SolicitudFormValores, "estadoId" | "municipioId">;
 };
 
-export function NuevaSolicitudCliente({ recursos }: Props) {
+export function NuevaSolicitudCliente({
+  recursos,
+  estados,
+  municipios,
+  ubicacionInicial,
+}: Props) {
   const [principal, setPrincipal] = useState<File | null>(null);
   const [adjuntos, setAdjuntos] = useState<File[]>([]);
   const [subiendo, setSubiendo] = useState(false);
@@ -57,6 +68,9 @@ export function NuevaSolicitudCliente({ recursos }: Props) {
       <SolicitudForm
         action={crearSolicitudAction}
         recursos={recursos}
+        estados={estados}
+        municipios={municipios}
+        valoresIniciales={ubicacionInicial}
         textoEnviar="Crear solicitud"
         textoEnviando={subiendo ? "Subiendo archivos…" : "Creando…"}
         rutaExito="/solicitudes"

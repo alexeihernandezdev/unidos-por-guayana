@@ -9,6 +9,7 @@ import {
   hayRecursosRepetidos,
   normalizarTexto,
 } from "@/modules/solicitudes/domain/reglas";
+import { validarUbicacion } from "@/modules/ubicacion/domain/validarUbicacion";
 import { type SolicitudDeps, validarRecursoSolicitud } from "./deps";
 import {
   DatosSolicitudInvalidosError,
@@ -19,13 +20,15 @@ import {
 
 export type EditarSolicitudInput = {
   sector?: string;
+  estadoId?: string;
+  municipioId?: string;
   urgencia?: UrgenciaSolicitud;
   descripcion?: string;
   recursos?: { recursoId: string; cantidadEstimada?: number | null }[];
 };
 
 export async function editarSolicitud(
-  { solicitudes, recursos }: SolicitudDeps,
+  { solicitudes, recursos, catalogo }: SolicitudDeps,
   id: string,
   input: EditarSolicitudInput,
   actorId: string,
@@ -55,6 +58,8 @@ export async function editarSolicitud(
 
   const cambios: {
     sector?: string;
+    estadoId?: string;
+    municipioId?: string;
     urgencia?: UrgenciaSolicitud;
     descripcion?: string;
   } = {};
@@ -65,6 +70,22 @@ export async function editarSolicitud(
       throw new DatosSolicitudInvalidosError("El sector no puede estar vacío.");
     }
     cambios.sector = sector;
+  }
+
+  // Estado y municipio se editan en conjunto (el municipio depende del estado).
+  if (input.estadoId !== undefined || input.municipioId !== undefined) {
+    const ubicacion = await validarUbicacion(
+      {
+        estadoId: input.estadoId ?? actual.estadoId,
+        municipioId: input.municipioId ?? actual.municipioId,
+      },
+      catalogo,
+    );
+    if (!ubicacion.ok) {
+      throw new DatosSolicitudInvalidosError(ubicacion.error);
+    }
+    cambios.estadoId = ubicacion.valor.estadoId;
+    cambios.municipioId = ubicacion.valor.municipioId;
   }
 
   if (input.urgencia !== undefined) {

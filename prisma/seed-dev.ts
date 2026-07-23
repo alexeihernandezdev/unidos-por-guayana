@@ -999,12 +999,17 @@ async function main() {
         : null;
 
     let archivosSolicitudCreados = 0;
+    // Todas las solicitudes demo son de Ciudad Guayana = Caroní (Bolívar, VE-F),
+    // como el sector reportado (feature 035).
+    const ubicacionSolicitud = await ubicacion("VE-F", "Caroní");
     for (const [indiceSolicitud, semilla] of SOLICITUDES.entries()) {
       const solicitudId = `seed-dev-solicitud-${semilla.slug}`;
       await prisma.solicitud.upsert({
         where: { id: solicitudId },
         update: {
           sector: semilla.sector,
+          estadoId: ubicacionSolicitud.estadoId,
+          municipioId: ubicacionSolicitud.municipioId,
           urgencia: semilla.urgencia,
           descripcion: semilla.descripcion,
           estado: semilla.estado,
@@ -1014,6 +1019,8 @@ async function main() {
         create: {
           id: solicitudId,
           sector: semilla.sector,
+          estadoId: ubicacionSolicitud.estadoId,
+          municipioId: ubicacionSolicitud.municipioId,
           urgencia: semilla.urgencia,
           descripcion: semilla.descripcion,
           estado: semilla.estado,

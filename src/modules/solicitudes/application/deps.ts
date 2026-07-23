@@ -1,5 +1,6 @@
 import type { StoragePort } from "@/modules/archivos/domain/StoragePort";
 import type { RecursoRepository } from "@/modules/recursos/domain/RecursoRepository";
+import type { CatalogoUbicacionRepository } from "@/modules/ubicacion/domain/CatalogoUbicacionRepository";
 import type { Solicitud } from "@/modules/solicitudes/domain/Solicitud";
 import type { SolicitudRepository } from "@/modules/solicitudes/domain/SolicitudRepository";
 import { esEditable } from "@/modules/solicitudes/domain/maquinaEstados";
@@ -15,6 +16,9 @@ import {
 export type SolicitudDeps = {
   solicitudes: SolicitudRepository;
   recursos: RecursoRepository;
+  // Catálogo de ubicación (feature 035): valida la coherencia estado↔municipio al
+  // crear/editar una solicitud, como en los casos de uso de `usuarios`.
+  catalogo: CatalogoUbicacionRepository;
 };
 
 /**

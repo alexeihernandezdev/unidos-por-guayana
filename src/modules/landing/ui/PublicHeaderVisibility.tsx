@@ -5,7 +5,8 @@ import type { ReactNode } from "react";
 
 export function PublicHeaderVisibility({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const esRutaAuth = pathname === "/login" || pathname === "/registro";
+  const esRutaSinHeader =
+    pathname === "/login" || pathname === "/registro" || pathname === "/test";
 
-  return esRutaAuth ? null : children;
+  return esRutaSinHeader ? null : children;
 }

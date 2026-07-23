@@ -47,6 +47,10 @@ export class InMemorySolicitudRepository implements SolicitudRepository {
     const solicitud: Solicitud = {
       id: `sol-${++this.secuencia}`,
       sector: datos.sector,
+      estadoId: datos.estadoId,
+      estadoNombre: datos.estadoId,
+      municipioId: datos.municipioId,
+      municipioNombre: datos.municipioId,
       urgencia: datos.urgencia,
       descripcion: datos.descripcion,
       estado: Estados.ABIERTA,

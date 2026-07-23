@@ -4,9 +4,9 @@
 
 ## Qué hace
 
-Añade una página pública y aislada en `/test` para validar una experiencia narrativa donde el
-video `public/videos/timeline.mp4` permanece fijado al viewport y avanza o retrocede según la
-posición de scroll del usuario.
+Añade una página pública y aislada en `/test` para validar una experiencia narrativa donde una
+secuencia de imágenes derivada de `public/videos/timeline.mp4` permanece fijada al viewport y
+avanza o retrocede fotograma a fotograma según la posición de scroll del usuario.
 
 La prueba representa tres momentos del proceso logístico: **Caja abierta**, **Caja preparada** y
 **Envío en camino**. Los textos avanzan sobre el video mientras la posición del scroll se traduce
@@ -21,16 +21,31 @@ alterar la landing ni otros recorridos existentes.
 
 ## Decisiones tomadas
 
-- **Ruta aislada:** la experiencia vive únicamente en `/test` y no modifica la navegación ni la
-  landing de producción.
-- **Scrubbing nativo:** se usa un elemento `<video>` con MP4 H.264. El progreso de scroll de la
-  sección se convierte en `currentTime` del video.
-- **Video fijado:** la escena ocupa el viewport mediante una capa sticky dentro de una sección de
+- **Ruta aislada:** la experiencia vive únicamente en `/test`, oculta el header global para ocupar
+  el viewport completo y no modifica la navegación ni la landing de producción.
+- **Scrubbing fotograma a fotograma:** se descartó escribir `currentTime` sobre un `<video>` H.264
+  porque el decodificador salta al keyframe más cercano y el scrubbing se veía a tirones. En su
+  lugar, `public/videos/timeline.mp4` se convierte a una secuencia de 216 imágenes WebP a 1280px y
+  24 fps (`public/videos/timeline-frames/`) que se dibujan en un `<canvas>`. Cada fotograma ya está
+  decodificado, así que el desplazamiento es fluido y determinista.
+- **Recorte del original:** el MP4 generado por IA repetía la carga de la caja en la furgoneta con
+  dos tomas; se eliminó la toma en primer plano duplicada para que la narración avance una sola vez.
+- **Suavizado del scroll:** se reutiliza `SmoothScroll` (Lenis, ya en la landing) para dar inercia
+  al gesto; el progreso de scroll define un fotograma objetivo y un bucle de `requestAnimationFrame`
+  interpola el fotograma actual hacia él. Además, el dibujo mezcla el fotograma base con el siguiente
+  según la parte fraccional, eliminando el "escalón" entre imágenes.
+- **Anclaje por escenas:** con el módulo `Snap` de Lenis (`lenis/snap`, sin dependencias nuevas), al
+  soltar el scroll la vista se asienta en el punto de reposo de cada etapa y en el cierre, de modo que
+  la narración avanza escena por escena reproduciendo los fotogramas intermedios. Se desactiva con
+  movimiento reducido.
+- **Escena fijada:** el canvas ocupa el viewport mediante una capa sticky dentro de una sección de
   scroll extendida. Al terminar la sección, la página continúa con normalidad.
-- **Actualización suavizada:** el controlador aproxima el tiempo visible al tiempo objetivo dentro
-  de `requestAnimationFrame`, evitando escrituras de tiempo innecesarias y saltos bruscos.
+- **Legibilidad sobre escena clara:** la grabación es de estudio y casi blanca, por lo que el texto
+  es oscuro (`--foreground`) con acentos `--primary` y un velo tonal del color de fondo desde el
+  borde inferior que garantiza contraste AA sin ensuciar la imagen.
 - **Dependencias existentes:** se aprovecha Motion, ya instalado, para observar el progreso de
-  scroll. No se añaden paquetes.
+  scroll y fundir los rótulos. La secuencia de imágenes se genera una sola vez con una herramienta
+  descartable (no se añaden paquetes al repositorio) y se sirve como activos estáticos.
 - **Composición:** `src/app/test/page.tsx` mantiene la ruta fina y compone un componente cliente de
   `src/modules/landing/ui` que encapsula la reproducción y el scroll.
 - **Accesibilidad:** con `prefers-reduced-motion: reduce` no se fuerza el scrubbing; se presenta una
@@ -43,70 +58,74 @@ alterar la landing ni otros recorridos existentes.
 **Incluye**
 
 - Ruta pública `/test`.
-- Video a pantalla completa y fijado durante la secuencia.
-- Scrubbing bidireccional vinculado al scroll.
-- Tres etapas textuales visibles y semánticas.
-- Estado inicial mientras cargan los metadatos y estado de error si el video no está disponible.
-- Diseño responsive desde 320 px, usando `100dvh` y recorte controlado con `object-fit: cover`.
-- Contraste suficiente entre texto y video mediante una capa tonal discreta.
-- Respeto de `prefers-reduced-motion`.
-- Limpieza de suscripciones y cuadros de animación al desmontar el componente.
+- Escena a pantalla completa y fijada durante la secuencia, dibujada en un `<canvas>`.
+- Secuencia de 216 fotogramas WebP servidos como activos estáticos.
+- Scrubbing bidireccional y suavizado (Lenis + interpolación + mezcla entre fotogramas).
+- Anclaje por escenas al soltar el scroll (Lenis Snap), desactivado con movimiento reducido.
+- Tres etapas textuales visibles y semánticas que se funden en su lugar.
+- Estado de carga con porcentaje mientras se precargan los fotogramas y estado de error si la
+  secuencia no está disponible.
+- Diseño responsive desde 320 px, usando `100dvh` y recorte tipo `cover` calculado en el canvas.
+- Contraste AA entre el texto oscuro y la escena clara mediante un velo tonal discreto.
+- Respeto de `prefers-reduced-motion` con una escena estática y los tres textos legibles.
+- Limpieza de suscripciones, observadores y cuadros de animación al desmontar el componente.
 
 **No incluye**
 
 - Integración en la landing u otra ruta de producción.
 - Panel de administración, datos dinámicos o persistencia.
 - Controles tradicionales de reproducción, audio o reproducción autónoma.
-- Generación automática de versiones optimizadas del MP4.
-- Secuencia de imágenes o canvas como alternativa.
-- Nuevas dependencias.
+- Scrubbing directo de `currentTime` sobre `<video>` (descartado por los saltos entre keyframes).
+- Generación de la secuencia en tiempo de ejecución o en el pipeline de build.
+- Nuevas dependencias en el repositorio.
 
 ## Flujo de interacción
 
-1. El usuario entra a `/test` y ve la primera escena mientras cargan los metadatos.
-2. Al desplazarse por la sección, su progreso entre 0 y 1 determina el tiempo objetivo entre 0 y la
-   duración total del video.
-3. El video permanece fijado y los tres mensajes aparecen en sus respectivos tramos.
+1. El usuario entra a `/test`, ve el primer fotograma en cuanto carga y un indicador de progreso
+   mientras se precarga el resto de la secuencia.
+2. Al desplazarse por la sección, su progreso entre 0 y 1 determina el fotograma objetivo entre el
+   primero y el último de la secuencia.
+3. La escena permanece fijada y los tres mensajes se funden en sus respectivos tramos.
 4. Si el usuario desplaza hacia arriba, la animación retrocede de forma equivalente.
-5. Al finalizar la sección, el video deja de estar fijado y aparece un cierre breve de la prueba.
+5. Al finalizar la sección, la escena deja de estar fijada y aparece un cierre breve de la prueba.
 
 ## Manejo de fallos y degradación
 
-- Antes de conocer la duración, la primera escena o superficie de carga permanece visible.
-- Si el video falla, se muestra una superficie estática con el título y las tres etapas; la página
-  sigue siendo comprensible.
-- Si el usuario solicita movimiento reducido, se evita sincronizar `currentTime` continuamente.
-- La implementación tolera duraciones desconocidas, valores no finitos y cambios de viewport sin
-  producir errores de ejecución.
+- Mientras se precarga la secuencia, el primer fotograma disponible y una superficie de carga con
+  porcentaje permanecen visibles.
+- Si la secuencia falla, se muestra una superficie estática con el título y las tres etapas; la
+  página sigue siendo comprensible.
+- Si el usuario solicita movimiento reducido, no se ejecuta el bucle de scrubbing: se dibuja un
+  fotograma estático y los tres textos se listan de forma legible.
+- La implementación tolera fotogramas aún no cargados (usa el más cercano disponible), valores no
+  finitos y cambios de viewport sin producir errores de ejecución.
 
 ## Criterios de aceptación
 
 - [ ] `/test` carga sin autenticación y sin modificar la landing.
-- [ ] El video usa `/videos/timeline.mp4`, está silenciado, se reproduce inline y no muestra
-      controles nativos.
-- [ ] Mientras se recorre la sección, el video permanece fijado al viewport.
-- [ ] El inicio del tramo corresponde aproximadamente al inicio del video y el final al último
-      fotograma disponible.
-- [ ] Desplazarse hacia arriba hace retroceder el video.
+- [ ] La escena usa la secuencia `/videos/timeline-frames/frame_NNN.webp` dibujada en un `<canvas>`.
+- [ ] Mientras se recorre la sección, la escena permanece fijada al viewport.
+- [ ] El inicio del tramo corresponde al primer fotograma y el final al último de la secuencia.
+- [ ] Desplazarse hacia arriba hace retroceder la animación.
 - [ ] Se muestran las etapas «Caja abierta», «Caja preparada» y «Envío en camino» en orden.
-- [ ] Los textos mantienen contraste WCAG AA sobre la escena.
+- [ ] Los textos mantienen contraste WCAG AA sobre la escena clara.
 - [ ] La ruta no produce scroll horizontal desde 320 px.
-- [ ] En móvil se usa la altura dinámica del viewport y el video se reproduce inline.
+- [ ] En móvil se usa la altura dinámica del viewport.
 - [ ] Con movimiento reducido, la información permanece disponible sin scrubbing continuo.
-- [ ] Un fallo al cargar el MP4 muestra un fallback comprensible y no rompe la página.
+- [ ] Un fallo al cargar la secuencia muestra un fallback comprensible y no rompe la página.
 - [ ] No se añaden dependencias ni lógica de dominio.
 - [ ] `pnpm lint`, `pnpm test` y `pnpm build` finalizan sin errores atribuibles a la feature.
 
 ## Riesgos y mitigaciones
 
-- **Saltos al buscar en el MP4:** dependen de la frecuencia de keyframes. Se recomienda H.264 sin
-  audio, fast-start y keyframes cada 0,25 a 0,5 segundos.
-- **Peso en conexiones móviles:** el activo debe comprimirse y, antes de producción, conviene crear
-  una variante móvil de aproximadamente 720p.
-- **Recorte vertical:** el sujeto principal debe permanecer en una zona central segura porque
-  `object-fit: cover` recorta distinto en pantallas verticales.
-- **Políticas de iOS:** `muted` y `playsInline` son obligatorios. El fallback cubre navegadores que
-  no entreguen fotogramas durante búsquedas antes de una interacción.
-- **Costo de escrituras a `currentTime`:** se limita a un ciclo de animación y se evita actualizar
-  cuando la diferencia con el tiempo objetivo es insignificante.
-
+- **Peso de la secuencia:** 216 fotogramas WebP a 1280px suman ~4,5 MB. Se precargan en segundo
+  plano tras mostrar el primer fotograma; antes de producción conviene revisar el número y tamaño
+  de fotogramas para conexiones móviles.
+- **Memoria del cliente:** mantener 216 imágenes decodificadas tiene coste; se limita el `devicePixelRatio`
+  a 2 y se dibuja en un único canvas. Un recuento mayor requeriría descarga bajo demanda.
+- **Recorte vertical:** el sujeto principal debe permanecer en una zona central segura porque el
+  dibujo tipo `cover` recorta distinto en pantallas verticales.
+- **Fotogramas aún no cargados:** el dibujo cae al fotograma cargado más cercano, evitando huecos
+  durante la precarga.
+- **Costo del scrubbing:** un solo bucle de `requestAnimationFrame` interpola hacia el objetivo y se
+  detiene al alcanzarlo, evitando trabajo por cuadro cuando la escena está en reposo.

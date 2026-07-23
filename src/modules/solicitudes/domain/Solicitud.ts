@@ -15,9 +15,22 @@ export type RecursoSolicitud = {
   atencion: { actividadId: string; actividadTitulo: string } | null;
 };
 
+// Ubicación por catálogo (feature 035). Los nombres se resuelven en lectura para
+// las vistas; los ids son la fuente de verdad al escribir.
+export type UbicacionSolicitud = {
+  estadoId: string;
+  estadoNombre: string;
+  municipioId: string;
+  municipioNombre: string;
+};
+
 export type Solicitud = {
   id: string;
   sector: string;
+  estadoId: string;
+  estadoNombre: string;
+  municipioId: string;
+  municipioNombre: string;
   urgencia: UrgenciaSolicitud;
   descripcion: string;
   estado: EstadoSolicitud;
@@ -39,6 +52,8 @@ export type NuevoRecursoSolicitud = {
 
 export type NuevaSolicitud = {
   sector: string;
+  estadoId: string;
+  municipioId: string;
   urgencia: UrgenciaSolicitud;
   descripcion: string;
   solicitanteId: string;
@@ -47,6 +62,8 @@ export type NuevaSolicitud = {
 
 export type CambiosSolicitud = {
   sector?: string;
+  estadoId?: string;
+  municipioId?: string;
   urgencia?: UrgenciaSolicitud;
   descripcion?: string;
 };

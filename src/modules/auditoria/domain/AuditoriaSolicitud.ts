@@ -29,6 +29,9 @@ export type EventoAuditoriaSolicitud = {
 export type SolicitudAuditable = {
   id: string;
   sector: string;
+  // Ubicación por catálogo (feature 035): el auditor la usa para verificar dónde es.
+  estadoNombre: string;
+  municipioNombre: string;
   descripcion: string;
   urgencia: UrgenciaSolicitud;
   estadoVerificacion: EstadoVerificacionSolicitud;

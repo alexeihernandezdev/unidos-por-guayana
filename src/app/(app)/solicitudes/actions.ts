@@ -52,6 +52,8 @@ const RecursoSchema = z.object({
 
 const SolicitudSchema = z.object({
   sector: z.string().trim().min(1, "Indica el sector o zona.").max(160),
+  estadoId: z.string().trim().min(1, "Selecciona el estado."),
+  municipioId: z.string().trim().min(1, "Selecciona el municipio."),
   urgencia: z.enum(URGENCIAS_SOLICITUD as [string, ...string[]], {
     message: "Indica la urgencia.",
   }),
@@ -67,6 +69,8 @@ const SolicitudSchema = z.object({
 
 export type SolicitudInput = {
   sector: string;
+  estadoId: string;
+  municipioId: string;
   urgencia: UrgenciaSolicitud;
   descripcion: string;
   recursos: { recursoId: string; cantidadEstimada?: number | null }[];
@@ -144,6 +148,8 @@ export async function crearSolicitudAction(
     const solicitud = await crearSolicitudServicio(
       {
         sector: parsed.data.sector,
+        estadoId: parsed.data.estadoId,
+        municipioId: parsed.data.municipioId,
         urgencia: parsed.data.urgencia as UrgenciaSolicitud,
         descripcion: parsed.data.descripcion,
         recursos: parsed.data.recursos,
@@ -178,6 +184,8 @@ export async function editarSolicitudAction(
       id,
       {
         sector: parsed.data.sector,
+        estadoId: parsed.data.estadoId,
+        municipioId: parsed.data.municipioId,
         urgencia: parsed.data.urgencia as UrgenciaSolicitud,
         descripcion: parsed.data.descripcion,
         recursos: parsed.data.recursos,

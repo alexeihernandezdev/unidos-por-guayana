@@ -8,6 +8,9 @@ import {
   URGENCIAS_SOLICITUD,
   UrgenciaSolicitud,
 } from "@/modules/solicitudes/domain/UrgenciaSolicitud";
+import { SelectorUbicacion } from "@/modules/ubicacion/ui/SelectorUbicacion";
+import type { Estado } from "@/modules/ubicacion/domain/Estado";
+import type { Municipio } from "@/modules/ubicacion/domain/Municipio";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import {
@@ -32,6 +35,8 @@ export type RecursoSolicitudValor = {
 
 export type SolicitudFormValores = {
   sector: string;
+  estadoId: string;
+  municipioId: string;
   urgencia: UrgenciaSolicitud;
   descripcion: string;
   recursos: RecursoSolicitudValor[];
@@ -42,6 +47,9 @@ type Props = {
     input: SolicitudFormValores,
   ) => Promise<{ ok: boolean; error?: string; id?: string }>;
   recursos: RecursoOpcion[];
+  /** Catálogo de ubicación (feature 035) para el selector estado → municipio. */
+  estados: Estado[];
+  municipios: Municipio[];
   valoresIniciales?: Partial<SolicitudFormValores>;
   textoEnviar: string;
   textoEnviando: string;
@@ -64,6 +72,8 @@ const campo =
 export function SolicitudForm({
   action,
   recursos,
+  estados,
+  municipios,
   valoresIniciales,
   textoEnviar,
   textoEnviando,
@@ -83,6 +93,8 @@ export function SolicitudForm({
   } = useForm<SolicitudFormValores>({
     defaultValues: {
       sector: valoresIniciales?.sector ?? "",
+      estadoId: valoresIniciales?.estadoId ?? "",
+      municipioId: valoresIniciales?.municipioId ?? "",
       urgencia: valoresIniciales?.urgencia ?? UrgenciaSolicitud.MEDIA,
       descripcion: valoresIniciales?.descripcion ?? "",
       recursos:
@@ -132,7 +144,17 @@ export function SolicitudForm({
         {errors.sector && (
           <p className="text-sm text-destructive">{errors.sector.message}</p>
         )}
+        <p className="text-xs text-muted-foreground">
+          Barrio o zona específica. El estado y municipio los indicas abajo.
+        </p>
       </div>
+
+      <SelectorUbicacion
+        control={control}
+        errors={errors}
+        estados={estados}
+        municipios={municipios}
+      />
 
       <div className="flex flex-col gap-1.5">
         <span className="text-sm font-medium">Urgencia</span>

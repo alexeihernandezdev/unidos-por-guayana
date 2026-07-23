@@ -39,11 +39,12 @@ import type { FiltroSolicitudes } from "@/modules/solicitudes/domain/SolicitudRe
 import { PrismaSolicitudRepository } from "@/modules/solicitudes/infrastructure/PrismaSolicitudRepository";
 import { PrismaRecursoRepository } from "@/modules/recursos/infrastructure/PrismaRecursoRepository";
 import { SupabaseStorageAdapter } from "@/modules/archivos/infrastructure/SupabaseStorageAdapter";
+import { catalogoUbicacion } from "@/lib/ubicacion";
 
 const solicitudes = new PrismaSolicitudRepository();
 const recursos = new PrismaRecursoRepository();
 const storage = new SupabaseStorageAdapter();
-const deps = { solicitudes, recursos, storage };
+const deps = { solicitudes, recursos, storage, catalogo: catalogoUbicacion };
 
 export function crearSolicitudServicio(
   input: CrearSolicitudInput,

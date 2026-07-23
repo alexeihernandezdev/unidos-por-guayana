@@ -2,21 +2,34 @@ import Link from "next/link";
 import { NuevaSolicitudCliente } from "@/modules/solicitudes/ui/NuevaSolicitudCliente";
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { listarRecursosServicio } from "@/shared/recursos";
-import { requireRol } from "@/shared/auth";
+import { cargarCatalogoUbicacion } from "@/shared/ubicacion";
+import { buscarUsuarioPorId, requireRol } from "@/shared/auth";
 import { PanelPage, PanelPageSubHeader } from "@/shared/ui/panel";
 
 export default async function NuevaSolicitudPage() {
-  await requireRol(Rol.SOLICITANTE);
+  const usuario = await requireRol(Rol.SOLICITANTE);
 
-  const recursos = (
-    await listarRecursosServicio({ soloSeleccionables: true })
-  ).map(
-    (r) => ({
-      id: r.id,
-      nombre: r.nombre,
-      unidad: r.unidad,
-    }),
-  );
+  const [recursosRaw, catalogo, perfil] = await Promise.all([
+    listarRecursosServicio({ soloSeleccionables: true }),
+    cargarCatalogoUbicacion(),
+    buscarUsuarioPorId(usuario.id),
+  ]);
+
+  const recursos = recursosRaw.map((r) => ({
+    id: r.id,
+    nombre: r.nombre,
+    unidad: r.unidad,
+  }));
+
+  // Pre-llena el selector con la ubicación del perfil del solicitante; el municipio
+  // solo si el estado también existe, para no dejar el desplegable incoherente.
+  const ubicacionInicial =
+    perfil?.estadoId
+      ? {
+          estadoId: perfil.estadoId,
+          municipioId: perfil.municipioId ?? "",
+        }
+      : undefined;
 
   return (
     <PanelPage>
@@ -38,7 +51,12 @@ export default async function NuevaSolicitudPage() {
         .
       </p>
 
-      <NuevaSolicitudCliente recursos={recursos} />
+      <NuevaSolicitudCliente
+        recursos={recursos}
+        estados={catalogo.estados}
+        municipios={catalogo.municipios}
+        ubicacionInicial={ubicacionInicial}
+      />
     </PanelPage>
   );
 }
