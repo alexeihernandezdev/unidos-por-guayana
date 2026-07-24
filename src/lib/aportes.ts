@@ -24,6 +24,9 @@ import type {
 import { PrismaAporteRepository } from "@/modules/aportes/infrastructure/PrismaAporteRepository";
 import { PrismaActividadRepository } from "@/modules/actividades/infrastructure/PrismaActividadRepository";
 import { PrismaRecursoRepository } from "@/modules/recursos/infrastructure/PrismaRecursoRepository";
+import { EstadoAporte } from "@/modules/aportes/domain/EstadoAporte";
+import { TipoNotificacion } from "@/modules/notificaciones/domain/TipoNotificacion";
+import { notificador } from "@/lib/notificaciones";
 
 // ── Composition root ────────────────────────────────────────────────────────
 // Cablea los repositorios Prisma (aportes + actividades + recursos) con los casos de
@@ -42,8 +45,56 @@ export function cancelarAporteServicio(id: string, actor: Actor): Promise<void> 
   return cancelarAporte(deps, id, actor);
 }
 
-export function marcarRecibidoServicio(id: string, actor: Actor): Promise<Aporte> {
-  return marcarRecibido(deps, id, actor);
+export async function marcarRecibidoServicio(
+  id: string,
+  actor: Actor,
+): Promise<Aporte> {
+  const aporte = await marcarRecibido(deps, id, actor);
+  // Disparador META_CUMPLIDA (feature 012): si este aporte hace cruzar el 100% de
+  // su meta por primera vez, avisa al admin dueño y a los aportantes de la meta.
+  await notificarMetaCumplida(aporte);
+  return aporte;
+}
+
+// Evalúa el cruce del 100% de la meta del recurso del aporte (antes vs después) y,
+// si aplica, emite el aviso. La idempotencia por `claveDedupe` (una META_CUMPLIDA
+// por meta) cubre reintentos. Best-effort: no debe romper el marcado del aporte.
+async function notificarMetaCumplida(aporte: Aporte): Promise<void> {
+  try {
+    if (!aporte.actividadId) return;
+    const actividad = await actividades.buscarPorId(aporte.actividadId);
+    if (!actividad) return;
+    const meta = actividad.metas.find((m) => m.recursoId === aporte.recursoId);
+    if (!meta || meta.cantidadObjetivo <= 0) return;
+
+    const agregados = await aportes.progresoPorActividad(aporte.actividadId);
+    const recibidoDespues =
+      agregados.find((a) => a.recursoId === aporte.recursoId)?.recibido ?? 0;
+    const recibidoAntes = recibidoDespues - aporte.cantidad;
+    const cruzaCien =
+      recibidoAntes < meta.cantidadObjetivo &&
+      recibidoDespues >= meta.cantidadObjetivo;
+    if (!cruzaCien) return;
+
+    const recibidos = await aportes.listarPorActividad(aporte.actividadId, {
+      estado: EstadoAporte.RECIBIDO,
+    });
+    const aportantes = recibidos
+      .filter((a) => a.recursoId === aporte.recursoId && a.colaboradorId)
+      .map((a) => a.colaboradorId as string);
+    const destinatarioIds = [...new Set([actividad.adminId, ...aportantes])];
+
+    await notificador.emitir({
+      tipo: TipoNotificacion.META_CUMPLIDA,
+      actividadId: actividad.id,
+      sectorDestino: actividad.sectorDestino,
+      recursoId: aporte.recursoId,
+      recursoNombre: meta.recurso?.nombre ?? "el recurso",
+      destinatarioIds,
+    });
+  } catch (error) {
+    console.error("[notificaciones] No se pudo emitir META_CUMPLIDA:", error);
+  }
 }
 
 export function revertirRecibidoServicio(

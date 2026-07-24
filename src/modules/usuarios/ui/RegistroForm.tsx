@@ -30,6 +30,7 @@ import {
 } from "@/shared/ui/select";
 import { DatosContactoFields } from "./DatosContactoFields";
 import { PasswordInput } from "./PasswordInput";
+import { TelefonoField } from "./TelefonoField";
 
 // Payload que el formulario envía al server action. Cuando el rol es ADMIN,
 // incluye el perfil de centro de acopio (feature 016) con `telefonoEsWhatsApp`.
@@ -467,25 +468,11 @@ export function RegistroForm({ action, estados, municipios }: Props) {
           />
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="telefono" className="text-sm font-medium">
-                Teléfono
-              </label>
-              <input
-                id="telefono"
-                type="tel"
-                className={campo}
-                aria-invalid={Boolean(errors.telefono)}
-                {...register("telefono", {
-                  required: esAdmin && "Indica un teléfono.",
-                })}
-              />
-              {errors.telefono && (
-                <p className="text-sm text-destructive">
-                  {errors.telefono.message}
-                </p>
-              )}
-            </div>
+            <TelefonoField<Campos>
+              control={control}
+              name="telefono"
+              required="Indica un teléfono."
+            />
             <div className="flex flex-col gap-1.5">
               <label htmlFor="correo" className="text-sm font-medium">
                 Correo de contacto

@@ -32,7 +32,11 @@ import type { FiltroActividades } from "@/modules/actividades/domain/ActividadRe
 import { PrismaActividadRepository } from "@/modules/actividades/infrastructure/PrismaActividadRepository";
 import { PrismaRecursoRepository } from "@/modules/recursos/infrastructure/PrismaRecursoRepository";
 import { PrismaPuntoAcopioRepository } from "@/modules/acopio/infrastructure/PrismaPuntoAcopioRepository";
+import { PrismaAfiliacionRepository } from "@/modules/afiliaciones/infrastructure";
 import { SupabaseStorageAdapter } from "@/modules/archivos/infrastructure/SupabaseStorageAdapter";
+import type { CategoriaRecurso } from "@/modules/recursos/domain/CategoriaRecurso";
+import { TipoNotificacion } from "@/modules/notificaciones/domain/TipoNotificacion";
+import { notificador } from "@/lib/notificaciones";
 
 // ── Composition root ────────────────────────────────────────────────────────
 // `src/lib` es infraestructura global (tech-stack.md): aquí se cablean los
@@ -43,6 +47,7 @@ import { SupabaseStorageAdapter } from "@/modules/archivos/infrastructure/Supaba
 const actividades = new PrismaActividadRepository();
 const recursos = new PrismaRecursoRepository();
 const puntos = new PrismaPuntoAcopioRepository();
+const afiliaciones = new PrismaAfiliacionRepository();
 const deps = { actividades, recursos, puntos };
 
 // Almacenamiento de archivos de actividad (feature 033): bucket PÚBLICO, distinto del
@@ -50,8 +55,44 @@ const deps = { actividades, recursos, puntos };
 const storage = new SupabaseStorageAdapter("SUPABASE_STORAGE_BUCKET_PUBLICO");
 const archivoDeps = { actividades, storage };
 
-export function crearActividadServicio(input: CrearActividadInput): Promise<Actividad> {
-  return crearActividad(deps, input);
+export async function crearActividadServicio(
+  input: CrearActividadInput,
+): Promise<Actividad> {
+  const actividad = await crearActividad(deps, input);
+  // Disparador NUEVA_ACTIVIDAD (feature 012): avisa a la red apta del admin dueño
+  // (025). Best-effort: nunca debe hacer fallar la creación de la actividad.
+  await notificarNuevaActividad(actividad, input.metas);
+  return actividad;
+}
+
+// Resuelve la red apta (colaboradores verificados afiliados cuya categoría coincide
+// con la de algún recurso de las metas) y emite el aviso in-app + WhatsApp.
+async function notificarNuevaActividad(
+  actividad: Actividad,
+  metas: CrearActividadInput["metas"],
+): Promise<void> {
+  try {
+    if (metas.length === 0) return;
+    const categorias = new Set<CategoriaRecurso>();
+    for (const meta of metas) {
+      const recurso = await recursos.buscarPorId(meta.recursoId);
+      if (recurso) categorias.add(recurso.categoria);
+    }
+    if (categorias.size === 0) return;
+    const destinatarioIds = await afiliaciones.listarDestinatarios(
+      actividad.adminId,
+      [...categorias],
+    );
+    if (destinatarioIds.length === 0) return;
+    await notificador.emitir({
+      tipo: TipoNotificacion.NUEVA_ACTIVIDAD,
+      actividadId: actividad.id,
+      sectorDestino: actividad.sectorDestino,
+      destinatarioIds,
+    });
+  } catch (error) {
+    console.error("[notificaciones] No se pudo emitir NUEVA_ACTIVIDAD:", error);
+  }
 }
 
 export function listarActividadesServicio(filtro?: FiltroActividades): Promise<Actividad[]> {

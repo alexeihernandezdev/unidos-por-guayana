@@ -125,49 +125,157 @@ export function normalizarCedula(entrada: string): string | null {
   return resultado.ok ? resultado.valor : null;
 }
 
-// ── Teléfono ──────────────────────────────────────────────────────────────────
+// ── Teléfono (E.164 con selector de país, feature 012) ──────────────────────────
+
+// Lista curada de países soportados en el selector de teléfono: Venezuela (por
+// defecto) más los destinos típicos de la diáspora. `dialCode` es el código de
+// marcación sin `+`. Se mantiene a mano (sin dependencias); ampliarla es añadir
+// una fila. El teléfono se guarda en E.164 (`+<dialCode><numeroNacional>`), y el
+// canal de WhatsApp (feature 012) lo consume tal cual.
+export type PaisTelefono = {
+  iso: string;
+  nombre: string;
+  dialCode: string;
+  ejemplo: string;
+};
+
+export const PAISES_TELEFONO: readonly PaisTelefono[] = [
+  { iso: "VE", nombre: "Venezuela", dialCode: "58", ejemplo: "0412 1234567" },
+  { iso: "US", nombre: "Estados Unidos", dialCode: "1", ejemplo: "555 123 4567" },
+  { iso: "ES", nombre: "España", dialCode: "34", ejemplo: "612 345 678" },
+  { iso: "CO", nombre: "Colombia", dialCode: "57", ejemplo: "300 1234567" },
+  { iso: "CL", nombre: "Chile", dialCode: "56", ejemplo: "9 1234 5678" },
+  { iso: "PE", nombre: "Perú", dialCode: "51", ejemplo: "912 345 678" },
+  { iso: "AR", nombre: "Argentina", dialCode: "54", ejemplo: "11 1234 5678" },
+  { iso: "PA", nombre: "Panamá", dialCode: "507", ejemplo: "6123 4567" },
+  { iso: "MX", nombre: "México", dialCode: "52", ejemplo: "55 1234 5678" },
+  { iso: "BR", nombre: "Brasil", dialCode: "55", ejemplo: "11 91234 5678" },
+  { iso: "EC", nombre: "Ecuador", dialCode: "593", ejemplo: "99 123 4567" },
+] as const;
+
+export const PAIS_TELEFONO_DEFECTO = "VE";
+
+// Países ordenados por longitud de `dialCode` (desc) para que el emparejamiento por
+// prefijo de un E.164 elija el código más largo primero (p. ej. `593` antes que `59`).
+const PAISES_POR_PREFIJO = [...PAISES_TELEFONO].sort(
+  (a, b) => b.dialCode.length - a.dialCode.length,
+);
+
+function paisPorIso(iso: string): PaisTelefono | undefined {
+  return PAISES_TELEFONO.find((p) => p.iso === iso);
+}
+
+// Valida el número nacional venezolano (10 dígitos significativos, sin el 0
+// inicial) contra los códigos de operadora/área conocidos. Devuelve el error o
+// `null` si es válido.
+function errorNacionalVenezuela(nacional10: string): string | null {
+  if (nacional10.length !== 10) {
+    return "El teléfono debe tener 11 dígitos (por ejemplo 0412 1234567).";
+  }
+  const codigo = `0${nacional10.slice(0, 3)}`;
+  if (!(CODIGOS_OPERADORA_VENEZUELA as readonly string[]).includes(codigo)) {
+    return "El código de operadora no es válido en Venezuela.";
+  }
+  return null;
+}
 
 /**
- * Valida y normaliza un teléfono venezolano. Acepta separadores (espacios,
- * guiones, paréntesis) y prefijo internacional opcional `+58`. Devuelve el
- * número en formato nacional `0XXXXXXXXXX` (11 dígitos).
+ * Valida y normaliza un teléfono a **E.164** (`+<dialCode><numeroNacional>`). El
+ * `iso` indica el país elegido en el formulario (por defecto Venezuela). Acepta:
+ * - un E.164 ya compuesto (`+58412...`), del que deduce el país por el prefijo;
+ * - un número nacional venezolano (`0412...`, con o sin separadores) cuando el
+ *   país es Venezuela (compatibilidad con lo capturado antes de esta feature).
+ *
+ * Venezuela conserva la validación estricta de operadora; el resto de países
+ * validan por longitud E.164 (7 a 15 dígitos en total tras el `+`).
  */
-export function validarTelefono(entrada: string): ResultadoValidacion<string> {
+export function validarTelefono(
+  entrada: string,
+  iso: string = PAIS_TELEFONO_DEFECTO,
+): ResultadoValidacion<string> {
   const bruta = entrada.trim();
   if (bruta.length === 0) {
     return { ok: false, error: "El teléfono es obligatorio." };
   }
 
-  // Normaliza: descarta todo lo que no sea dígito; si empieza por +58, lo
-  // convierte a 0.
-  let digitos = bruta.replace(/[^\d+]/g, "");
-  if (digitos.startsWith("+58")) {
-    digitos = `0${digitos.slice(3)}`;
-  } else {
-    digitos = digitos.replace(/\+/g, "");
+  // Un `00` internacional se trata como `+`.
+  const conMas = bruta.startsWith("00") ? `+${bruta.slice(2)}` : bruta;
+
+  // Caso 1: E.164 explícito (empieza por `+`). El país se deduce del prefijo.
+  if (conMas.startsWith("+")) {
+    const digitos = conMas.slice(1).replace(/\D/g, "");
+    const pais = PAISES_POR_PREFIJO.find((p) => digitos.startsWith(p.dialCode));
+    if (!pais) {
+      return { ok: false, error: "El código de país no es reconocido." };
+    }
+    const nacional = digitos.slice(pais.dialCode.length);
+    if (pais.iso === "VE") {
+      const error = errorNacionalVenezuela(nacional);
+      if (error) return { ok: false, error };
+      return { ok: true, valor: `+58${nacional}` };
+    }
+    if (nacional.length < 6 || nacional.length > 14) {
+      return { ok: false, error: "El número de teléfono no es válido." };
+    }
+    return { ok: true, valor: `+${pais.dialCode}${nacional}` };
   }
 
-  if (digitos.length !== 11 || !digitos.startsWith("0")) {
-    return {
-      ok: false,
-      error: "El teléfono debe tener 11 dígitos (por ejemplo 0412 1234567).",
-    };
+  // Caso 2: número sin prefijo. Se interpreta según el país elegido.
+  const pais = paisPorIso(iso) ?? paisPorIso(PAIS_TELEFONO_DEFECTO)!;
+  const soloDigitos = conMas.replace(/\D/g, "");
+
+  if (pais.iso === "VE") {
+    // Acepta `0XXXXXXXXXX` (11) o `XXXXXXXXXX` (10, sin el 0). También `58...`.
+    let nacional = soloDigitos;
+    if (nacional.startsWith("58") && nacional.length === 12) {
+      nacional = nacional.slice(2);
+    } else if (nacional.startsWith("0")) {
+      nacional = nacional.slice(1);
+    }
+    const error = errorNacionalVenezuela(nacional);
+    if (error) return { ok: false, error };
+    return { ok: true, valor: `+58${nacional}` };
   }
 
-  const codigo = digitos.slice(0, 4);
-  if (!(CODIGOS_OPERADORA_VENEZUELA as readonly string[]).includes(codigo)) {
-    return {
-      ok: false,
-      error: "El código de operadora no es válido en Venezuela.",
-    };
+  if (soloDigitos.length < 6 || soloDigitos.length > 14) {
+    return { ok: false, error: "El número de teléfono no es válido." };
   }
-
-  return { ok: true, valor: digitos };
+  return { ok: true, valor: `+${pais.dialCode}${soloDigitos}` };
 }
 
-export function normalizarTelefono(entrada: string): string | null {
-  const resultado = validarTelefono(entrada);
+export function normalizarTelefono(
+  entrada: string,
+  iso: string = PAIS_TELEFONO_DEFECTO,
+): string | null {
+  const resultado = validarTelefono(entrada, iso);
   return resultado.ok ? resultado.valor : null;
+}
+
+/** Deduce el `iso` del país de un teléfono E.164 por su prefijo, o `null`. */
+export function paisDeTelefonoE164(telefono: string): string | null {
+  if (!telefono.startsWith("+")) return null;
+  const digitos = telefono.slice(1).replace(/\D/g, "");
+  const pais = PAISES_POR_PREFIJO.find((p) => digitos.startsWith(p.dialCode));
+  return pais?.iso ?? null;
+}
+
+/**
+ * Descompone un teléfono E.164 en el país (`iso`) y el número **para mostrar** en
+ * el input al editar: en Venezuela se antepone el `0` nacional (`0412...`); en el
+ * resto se devuelve el número significativo tal cual. Si no se reconoce el
+ * prefijo, cae a Venezuela con el número entre los dígitos disponibles.
+ */
+export function partesTelefonoE164(telefono: string): {
+  iso: string;
+  nacional: string;
+} {
+  const iso = paisDeTelefonoE164(telefono) ?? PAIS_TELEFONO_DEFECTO;
+  const pais = paisPorIso(iso)!;
+  const digitos = telefono.replace(/\D/g, "");
+  const nacional = digitos.startsWith(pais.dialCode)
+    ? digitos.slice(pais.dialCode.length)
+    : digitos;
+  return { iso, nacional: iso === "VE" ? `0${nacional}` : nacional };
 }
 
 // ── Ubicación (catálogo, feature 020) ─────────────────────────────────────────

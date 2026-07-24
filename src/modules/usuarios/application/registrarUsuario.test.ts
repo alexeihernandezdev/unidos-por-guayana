@@ -68,7 +68,7 @@ describe("registrarUsuario", () => {
     expect(usuario.rol).toBe(Rol.COLABORADOR);
     expect(usuario.estadoVerificacion).toBe("PENDIENTE");
     expect(usuario.cedula).toBe("V12345678");
-    expect(usuario.telefono).toBe("04121234567");
+    expect(usuario.telefono).toBe("+584121234567");
     expect(usuario.telefonoEsWhatsApp).toBe(true);
     expect(usuario.estadoId).toBe(guaira.id);
     expect(usuario.municipioId).toBe(vargas.id);

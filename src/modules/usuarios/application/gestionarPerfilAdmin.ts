@@ -1,5 +1,6 @@
 import type { CatalogoUbicacionRepository } from "@/modules/ubicacion/domain/CatalogoUbicacionRepository";
 import { validarUbicacion } from "@/modules/ubicacion/domain/validarUbicacion";
+import { normalizarTelefono } from "@/modules/usuarios/domain/datosContacto";
 import {
   problemasDePerfilAdmin,
   type CambiosPerfilAdmin,
@@ -31,7 +32,9 @@ function normalizar(datos: DatosPerfilAdmin): DatosPerfilAdmin {
     nombreCuenta: datos.nombreCuenta.trim(),
     estadoId: datos.estadoId.trim(),
     municipioId: datos.municipioId.trim(),
-    telefono: datos.telefono.trim(),
+    // El teléfono se guarda en E.164 (feature 012). Si por lo que sea no valida
+    // (dato heredado atípico), se conserva el trim para no perder el contacto.
+    telefono: normalizarTelefono(datos.telefono) ?? datos.telefono.trim(),
     telefonoEsWhatsApp: Boolean(datos.telefonoEsWhatsApp),
     correo: datos.correo.trim().toLowerCase(),
     tipoDocumento: datos.tipoDocumento,

@@ -3,6 +3,22 @@
 > Checklist de implementación. Marcar el progreso conforme se avanza. El orden respeta las
 > dependencias descritas en `plan.md`.
 
+> **Estado jul 2026 (implementado, pendiente aplicar migración).**
+> - [x] Teléfono E.164 + selector de país (`datosContacto.ts`, `TelefonoField`, formularios,
+>       normalización servidor) + tests actualizados.
+> - [x] Modelo `Notificacion` + enum en `schema.prisma`; migración `20260724120000_notificaciones_
+>       y_telefono_e164` **creada** (tabla + enum + backfill de teléfonos). **Falta aplicarla**
+>       (`pnpm db:migrate` / deploy) contra la base; en local requiere Docker o consentimiento en Neon.
+> - [x] Módulo `notificaciones` (domain/application/infrastructure) con puertos y reglas + tests
+>       (reglas, emitir, consultar, WhatsAppCloudAdapter).
+> - [x] Canal WhatsApp plug-n-play (`WhatsAppCloudAdapter`, env-gated) + `.env.example`.
+> - [x] Disparadores en `@/lib/actividades` (NUEVA_ACTIVIDAD, red apta) y `@/lib/aportes`
+>       (META_CUMPLIDA, cruce 100%). Composición `@/lib/notificaciones` + `@/shared/notificaciones`.
+> - [x] UI campana (AppShell) + bandeja `/notificaciones` + server actions.
+> - [x] `pnpm test` (feature en verde), `pnpm lint` (0 errores), `pnpm build` (OK).
+> - [ ] Aplicar la migración en la base y validar el flujo end-to-end en `pnpm dev`.
+> - [ ] Mover 012 a "Hecho" en el roadmap tras aplicar la migración.
+
 ## 0. Preparación
 
 - [ ] Leer la guía de Next.js 16 en `node_modules/next/dist/docs/` (server actions, server components)

@@ -3,6 +3,30 @@
 > Cómo se implementa la `spec.md`. Respeta `constitution/tech-stack.md` (Clean + Screaming,
 > pureza de capas, convenciones y límites duros).
 
+> **Actualización jul 2026 (implementado).** El plan original (solo in-app) se amplió con el canal
+> WhatsApp y el teléfono en E.164. Lo entregado:
+> - **Módulo `src/modules/notificaciones`** (domain/application/infrastructure/ui). Puertos:
+>   `NotificadorPort`, `CanalWhatsApp`, `LectorContacto`. Reglas puras `componerMensaje`,
+>   `variablesPlantilla`, `claveDedupe`, `contarNoLeidas`. Casos de uso `emitirNotificacion`
+>   (best-effort, dedup + WhatsApp a los nuevos con `telefonoEsWhatsApp`) y lecturas/marcado.
+> - **Infra:** `PrismaNotificacionRepository`, `PrismaLectorContacto` (teléfono del `PerfilAdmin`
+>   para ADMIN, del `Usuario` para el resto), `WhatsAppCloudAdapter` (Graph API, env-gated no-op).
+> - **Disparadores en el composition root** (no en los casos de uso puros de 024/006, que quedan
+>   intactos): `@/lib/actividades.ts` (`crearActividadServicio` resuelve la red apta con
+>   `AfiliacionRepository` + categorías de las metas y emite `NUEVA_ACTIVIDAD`) y `@/lib/aportes.ts`
+>   (`marcarRecibidoServicio` evalúa el cruce del 100% y emite `META_CUMPLIDA`). Ambos best-effort.
+> - **Composición:** `@/lib/notificaciones.ts` (notificador compuesto + servicios de lectura) y
+>   fachada `@/shared/notificaciones`.
+> - **UI:** `CampanaNotificaciones` (server) + `CampanaCliente` (popover) en el `AppShell`; bandeja
+>   `/notificaciones` (route group `(app)`, todas las roles) con `NotificacionesLista`; server actions
+>   en `src/modules/notificaciones/ui/acciones.ts`.
+> - **Teléfono E.164:** `datosContacto.ts` (`PAISES_TELEFONO`, `validarTelefono(entrada, iso)`,
+>   `paisDeTelefonoE164`, `partesTelefonoE164`); componente `TelefonoField` (país + número, compone
+>   E.164) cableado en `DatosContactoFields`, `RegistroForm` (admin) y `PerfilAdminForm`;
+>   normalización servidor en `gestionarPerfilAdmin`. Migración `20260724120000_notificaciones_y_
+>   telefono_e164` (tabla + enum + backfill `0XXX…`→`+58XXX…`).
+> - **Env:** claves `WHATSAPP_*` en `.env.example`.
+
 ## Enfoque general
 
 De **adentro hacia afuera** (dominio → aplicación → infraestructura → presentación), reutilizando el

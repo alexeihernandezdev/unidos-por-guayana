@@ -121,7 +121,7 @@ describe("gestionarPerfilAdmin", () => {
 
       expect(actualizado.estadoId).toBe(miranda.id);
       expect(actualizado.municipioId).toBe(baruta.id);
-      expect(actualizado.telefono).toBe("+58 414 1111111");
+      expect(actualizado.telefono).toBe("+584141111111");
       expect(actualizado.nombreCuenta).toBe(baseInput.nombreCuenta);
     });
 

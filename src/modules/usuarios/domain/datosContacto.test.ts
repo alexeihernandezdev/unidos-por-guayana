@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   normalizarCedula,
   normalizarTelefono,
+  paisDeTelefonoE164,
+  partesTelefonoE164,
   tieneDatosContactoCompletos,
   validarCedula,
   validarDatosContacto,
@@ -66,7 +68,7 @@ describe("validarTelefono", () => {
     if (!r.ok) expect(r.error).toBe("El teléfono es obligatorio.");
   });
 
-  it("rechaza longitud incorrecta", () => {
+  it("rechaza longitud incorrecta (Venezuela)", () => {
     const r = validarTelefono("04121234");
     expect(r.ok).toBe(false);
     if (!r.ok)
@@ -82,34 +84,72 @@ describe("validarTelefono", () => {
       expect(r.error).toBe("El código de operadora no es válido en Venezuela.");
   });
 
-  it("acepta y normaliza formato nacional con separadores", () => {
+  it("acepta y normaliza formato nacional venezolano a E.164", () => {
     expect(validarTelefono("0412-1234567")).toEqual({
       ok: true,
-      valor: "04121234567",
+      valor: "+584121234567",
     });
     expect(validarTelefono("(0414) 123 4567")).toEqual({
       ok: true,
-      valor: "04141234567",
+      valor: "+584141234567",
     });
   });
 
-  it("convierte prefijo +58 a 0 y valida operadora", () => {
+  it("acepta un E.164 venezolano ya compuesto y deduce el país", () => {
     expect(validarTelefono("+58 412 1234567")).toEqual({
       ok: true,
-      valor: "04121234567",
+      valor: "+584121234567",
     });
   });
 
   it("acepta un fijo con código de área conocido", () => {
     expect(validarTelefono("0286-1234567")).toEqual({
       ok: true,
-      valor: "02861234567",
+      valor: "+582861234567",
+    });
+  });
+
+  it("normaliza un número de otro país por su iso (validación por longitud)", () => {
+    expect(validarTelefono("612 345 678", "ES")).toEqual({
+      ok: true,
+      valor: "+34612345678",
+    });
+    expect(validarTelefono("300 1234567", "CO")).toEqual({
+      ok: true,
+      valor: "+573001234567",
+    });
+  });
+
+  it("acepta un E.164 de otro país y lo deja tal cual", () => {
+    expect(validarTelefono("+1 555 123 4567")).toEqual({
+      ok: true,
+      valor: "+15551234567",
     });
   });
 
   it("normalizarTelefono devuelve null si no es válido", () => {
     expect(normalizarTelefono("0499 111 2222")).toBeNull();
-    expect(normalizarTelefono("+58 412 1234567")).toBe("04121234567");
+    expect(normalizarTelefono("+58 412 1234567")).toBe("+584121234567");
+  });
+});
+
+describe("paisDeTelefonoE164 / partesTelefonoE164", () => {
+  it("deduce el país por el prefijo E.164", () => {
+    expect(paisDeTelefonoE164("+584121234567")).toBe("VE");
+    expect(paisDeTelefonoE164("+34612345678")).toBe("ES");
+    expect(paisDeTelefonoE164("+15551234567")).toBe("US");
+    expect(paisDeTelefonoE164("04121234567")).toBeNull();
+  });
+
+  it("descompone para mostrar en el input (VE antepone el 0)", () => {
+    expect(partesTelefonoE164("+584121234567")).toEqual({
+      iso: "VE",
+      nacional: "04121234567",
+    });
+    expect(partesTelefonoE164("+34612345678")).toEqual({
+      iso: "ES",
+      nacional: "612345678",
+    });
   });
 });
 
@@ -163,7 +203,7 @@ describe("validarDatosContacto", () => {
       ok: true,
       valor: {
         cedula: "V12345678",
-        telefono: "04121234567",
+        telefono: "+584121234567",
         telefonoEsWhatsApp: true,
         estadoId: "est-guaira",
         municipioId: "mun-vargas",

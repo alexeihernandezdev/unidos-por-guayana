@@ -14,6 +14,7 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@/shared/ui/sidebar";
+import { CampanaNotificaciones } from "@/modules/notificaciones/ui/CampanaNotificaciones";
 import { AppSidebarNav } from "./app-sidebar-nav";
 import type { NavSection } from "./navConfig";
 
@@ -119,6 +120,9 @@ export async function AppShell({
           <span className="truncate text-sm font-medium text-foreground/80">
             {ariaLabel}
           </span>
+          <div className="ml-auto flex items-center">
+            <CampanaNotificaciones />
+          </div>
         </header>
 
         {children}

@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/select";
+import { TelefonoField } from "./TelefonoField";
 
 type Props = {
   // Valores actuales del perfil, para prellenar el formulario.
@@ -90,19 +91,11 @@ export function PerfilAdminForm({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="telefono" className="text-sm font-medium">
-            Teléfono
-          </label>
-          <input
-            id="telefono"
-            type="tel"
-            className={campo}
-            aria-invalid={Boolean(errors.telefono)}
-            {...register("telefono", { required: "Indica un teléfono." })}
+          <TelefonoField<DatosPerfilAdmin>
+            control={control}
+            name="telefono"
+            required="Indica un teléfono."
           />
-          {errors.telefono && (
-            <p className="text-sm text-destructive">{errors.telefono.message}</p>
-          )}
           <label className="mt-1 flex items-center gap-2 text-sm">
             <input
               type="checkbox"

@@ -92,10 +92,42 @@ model Usuario {
   eventosAuditoria EventoAuditoriaSolicitud[] @relation("ActorEventoAuditoria")
   // Evidencia de verificación subida por este auditor (feature 032).
   evidenciasAuditoria ArchivoEvidenciaAuditoria[] @relation("EvidenciaAuditoria")
+  // Notificaciones in-app dirigidas a este usuario (feature 012).
+  notificaciones      Notificacion[]
 
   @@index([estadoId])
   @@index([municipioId])
   @@map("usuarios")
+}
+
+// Tipo de notificación (feature 012). Conjunto cerrado: el `mensaje` es texto
+// compuesto al emitir, pero el `tipo` clasifica y elige plantilla/icono. Sus
+// valores coinciden con el enum de dominio para mapear sin casts.
+enum TipoNotificacion {
+  NUEVA_ACTIVIDAD
+  META_CUMPLIDA
+}
+
+// Aviso in-app dirigido a un `Usuario` (feature 012). La `referencia` se modela
+// como par `(referenciaTipo, referenciaId)` en vez de una FK rígida, para poder
+// apuntar a distintas entidades (hoy la Actividad) sin migrar la tabla.
+// `claveDedupe` + el índice único evitan duplicados si el disparador se reintenta.
+// El envío por WhatsApp (feature 012) es best-effort y no se persiste aquí.
+model Notificacion {
+  id             String           @id @default(cuid())
+  usuarioId      String
+  usuario        Usuario          @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  tipo           TipoNotificacion
+  mensaje        String
+  referenciaTipo String
+  referenciaId   String
+  leida          Boolean          @default(false)
+  claveDedupe    String
+  createdAt      DateTime         @default(now())
+
+  @@unique([usuarioId, claveDedupe])
+  @@index([usuarioId, leida])
+  @@map("notificaciones")
 }
 
 // Afiliacion (feature 025): vínculo unilateral entre un COLABORADOR y un ADMIN

@@ -10,10 +10,8 @@ import type {
 import type { Estado } from "@/modules/ubicacion/domain/Estado";
 import type { Municipio } from "@/modules/ubicacion/domain/Municipio";
 import { SelectorUbicacion } from "@/modules/ubicacion/ui/SelectorUbicacion";
-import {
-  validarCedula,
-  validarTelefono,
-} from "@/modules/usuarios/domain/datosContacto";
+import { validarCedula } from "@/modules/usuarios/domain/datosContacto";
+import { TelefonoField } from "./TelefonoField";
 
 // Campos de contacto y ubicación exigidos a COLABORADOR/SOLICITANTE
 // (feature 017; ubicación por catálogo desde 020). Componente reutilizado por
@@ -100,27 +98,11 @@ export function DatosContactoFields<T extends FieldValues & CamposDatosContacto>
           )}
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="telefono" className="text-sm font-medium">
-            Teléfono
-          </label>
-          <input
-            id="telefono"
-            type="tel"
-            className={campo}
-            placeholder="0412 1234567"
-            aria-invalid={Boolean(errorFor("telefono"))}
-            {...register("telefono" as Path<T>, {
-              validate: (valor: unknown) => {
-                const r = validarTelefono(String(valor ?? ""));
-                return r.ok ? true : r.error;
-              },
-            })}
-          />
-          {errorFor("telefono") && (
-            <p className="text-sm text-destructive">{errorFor("telefono")}</p>
-          )}
-        </div>
+        <TelefonoField<T>
+          control={control}
+          name={"telefono" as Path<T>}
+          required="El teléfono es obligatorio."
+        />
       </div>
 
       <label className="flex items-center gap-2 text-sm">

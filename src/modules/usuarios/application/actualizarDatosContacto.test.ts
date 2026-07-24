@@ -59,7 +59,7 @@ describe("actualizarDatosContacto", () => {
     );
 
     expect(actualizado.cedula).toBe("E9876543");
-    expect(actualizado.telefono).toBe("04147654321");
+    expect(actualizado.telefono).toBe("+584147654321");
     expect(actualizado.telefonoEsWhatsApp).toBe(false);
     expect(actualizado.estadoId).toBe(miranda.id);
     expect(actualizado.municipioId).toBe(baruta.id);
