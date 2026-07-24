@@ -16,11 +16,13 @@ import {
   cargarPortadasServicio,
   listarSolicitudesServicio,
 } from "@/shared/solicitudes";
+import { cargarCatalogoUbicacion } from "@/shared/ubicacion";
 import { requireRol } from "@/shared/auth";
 import { FiltroSelect } from "@/shared/ui/filtro-select";
 import { Input } from "@/shared/ui/input";
 import {
-  PanelFilters,
+  FiltroUbicacion,
+  PanelFilterShell,
   PanelFiltersField,
   PanelPage,
   PanelPageHeader,
@@ -32,21 +34,40 @@ type Props = {
     sector?: string;
     urgencia?: string;
     estado?: string;
+    estadoId?: string;
+    municipioId?: string;
   }>;
 };
 
 export default async function SolicitudesAdminPage({ searchParams }: Props) {
   await requireRol(Rol.ADMIN);
 
-  const { sector, urgencia, estado } = await searchParams;
+  const params = await searchParams;
+  const catalogo = await cargarCatalogoUbicacion();
+  const estadoIds = new Set(catalogo.estados.map((e) => e.id));
+  const municipioIds = new Set(catalogo.municipios.map((m) => m.id));
 
   const filtro: FiltroSolicitudes = {};
-  if (sector?.trim()) filtro.sector = sector.trim();
-  if (urgencia && esUrgenciaSolicitud(urgencia)) filtro.urgencia = urgencia;
-  if (estado && esEstadoSolicitud(estado)) filtro.estado = estado;
+  if (params.sector?.trim()) filtro.sector = params.sector.trim();
+  if (params.urgencia && esUrgenciaSolicitud(params.urgencia))
+    filtro.urgencia = params.urgencia;
+  if (params.estado && esEstadoSolicitud(params.estado))
+    filtro.estado = params.estado;
+  if (params.estadoId && estadoIds.has(params.estadoId))
+    filtro.estadoId = params.estadoId;
+  if (params.municipioId && municipioIds.has(params.municipioId))
+    filtro.municipioId = params.municipioId;
 
   const solicitudes = await listarSolicitudesServicio(filtro);
   const portadas = await cargarPortadasServicio(solicitudes);
+
+  const activos = [
+    filtro.sector,
+    filtro.urgencia,
+    filtro.estado,
+    filtro.estadoId,
+    filtro.municipioId,
+  ].filter(Boolean).length;
 
   return (
     <PanelPage>
@@ -57,60 +78,72 @@ export default async function SolicitudesAdminPage({ searchParams }: Props) {
         description="Peticiones del terreno: sector, urgencia y recursos necesarios."
       />
 
-      <PanelFilters
-        activos={
-          [filtro.sector, filtro.urgencia, filtro.estado].filter(Boolean).length
-        }
+      <PanelFilterShell
+        activos={activos}
         limpiarHref="/panel/solicitudes"
+        submitLabel="Aplicar filtros"
+        resumen={`${solicitudes.length} ${solicitudes.length === 1 ? "resultado" : "resultados"}`}
+        filtros={
+          <>
+            <PanelFiltersField label="Sector" htmlFor="sector">
+              <Input
+                id="sector"
+                name="sector"
+                defaultValue={filtro.sector ?? ""}
+                placeholder="Petare, Upata…"
+                className="w-full bg-background"
+              />
+            </PanelFiltersField>
+
+            <PanelFiltersField label="Urgencia">
+              <FiltroSelect
+                name="urgencia"
+                ariaLabel="Filtrar por urgencia"
+                defaultValue={filtro.urgencia ?? "todas"}
+                className="w-full bg-background"
+                opciones={[
+                  { value: "todas", label: "Todas" },
+                  ...URGENCIAS_SOLICITUD.map((u) => ({
+                    value: u,
+                    label: URGENCIA_LABEL[u],
+                  })),
+                ]}
+              />
+            </PanelFiltersField>
+
+            <PanelFiltersField label="Situación">
+              <FiltroSelect
+                name="estado"
+                ariaLabel="Filtrar por situación de la solicitud"
+                defaultValue={filtro.estado ?? "todos"}
+                className="w-full bg-background"
+                opciones={[
+                  { value: "todos", label: "Todas" },
+                  ...ESTADOS_SOLICITUD.map((e) => ({
+                    value: e,
+                    label: ESTADO_LABEL[e],
+                  })),
+                ]}
+              />
+            </PanelFiltersField>
+
+            <FiltroUbicacion
+              estados={catalogo.estados}
+              municipios={catalogo.municipios}
+              estadoIdSel={filtro.estadoId}
+              municipioIdSel={filtro.municipioId}
+            />
+          </>
+        }
       >
-        <PanelFiltersField label="Sector" htmlFor="sector">
-          <Input
-            id="sector"
-            name="sector"
-            defaultValue={filtro.sector ?? ""}
-            placeholder="Petare, Upata…"
-            className="w-48"
-          />
-        </PanelFiltersField>
-
-        <PanelFiltersField label="Urgencia">
-          <FiltroSelect
-            name="urgencia"
-            ariaLabel="Filtrar por urgencia"
-            defaultValue={filtro.urgencia ?? "todas"}
-            opciones={[
-              { value: "todas", label: "Todas" },
-              ...URGENCIAS_SOLICITUD.map((u) => ({
-                value: u,
-                label: URGENCIA_LABEL[u],
-              })),
-            ]}
-          />
-        </PanelFiltersField>
-
-        <PanelFiltersField label="Estado">
-          <FiltroSelect
-            name="estado"
-            ariaLabel="Filtrar por estado"
-            defaultValue={filtro.estado ?? "todos"}
-            opciones={[
-              { value: "todos", label: "Todos" },
-              ...ESTADOS_SOLICITUD.map((e) => ({
-                value: e,
-                label: ESTADO_LABEL[e],
-              })),
-            ]}
-          />
-        </PanelFiltersField>
-      </PanelFilters>
-
-      <SolicitudesAdminGrid
-        solicitudes={solicitudes}
-        baseRuta="/panel/solicitudes"
-        portadas={portadas}
-        marcarAtendidaAction={marcarAtendidaAction}
-        cerrarAction={cerrarSolicitudAction}
-      />
+        <SolicitudesAdminGrid
+          solicitudes={solicitudes}
+          baseRuta="/panel/solicitudes"
+          portadas={portadas}
+          marcarAtendidaAction={marcarAtendidaAction}
+          cerrarAction={cerrarSolicitudAction}
+        />
+      </PanelFilterShell>
     </PanelPage>
   );
 }

@@ -195,6 +195,8 @@ export class PrismaSolicitudRepository implements SolicitudRepository {
         ...(filtro?.solicitanteId
           ? { solicitanteId: filtro.solicitanteId }
           : {}),
+        ...(filtro?.estadoId ? { estadoId: filtro.estadoId } : {}),
+        ...(filtro?.municipioId ? { municipioId: filtro.municipioId } : {}),
       },
       orderBy: { createdAt: "desc" },
       include: INCLUDE_RECURSOS,

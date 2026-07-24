@@ -21,7 +21,7 @@ export function PanelListToolbar({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center justify-between gap-4 rounded-lg border bg-card p-4",
+        "panel-surface flex flex-wrap items-center justify-between gap-4 rounded-lg border bg-card p-4",
         className,
       )}
     >
@@ -48,7 +48,7 @@ export function PanelList({ children, className, animated = false }: ListProps) 
   return (
     <div
       className={cn(
-        "divide-y overflow-hidden rounded-lg border bg-card",
+        "panel-surface divide-y overflow-hidden rounded-lg border bg-card",
         animated && "panel-stagger",
         className,
       )}

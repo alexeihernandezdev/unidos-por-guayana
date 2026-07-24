@@ -25,14 +25,16 @@ import {
 import { UrgenciaBadge } from "@/modules/solicitudes/ui/UrgenciaBadge";
 import { URGENCIA_LABEL } from "@/modules/solicitudes/ui/urgencias";
 import { listarAuditoriaServicio } from "@/shared/auditoria";
+import { cargarCatalogoUbicacion } from "@/shared/ubicacion";
 import { requireAuditorActivo } from "@/shared/auth";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import { FiltroSelect } from "@/shared/ui/filtro-select";
 import { Input } from "@/shared/ui/input";
 import {
+  FiltroUbicacion,
   PanelEmptyState,
-  PanelFilters,
+  PanelFilterShell,
   PanelFiltersField,
   PanelPage,
   PanelPageHeader,
@@ -58,7 +60,13 @@ const FECHA = new Intl.DateTimeFormat("es-VE", {
 });
 
 type Props = {
-  searchParams: Promise<{ q?: string; urgencia?: string; tab?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    urgencia?: string;
+    tab?: string;
+    estadoId?: string;
+    municipioId?: string;
+  }>;
 };
 
 function clasificar(item: SolicitudAuditable, actorId: string): TabKey {
@@ -121,6 +129,22 @@ export default async function AuditoriaSolicitudesPage({ searchParams }: Props) 
       ? query.urgencia
       : undefined;
 
+  // Ubicación: la cola audita en memoria y `SolicitudAuditable` expone nombres (no
+  // ids), así que traducimos el id del catálogo a su nombre para el filtro, igual
+  // que hace `coincideTexto`.
+  const catalogo = await cargarCatalogoUbicacion();
+  const estadoSel = query.estadoId
+    ? catalogo.estados.find((e) => e.id === query.estadoId)
+    : undefined;
+  const municipioSel = query.municipioId
+    ? catalogo.municipios.find((m) => m.id === query.municipioId)
+    : undefined;
+  const estadoId = estadoSel?.id;
+  const municipioId =
+    municipioSel && municipioSel.estadoId === estadoId
+      ? municipioSel.id
+      : undefined;
+
   const todas = await listarAuditoriaServicio(actor);
 
   // Conteo por pestaña sobre el total (sin aplicar búsqueda/urgencia) para que el
@@ -133,9 +157,17 @@ export default async function AuditoriaSolicitudesPage({ searchParams }: Props) 
   };
   for (const item of todas) conteo[clasificar(item, actor.id)] += 1;
 
-  // Visibles: las del tab activo, afinadas por búsqueda y urgencia.
+  // Visibles: las del tab activo, afinadas por búsqueda, urgencia y ubicación.
   let visibles = todas.filter((item) => clasificar(item, actor.id) === tab);
   if (urgencia) visibles = visibles.filter((item) => item.urgencia === urgencia);
+  if (estadoSel)
+    visibles = visibles.filter(
+      (item) => item.estadoNombre === estadoSel.nombre,
+    );
+  if (municipioId && municipioSel)
+    visibles = visibles.filter(
+      (item) => item.municipioNombre === municipioSel.nombre,
+    );
   if (texto) visibles = visibles.filter((item) => coincideTexto(item, texto));
 
   const hrefTab = (destino: TabKey) => {
@@ -143,10 +175,14 @@ export default async function AuditoriaSolicitudesPage({ searchParams }: Props) 
     params.set("tab", destino);
     if (texto) params.set("q", texto);
     if (urgencia) params.set("urgencia", urgencia);
+    if (estadoId) params.set("estadoId", estadoId);
+    if (municipioId) params.set("municipioId", municipioId);
     return `/auditoria/solicitudes?${params.toString()}`;
   };
 
-  const filtrosActivos = [texto, urgencia].filter(Boolean).length;
+  const filtrosActivos = [texto, urgencia, estadoId, municipioId].filter(
+    Boolean,
+  ).length;
 
   return (
     <PanelPage>
@@ -192,48 +228,63 @@ export default async function AuditoriaSolicitudesPage({ searchParams }: Props) 
         })}
       </nav>
 
-      <PanelFilters activos={filtrosActivos} limpiarHref={hrefTab(tab)}>
-        <input type="hidden" name="tab" value={tab} />
-        <PanelFiltersField label="Buscar" htmlFor="q">
-          <div className="relative">
-            <Search
-              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-              strokeWidth={1.5}
-              aria-hidden
+      <PanelFilterShell
+        activos={filtrosActivos}
+        limpiarHref={`/auditoria/solicitudes?tab=${tab}`}
+        submitLabel="Aplicar filtros"
+        resumen={`${visibles.length} ${visibles.length === 1 ? "resultado" : "resultados"}`}
+        filtros={
+          <>
+            <input type="hidden" name="tab" value={tab} />
+            <PanelFiltersField label="Buscar" htmlFor="q">
+              <div className="relative">
+                <Search
+                  className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                  strokeWidth={1.5}
+                  aria-hidden
+                />
+                <Input
+                  id="q"
+                  name="q"
+                  defaultValue={texto}
+                  placeholder="Sector, municipio o solicitante"
+                  className="w-full bg-background pl-9"
+                />
+              </div>
+            </PanelFiltersField>
+            <PanelFiltersField label="Urgencia">
+              <FiltroSelect
+                name="urgencia"
+                ariaLabel="Filtrar por urgencia"
+                defaultValue={urgencia ?? "todas"}
+                className="w-full bg-background"
+                opciones={[
+                  { value: "todas", label: "Todas" },
+                  ...URGENCIAS_SOLICITUD.map((u) => ({
+                    value: u,
+                    label: URGENCIA_LABEL[u],
+                  })),
+                ]}
+              />
+            </PanelFiltersField>
+            <FiltroUbicacion
+              estados={catalogo.estados}
+              municipios={catalogo.municipios}
+              estadoIdSel={estadoId}
+              municipioIdSel={municipioId}
             />
-            <Input
-              id="q"
-              name="q"
-              defaultValue={texto}
-              placeholder="Sector, municipio, estado o solicitante"
-              className="w-full pl-9 sm:w-80"
-            />
-          </div>
-        </PanelFiltersField>
-        <PanelFiltersField label="Urgencia">
-          <FiltroSelect
-            name="urgencia"
-            ariaLabel="Filtrar por urgencia"
-            defaultValue={urgencia ?? "todas"}
-            opciones={[
-              { value: "todas", label: "Todas" },
-              ...URGENCIAS_SOLICITUD.map((u) => ({
-                value: u,
-                label: URGENCIA_LABEL[u],
-              })),
-            ]}
+          </>
+        }
+      >
+        {visibles.length === 0 ? (
+          <PanelEmptyState
+            bordered={false}
+            icon={Inbox}
+            title="No hay solicitudes"
+            description="Ninguna solicitud de esta categoría coincide con los filtros."
           />
-        </PanelFiltersField>
-      </PanelFilters>
-
-      {visibles.length === 0 ? (
-        <PanelEmptyState
-          icon={Inbox}
-          title="No hay solicitudes"
-          description="Ninguna solicitud de esta categoría coincide con los filtros."
-        />
-      ) : (
-        <section aria-labelledby="cola-auditoria" className="space-y-4">
+        ) : (
+          <section aria-labelledby="cola-auditoria" className="space-y-4">
           <div className="flex items-end justify-between gap-4">
             <div>
               <h2
@@ -364,8 +415,9 @@ export default async function AuditoriaSolicitudesPage({ searchParams }: Props) 
               );
             })}
           </div>
-        </section>
-      )}
+          </section>
+        )}
+      </PanelFilterShell>
     </PanelPage>
   );
 }

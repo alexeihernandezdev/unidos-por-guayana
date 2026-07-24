@@ -54,11 +54,25 @@ export default async function RootLayout({
     esLanding ||
     pathname.startsWith("/transparencia") ||
     pathname.startsWith("/testimonios");
+  // Onboarding/auth viven fuera del shell logeado y traen su propio tratamiento
+  // claro (`.auth-shell`, /cuenta-admin, /completar-perfil): no se oscurecen.
+  const esOnboardingOAuth =
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/registro") ||
+    pathname.startsWith("/completar-perfil") ||
+    pathname.startsWith("/cuenta-admin");
+  // Espacio logeado (rutas con AppShell: (app)/(admin)/superadmin) → tema oscuro
+  // petróleo premium. Se aplica en <html> para que también cubra el contenido en
+  // portal (dropdowns, modales, sheet móvil) que Radix monta fuera del shell. El
+  // público (landing/transparencia, con o sin sesión) y el onboarding: claro.
+  const esEspacioLogeado =
+    Boolean(usuario) && !esPaginaPublica && !esOnboardingOAuth;
 
   return (
     <html
       lang="es"
-      style={{ colorScheme: "light" }}
+      data-theme={esEspacioLogeado ? "panel" : undefined}
+      style={{ colorScheme: esEspacioLogeado ? "dark" : "light" }}
       className={`${geistSans.variable} ${geistMono.variable} ${ebGaramond.variable} h-full antialiased`}
     >
       <body

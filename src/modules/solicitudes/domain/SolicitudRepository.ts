@@ -17,6 +17,10 @@ export type FiltroSolicitudes = {
   urgencia?: UrgenciaSolicitud;
   estado?: EstadoSolicitud;
   solicitanteId?: string;
+  /** Ubicación por catálogo (feature 020): estado federal geográfico. */
+  estadoId?: string;
+  /** Municipio del catálogo; debe pertenecer al `estadoId` cuando ambos vienen. */
+  municipioId?: string;
 };
 
 export interface SolicitudRepository {

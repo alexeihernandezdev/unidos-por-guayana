@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import {
   Select,
   SelectContent,
@@ -36,18 +37,34 @@ export function FiltroSelect({
   ariaLabel,
   className,
 }: Props) {
+  const anclaRef = useRef<HTMLSpanElement>(null);
+
+  // Auto-submit: si el select vive en un form marcado con `data-autosubmit`
+  // (p. ej. el sidebar de filtros), al elegir una opción se aplica el filtro sin
+  // botón. Se difiere con setTimeout para que Radix ya haya sincronizado el
+  // <select> oculto antes de serializar el form. En forms sin ese atributo, no
+  // hace nada (comportamiento previo intacto).
+  const alCambiar = () => {
+    const form = anclaRef.current?.closest("form");
+    if (form?.hasAttribute("data-autosubmit")) {
+      setTimeout(() => form.requestSubmit(), 0);
+    }
+  };
+
   return (
-    <Select name={name} defaultValue={defaultValue}>
-      <SelectTrigger aria-label={ariaLabel} className={className ?? "min-w-40"}>
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {opciones.map((opcion) => (
-          <SelectItem key={opcion.value} value={opcion.value}>
-            {opcion.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <span ref={anclaRef} className="contents">
+      <Select name={name} defaultValue={defaultValue} onValueChange={alCambiar}>
+        <SelectTrigger aria-label={ariaLabel} className={className ?? "min-w-40"}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {opciones.map((opcion) => (
+            <SelectItem key={opcion.value} value={opcion.value}>
+              {opcion.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </span>
   );
 }

@@ -24,18 +24,15 @@ export function TarjetaPanel({
   return (
     <section
       className={cn(
-        "flex flex-col rounded-xl border border-border bg-card p-5",
+        "panel-surface card-lift flex flex-col rounded-xl border border-border bg-card p-5",
         className,
       )}
     >
       <div className="mb-5 flex items-center justify-between gap-3">
         <h2 className="flex items-center gap-2.5 text-base font-semibold leading-none tracking-tight">
           {Icono ? (
-            <span
-              className="grid size-8 flex-none place-items-center rounded-lg bg-primary/10 text-primary-ink"
-              aria-hidden
-            >
-              <Icono strokeWidth={1.5} className="size-4" />
+            <span className="panel-icon-chip" aria-hidden>
+              <Icono aria-hidden />
             </span>
           ) : null}
           {titulo}

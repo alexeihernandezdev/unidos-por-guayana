@@ -37,12 +37,8 @@ export function PanelEmptyState({
         className,
       )}
     >
-      <span className="flex size-12 items-center justify-center rounded-lg bg-muted">
-        <Icon
-          strokeWidth={1.5}
-          className="size-6 text-muted-foreground"
-          aria-hidden="true"
-        />
+      <span className="panel-icon-chip tone-neutral size-12" aria-hidden="true">
+        <Icon aria-hidden="true" />
       </span>
       <div className="flex flex-col gap-1">
         <p className="font-medium">{title}</p>

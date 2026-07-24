@@ -1,4 +1,5 @@
 import { UrgenciaSolicitud } from "@/modules/solicitudes/domain/UrgenciaSolicitud";
+import type { PanelListRowIconTone } from "@/shared/ui/panel";
 
 export const URGENCIA_LABEL: Record<UrgenciaSolicitud, string> = {
   [UrgenciaSolicitud.BAJA]: "Baja",
@@ -22,3 +23,12 @@ export const URGENCIA_RAIL: Record<UrgenciaSolicitud, string> = {
   [UrgenciaSolicitud.MEDIA]: "bg-warning",
   [UrgenciaSolicitud.ALTA]: "bg-destructive",
 };
+
+// Tono del chip del icono guía en la fila: mismo lenguaje que el rail y el badge,
+// para que la urgencia se lea también en el icono (jerarquía, no solo decoración).
+export const URGENCIA_ICON_TONE: Record<UrgenciaSolicitud, PanelListRowIconTone> =
+  {
+    [UrgenciaSolicitud.BAJA]: "teal",
+    [UrgenciaSolicitud.MEDIA]: "warning",
+    [UrgenciaSolicitud.ALTA]: "danger",
+  };

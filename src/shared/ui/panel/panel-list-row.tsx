@@ -1,6 +1,26 @@
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
+// Tono del chip del icono guía: encima del teal por defecto, permite que la fila
+// comunique categoría/estado de un vistazo (p. ej. urgencia). El color acompaña
+// al texto/badge, nunca es el único portador (WCAG). Mapea a `.tone-*` del chip.
+export type PanelListRowIconTone =
+  | "teal"
+  | "success"
+  | "warning"
+  | "danger"
+  | "accent"
+  | "neutral";
+
+const ICON_TONE_CLASS: Record<PanelListRowIconTone, string> = {
+  teal: "",
+  success: "tone-success",
+  warning: "tone-warning",
+  danger: "tone-danger",
+  accent: "tone-accent",
+  neutral: "tone-neutral",
+};
+
 // Fila (row-card) de un listado del espacio logeado. Feature 026, guía
 // `constitution/ui-guidelines.md §5`. Presentación pura: no conoce el dominio;
 // cada listado le pasa título/badge/secundaria/metadatos/acciones ya formateados.
@@ -36,6 +56,8 @@ type Props = {
    * Da lectura de un vistazo (p. ej. urgencia) sin ser el único portador del estado.
    */
   accent?: string;
+  /** Tono del chip del icono guía (default teal). Refuerza la lectura de estado. */
+  iconTone?: PanelListRowIconTone;
   className?: string;
 };
 
@@ -48,6 +70,7 @@ export function PanelListRow({
   actions,
   detail,
   accent,
+  iconTone = "teal",
   className,
 }: Props) {
   return (
@@ -68,7 +91,7 @@ export function PanelListRow({
       )}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex min-w-0 items-start gap-3">
-          <span className="profile-icon size-10">
+          <span className={cn("profile-icon size-10", ICON_TONE_CLASS[iconTone])}>
             <Icon aria-hidden="true" />
           </span>
           <div className="min-w-0">

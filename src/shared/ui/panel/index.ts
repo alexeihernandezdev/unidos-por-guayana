@@ -8,7 +8,13 @@ export {
 export { PanelPageSubHeader } from "./panel-page-sub-header";
 export { PanelList, PanelListToolbar } from "./panel-list";
 export { PanelFilters, PanelFiltersField } from "./panel-filters";
-export { PanelListRow, type PanelListMeta } from "./panel-list-row";
+export { PanelFilterShell } from "./panel-filter-shell";
+export { FiltroUbicacion } from "./filtro-ubicacion";
+export {
+  PanelListRow,
+  type PanelListMeta,
+  type PanelListRowIconTone,
+} from "./panel-list-row";
 export { PanelBadge, type PanelBadgeTone } from "./panel-badge";
 export { PanelEmptyState } from "./panel-empty-state";
 export {

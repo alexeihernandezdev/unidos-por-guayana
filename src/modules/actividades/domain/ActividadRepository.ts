@@ -23,6 +23,14 @@ export type FiltroActividades = {
   adminId?: string;
   /** Actividades vinculadas al centro indicado (relación muchos-a-muchos). */
   puntoAcopioId?: string;
+  /**
+   * Ubicación por catálogo (feature 020). La Actividad no tiene ubicación propia:
+   * se filtra por la de sus puntos de acopio vinculados (una actividad coincide si
+   * tiene algún punto en ese estado/municipio). Las actividades sin punto asignado
+   * no aparecen al filtrar por ubicación.
+   */
+  estadoId?: string;
+  municipioId?: string;
   /** Límites inclusivos sobre la fecha operativa de la actividad, en UTC. */
   fechaDesde?: Date;
   fechaHasta?: Date;

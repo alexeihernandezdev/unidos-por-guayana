@@ -26,9 +26,9 @@ type Props = {
 // `className` sobre `<Button>` (tailwind-merge resuelve los conflictos).
 export const PANEL_HEADER_ACTION = {
   primary:
-    "bg-white text-primary-ink hover:bg-white/90 focus-visible:ring-white/40",
+    "bg-white text-[var(--panel-hero-action-ink)] hover:bg-white/90 focus-visible:ring-white/40",
   secondary:
-    "border border-white/15 bg-white/10 text-primary-foreground hover:bg-white/20 focus-visible:ring-white/40",
+    "border border-white/20 bg-white/10 text-white hover:bg-white/20 focus-visible:ring-white/40",
 } as const;
 
 export function PanelPageHeader({
@@ -41,17 +41,21 @@ export function PanelPageHeader({
 }: Props) {
   return (
     <header
+      style={{
+        background: "var(--panel-hero-bg)",
+        color: "var(--panel-hero-fg)",
+      }}
       className={cn(
-        "relative isolate overflow-hidden rounded-xl bg-primary-ink px-6 py-7 text-primary-foreground md:px-8",
+        "relative isolate overflow-hidden rounded-xl px-6 py-7 shadow-[var(--shadow-card-lift)] md:px-8",
         animated && "panel-rise",
       )}
     >
-      {/* Capa de profundidad: wash radial dentro del hue del token (superficie,
-          no gradient-text) + icono fantasma, misma familia visual que las
-          tarjetas del dashboard. Decorativos, fuera del árbol accesible. */}
+      {/* Capa de profundidad: wash radial dentro del hue de marca (superficie, no
+          gradient-text) + icono fantasma, misma familia visual que las tarjetas
+          del dashboard. Decorativos, fuera del árbol accesible. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_150%_at_0%_0%,color-mix(in_oklch,var(--primary)_45%,transparent),transparent_62%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_150%_at_0%_0%,var(--panel-hero-ring),transparent_62%)]"
       />
       <Icon
         aria-hidden="true"

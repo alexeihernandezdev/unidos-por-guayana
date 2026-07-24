@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRightIcon, Sparkles, TrendingDown, TrendingUp } from "lucide-react";
+import { NumeroAnimado } from "./NumeroAnimado";
 
 type Props = {
   valor: number;
@@ -32,13 +33,18 @@ export function TarjetaDestacada({
   return (
     <Link
       href={href}
-      className="focus-ring group relative flex flex-col justify-between gap-5 overflow-hidden rounded-xl p-5 text-white transition-transform duration-200 hover:-translate-y-0.5"
-      style={{ background: "var(--primary-ink)" }}
+      className="focus-ring group relative isolate flex flex-col justify-between gap-5 overflow-hidden rounded-xl p-5 text-white shadow-[var(--shadow-card-lift)] transition-transform duration-200 hover:-translate-y-0.5"
+      style={{ background: "var(--panel-hero-bg)" }}
     >
-      {/* Textura de fondo whisper-quiet. */}
+      {/* Profundidad: wash radial dentro del hue de marca + textura whisper-quiet.
+          `-z-10` para quedar sobre el fondo hero pero bajo el contenido. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(120%_140%_at_100%_0%,var(--panel-hero-ring),transparent_60%)]"
+      />
       <Sparkles
         strokeWidth={1.5}
-        className="pointer-events-none absolute -right-4 -top-4 size-28 text-white/[0.06] transition-transform duration-300 group-hover:scale-110"
+        className="pointer-events-none absolute -right-4 -top-4 -z-10 size-28 text-white/[0.08] transition-transform duration-300 group-hover:scale-110"
         aria-hidden
       />
 
@@ -60,7 +66,7 @@ export function TarjetaDestacada({
 
       <div className="flex flex-col gap-1">
         <span className="numeric-tnum font-mono text-4xl font-medium leading-none tracking-tight">
-          {valor}
+          <NumeroAnimado valor={valor} />
         </span>
         <span className="text-sm text-white/85">{etiqueta}</span>
       </div>

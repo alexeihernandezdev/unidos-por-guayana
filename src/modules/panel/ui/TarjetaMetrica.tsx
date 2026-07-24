@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRightIcon, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/shared/lib/utils";
+import { NumeroAnimado } from "./NumeroAnimado";
 import { TONO, type Tono } from "./tonos";
 
 type Props = {
@@ -37,7 +38,7 @@ export function TarjetaMetrica({
     <Link
       href={href}
       className={cn(
-        "focus-ring group relative flex flex-col gap-4 overflow-hidden rounded-xl border p-5 transition-[transform,background-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-sm",
+        "panel-surface focus-ring group relative flex flex-col gap-4 overflow-hidden rounded-xl border p-5 transition-[transform,background-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-lift)]",
         t.card,
       )}
     >
@@ -78,7 +79,7 @@ export function TarjetaMetrica({
             t.valor,
           )}
         >
-          {valor}
+          <NumeroAnimado valor={valor} />
         </span>
         <span className="text-sm font-medium text-foreground/80">{etiqueta}</span>
       </div>
@@ -90,8 +91,8 @@ export function TarjetaMetrica({
             aria-hidden
           >
             <div
-              className={cn("h-full rounded-full", t.barra)}
-              style={{ width: `${pct}%` }}
+              className={cn("panel-meter-fill h-full w-full rounded-full", t.barra)}
+              style={{ ["--meter" as string]: pct / 100 }}
             />
           </div>
           {subtitulo ? (

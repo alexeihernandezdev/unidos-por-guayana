@@ -6,7 +6,7 @@ import { Button } from "@/shared/ui/button";
 import { PanelEmptyState, PanelList, PanelListRow } from "@/shared/ui/panel";
 import { EstadoSolicitudBadge } from "./EstadoSolicitudBadge";
 import { UrgenciaBadge } from "./UrgenciaBadge";
-import { URGENCIA_RAIL } from "./urgencias";
+import { URGENCIA_ICON_TONE, URGENCIA_RAIL } from "./urgencias";
 import { formatearFechaCreacion } from "./fechas";
 import { EstadoVerificacionSolicitud } from "@/modules/auditoria/domain";
 import { EstadoVerificacionBadge } from "@/modules/auditoria/ui";
@@ -43,6 +43,7 @@ export function SolicitudesTabla({
           key={solicitud.id}
           icon={Inbox}
           accent={URGENCIA_RAIL[solicitud.urgencia]}
+          iconTone={URGENCIA_ICON_TONE[solicitud.urgencia]}
           title={
             <Link
               href={`${baseRuta}/${solicitud.id}`}

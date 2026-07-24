@@ -234,6 +234,20 @@ export class PrismaActividadRepository implements ActividadRepository {
         ...(filtro?.puntoAcopioId
           ? { puntosAcopio: { some: { puntoAcopioId: filtro.puntoAcopioId } } }
           : {}),
+        ...(filtro?.estadoId || filtro?.municipioId
+          ? {
+              puntosAcopio: {
+                some: {
+                  puntoAcopio: {
+                    ...(filtro.estadoId ? { estadoId: filtro.estadoId } : {}),
+                    ...(filtro.municipioId
+                      ? { municipioId: filtro.municipioId }
+                      : {}),
+                  },
+                },
+              },
+            }
+          : {}),
         ...(filtro?.fechaDesde || filtro?.fechaHasta
           ? {
               fecha: {

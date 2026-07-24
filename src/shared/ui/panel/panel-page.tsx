@@ -17,7 +17,7 @@ export function PanelPage({ className, children }: Props) {
   return (
     <div
       className={cn(
-        "flex w-full flex-1 flex-col gap-7 p-5 md:p-8 lg:p-10",
+        "panel-page flex w-full flex-1 flex-col gap-7 p-5 md:p-8 lg:p-10",
         className,
       )}
     >

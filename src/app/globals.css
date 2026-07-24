@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@custom-variant dark (&:is(.dark *));
+
 /* Tokens de diseño (paleta "Unidos por la Guaira": teal/petróleo anclado al lugar).
    Modo claro por defecto; dark es opt-in vía [data-theme="dark"] / .dark, NO por
    prefers-color-scheme del OS (ver tech-stack.md → Estilo visual). */
@@ -53,6 +55,21 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  /* Superficie "hero" premium (banner de página + tarjeta destacada). En claro
+     conserva el teal profundo actual; el tema del espacio logeado la sube a una
+     banda con profundidad. Se consume vía var() en estilos inline, no como clase.
+     --elevated: segundo nivel de superficie sobre --card (hover, bloques anidados). */
+  --panel-hero-bg: var(--primary-ink);
+  --panel-hero-fg: var(--primary-foreground);
+  --panel-hero-ring: color-mix(in oklch, var(--primary) 45%, transparent);
+  /* Texto del botón primario del hero: siempre sobre blanco, NO invierte con el
+     tema. Teal oscuro con contraste AA sobre blanco en claro y en oscuro. */
+  --panel-hero-action-ink: oklch(0.38 0.1 194);
+  --elevated: var(--card);
+  /* Sombra de tarjeta: en claro es discreta; el tema oscuro la profundiza para
+     que la elevación se lea sobre el lienzo (resuelve el "blanco sobre blanco"). */
+  --shadow-card: 0 1px 2px -1px color-mix(in oklch, var(--foreground) 10%, transparent);
+  --shadow-card-lift: 0 12px 30px -18px color-mix(in oklch, var(--primary) 30%, transparent);
 }
 
 /* Dark mode: opt-in vía atributo, NO por preferencia del OS. La landing y toda
@@ -100,6 +117,79 @@
     --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Tema del espacio logeado: "sala de operaciones" en petróleo profundo. Oscuro
+   pero NO negro (anclado al hue teal 200-215 de marca), refinado, con jerarquía
+   de superficies para que las tarjetas tengan cuerpo sobre el lienzo. Se activa
+   con [data-theme="panel"] en <html> solo para el espacio logeado (ver
+   src/app/layout.tsx); la landing y el público siguen en claro. Decisión de
+   equipo: extiende la paleta a un modo oscuro premium para admin, colaborador,
+   auditor y solicitante (sobrescribe el "colaborador en claro" original). */
+:root[data-theme="panel"] {
+  color-scheme: dark;
+  /* Lienzo: petróleo profundo desaturado, no negro. */
+  --background: oklch(0.235 0.021 220);
+  --foreground: oklch(0.965 0.007 210);
+  /* Superficies elevadas: la card sube sobre el lienzo (+0.05 L) y aún hay un
+     nivel --elevated para hover/anidados. Esta separación es la que da cuerpo. */
+  --card: oklch(0.285 0.024 216);
+  --card-foreground: oklch(0.965 0.007 210);
+  --elevated: oklch(0.325 0.026 214);
+  --popover: oklch(0.30 0.025 216);
+  --popover-foreground: oklch(0.965 0.007 210);
+  /* Teal de marca más brillante para que "encienda" sobre el oscuro. */
+  --primary: oklch(0.74 0.115 190);
+  --primary-foreground: oklch(0.19 0.02 220);
+  /* Ink = variante de TEXTO teal, clara para AA sobre card/lienzo. */
+  --primary-ink: oklch(0.85 0.095 190);
+  --secondary: oklch(0.33 0.02 216);
+  --secondary-foreground: oklch(0.95 0.008 210);
+  --muted: oklch(0.315 0.018 216);
+  --muted-foreground: oklch(0.745 0.02 208);
+  --accent: oklch(0.72 0.10 200);
+  --accent-foreground: oklch(0.17 0.02 220);
+  --destructive: oklch(0.70 0.185 22);
+  --brand: oklch(0.74 0.115 190);
+  --brand-foreground: oklch(0.19 0.02 220);
+  /* Semánticos de estado en variante oscura (más luminosos, -ink para texto AA). */
+  --success: oklch(0.74 0.14 158);
+  --success-ink: oklch(0.84 0.13 160);
+  --warning: oklch(0.82 0.14 80);
+  --warning-ink: oklch(0.88 0.12 84);
+  /* Hairlines teal-tintados, visibles sobre el oscuro sin ser duros. */
+  --border: oklch(0.40 0.022 214);
+  --input: oklch(0.44 0.024 214);
+  --ring: oklch(0.72 0.10 200);
+  /* Series de gráficos: teal, ámbar, verde de la paleta permitida, en luminancia
+     apta para oscuro (coinciden con COLOR_TIPO que referencia estos tokens). */
+  --chart-1: oklch(0.74 0.115 190);
+  --chart-2: oklch(0.82 0.14 80);
+  --chart-3: oklch(0.74 0.14 158);
+  --chart-4: oklch(0.70 0.10 200);
+  --chart-5: oklch(0.78 0.10 230);
+  /* Chrome (sidebar) comparte el lienzo, separado por hairline (spec AppShell). */
+  --sidebar: oklch(0.235 0.021 220);
+  --sidebar-foreground: oklch(0.965 0.007 210);
+  --sidebar-primary: oklch(0.74 0.115 190);
+  --sidebar-primary-foreground: oklch(0.19 0.02 220);
+  --sidebar-accent: oklch(0.315 0.018 216);
+  --sidebar-accent-foreground: oklch(0.965 0.007 210);
+  --sidebar-border: oklch(0.40 0.022 214);
+  --sidebar-ring: oklch(0.72 0.10 200);
+  /* Banda hero: teal petróleo con profundidad (gradiente dentro del hue de marca,
+     superficie, NO gradient-text). Es el momento "premium" del encabezado. */
+  --panel-hero-bg: linear-gradient(
+    135deg,
+    oklch(0.36 0.075 198) 0%,
+    oklch(0.30 0.055 212) 52%,
+    oklch(0.335 0.09 188) 100%
+  );
+  --panel-hero-fg: oklch(0.98 0.012 195);
+  --panel-hero-ring: color-mix(in oklch, var(--primary) 60%, transparent);
+  /* Sombras: más presencia sobre el oscuro, apoyadas en el teal para "lucir". */
+  --shadow-card: 0 2px 8px -4px oklch(0.10 0.02 220 / 0.6);
+  --shadow-card-lift: 0 18px 40px -20px oklch(0.08 0.05 200 / 0.75);
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -109,6 +199,7 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-elevated: var(--elevated);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
@@ -343,7 +434,7 @@
   }
   .card-lift:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px -12px color-mix(in oklch, var(--primary) 24%, transparent);
+    box-shadow: var(--shadow-card-lift);
   }
 }
 
@@ -351,6 +442,46 @@
   .card-lift {
     transition: none;
   }
+}
+
+/* Superficie de tarjeta con cuerpo: sombra base (token, adapta a tema) + un
+   top-highlight sutil en el tema oscuro para el efecto "iluminada desde arriba".
+   Es lo que hace que las tarjetas dejen de ser cajas planas sobre el lienzo. */
+.panel-surface {
+  box-shadow: var(--shadow-card);
+}
+:root[data-theme="panel"] .panel-surface {
+  box-shadow:
+    var(--shadow-card),
+    inset 0 1px 0 oklch(1 0 0 / 0.045);
+}
+
+/* Ambiente del espacio oscuro: reemplaza el gradiente claro de la landing por
+   glows teal muy tenues sobre el petróleo, para dar profundidad sin ruido. El
+   drift lento se hereda del keyframe ambient-drift ya definido. */
+:root[data-theme="panel"] body::before {
+  background-image:
+    radial-gradient(ellipse 55% 45% at 8% -5%, oklch(0.55 0.11 195 / 0.16), transparent 60%),
+    radial-gradient(ellipse 50% 45% at 100% 8%, oklch(0.5 0.1 205 / 0.13), transparent 62%),
+    radial-gradient(ellipse 65% 50% at 50% 108%, oklch(0.45 0.1 188 / 0.12), transparent 66%),
+    linear-gradient(180deg, oklch(0.235 0.021 220) 0%, oklch(0.225 0.024 214) 100%);
+}
+
+/* Coreografía de entrada por página (solo espacio logeado): los bloques de nivel
+   superior de cada `PanelPage` entran en cascada al montar. Una sola regla cubre
+   todas las pantallas (dashboard, listados, detalle). Gated por reduced-motion y
+   por el tema, así el público no cambia. `backwards` libera transform al terminar
+   para no congelar hover-lifts. */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-theme="panel"] .panel-page > * {
+    animation: panel-rise 340ms var(--ease-out-emil) backwards;
+  }
+  :root[data-theme="panel"] .panel-page > *:nth-child(1) { animation-delay: 40ms; }
+  :root[data-theme="panel"] .panel-page > *:nth-child(2) { animation-delay: 95ms; }
+  :root[data-theme="panel"] .panel-page > *:nth-child(3) { animation-delay: 150ms; }
+  :root[data-theme="panel"] .panel-page > *:nth-child(4) { animation-delay: 205ms; }
+  :root[data-theme="panel"] .panel-page > *:nth-child(5) { animation-delay: 255ms; }
+  :root[data-theme="panel"] .panel-page > *:nth-child(n + 6) { animation-delay: 300ms; }
 }
 
 /* Auditoría: entradas breves que ayudan a leer la cola sin retrasar acciones. */
@@ -598,6 +729,12 @@
   border-radius: var(--radius-xl);
   background: color-mix(in oklch, var(--card) 96%, var(--primary) 4%);
   padding: 1.25rem;
+  box-shadow: var(--shadow-card);
+}
+:root[data-theme="panel"] .profile-surface {
+  box-shadow:
+    var(--shadow-card),
+    inset 0 1px 0 oklch(1 0 0 / 0.045);
 }
 
 .profile-section-heading {
@@ -609,8 +746,78 @@
 
 .profile-section-heading h2 { font-size: 1rem; font-weight: 650; }
 .profile-section-heading p { margin-top: 0.2rem; color: var(--muted-foreground); font-size: 0.8125rem; line-height: 1.3rem; }
-.profile-icon { display: grid; width: 2.25rem; height: 2.25rem; flex: none; place-items: center; border-radius: var(--radius-md); background: color-mix(in oklch, var(--primary) 11%, transparent); color: var(--primary-ink); }
-.profile-icon svg { width: 1rem; height: 1rem; stroke-width: 1.7; }
+/* Sistema de chip de icono (feature panel · impacto visual). Antes los iconos
+   eran washes planos monocromos ("secos"): ahora un contenedor con profundidad
+   (gradiente tonal + anillo interno + highlight superior) y tono semántico, para
+   que el icono aporte jerarquía y categoría de un vistazo, no solo decore. El
+   glifo va en la variante `-ink` (contraste). `.profile-icon` conserva su nombre
+   (usado en listados y perfil) y comparte el tratamiento; `.panel-icon-chip` es
+   el alias para usos nuevos. El tono se elige con `.tone-*` (default: teal). */
+.panel-icon-chip,
+.profile-icon {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: none;
+  place-items: center;
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    150deg,
+    color-mix(in oklch, var(--primary) 26%, var(--card)),
+    color-mix(in oklch, var(--primary) 10%, var(--card))
+  );
+  color: var(--primary-ink);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklch, var(--primary) 28%, transparent),
+    inset 0 1px 0 oklch(1 0 0 / 0.08);
+}
+.panel-icon-chip svg,
+.profile-icon svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  stroke-width: 1.7;
+}
+/* Contenedor y glifo crecen juntos cuando el markup pide size-10/size-12 (las
+   utilidades de Tailwind van en @layer y pierden ante estas reglas sin capa). */
+.panel-icon-chip.size-10,
+.profile-icon.size-10 { width: 2.5rem; height: 2.5rem; }
+.panel-icon-chip.size-12,
+.profile-icon.size-12 { width: 3rem; height: 3rem; border-radius: var(--radius-lg); }
+.panel-icon-chip.size-10 svg,
+.profile-icon.size-10 svg { width: 1.15rem; height: 1.15rem; }
+.panel-icon-chip.size-12 svg,
+.profile-icon.size-12 svg { width: 1.4rem; height: 1.4rem; }
+
+.panel-icon-chip.tone-success,
+.profile-icon.tone-success {
+  background: linear-gradient(150deg, color-mix(in oklch, var(--success) 26%, var(--card)), color-mix(in oklch, var(--success) 10%, var(--card)));
+  color: var(--success-ink);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--success) 28%, transparent), inset 0 1px 0 oklch(1 0 0 / 0.08);
+}
+.panel-icon-chip.tone-warning,
+.profile-icon.tone-warning {
+  background: linear-gradient(150deg, color-mix(in oklch, var(--warning) 28%, var(--card)), color-mix(in oklch, var(--warning) 11%, var(--card)));
+  color: var(--warning-ink);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--warning) 30%, transparent), inset 0 1px 0 oklch(1 0 0 / 0.08);
+}
+.panel-icon-chip.tone-danger,
+.profile-icon.tone-danger {
+  background: linear-gradient(150deg, color-mix(in oklch, var(--destructive) 24%, var(--card)), color-mix(in oklch, var(--destructive) 9%, var(--card)));
+  color: var(--destructive);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--destructive) 26%, transparent), inset 0 1px 0 oklch(1 0 0 / 0.08);
+}
+.panel-icon-chip.tone-accent,
+.profile-icon.tone-accent {
+  background: linear-gradient(150deg, color-mix(in oklch, var(--accent) 26%, var(--card)), color-mix(in oklch, var(--accent) 10%, var(--card)));
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--accent) 28%, transparent), inset 0 1px 0 oklch(1 0 0 / 0.08);
+}
+.panel-icon-chip.tone-neutral,
+.profile-icon.tone-neutral {
+  background: linear-gradient(150deg, color-mix(in oklch, var(--muted-foreground) 20%, var(--card)), color-mix(in oklch, var(--muted-foreground) 8%, var(--card)));
+  color: var(--foreground);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--muted-foreground) 22%, transparent), inset 0 1px 0 oklch(1 0 0 / 0.06);
+}
 .profile-section-link { display: inline-flex; flex: none; align-items: center; gap: 0.45rem; border-radius: var(--radius-md); padding: 0.5rem 0.7rem; color: var(--muted-foreground); font-size: 0.8125rem; font-weight: 550; transition: background-color 160ms var(--ease-out-emil), color 160ms var(--ease-out-emil), transform 120ms var(--ease-out-emil); }
 .profile-section-link svg { width: 0.95rem; height: 0.95rem; }
 .profile-section-link:hover { background: var(--muted); color: var(--foreground); }
