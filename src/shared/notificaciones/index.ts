@@ -6,7 +6,16 @@ export {
   contarNoLeidasServicio,
   marcarLeidaServicio,
   marcarTodasLeidasServicio,
+  consultarPreferenciasServicio,
+  actualizarPreferenciaServicio,
+  smtpDisponibleServicio,
+  enviarCorreoPruebaServicio,
+  consultarCanalesUsuarioServicio,
 } from "@/lib/notificaciones";
 export type { Notificacion } from "@/modules/notificaciones/domain/Notificacion";
 export { TipoNotificacion } from "@/modules/notificaciones/domain/TipoNotificacion";
+export type {
+  CanalExterno,
+  PreferenciaVista,
+} from "@/modules/notificaciones/domain";
 export { NoAutorizadoError } from "@/modules/notificaciones/application/errors";

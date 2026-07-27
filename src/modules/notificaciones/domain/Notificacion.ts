@@ -1,4 +1,5 @@
 import type { TipoNotificacion } from "./TipoNotificacion";
+import type { Rol } from "@/modules/usuarios/domain/Rol";
 
 // Entidad de dominio del aviso in-app (feature 012). Pura: fechas `Date` en UTC.
 // La `referencia` es un par `(referenciaTipo, referenciaId)` en vez de una FK
@@ -26,11 +27,13 @@ export type NuevaNotificacion = {
   claveDedupe: string;
 };
 
-// Contacto de un destinatario para el canal WhatsApp (feature 012). Lo resuelve un
-// `LectorContacto`: para el ADMIN el teléfono vive en su `PerfilAdmin`; para el
-// resto en el propio `Usuario`.
+// Contacto multicanal del destinatario. El teléfono efectivo del ADMIN vive en
+// PerfilAdmin; email, nombre y rol siempre provienen de Usuario.
 export type ContactoDestinatario = {
   usuarioId: string;
+  nombre: string;
+  email: string;
+  rol: Rol;
   telefono: string | null;
   telefonoEsWhatsApp: boolean;
 };

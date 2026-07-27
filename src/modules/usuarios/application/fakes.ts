@@ -124,6 +124,38 @@ export class InMemoryUsuarioRepository implements UsuarioRepository {
     this.porId.set(id, actualizado);
     return actualizado;
   }
+
+  async actualizarCuenta(
+    id: string,
+    datos: { nombre: string; email: string },
+  ): Promise<Usuario> {
+    const usuario = this.porId.get(id);
+    if (!usuario) {
+      throw new Error(`Usuario "${id}" no encontrado.`);
+    }
+    const actualizado: Usuario = {
+      ...usuario,
+      nombre: datos.nombre,
+      email: datos.email,
+      updatedAt: new Date(),
+    };
+    this.porId.set(id, actualizado);
+    return actualizado;
+  }
+
+  async actualizarPassword(id: string, passwordHash: string): Promise<Usuario> {
+    const usuario = this.porId.get(id);
+    if (!usuario) {
+      throw new Error(`Usuario "${id}" no encontrado.`);
+    }
+    const actualizado: Usuario = {
+      ...usuario,
+      passwordHash,
+      updatedAt: new Date(),
+    };
+    this.porId.set(id, actualizado);
+    return actualizado;
+  }
 }
 
 export class InMemoryPerfilAdminRepository implements PerfilAdminRepository {

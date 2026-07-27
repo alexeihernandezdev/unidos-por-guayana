@@ -30,4 +30,12 @@ export interface UsuarioRepository {
     id: string,
     categorias: CategoriaRecurso[],
   ): Promise<Usuario>;
+  // Feature 035: datos base de la cuenta (nombre y correo), editables desde el
+  // perfil de SUPERADMIN y AUDITOR.
+  actualizarCuenta(
+    id: string,
+    datos: { nombre: string; email: string },
+  ): Promise<Usuario>;
+  // Feature 035: cambia el hash de contraseña de la cuenta.
+  actualizarPassword(id: string, passwordHash: string): Promise<Usuario>;
 }

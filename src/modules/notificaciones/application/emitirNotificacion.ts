@@ -3,8 +3,12 @@ import type { EventoNotificacion } from "@/modules/notificaciones/domain/Notific
 import {
   claveDedupe,
   componerMensaje,
+  asuntoDeEvento,
+  hrefDeReferencia,
+  referenciaDeEvento,
   variablesPlantilla,
 } from "@/modules/notificaciones/domain/reglas";
+import { canalActivo } from "@/modules/notificaciones/domain";
 import type { EmitirDeps } from "./deps";
 
 const REFERENCIA_TIPO = "ACTIVIDAD";
@@ -23,7 +27,13 @@ const REFERENCIA_TIPO = "ACTIVIDAD";
  * emisor (crear actividad / marcar recibido).
  */
 export async function emitirNotificacion(
-  { notificaciones, contactos, canalWhatsApp }: EmitirDeps,
+  {
+    notificaciones,
+    contactos,
+    canalWhatsApp,
+    canalEmail,
+    preferencias,
+  }: EmitirDeps,
   evento: EventoNotificacion,
 ): Promise<void> {
   try {
@@ -36,31 +46,79 @@ export async function emitirNotificacion(
     if (nuevos.length === 0) return;
 
     const mensaje = componerMensaje(evento);
+    const referencia = referenciaDeEvento(evento);
     const filas: NuevaNotificacion[] = nuevos.map((usuarioId) => ({
       usuarioId,
       tipo: evento.tipo,
       mensaje,
-      referenciaTipo: REFERENCIA_TIPO,
-      referenciaId: evento.actividadId,
+      referenciaTipo: referencia.tipo || REFERENCIA_TIPO,
+      referenciaId: referencia.id,
       claveDedupe: clave,
     }));
     await notificaciones.crearMuchas(filas);
 
-    // Canal WhatsApp: solo destinatarios nuevos con WhatsApp. El adaptador es no-op
-    // si Meta no está configurado, así que llamar siempre es seguro.
     const variables = variablesPlantilla(evento);
-    const contactosNuevos = await contactos.contactoDe(nuevos);
-    await Promise.allSettled(
-      contactosNuevos
-        .filter((c) => c.telefonoEsWhatsApp && c.telefono)
-        .map((c) =>
-          canalWhatsApp.enviar({
-            telefonoE164: c.telefono as string,
+    const [contactosNuevos, preferenciasGuardadas] = await Promise.all([
+      contactos.contactoDe(nuevos),
+      preferencias.listarPorUsuarios(nuevos),
+    ]);
+    const preferenciasPorUsuario = new Map(
+      preferenciasGuardadas
+        .filter((p) => p.tipo === evento.tipo)
+        .map((p) => [p.usuarioId, p]),
+    );
+    const tareas: Array<{
+      canal: "EMAIL" | "WHATSAPP";
+      usuarioId: string;
+      promesa: Promise<void>;
+    }> = [];
+    for (const contacto of contactosNuevos) {
+      const preferencia = preferenciasPorUsuario.get(contacto.usuarioId);
+      if (
+        canalActivo(preferencia, "WHATSAPP") &&
+        contacto.telefonoEsWhatsApp &&
+        contacto.telefono
+      ) {
+        tareas.push({
+          canal: "WHATSAPP",
+          usuarioId: contacto.usuarioId,
+          promesa: canalWhatsApp.enviar({
+            telefonoE164: contacto.telefono,
             tipo: evento.tipo,
             variables,
           }),
-        ),
+        });
+      }
+      if (canalActivo(preferencia, "EMAIL") && contacto.email) {
+        tareas.push({
+          canal: "EMAIL",
+          usuarioId: contacto.usuarioId,
+          promesa: canalEmail.enviar({
+            email: contacto.email,
+            nombre: contacto.nombre,
+            tipo: evento.tipo,
+            asunto: asuntoDeEvento(evento),
+            mensaje,
+            href: hrefDeReferencia(
+              contacto.rol,
+              referencia.tipo,
+              referencia.id,
+            ),
+          }),
+        });
+      }
+    }
+    const resultados = await Promise.allSettled(
+      tareas.map((tarea) => tarea.promesa),
     );
+    resultados.forEach((resultado, indice) => {
+      if (resultado.status === "rejected") {
+        const tarea = tareas[indice];
+        console.error(
+          `[notificaciones] Falló ${tarea.canal} para ${tarea.usuarioId} (${evento.tipo}).`,
+        );
+      }
+    });
   } catch (error) {
     // Best-effort: registrar y seguir. El aviso no puede tumbar el negocio.
     console.error("[notificaciones] Falló la emisión del aviso:", error);

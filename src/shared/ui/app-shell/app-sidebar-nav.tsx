@@ -15,6 +15,7 @@ import {
   PackageIcon,
   ScrollTextIcon,
   ScanSearchIcon,
+  Settings2Icon,
   UserRoundIcon,
   UserCheckIcon,
   UsersIcon,
@@ -48,6 +49,7 @@ const ICONOS: Record<IconoNav, LucideIcon> = {
   red: UsersIcon,
   testimonios: MessageSquareQuoteIcon,
   auditoria: ScanSearchIcon,
+  ajustes: Settings2Icon,
 };
 
 type Props = {

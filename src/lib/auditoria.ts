@@ -23,6 +23,7 @@ import type {
 } from "@/modules/auditoria/domain";
 import { PrismaAuditoriaRepository } from "@/modules/auditoria/infrastructure";
 import { SupabaseStorageAdapter } from "@/modules/archivos/infrastructure/SupabaseStorageAdapter";
+import { notificarActualizacionAuditoria } from "@/lib/eventosNotificaciones";
 
 const auditorias = new PrismaAuditoriaRepository();
 const storage = new SupabaseStorageAdapter();
@@ -53,11 +54,27 @@ export const liberarAuditoriaServicio = (
   solicitudId: string,
 ) => liberarSolicitudAuditoria(auditorias, actor, solicitudId);
 
-export const dictaminarAuditoriaServicio = (
+export const dictaminarAuditoriaServicio = async (
   actor: ActorAuditoria,
   solicitudId: string,
   input: EmitirDictamenInput,
-) => emitirDictamenAuditoria(auditorias, actor, solicitudId, input);
+) => {
+  await emitirDictamenAuditoria(auditorias, actor, solicitudId, input);
+  const solicitud = await auditorias.buscarPorId(solicitudId);
+  if (solicitud) {
+    await notificarActualizacionAuditoria(
+      solicitudId,
+      solicitud.solicitante.id,
+      input.resultado,
+      solicitud.cicloAuditoria,
+    ).catch((error) =>
+      console.error(
+        "[notificaciones] No se pudo emitir ACTUALIZACION_AUDITORIA:",
+        error,
+      ),
+    );
+  }
+};
 
 export const reenviarAuditoriaServicio = (
   solicitudId: string,

@@ -20,6 +20,12 @@ import {
   type RegistrarUsuarioInput,
 } from "@/modules/usuarios/application/registrarUsuario";
 import { declararCategorias } from "@/modules/usuarios/application/declararCategorias";
+import {
+  actualizarDatosCuenta,
+  cambiarPassword,
+  type ActualizarDatosCuentaInput,
+  type CambiarPasswordInput,
+} from "@/modules/usuarios/application/gestionarCuenta";
 import { validarCredenciales } from "@/modules/usuarios/application/validarCredenciales";
 import {
   crearAuditor,
@@ -38,6 +44,10 @@ import { BcryptPasswordHasher } from "@/modules/usuarios/infrastructure/BcryptPa
 import { PrismaPerfilAdminRepository } from "@/modules/usuarios/infrastructure/PrismaPerfilAdminRepository";
 import { PrismaUsuarioRepository } from "@/modules/usuarios/infrastructure/PrismaUsuarioRepository";
 import { catalogoUbicacion } from "@/lib/ubicacion";
+import {
+  notificarEstadoCuentaAdmin,
+  notificarNuevoAdminPendiente,
+} from "@/lib/eventosNotificaciones";
 
 // ── Composition root ────────────────────────────────────────────────────────
 // `src/lib` es infraestructura global (tech-stack.md): aquí se cablean las
@@ -93,6 +103,9 @@ export async function registrarAdministradorConPerfil(
     { perfiles, catalogo },
     { usuarioId: usuario.id, ...perfil },
   );
+  await notificarNuevoAdminPendiente(usuario).catch((error) =>
+    console.error("[notificaciones] No se pudo emitir NUEVO_ADMIN_PENDIENTE:", error),
+  );
   return usuario;
 }
 
@@ -109,6 +122,24 @@ export function actualizarPerfilAdminGestion(
   return actualizarPerfilAdmin({ perfiles, catalogo }, usuarioId, cambios);
 }
 
+// ── Cuenta base: nombre, correo y contraseña (feature 035) ────────────────────
+// Perfil editable de SUPERADMIN y AUDITOR. Infraestructura ya inyectada; lo
+// consumen los server actions a través de la fachada `@/shared/auth`.
+
+export function actualizarDatosCuentaServicio(
+  usuarioId: string,
+  input: ActualizarDatosCuentaInput,
+): Promise<Usuario> {
+  return actualizarDatosCuenta({ usuarios }, usuarioId, input);
+}
+
+export function cambiarPasswordServicio(
+  usuarioId: string,
+  input: CambiarPasswordInput,
+): Promise<Usuario> {
+  return cambiarPassword({ usuarios, hasher }, usuarioId, input);
+}
+
 // ── Gestión de administradores por el SUPERADMIN (feature 015) ────────────────
 // Casos de uso puros con la infraestructura ya inyectada. Los consume la bandeja
 // del superadmin a través de la fachada `@/shared/auth`.
@@ -116,18 +147,26 @@ export function listarAdminsPendientesGestion(actor: Actor): Promise<Usuario[]> 
   return listarAdminsPendientes({ usuarios }, actor);
 }
 
-export function aprobarAdminGestion(
+export async function aprobarAdminGestion(
   actor: Actor,
   adminId: string,
 ): Promise<Usuario> {
-  return aprobarAdmin({ usuarios }, actor, adminId);
+  const admin = await aprobarAdmin({ usuarios }, actor, adminId);
+  await notificarEstadoCuentaAdmin(admin).catch((error) =>
+    console.error("[notificaciones] No se pudo emitir ESTADO_CUENTA_ADMIN:", error),
+  );
+  return admin;
 }
 
-export function rechazarAdminGestion(
+export async function rechazarAdminGestion(
   actor: Actor,
   adminId: string,
 ): Promise<Usuario> {
-  return rechazarAdmin({ usuarios }, actor, adminId);
+  const admin = await rechazarAdmin({ usuarios }, actor, adminId);
+  await notificarEstadoCuentaAdmin(admin).catch((error) =>
+    console.error("[notificaciones] No se pudo emitir ESTADO_CUENTA_ADMIN:", error),
+  );
+  return admin;
 }
 
 export const listarAuditoresGestion = (actor: Actor) =>

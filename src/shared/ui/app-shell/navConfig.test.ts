@@ -25,6 +25,7 @@ describe("navSectionsPorRol", () => {
       "/puntos-acopio",
       "/mis-testimonios",
       "/mi-perfil",
+      "/ajustes",
     ]);
   });
 
@@ -35,6 +36,7 @@ describe("navSectionsPorRol", () => {
       "/solicitudes/proponer-recurso",
       "/mis-testimonios",
       "/mi-perfil",
+      "/ajustes",
     ]);
   });
 
@@ -48,19 +50,26 @@ describe("navSectionsPorRol", () => {
       "/panel/recursos",
       "/panel/donaciones",
       "/panel/perfil",
+      "/ajustes",
       "/panel/puntos-acopio",
     ]);
   });
 
-  it("da al SUPERADMIN la gestión de aprobaciones y auditores", () => {
+  it("da al SUPERADMIN la gestión de aprobaciones, auditores y su perfil", () => {
     expect(hrefs(Rol.SUPERADMIN)).toEqual([
       "/superadmin/admins",
       "/superadmin/auditores",
+      "/superadmin/perfil",
+      "/ajustes",
     ]);
   });
 
-  it("da al AUDITOR su cola de solicitudes", () => {
-    expect(hrefs(Rol.AUDITOR)).toEqual(["/auditoria/solicitudes"]);
+  it("da al AUDITOR su cola de solicitudes y su perfil", () => {
+    expect(hrefs(Rol.AUDITOR)).toEqual([
+      "/auditoria/solicitudes",
+      "/auditoria/perfil",
+      "/ajustes",
+    ]);
   });
 
   it("empieza el hogar de cada rol dentro de su propia navegación", () => {

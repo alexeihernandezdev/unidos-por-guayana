@@ -15,6 +15,8 @@ export {
   obtenerPerfilAdminGestion,
   actualizarPerfilAdminGestion,
   actualizarDatosContactoUsuario,
+  actualizarDatosCuentaServicio,
+  cambiarPasswordServicio,
   buscarUsuarioPorId,
   crearAuditorGestion,
   listarAuditoresGestion,

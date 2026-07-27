@@ -48,6 +48,25 @@ export class CategoriasAporteVaciasError extends Error {
   }
 }
 
+// ── Cuenta base: nombre, correo y contraseña (feature 035) ────────────────────
+
+// Los datos de la cuenta (nombre o correo) no cumplen las reglas mínimas. El
+// mensaje describe el primer problema, listo para mostrar al usuario.
+export class DatosCuentaInvalidosError extends Error {
+  constructor(mensaje: string) {
+    super(mensaje);
+    this.name = "DatosCuentaInvalidosError";
+  }
+}
+
+// La contraseña actual introducida para autorizar un cambio no coincide.
+export class PasswordActualIncorrectaError extends Error {
+  constructor() {
+    super("La contraseña actual no es correcta.");
+    this.name = "PasswordActualIncorrectaError";
+  }
+}
+
 // ── Gestión de administradores por el SUPERADMIN (feature 015) ────────────────
 
 // El actor de una acción reservada al `SUPERADMIN` no lo es.

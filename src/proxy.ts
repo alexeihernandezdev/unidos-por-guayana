@@ -22,6 +22,7 @@ export default auth((req) => {
     pathname.startsWith("/panel") ||
     pathname.startsWith("/superadmin") ||
     pathname.startsWith("/auditoria") ||
+    pathname === "/ajustes" ||
     pathname === "/cuenta-admin" ||
     pathname === "/mis-aportes" ||
     pathname === "/mis-testimonios" ||

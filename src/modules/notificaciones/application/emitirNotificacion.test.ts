@@ -5,18 +5,35 @@ import { TipoNotificacion } from "@/modules/notificaciones/domain/TipoNotificaci
 import { emitirNotificacion } from "./emitirNotificacion";
 import {
   FakeCanalWhatsApp,
+  FakeCanalEmail,
   FakeLectorContacto,
   FakeNotificacionRepository,
+  FakePreferenciaNotificacionRepository,
 } from "./fakes";
 
-function armar(contactos: ContactoDestinatario[] = []) {
+function armar(
+  contactos: Array<
+    Pick<ContactoDestinatario, "usuarioId" | "telefono" | "telefonoEsWhatsApp"> &
+      Partial<ContactoDestinatario>
+  > = [],
+) {
   const notificaciones = new FakeNotificacionRepository();
   const canalWhatsApp = new FakeCanalWhatsApp();
+  const canalEmail = new FakeCanalEmail();
+  const preferencias = new FakePreferenciaNotificacionRepository();
   const contactosLector = new FakeLectorContacto(contactos);
   return {
-    deps: { notificaciones, contactos: contactosLector, canalWhatsApp },
+    deps: {
+      notificaciones,
+      contactos: contactosLector,
+      canalWhatsApp,
+      canalEmail,
+      preferencias,
+    },
     notificaciones,
     canalWhatsApp,
+    canalEmail,
+    preferencias,
   };
 }
 
@@ -96,5 +113,22 @@ describe("emitirNotificacion", () => {
       emitirNotificacion(deps, eventoNuevaActividad),
     ).resolves.toBeUndefined();
     expect(notificaciones.items).toHaveLength(2);
+  });
+
+  it("envía Email por defecto y respeta una preferencia desactivada", async () => {
+    const { deps, canalEmail, preferencias } = armar([
+      { usuarioId: "u1", telefono: null, telefonoEsWhatsApp: false },
+      { usuarioId: "u2", telefono: null, telefonoEsWhatsApp: false },
+    ]);
+    await preferencias.guardar(
+      "u2",
+      TipoNotificacion.NUEVA_ACTIVIDAD,
+      "EMAIL",
+      false,
+    );
+    await emitirNotificacion(deps, eventoNuevaActividad);
+    expect(canalEmail.enviados.map((item) => item.email)).toEqual([
+      "u1@example.com",
+    ]);
   });
 });

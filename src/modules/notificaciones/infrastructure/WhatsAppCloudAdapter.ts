@@ -28,12 +28,37 @@ function leerConfig(): ConfigWhatsApp | null {
 
 // Nombre de la plantilla aprobada en Meta para cada tipo (configurable por env).
 function nombrePlantilla(tipo: TipoNotificacion): string | undefined {
-  switch (tipo) {
-    case TipoNotificacion.NUEVA_ACTIVIDAD:
-      return process.env.WHATSAPP_TEMPLATE_NUEVA_ACTIVIDAD;
-    case TipoNotificacion.META_CUMPLIDA:
-      return process.env.WHATSAPP_TEMPLATE_META_CUMPLIDA;
-  }
+  const nombres: Record<TipoNotificacion, string | undefined> = {
+    [TipoNotificacion.NUEVA_ACTIVIDAD]:
+      process.env.WHATSAPP_TEMPLATE_NUEVA_ACTIVIDAD,
+    [TipoNotificacion.META_CUMPLIDA]:
+      process.env.WHATSAPP_TEMPLATE_META_CUMPLIDA,
+    [TipoNotificacion.NUEVO_APORTE]:
+      process.env.WHATSAPP_TEMPLATE_NUEVO_APORTE,
+    [TipoNotificacion.ESTADO_APORTE]:
+      process.env.WHATSAPP_TEMPLATE_ESTADO_APORTE,
+    [TipoNotificacion.NUEVA_AFILIACION]:
+      process.env.WHATSAPP_TEMPLATE_NUEVA_AFILIACION,
+    [TipoNotificacion.AFILIACION_REMOVIDA]:
+      process.env.WHATSAPP_TEMPLATE_AFILIACION_REMOVIDA,
+    [TipoNotificacion.NUEVA_SOLICITUD_ZONA]:
+      process.env.WHATSAPP_TEMPLATE_NUEVA_SOLICITUD_ZONA,
+    [TipoNotificacion.ESTADO_SOLICITUD]:
+      process.env.WHATSAPP_TEMPLATE_ESTADO_SOLICITUD,
+    [TipoNotificacion.ACTUALIZACION_AUDITORIA]:
+      process.env.WHATSAPP_TEMPLATE_ACTUALIZACION_AUDITORIA,
+    [TipoNotificacion.NUEVA_SOLICITUD_AUDITABLE]:
+      process.env.WHATSAPP_TEMPLATE_NUEVA_SOLICITUD_AUDITABLE,
+    [TipoNotificacion.RESULTADO_PROPUESTA_RECURSO]:
+      process.env.WHATSAPP_TEMPLATE_RESULTADO_PROPUESTA_RECURSO,
+    [TipoNotificacion.RESULTADO_TESTIMONIO]:
+      process.env.WHATSAPP_TEMPLATE_RESULTADO_TESTIMONIO,
+    [TipoNotificacion.NUEVO_ADMIN_PENDIENTE]:
+      process.env.WHATSAPP_TEMPLATE_NUEVO_ADMIN_PENDIENTE,
+    [TipoNotificacion.ESTADO_CUENTA_ADMIN]:
+      process.env.WHATSAPP_TEMPLATE_ESTADO_CUENTA_ADMIN,
+  };
+  return nombres[tipo];
 }
 
 /**

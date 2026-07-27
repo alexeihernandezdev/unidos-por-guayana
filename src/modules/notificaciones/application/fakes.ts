@@ -12,6 +12,17 @@ import type {
   FiltroNotificaciones,
   NotificacionRepository,
 } from "@/modules/notificaciones/domain/NotificacionRepository";
+import type {
+  CanalExterno,
+  PreferenciaNotificacion,
+  PreferenciaNotificacionRepository,
+} from "@/modules/notificaciones/domain";
+import type {
+  CanalEmail,
+  EnvioEmail,
+} from "@/modules/notificaciones/domain/CanalEmail";
+import type { TipoNotificacion } from "@/modules/notificaciones/domain/TipoNotificacion";
+import { Rol } from "@/modules/usuarios/domain/Rol";
 
 // Dobles en memoria para los tests de la capa de aplicación (feature 012).
 
@@ -93,11 +104,87 @@ export class FakeCanalWhatsApp implements CanalWhatsApp {
 }
 
 export class FakeLectorContacto implements LectorContacto {
-  constructor(private readonly contactos: ContactoDestinatario[]) {}
+  private readonly contactos: ContactoDestinatario[];
+
+  constructor(
+    contactos: Array<
+      Pick<ContactoDestinatario, "usuarioId" | "telefono" | "telefonoEsWhatsApp"> &
+        Partial<ContactoDestinatario>
+    >,
+  ) {
+    this.contactos = contactos.map((contacto) => ({
+      nombre: "Persona",
+      email: `${contacto.usuarioId}@example.com`,
+      rol: Rol.COLABORADOR,
+      ...contacto,
+    }));
+  }
 
   async contactoDe(
     usuarioIds: readonly string[],
   ): Promise<ContactoDestinatario[]> {
     return this.contactos.filter((c) => usuarioIds.includes(c.usuarioId));
+  }
+}
+
+export class FakeCanalEmail implements CanalEmail {
+  enviados: EnvioEmail[] = [];
+  pruebas: Array<{ email: string; nombre: string }> = [];
+  fallar = false;
+  activo = true;
+
+  disponible(): boolean {
+    return this.activo;
+  }
+
+  async enviar(envio: EnvioEmail): Promise<void> {
+    if (this.fallar) throw new Error("SMTP caído");
+    if (this.activo) this.enviados.push(envio);
+  }
+
+  async enviarPrueba(destinatario: {
+    email: string;
+    nombre: string;
+  }): Promise<void> {
+    if (this.fallar) throw new Error("SMTP caído");
+    this.pruebas.push(destinatario);
+  }
+}
+
+export class FakePreferenciaNotificacionRepository
+  implements PreferenciaNotificacionRepository
+{
+  items: PreferenciaNotificacion[] = [];
+
+  async listarPorUsuario(usuarioId: string): Promise<PreferenciaNotificacion[]> {
+    return this.items.filter((item) => item.usuarioId === usuarioId);
+  }
+
+  async listarPorUsuarios(
+    usuarioIds: readonly string[],
+  ): Promise<PreferenciaNotificacion[]> {
+    return this.items.filter((item) => usuarioIds.includes(item.usuarioId));
+  }
+
+  async guardar(
+    usuarioId: string,
+    tipo: TipoNotificacion,
+    canal: CanalExterno,
+    activo: boolean,
+  ): Promise<void> {
+    let item = this.items.find(
+      (actual) => actual.usuarioId === usuarioId && actual.tipo === tipo,
+    );
+    if (!item) {
+      item = {
+        usuarioId,
+        tipo,
+        emailActivo: true,
+        whatsappActivo: true,
+      };
+      this.items.push(item);
+    }
+    if (canal === "EMAIL") item.emailActivo = activo;
+    else item.whatsappActivo = activo;
   }
 }

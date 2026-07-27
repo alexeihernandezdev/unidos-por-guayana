@@ -1,6 +1,6 @@
 # 036 · Preferencias y email de notificaciones
 
-> Estado: **Especificada** · Extiende: `012 · Notificaciones` · Depende de: `006`, `007`, `015`, `019`, `025`, `032` y `035`
+> Estado: **Implementada** · Extiende: `012 · Notificaciones` · Depende de: `006`, `007`, `015`, `019`, `025`, `032` y `035`
 
 ## Qué hace
 

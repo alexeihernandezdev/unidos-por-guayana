@@ -22,6 +22,7 @@ import type {
 } from "@/modules/testimonios/domain";
 import { PrismaTestimonioRepository } from "@/modules/testimonios/infrastructure/PrismaTestimonioRepository";
 import { PrismaSolicitudRepository } from "@/modules/solicitudes/infrastructure/PrismaSolicitudRepository";
+import { notificarResultadoTestimonio } from "@/lib/eventosNotificaciones";
 
 const testimonios = new PrismaTestimonioRepository();
 const solicitudes = new PrismaSolicitudRepository();
@@ -56,19 +57,27 @@ export function eliminarTestimonioServicio(
   return eliminarTestimonio(deps, id, actor);
 }
 
-export function aprobarTestimonioServicio(
+export async function aprobarTestimonioServicio(
   id: string,
   actor: ActorTestimonio,
 ): Promise<Testimonio> {
-  return aprobarTestimonio(deps, id, actor);
+  const testimonio = await aprobarTestimonio(deps, id, actor);
+  await notificarResultadoTestimonio(testimonio).catch((error) =>
+    console.error("[notificaciones] No se pudo emitir RESULTADO_TESTIMONIO:", error),
+  );
+  return testimonio;
 }
 
-export function rechazarTestimonioServicio(
+export async function rechazarTestimonioServicio(
   id: string,
   motivo: string,
   actor: ActorTestimonio,
 ): Promise<Testimonio> {
-  return rechazarTestimonio(deps, id, motivo, actor);
+  const testimonio = await rechazarTestimonio(deps, id, motivo, actor);
+  await notificarResultadoTestimonio(testimonio).catch((error) =>
+    console.error("[notificaciones] No se pudo emitir RESULTADO_TESTIMONIO:", error),
+  );
+  return testimonio;
 }
 
 export function ocultarTestimonioServicio(

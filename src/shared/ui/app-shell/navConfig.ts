@@ -18,7 +18,8 @@ export type IconoNav =
   | "aprobaciones"
   | "red"
   | "testimonios"
-  | "auditoria";
+  | "auditoria"
+  | "ajustes";
 
 // Ítem de navegación del panel. `exact` = activo solo con la ruta exacta.
 export type NavItem = {
@@ -62,6 +63,7 @@ const NAV_ADMIN: NavSection[] = [
     label: "Mi cuenta",
     items: [
       { label: "Datos del administrador", href: "/panel/perfil", icon: "acopio" },
+      { label: "Ajustes", href: "/ajustes", icon: "ajustes", exact: true },
       {
         label: "Centros de Acopio",
         href: "/panel/puntos-acopio",
@@ -90,6 +92,13 @@ const NAV_SUPERADMIN: NavSection[] = [
       },
     ],
   },
+  {
+    label: "Mi cuenta",
+    items: [
+      { label: "Mi perfil", href: "/superadmin/perfil", icon: "perfil", exact: true },
+      { label: "Ajustes", href: "/ajustes", icon: "ajustes", exact: true },
+    ],
+  },
 ];
 
 const NAV_AUDITOR: NavSection[] = [
@@ -101,6 +110,13 @@ const NAV_AUDITOR: NavSection[] = [
         href: "/auditoria/solicitudes",
         icon: "auditoria",
       },
+    ],
+  },
+  {
+    label: "Mi cuenta",
+    items: [
+      { label: "Mi perfil", href: "/auditoria/perfil", icon: "perfil", exact: true },
+      { label: "Ajustes", href: "/ajustes", icon: "ajustes", exact: true },
     ],
   },
 ];
@@ -121,6 +137,7 @@ const NAV_COLABORADOR: NavSection[] = [
     items: [
       { label: "Mis testimonios", href: "/mis-testimonios", icon: "testimonios", exact: true },
       { label: "Mi perfil", href: "/mi-perfil", icon: "perfil", exact: true },
+      { label: "Ajustes", href: "/ajustes", icon: "ajustes", exact: true },
     ],
   },
 ];
@@ -155,6 +172,7 @@ const NAV_SOLICITANTE: NavSection[] = [
     items: [
       { label: "Mis testimonios", href: "/mis-testimonios", icon: "testimonios", exact: true },
       { label: "Mi perfil", href: "/mi-perfil", icon: "perfil", exact: true },
+      { label: "Ajustes", href: "/ajustes", icon: "ajustes", exact: true },
     ],
   },
 ];

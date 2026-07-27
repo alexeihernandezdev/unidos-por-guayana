@@ -94,6 +94,8 @@ model Usuario {
   evidenciasAuditoria ArchivoEvidenciaAuditoria[] @relation("EvidenciaAuditoria")
   // Notificaciones in-app dirigidas a este usuario (feature 012).
   notificaciones      Notificacion[]
+  // Preferencias de canales externos por categoría (feature 036).
+  preferenciasNotificacion PreferenciaNotificacion[]
 
   @@index([estadoId])
   @@index([municipioId])
@@ -106,6 +108,18 @@ model Usuario {
 enum TipoNotificacion {
   NUEVA_ACTIVIDAD
   META_CUMPLIDA
+  NUEVO_APORTE
+  ESTADO_APORTE
+  NUEVA_AFILIACION
+  AFILIACION_REMOVIDA
+  NUEVA_SOLICITUD_ZONA
+  ESTADO_SOLICITUD
+  ACTUALIZACION_AUDITORIA
+  NUEVA_SOLICITUD_AUDITABLE
+  RESULTADO_PROPUESTA_RECURSO
+  RESULTADO_TESTIMONIO
+  NUEVO_ADMIN_PENDIENTE
+  ESTADO_CUENTA_ADMIN
 }
 
 // Aviso in-app dirigido a un `Usuario` (feature 012). La `referencia` se modela
@@ -128,6 +142,24 @@ model Notificacion {
   @@unique([usuarioId, claveDedupe])
   @@index([usuarioId, leida])
   @@map("notificaciones")
+}
+
+// Elección de canales externos para una categoría de aviso (feature 036).
+// In-app no se modela: es obligatorio y siempre activo. La ausencia de fila usa
+// los defaults del dominio (Email y WhatsApp activos, sujetos a disponibilidad).
+model PreferenciaNotificacion {
+  id             String           @id @default(cuid())
+  usuarioId      String
+  usuario        Usuario          @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  tipo           TipoNotificacion
+  emailActivo    Boolean          @default(true)
+  whatsappActivo Boolean          @default(true)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@unique([usuarioId, tipo])
+  @@index([usuarioId])
+  @@map("preferencias_notificacion")
 }
 
 // Afiliacion (feature 025): vínculo unilateral entre un COLABORADOR y un ADMIN

@@ -23,7 +23,24 @@ export type MetaCumplidaEvento = {
   destinatarioIds: readonly string[];
 };
 
-export type EventoNotificacion = NuevaActividadEvento | MetaCumplidaEvento;
+// Formato extensible para eventos cuyos destinatarios y texto ya fueron resueltos
+// por el caso de uso que conoce la entidad de origen (feature 036).
+export type EventoNotificacionDirecto = {
+  directo: true;
+  tipo: TipoNotificacion;
+  destinatarioIds: readonly string[];
+  mensaje: string;
+  asunto: string;
+  referenciaTipo: string;
+  referenciaId: string;
+  claveDedupe: string;
+  variablesWhatsApp?: readonly string[];
+};
+
+export type EventoNotificacion =
+  | NuevaActividadEvento
+  | MetaCumplidaEvento
+  | EventoNotificacionDirecto;
 
 /**
  * Puerto de emisión de avisos (feature 012). Lo definen las notificaciones y lo

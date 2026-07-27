@@ -45,14 +45,15 @@ _Features completadas, en orden de implementación._
 
 29. **033 · Imágenes y documentación en actividades** — El `ADMIN` dueño adjunta una **imagen principal** y hasta **10 documentos** a su actividad, **en cualquier estado** (subida al crear y gestión posterior en `/panel/actividades/[id]`). A diferencia de 031, los archivos son **públicos**: un **bucket público** nuevo (`SUPABASE_STORAGE_BUCKET_PUBLICO`) servido por URL pública permanente. Con ello se **rediseña el tablero público de transparencia** en una **galería editorial**: actividad destacada con portada a lo ancho y grid de tarjetas con imagen (`/transparencia`), y detalle público con hero de portada, metas y galería de adjuntos (`/transparencia/[id]`); también se muestran en el detalle del colaborador (`/actividades/[id]`). Nuevo modelo `ArchivoActividad` (`PRINCIPAL` | `ADJUNTO`, máx 1 principal por índice único parcial); reutiliza `src/modules/archivos` (extendido con `urlPublica` y adaptador por bucket). DTOs públicos ganan `portadaUrl`/adjuntos sin datos personales. Migración `actividad_archivos`. _Enmienda 024. Depende de 024, 022, 031, 009 y 021._
 
+30. **036 · Preferencias y email de notificaciones** — Extiende 012 con Email SMTP plug-and-play,
+preferencias por categoría para Email/WhatsApp, in-app siempre activo, `/ajustes` para todos los
+roles y eventos inmediatos de aportes, afiliaciones, solicitudes, auditoría, moderación y aprobación
+de cuentas. Incluye correo de prueba seguro y degradación sin SMTP. Sin scheduler, digest, cola ni
+reintentos.
+
 ## Siguiente 🔜
 
 _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
-
-30. **036 · Preferencias y email de notificaciones** — Extiende 012 con Email SMTP plug-and-play,
-preferencias por categoría para Email/WhatsApp, in-app siempre activo, `/ajustes` para todos los
-roles y nuevos eventos inmediatos de aportes, afiliaciones, solicitudes, auditoría, moderación y
-aprobación de cuentas. Sin scheduler, digest, cola ni reintentos.
 
 24. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
 

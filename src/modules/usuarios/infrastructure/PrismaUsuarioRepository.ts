@@ -81,4 +81,21 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
       data: { categoriasAporte: { set: categorias } },
     });
   }
+
+  async actualizarCuenta(
+    id: string,
+    datos: { nombre: string; email: string },
+  ): Promise<Usuario> {
+    return prisma.usuario.update({
+      where: { id },
+      data: { nombre: datos.nombre, email: datos.email },
+    });
+  }
+
+  async actualizarPassword(id: string, passwordHash: string): Promise<Usuario> {
+    return prisma.usuario.update({
+      where: { id },
+      data: { passwordHash },
+    });
+  }
 }

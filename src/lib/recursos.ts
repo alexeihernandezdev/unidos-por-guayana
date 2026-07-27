@@ -23,6 +23,7 @@ import {
 import type { Recurso } from "@/modules/recursos/domain/Recurso";
 import type { FiltroRecursos } from "@/modules/recursos/domain/RecursoRepository";
 import { PrismaRecursoRepository } from "@/modules/recursos/infrastructure/PrismaRecursoRepository";
+import { notificarResultadoRecurso } from "@/lib/eventosNotificaciones";
 
 // ── Composition root ────────────────────────────────────────────────────────
 // `src/lib` es infraestructura global (tech-stack.md): aquí se cablea el
@@ -74,10 +75,18 @@ export function listarPropuestasServicio(): Promise<Recurso[]> {
   return listarPropuestas({ recursos });
 }
 
-export function aprobarPropuestaServicio(id: string): Promise<Recurso> {
-  return aprobarPropuesta({ recursos }, id);
+export async function aprobarPropuestaServicio(id: string): Promise<Recurso> {
+  const recurso = await aprobarPropuesta({ recursos }, id);
+  await notificarResultadoRecurso(recurso).catch((error) =>
+    console.error("[notificaciones] No se pudo emitir RESULTADO_RECURSO:", error),
+  );
+  return recurso;
 }
 
-export function rechazarPropuestaServicio(id: string): Promise<Recurso> {
-  return rechazarPropuesta({ recursos }, id);
+export async function rechazarPropuestaServicio(id: string): Promise<Recurso> {
+  const recurso = await rechazarPropuesta({ recursos }, id);
+  await notificarResultadoRecurso(recurso).catch((error) =>
+    console.error("[notificaciones] No se pudo emitir RESULTADO_RECURSO:", error),
+  );
+  return recurso;
 }

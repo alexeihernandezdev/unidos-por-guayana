@@ -1,6 +1,7 @@
 import { DateTime } from "luxon";
 import type { Notificacion } from "@/modules/notificaciones/domain/Notificacion";
 import { Rol } from "@/modules/usuarios/domain/Rol";
+import { hrefDeReferencia } from "@/modules/notificaciones/domain/reglas";
 
 // Helpers de presentación de notificaciones (feature 012). Puros de formato.
 
@@ -17,7 +18,9 @@ export function formatearFecha(fecha: Date): string {
  * `/actividades/[id]`.
  */
 export function hrefDeNotificacion(rol: Rol, notificacion: Notificacion): string {
-  if (notificacion.referenciaTipo !== "ACTIVIDAD") return "/notificaciones";
-  const base = rol === Rol.ADMIN ? "/panel/actividades" : "/actividades";
-  return `${base}/${notificacion.referenciaId}`;
+  return hrefDeReferencia(
+    rol,
+    notificacion.referenciaTipo,
+    notificacion.referenciaId,
+  );
 }

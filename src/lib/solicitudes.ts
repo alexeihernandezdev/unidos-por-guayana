@@ -40,17 +40,25 @@ import { PrismaSolicitudRepository } from "@/modules/solicitudes/infrastructure/
 import { PrismaRecursoRepository } from "@/modules/recursos/infrastructure/PrismaRecursoRepository";
 import { SupabaseStorageAdapter } from "@/modules/archivos/infrastructure/SupabaseStorageAdapter";
 import { catalogoUbicacion } from "@/lib/ubicacion";
+import {
+  notificarEstadoSolicitud,
+  notificarNuevaSolicitud,
+} from "@/lib/eventosNotificaciones";
 
 const solicitudes = new PrismaSolicitudRepository();
 const recursos = new PrismaRecursoRepository();
 const storage = new SupabaseStorageAdapter();
 const deps = { solicitudes, recursos, storage, catalogo: catalogoUbicacion };
 
-export function crearSolicitudServicio(
+export async function crearSolicitudServicio(
   input: CrearSolicitudInput,
   solicitanteId: string,
 ): Promise<Solicitud> {
-  return crearSolicitud(deps, input, solicitanteId);
+  const solicitud = await crearSolicitud(deps, input, solicitanteId);
+  await notificarNuevaSolicitud(solicitud).catch((error) =>
+    console.error("[notificaciones] No se pudo emitir NUEVA_SOLICITUD:", error),
+  );
+  return solicitud;
 }
 
 export function listarMisSolicitudesServicio(
@@ -84,12 +92,20 @@ export function cancelarSolicitudServicio(
   return cancelarSolicitud(deps, id, solicitanteId);
 }
 
-export function marcarAtendidaServicio(id: string): Promise<Solicitud> {
-  return marcarAtendida(deps, id);
+export async function marcarAtendidaServicio(id: string): Promise<Solicitud> {
+  const solicitud = await marcarAtendida(deps, id);
+  await notificarEstadoSolicitud(solicitud).catch((error) =>
+    console.error("[notificaciones] No se pudo emitir ESTADO_SOLICITUD:", error),
+  );
+  return solicitud;
 }
 
-export function cerrarSolicitudServicio(id: string): Promise<Solicitud> {
-  return cerrarSolicitud(deps, id);
+export async function cerrarSolicitudServicio(id: string): Promise<Solicitud> {
+  const solicitud = await cerrarSolicitud(deps, id);
+  await notificarEstadoSolicitud(solicitud).catch((error) =>
+    console.error("[notificaciones] No se pudo emitir ESTADO_SOLICITUD:", error),
+  );
+  return solicitud;
 }
 
 // ── Archivos (feature 031) ──

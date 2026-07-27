@@ -21,6 +21,10 @@ import type { ConteoPorCategoria } from "@/modules/afiliaciones/domain/Afiliacio
 import type { FiltroCentros } from "@/modules/afiliaciones/domain/LectorCentrosDisponibles";
 import { PrismaAfiliacionRepository } from "@/modules/afiliaciones/infrastructure/PrismaAfiliacionRepository";
 import { PrismaLectorCentrosDisponibles } from "@/modules/afiliaciones/infrastructure/PrismaLectorCentrosDisponibles";
+import {
+  notificarAfiliacionRemovida,
+  notificarNuevaAfiliacion,
+} from "@/lib/eventosNotificaciones";
 
 // ── Composition root (feature 025) ───────────────────────────────────────────
 // Cablea el repositorio Prisma de afiliaciones y el lector de centros disponibles
@@ -29,11 +33,16 @@ const afiliaciones = new PrismaAfiliacionRepository();
 const centros = new PrismaLectorCentrosDisponibles();
 const deps = { afiliaciones, centros };
 
-export function afiliarseACentroServicio(
+export async function afiliarseACentroServicio(
   colaboradorId: string,
   adminId: string,
 ): Promise<Afiliacion> {
-  return afiliarseACentro(deps, colaboradorId, adminId);
+  const afiliacion = await afiliarseACentro(deps, colaboradorId, adminId);
+  await notificarNuevaAfiliacion(adminId, colaboradorId, afiliacion.id).catch(
+    (error) =>
+      console.error("[notificaciones] No se pudo emitir NUEVA_AFILIACION:", error),
+  );
+  return afiliacion;
 }
 
 export function dejarCentroServicio(
@@ -43,11 +52,24 @@ export function dejarCentroServicio(
   return dejarCentro(deps, colaboradorId, adminId);
 }
 
-export function removerDeRedServicio(
+export async function removerDeRedServicio(
   adminId: string,
   colaboradorId: string,
 ): Promise<void> {
-  return removerDeRed(deps, adminId, colaboradorId);
+  const afiliacion = await afiliaciones.buscar(colaboradorId, adminId);
+  await removerDeRed(deps, adminId, colaboradorId);
+  if (afiliacion) {
+    await notificarAfiliacionRemovida(
+      adminId,
+      colaboradorId,
+      afiliacion.id,
+    ).catch((error) =>
+      console.error(
+        "[notificaciones] No se pudo emitir AFILIACION_REMOVIDA:",
+        error,
+      ),
+    );
+  }
 }
 
 export function listarMiRedServicio(

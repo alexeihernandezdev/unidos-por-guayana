@@ -27,6 +27,10 @@ import { PrismaRecursoRepository } from "@/modules/recursos/infrastructure/Prism
 import { EstadoAporte } from "@/modules/aportes/domain/EstadoAporte";
 import { TipoNotificacion } from "@/modules/notificaciones/domain/TipoNotificacion";
 import { notificador } from "@/lib/notificaciones";
+import {
+  notificarEstadoAporte,
+  notificarNuevoAporte,
+} from "@/lib/eventosNotificaciones";
 
 // ── Composition root ────────────────────────────────────────────────────────
 // Cablea los repositorios Prisma (aportes + actividades + recursos) con los casos de
@@ -37,12 +41,22 @@ const actividades = new PrismaActividadRepository();
 const recursos = new PrismaRecursoRepository();
 const deps = { aportes, actividades, recursos };
 
-export function crearAporteServicio(input: CrearAporteInput): Promise<Aporte> {
-  return crearAporte(deps, input);
+export async function crearAporteServicio(input: CrearAporteInput): Promise<Aporte> {
+  const aporte = await crearAporte(deps, input);
+  await notificarNuevoAporte(aporte).catch((error) =>
+    console.error("[notificaciones] No se pudo emitir NUEVO_APORTE:", error),
+  );
+  return aporte;
 }
 
-export function cancelarAporteServicio(id: string, actor: Actor): Promise<void> {
-  return cancelarAporte(deps, id, actor);
+export async function cancelarAporteServicio(id: string, actor: Actor): Promise<void> {
+  const aporte = await aportes.buscarPorId(id);
+  await cancelarAporte(deps, id, actor);
+  if (aporte) {
+    await notificarEstadoAporte(aporte, actor.rol, "CANCELADO").catch((error) =>
+      console.error("[notificaciones] No se pudo emitir ESTADO_APORTE:", error),
+    );
+  }
 }
 
 export async function marcarRecibidoServicio(
@@ -50,6 +64,9 @@ export async function marcarRecibidoServicio(
   actor: Actor,
 ): Promise<Aporte> {
   const aporte = await marcarRecibido(deps, id, actor);
+  await notificarEstadoAporte(aporte, actor.rol, "RECIBIDO").catch((error) =>
+    console.error("[notificaciones] No se pudo emitir ESTADO_APORTE:", error),
+  );
   // Disparador META_CUMPLIDA (feature 012): si este aporte hace cruzar el 100% de
   // su meta por primera vez, avisa al admin dueño y a los aportantes de la meta.
   await notificarMetaCumplida(aporte);
