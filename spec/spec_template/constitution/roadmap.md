@@ -49,6 +49,11 @@ _Features completadas, en orden de implementación._
 
 _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
 
+30. **036 · Preferencias y email de notificaciones** — Extiende 012 con Email SMTP plug-and-play,
+preferencias por categoría para Email/WhatsApp, in-app siempre activo, `/ajustes` para todos los
+roles y nuevos eventos inmediatos de aportes, afiliaciones, solicitudes, auditoría, moderación y
+aprobación de cuentas. Sin scheduler, digest, cola ni reintentos.
+
 24. **010 · Seguimiento del envío** — Historial de trazabilidad (`SeguimientoEvento`): transiciones de estado y evidencia de entrega.
 
 ## Backlog / ideas 💡
