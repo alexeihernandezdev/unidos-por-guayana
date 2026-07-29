@@ -24,7 +24,7 @@ type Props = {
   perfil: DatosPerfilAdmin;
   // Server action de actualización, recibido como prop desde la página.
   action: (input: DatosPerfilAdmin) => Promise<{ ok: boolean; error?: string }>;
-  // Catálogo de ubicación (feature 020): estados y municipios para el selector.
+  // Catálogo de ubicación (feature 020): estados y municipios para el selector...
   estados: Estado[];
   municipios: Municipio[];
 };
