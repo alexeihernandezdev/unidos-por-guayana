@@ -69,7 +69,7 @@ export function PerfilAdminForm({
     <form onSubmit={onSubmit} className="flex w-full max-w-xl flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <label htmlFor="nombreCuenta" className="text-sm font-medium">
-          Nombre de la cuenta
+          Nombre de la cuenta (razón social)
         </label>
         <input
           id="nombreCuenta"
