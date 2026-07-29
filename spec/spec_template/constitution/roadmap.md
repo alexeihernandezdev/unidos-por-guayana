@@ -51,6 +51,14 @@ roles y eventos inmediatos de aportes, afiliaciones, solicitudes, auditoría, mo
 de cuentas. Incluye correo de prueba seguro y degradación sin SMTP. Sin scheduler, digest, cola ni
 reintentos.
 
+## En curso 🚧
+
+31. **037 · Webhook mínimo de WhatsApp** — Callback seguro para verificación de
+Meta y recepción autenticada de eventos `messages`, sin persistencia ni
+procesamiento en esta etapa. Incluye la configuración prevista de la plantilla
+base `AUTHENTICATION` `login_otp` con botón para copiar código. El código está
+implementado; falta desplegar y completar la configuración externa en Meta.
+
 ## Siguiente 🔜
 
 _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
