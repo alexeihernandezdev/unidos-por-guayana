@@ -25,6 +25,7 @@ export type PerfilAdmin = {
   municipioId: string;
   telefono: string;
   telefonoEsWhatsApp: boolean;
+  telefonoVerificadoEn: Date | null;
   correo: string;
   tipoDocumento: TipoDocumento;
   numeroDocumento: string;

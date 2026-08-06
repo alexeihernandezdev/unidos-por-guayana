@@ -23,6 +23,10 @@ import {
   registrarNuevoUsuario,
 } from "@/shared/auth";
 import type { RegistroInput } from "@/modules/usuarios/ui/RegistroForm";
+import {
+  DestinoVerificacionTelefono,
+  iniciarVerificacionTelefonoServicio,
+} from "@/shared/verificacion-telefono";
 
 // Validación en el límite (servidor). Las reglas también viven en los casos de
 // uso; aquí se rechaza pronto con mensajes claros. Desde la feature 015 `ADMIN`
@@ -41,7 +45,9 @@ const CuentaSchema = z.object({
 const DatosContactoSchema = z.object({
   cedula: z.string().trim().min(1, "La cédula es obligatoria.").max(20),
   telefono: z.string().trim().min(1, "El teléfono es obligatorio.").max(20),
-  telefonoEsWhatsApp: z.boolean(),
+  telefonoEsWhatsApp: z.literal(true, {
+    message: "El teléfono debe tener WhatsApp para poder verificarlo.",
+  }),
   estadoId: z.string().trim().min(1, "Selecciona el estado.").max(40),
   municipioId: z.string().trim().min(1, "Selecciona el municipio.").max(40),
 });
@@ -76,7 +82,9 @@ const PerfilSchema = z.object({
   estadoId: z.string().trim().min(1, "Selecciona el estado.").max(40),
   municipioId: z.string().trim().min(1, "Selecciona el municipio.").max(40),
   telefono: z.string().trim().min(1, "Indica un teléfono.").max(40),
-  telefonoEsWhatsApp: z.boolean(),
+  telefonoEsWhatsApp: z.literal(true, {
+    message: "El teléfono debe tener WhatsApp para poder verificarlo.",
+  }),
   correo: z.email("Indica un correo de contacto válido."),
   tipoDocumento: z.enum(TipoDocumento, { message: "Tipo de documento no válido." }),
   numeroDocumento: z.string().trim().min(1, "Indica el número de documento.").max(40),
@@ -127,12 +135,17 @@ export async function registrarUsuarioAction(
         categoriasAporte = categorias.data;
       }
 
-      await registrarNuevoUsuario({
+      const usuario = await registrarNuevoUsuario({
         ...cuenta.data,
         rol,
         datosContacto: datosContacto.data,
         categoriasAporte,
       });
+      await iniciarVerificacionTelefonoServicio(
+        usuario.id,
+        DestinoVerificacionTelefono.USUARIO,
+        datosContacto.data.telefono,
+      ).catch(() => undefined);
       return { ok: true, rol };
     }
 
@@ -173,6 +186,11 @@ export async function registrarUsuarioAction(
         estadoId: perfil.data.estadoId,
         municipioId: perfil.data.municipioId,
       });
+      await iniciarVerificacionTelefonoServicio(
+        admin.id,
+        DestinoVerificacionTelefono.PERFIL_ADMIN,
+        perfil.data.telefono,
+      ).catch(() => undefined);
       return { ok: true, rol };
     }
 

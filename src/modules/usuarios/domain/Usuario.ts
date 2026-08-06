@@ -17,6 +17,7 @@ export type Usuario = {
   cedula: string | null;
   telefono: string | null;
   telefonoEsWhatsApp: boolean;
+  telefonoVerificadoEn: Date | null;
   // Ubicación por catálogo (feature 020, sustituye a los antiguos `estado`/
   // `parroquia` de texto libre). FKs a `Estado`/`Municipio`.
   estadoId: string | null;
@@ -41,6 +42,7 @@ export type NuevoUsuario = {
   cedula?: string | null;
   telefono?: string | null;
   telefonoEsWhatsApp?: boolean;
+  telefonoVerificadoEn?: Date | null;
   estadoId?: string | null;
   municipioId?: string | null;
   categoriasAporte?: CategoriaRecurso[];

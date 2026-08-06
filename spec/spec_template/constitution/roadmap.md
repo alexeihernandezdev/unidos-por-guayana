@@ -59,6 +59,12 @@ procesamiento en esta etapa. Incluye la configuración prevista de la plantilla
 base `AUTHENTICATION` `login_otp` con botón para copiar código. El código está
 implementado; falta desplegar y completar la configuración externa en Meta.
 
+32. **038 · Verificación de teléfono mediante OTP** — Confirma por WhatsApp todo
+teléfono nuevo o modificado, conserva el anterior hasta validar cambios y limita
+el espacio privado mientras exista una verificación pendiente. El código y la
+migración están listos; falta configurar `PHONE_OTP_SECRET`, credenciales de Meta
+y desplegar.
+
 ## Siguiente 🔜
 
 _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._

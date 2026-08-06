@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { MapPinned, ShieldCheck, UserRound } from "lucide-react";
+import {
+  CheckCircle2,
+  MapPinned,
+  ShieldCheck,
+  UserRound,
+} from "lucide-react";
 import {
   PanelPage,
   PanelPageHeader,
@@ -61,6 +66,12 @@ export default async function PerfilAdminPage() {
       {datos ? (
         <section className="profile-surface mx-auto w-full max-w-3xl">
           <div className="profile-section-heading"><span className="profile-icon"><ShieldCheck aria-hidden="true" /></span><div><h2>Identidad y contacto</h2><p>La información que verán los colaboradores al consultar tu centro.</p></div></div>
+          {perfil?.telefonoVerificadoEn && (
+            <p className="mb-4 inline-flex items-center gap-2 text-xs font-medium text-primary-ink">
+              <CheckCircle2 className="size-4" strokeWidth={1.5} aria-hidden />
+              Teléfono verificado por WhatsApp
+            </p>
+          )}
           <PerfilAdminForm
           perfil={datos}
           action={actualizarPerfilAction}

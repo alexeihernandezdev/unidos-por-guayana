@@ -497,9 +497,14 @@ export function RegistroForm({ action, estados, municipios }: Props) {
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
-              {...register("perfilTelefonoEsWhatsApp")}
+              {...register("perfilTelefonoEsWhatsApp", {
+                validate: (valor) =>
+                  !esAdmin ||
+                  valor ||
+                  "El número debe recibir WhatsApp para poder verificarlo.",
+              })}
             />
-            Este número recibe WhatsApp
+            Este número recibe WhatsApp y puede verificarse
           </label>
 
           <div className="grid gap-4 sm:grid-cols-2">

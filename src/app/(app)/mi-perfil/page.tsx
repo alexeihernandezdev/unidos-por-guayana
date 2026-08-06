@@ -1,5 +1,11 @@
 import type { CSSProperties } from "react";
-import { HeartHandshake, MapPin, ShieldCheck, UserRound } from "lucide-react";
+import {
+  CheckCircle2,
+  HeartHandshake,
+  MapPin,
+  ShieldCheck,
+  UserRound,
+} from "lucide-react";
 import { CategoriasEditor } from "@/modules/afiliaciones/ui/CategoriasEditor";
 import { GestionAfiliaciones } from "@/modules/afiliaciones/ui/GestionAfiliaciones";
 import { Rol } from "@/modules/usuarios/domain/Rol";
@@ -94,6 +100,12 @@ export default async function MiPerfilPage() {
             <span className="profile-icon"><ShieldCheck aria-hidden="true" /></span>
             <div><h2>Datos personales</h2><p>Información privada usada para coordinar contigo.</p></div>
           </div>
+          {usuario?.telefonoVerificadoEn && (
+            <p className="mb-4 inline-flex items-center gap-2 text-xs font-medium text-primary-ink">
+              <CheckCircle2 className="size-4" strokeWidth={1.5} aria-hidden />
+              Teléfono verificado por WhatsApp
+            </p>
+          )}
           <DatosContactoForm
         modo="editar"
         valoresIniciales={{

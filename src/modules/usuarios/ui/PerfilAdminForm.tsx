@@ -99,9 +99,13 @@ export function PerfilAdminForm({
           <label className="mt-1 flex items-center gap-2 text-sm">
             <input
               type="checkbox"
-              {...register("telefonoEsWhatsApp")}
+              {...register("telefonoEsWhatsApp", {
+                validate: (valor) =>
+                  valor ||
+                  "El número debe recibir WhatsApp para poder verificarlo.",
+              })}
             />
-            Este número recibe WhatsApp
+            Este número recibe WhatsApp y puede verificarse
           </label>
         </div>
         <div className="flex flex-col gap-1.5">

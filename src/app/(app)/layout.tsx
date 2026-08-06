@@ -1,4 +1,4 @@
-import { requireSesion } from "@/shared/auth";
+import { requireTelefonoVerificado } from "@/shared/auth";
 import {
   AppShell,
   navSectionsPorRol,
@@ -18,7 +18,7 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const usuario = await requireSesion();
+  const usuario = await requireTelefonoVerificado();
 
   return (
     <AppShell

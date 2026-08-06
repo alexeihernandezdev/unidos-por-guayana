@@ -7,7 +7,17 @@ import {
   PerfilAdminNoEncontradoError,
 } from "@/modules/usuarios/application/errors";
 import { TipoDocumento } from "@/modules/usuarios/domain/PerfilAdmin";
-import { actualizarPerfilAdminGestion, requireAdminVerificado } from "@/shared/auth";
+import { normalizarTelefono } from "@/modules/usuarios/domain/datosContacto";
+import {
+  actualizarPerfilAdminGestion,
+  obtenerPerfilAdminGestion,
+  requireAdminVerificado,
+} from "@/shared/auth";
+import {
+  DestinoVerificacionTelefono,
+  iniciarVerificacionTelefonoServicio,
+  telefonoPendienteServicio,
+} from "@/shared/verificacion-telefono";
 
 const RUTA_PERFIL = "/panel/perfil";
 
@@ -42,7 +52,37 @@ export async function actualizarPerfilAction(
   }
 
   try {
-    await actualizarPerfilAdminGestion(sesion.id, parsed.data);
+    const actual = await obtenerPerfilAdminGestion(sesion.id);
+    if (!actual) {
+      return {
+        ok: false,
+        error: "Tu cuenta aún no tiene un perfil de centro de acopio.",
+      };
+    }
+    const telefonoNuevo =
+      normalizarTelefono(parsed.data.telefono) ?? parsed.data.telefono;
+    const telefonoCambio = actual.telefono !== telefonoNuevo;
+    await actualizarPerfilAdminGestion(sesion.id, {
+      ...parsed.data,
+      telefono: actual.telefono,
+    });
+    if (telefonoCambio) {
+      try {
+        await iniciarVerificacionTelefonoServicio(
+          sesion.id,
+          DestinoVerificacionTelefono.PERFIL_ADMIN,
+          telefonoNuevo,
+        );
+      } catch {
+        if (!(await telefonoPendienteServicio(sesion.id))) {
+          return {
+            ok: false,
+            error:
+              "No pudimos iniciar la verificación. Tu teléfono anterior se conserva.",
+          };
+        }
+      }
+    }
     revalidatePath(RUTA_PERFIL);
     return { ok: true };
   } catch (error) {

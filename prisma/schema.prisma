@@ -35,6 +35,11 @@ enum EstadoVerificacion {
   RECHAZADO
 }
 
+enum DestinoVerificacionTelefono {
+  USUARIO
+  PERFIL_ADMIN
+}
+
 // Persona registrada en la plataforma. La contraseña se guarda siempre hasheada
 // (nunca en claro). La autenticación es por credenciales (email + contraseña)
 // con Auth.js v5 y sesión JWT.
@@ -55,6 +60,7 @@ model Usuario {
   cedula             String?            @unique
   telefono           String?
   telefonoEsWhatsApp Boolean            @default(false)
+  telefonoVerificadoEn DateTime?
   estadoId           String?
   estadoUbicacion    Estado?            @relation(fields: [estadoId], references: [id])
   municipioId        String?
@@ -96,6 +102,7 @@ model Usuario {
   notificaciones      Notificacion[]
   // Preferencias de canales externos por categoría (feature 036).
   preferenciasNotificacion PreferenciaNotificacion[]
+  verificacionesTelefono VerificacionTelefono[]
 
   @@index([estadoId])
   @@index([municipioId])
@@ -209,6 +216,7 @@ model PerfilAdmin {
   telefono           String
   // Flag WhatsApp del teléfono del centro de acopio (feature 017 amplía 016).
   telefonoEsWhatsApp Boolean       @default(false)
+  telefonoVerificadoEn DateTime?
   correo             String
   tipoDocumento      TipoDocumento
   numeroDocumento    String
@@ -218,6 +226,28 @@ model PerfilAdmin {
   @@index([estadoId])
   @@index([municipioId])
   @@map("perfiles_admin")
+}
+
+// Solicitud temporal para demostrar acceso a un teléfono mediante WhatsApp.
+// El código se persiste como HMAC; nunca se almacena el OTP en texto.
+model VerificacionTelefono {
+  id                String                      @id @default(cuid())
+  usuarioId         String
+  usuario           Usuario                     @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  destino           DestinoVerificacionTelefono
+  telefonoPendiente String
+  codigoHash        String
+  expiraEn          DateTime
+  intentosFallidos  Int                         @default(0)
+  envios             Int                         @default(1)
+  ultimoEnvioEn     DateTime                    @default(now())
+  consumidoEn       DateTime?
+  createdAt         DateTime                    @default(now())
+  updatedAt         DateTime                    @updatedAt
+
+  @@index([usuarioId, destino, consumidoEn])
+  @@index([usuarioId, telefonoPendiente, createdAt])
+  @@map("verificaciones_telefono")
 }
 
 // PuntoAcopio: ubicación física perteneciente a un `ADMIN` (feature 011). Un

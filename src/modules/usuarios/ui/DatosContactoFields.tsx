@@ -108,9 +108,13 @@ export function DatosContactoFields<T extends FieldValues & CamposDatosContacto>
       <label className="flex items-center gap-2 text-sm">
         <input
           type="checkbox"
-          {...register("telefonoEsWhatsApp" as Path<T>)}
+          {...register("telefonoEsWhatsApp" as Path<T>, {
+            validate: (valor) =>
+              Boolean(valor) ||
+              "El número debe recibir WhatsApp para poder verificarlo.",
+          })}
         />
-        Este número recibe WhatsApp
+        Este número recibe WhatsApp y puede verificarse
       </label>
 
       <SelectorUbicacion<T>

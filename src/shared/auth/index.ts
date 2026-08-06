@@ -30,5 +30,6 @@ export {
   requireDatosContactoCompletos,
   requireRol,
   requireSesion,
+  requireTelefonoVerificado,
   type UsuarioSesion,
 } from "./session";

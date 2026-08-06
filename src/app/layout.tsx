@@ -59,6 +59,7 @@ export default async function RootLayout({
   const esOnboardingOAuth =
     pathname.startsWith("/login") ||
     pathname.startsWith("/registro") ||
+    pathname.startsWith("/verificar-telefono") ||
     pathname.startsWith("/completar-perfil") ||
     pathname.startsWith("/cuenta-admin");
   // Espacio logeado (rutas con AppShell: (app)/(admin)/superadmin) → tema oscuro

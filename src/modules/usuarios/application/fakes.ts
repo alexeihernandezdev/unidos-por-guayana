@@ -26,6 +26,7 @@ export class InMemoryUsuarioRepository implements UsuarioRepository {
       cedula: datos.cedula ?? null,
       telefono: datos.telefono ?? null,
       telefonoEsWhatsApp: datos.telefonoEsWhatsApp ?? false,
+      telefonoVerificadoEn: datos.telefonoVerificadoEn ?? null,
       estadoId: datos.estadoId ?? null,
       municipioId: datos.municipioId ?? null,
       categoriasAporte: datos.categoriasAporte ?? [],
@@ -168,6 +169,7 @@ export class InMemoryPerfilAdminRepository implements PerfilAdminRepository {
       id: `perfil-${++this.secuencia}`,
       createdAt: ahora,
       updatedAt: ahora,
+      telefonoVerificadoEn: null,
       ...datos,
     };
     this.porUsuarioId.set(perfil.usuarioId, perfil);

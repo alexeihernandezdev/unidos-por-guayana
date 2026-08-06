@@ -4,6 +4,7 @@ import { tieneDatosContactoCompletos } from "@/modules/usuarios/domain/datosCont
 import { Rol } from "@/modules/usuarios/domain/Rol";
 import { puedeOperarComoAdmin } from "@/modules/usuarios/domain/verificacion";
 import { EstadoVerificacion } from "@/modules/usuarios/domain/Rol";
+import { telefonoPendienteServicio } from "@/shared/verificacion-telefono";
 
 // Helpers de sesión para el servidor (server components, server actions y route
 // handlers). `src/shared` es transversal, así que la presentación puede leer la
@@ -35,6 +36,15 @@ export async function requireSesion(): Promise<UsuarioSesion> {
   return usuario;
 }
 
+/** Exige que no exista un teléfono nuevo o modificado pendiente de OTP. */
+export async function requireTelefonoVerificado(): Promise<UsuarioSesion> {
+  const usuario = await requireSesion();
+  if (await telefonoPendienteServicio(usuario.id)) {
+    redirect("/verificar-telefono");
+  }
+  return usuario;
+}
+
 /**
  * Exige que el usuario tenga uno de los roles indicados. Sin sesión → /login;
  * con sesión pero rol no autorizado → inicio (/). Es el gate por rol para el
@@ -44,7 +54,7 @@ export async function requireSesion(): Promise<UsuarioSesion> {
  * `/completar-perfil` antes de dejarle entrar a la ruta protegida.
  */
 export async function requireRol(...roles: Rol[]): Promise<UsuarioSesion> {
-  const usuario = await requireSesion();
+  const usuario = await requireTelefonoVerificado();
   if (!roles.includes(usuario.rol)) redirect("/");
   if (
     usuario.rol === Rol.COLABORADOR ||
@@ -67,7 +77,7 @@ export async function requireRol(...roles: Rol[]): Promise<UsuarioSesion> {
  * de su solicitud. Doble candado con la comprobación en los casos de uso.
  */
 export async function requireAdminVerificado(): Promise<UsuarioSesion> {
-  const usuario = await requireSesion();
+  const usuario = await requireTelefonoVerificado();
   if (usuario.rol !== Rol.ADMIN) redirect("/");
 
   const fresco = await buscarUsuarioPorId(usuario.id);
@@ -78,7 +88,7 @@ export async function requireAdminVerificado(): Promise<UsuarioSesion> {
 
 /** Exige una cuenta AUDITOR activa, comprobada en base en cada operación. */
 export async function requireAuditorActivo(): Promise<UsuarioSesion> {
-  const usuario = await requireSesion();
+  const usuario = await requireTelefonoVerificado();
   if (usuario.rol !== Rol.AUDITOR) redirect("/");
 
   const fresco = await buscarUsuarioPorId(usuario.id);
