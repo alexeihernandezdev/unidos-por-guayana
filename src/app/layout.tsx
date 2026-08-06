@@ -62,6 +62,11 @@ export default async function RootLayout({
     pathname.startsWith("/verificar-telefono") ||
     pathname.startsWith("/completar-perfil") ||
     pathname.startsWith("/cuenta-admin");
+  // Presentación inmersiva (/how-it-works · feature 039): deck a pantalla
+  // completa en el tema petróleo, con o sin sesión. Suprime el navbar público
+  // y la banda "Ir a mi panel", no resta altura de header y fuerza el tema
+  // oscuro aunque el visitante no tenga sesión: el deck controla el viewport.
+  const esPresentacionInmersiva = pathname.startsWith("/how-it-works");
   // Espacio logeado (rutas con AppShell: (app)/(admin)/superadmin) → tema oscuro
   // petróleo premium. Se aplica en <html> para que también cubra el contenido en
   // portal (dropdowns, modales, sheet móvil) que Radix monta fuera del shell. El
@@ -72,8 +77,11 @@ export default async function RootLayout({
   return (
     <html
       lang="es"
-      data-theme={esEspacioLogeado ? "panel" : undefined}
-      style={{ colorScheme: esEspacioLogeado ? "dark" : "light" }}
+      data-theme={esEspacioLogeado || esPresentacionInmersiva ? "panel" : undefined}
+      style={{
+        colorScheme:
+          esEspacioLogeado || esPresentacionInmersiva ? "dark" : "light",
+      }}
       className={`${geistSans.variable} ${geistMono.variable} ${ebGaramond.variable} h-full antialiased`}
     >
       <body
@@ -84,18 +92,20 @@ export default async function RootLayout({
         // superpone al hero, por eso no resta altura; con sesión, la banda de
         // regreso sí permanece dentro del flujo.
         style={{
-          ["--altura-header" as string]: !usuario
-            ? esLanding
-              ? "0rem"
-              : "4rem"
-            : esPaginaPublica
-              ? "3.5rem"
-              : "0rem",
+          ["--altura-header" as string]: esPresentacionInmersiva
+            ? "0rem"
+            : !usuario
+              ? esLanding
+                ? "0rem"
+                : "4rem"
+              : esPaginaPublica
+                ? "3.5rem"
+                : "0rem",
         }}
         suppressHydrationWarning
       >
         <Providers>
-          {!usuario && (
+          {!usuario && !esPresentacionInmersiva && (
             <PublicHeaderVisibility>
               <SiteHeader superpuesto={esLanding} />
             </PublicHeaderVisibility>

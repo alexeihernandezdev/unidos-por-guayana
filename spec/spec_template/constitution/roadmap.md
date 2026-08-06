@@ -65,6 +65,14 @@ el espacio privado mientras exista una verificación pendiente. El código y la
 migración están listos; falta configurar `PHONE_OTP_SECRET`, credenciales de Meta
 y desplegar.
 
+33. **039 · Presentación "Cómo funciona"** — Deck a pantalla completa en
+`/how-it-works` (ruta pública inmersiva, tema petróleo) para exponer la plataforma
+ante prensa: 11 diapositivas navegables por teclado/clic/gesto que recorren la
+mayoría de módulos, cada una con una recreación animada de la pantalla real hecha
+con los tokens del sistema. Motion con `motion` + `ease-out-emil`, deep-link por
+`#N` y respeto de `prefers-reduced-motion`. Solo presentacional: no toca dominio,
+datos ni permisos. Módulo `src/modules/presentacion/ui`.
+
 ## Siguiente 🔜
 
 _Lo próximo a abordar. Idealmente una sola feature "en curso" a la vez._
